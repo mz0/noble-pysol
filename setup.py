@@ -9,13 +9,14 @@ if os.name == 'nt':
     import py2exe
 
 if os.name == 'posix':
-    data_dir = 'share/games/pysolfc'
+    data_dir = 'share/PySolFC'
 elif os.name == 'nt':
     data_dir = 'data'
 else:
     data_dir = 'data'
 
 ddirs = [
+    'html',
     'images',
     'sound',
     'tiles',
@@ -71,6 +72,7 @@ kw = {
     'license'      : 'GPL',
     'scripts'      : ['pysol.py'],
     'packages'     : ['pysollib',
+                      'pysollib.configobj',
                       'pysollib.macosx',
                       'pysollib.winsystems',
                       'pysollib.tk',

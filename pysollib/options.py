@@ -28,7 +28,7 @@ import traceback
 # PySol imports
 from mfxutil import print_err
 from resource import CSI
-import configobj, validate
+from configobj import configobj, validate
 import settings
 
 # Toolkit imports

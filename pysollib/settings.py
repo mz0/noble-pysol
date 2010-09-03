@@ -59,7 +59,10 @@ DATA_DIRS = []
 # you can add your extra directories here
 if os.name == 'posix':
     DATA_DIRS = [
-        '/usr/share/games/pysolfc',
+        '/usr/share/PySolFC',
+        '/usr/local/share/PySolFC',
+        '/usr/games/PySolFC',
+        '/usr/local/games/PySolFC',
         ]
 if os.name == 'nt':
     pass

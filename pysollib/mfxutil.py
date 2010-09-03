@@ -119,7 +119,7 @@ def getprefdir(package):
     home = os.environ.get("HOME", "").strip()
     if not home or not os.path.isdir(home):
         home = os.curdir
-    return os.path.join(home, ".pysolfc")
+    return os.path.join(home, ".PySolFC")
 
 
 # high resolution clock() and sleep()
