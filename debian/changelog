@@ -1,0 +1,13 @@
+pysolfc (2.0-1) unstable; urgency=low
+
+  * Debian version bump
+  * Forgot to add a colon after "LP" in the inital changelog entry. 
+    Closing it properly now (LP: #179298)
+
+ -- Bernhard Reiter <ockham@raz.or.at>  Thu, 6 May 2010 18:52:23 +0200
+
+pysolfc (2.0-0ubuntu1) lucid; urgency=low
+
+  * Initial release (Closes: #519752, LP #179298)
+
+ -- Bernhard Reiter <ockham@raz.or.at>  Fri, 4 Feb 2010 16:16:38 +0100

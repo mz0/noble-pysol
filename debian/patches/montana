@@ -1,0 +1,138 @@
+# Description: Replace some magic numbers by constants, and add double montana
+#  game mode.
+# Origin: vendor, http://patch-tracker.debian.org/patch/misc/view/pysol/4.82.1-4.1/src/games/montana.py
+# Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2934413&group_id=150718&atid=778745
+
+Index: pysolfc-2.0/pysollib/games/montana.py
+===================================================================
+--- pysolfc-2.0.orig/pysollib/games/montana.py
++++ pysolfc-2.0/pysollib/games/montana.py
+@@ -87,14 +87,14 @@
+     def dealCards(self, sound=0):
+         # move cards to the Talon, shuffle and redeal
+         game = self.game
+-        RLEN, RSTEP, RBASE = game.RLEN, game.RSTEP, game.RBASE
++        RLEN, RSTEP, RBASE, RROWS = game.RLEN, game.RSTEP, game.RBASE, game.RROWS
+         num_cards = 0
+         assert len(self.cards) == 0
+         rows = game.s.rows
+         # move out-of-sequence cards from the Tableau to the Talon
+         stacks = []
+-        gaps = [None] * 4
+-        for g in range(4):
++        gaps = [None] * RROWS
++        for g in range(RROWS):
+             i = g * RSTEP
+             r = rows[i]
+             if r.cards and r.cards[-1].rank == RBASE:
+@@ -164,17 +164,17 @@
+     RowStack_Class = Montana_RowStack
+     Hint_Class = Montana_Hint
+ 
+-    RLEN, RSTEP, RBASE = 52, 13, 1
++    RLEN, RSTEP, RBASE, RROWS = 52, 13, 1, 4
+ 
+     def createGame(self):
+         # create layout
+         l, s = Layout(self, XM=4), self.s
+ 
+         # set window
+-        self.setSize(l.XM + self.RSTEP*l.XS, l.YM + 5*l.YS)
++        self.setSize(l.XM + self.RSTEP*l.XS, l.YM + (self.RROWS+1)*l.YS)
+ 
+         # create stacks
+-        for i in range(4):
++        for i in range(self.RROWS):
+             x, y, = l.XM, l.YM + i*l.YS
+             for j in range(self.RSTEP):
+                 s.rows.append(self.RowStack_Class(x, y, self, max_accept=1, max_cards=1))
+@@ -195,12 +195,12 @@
+ 
+     def startGame(self):
+         frames = 0
+-        for i in range(52):
++        for i in range(self.RLEN):
+             c = self.s.talon.cards[-1]
+             if c.rank == ACE:
+                 self.s.talon.dealRow(rows=self.s.internals, frames=0)
+             else:
+-                if frames == 0 and i >= 39:
++                if frames == 0 and i >= (self.RLEN-13):
+                     self.startDealSample()
+                     frames = 4
+                 self.s.talon.dealRow(rows=(self.s.rows[i],), frames=frames)
+@@ -233,6 +233,12 @@
+             if from_stack.id % self.RSTEP == 0 and from_stack.cards[-1].rank == self.RBASE:
+                 # do not move the leftmost card of a row if the rank is correct
+                 return -1
++            # check if the left neighbour matches
++            if from_stack.id % self.RSTEP != 0:
++                neigh = self.s.rows[from_stack.id -1]
++                if neigh.cards:
++                    if neigh.cards[-1].rank + 1 == from_stack.cards[-1].rank and neigh.cards[-1].suit == from_stack.cards[-1].suit:
++                        return -1
+         return 1
+ 
+ 
+@@ -266,10 +272,10 @@
+     def startGame(self):
+         frames = 0
+         j = 0
+-        for i in range(52):
++        for i in range(self.RLEN-self.RROWS):
+             if j % 14 == 0:
+                 j = j + 1
+-            if i == 39:
++            if i == self.RLEN-self.RROWS*2:
+                 self.startDealSample()
+                 frames = 4
+             self.s.talon.dealRow(rows=(self.s.rows[j],), frames=frames)
+@@ -294,24 +300,44 @@
+     def startGame(self):
+         frames = 0
+         r = self.s.rows
+-        self.s.talon.dealRow(rows=(r[0],r[14],r[28],r[42]), frames=frames)
+-        for i in range(4):
+-            if i == 3:
++        for i in range(self.RROWS):
++            self.s.talon.dealRow(rows=(r[14*i],), frames=frames)
++        for i in range(self.RROWS):
++            if i == self.RROWS-1:
+                 self.startDealSample()
+-                frames = 4
++                frames = self.RROWS
+             n = i * 14 + 2
+             self.s.talon.dealRow(rows=r[n:n+12], frames=frames)
+ 
++# /***********************************************************************
++# // Games with two decks
++# ************************************************************************/
++
++class DoubleMontana(Montana):
++    RLEN, RROWS = 104, 8
++
++class DoubleBlueMoon(BlueMoon):
++    RLEN, RROWS = 112, 8
++
++class DoubleRedMoon(RedMoon):
++    RLEN, RROWS = 112, 8
+ 
+ # register the game
+ registerGame(GameInfo(53, Montana, "Montana",
+                       GI.GT_MONTANA, 1, 2,
+                       si={"ncards": 48}, altnames="Gaps"))
++registerGame(GameInfo(100000, DoubleMontana, "Double Montana",
++                      GI.GT_MONTANA, 2, 2,
++                      si={"ncards": 96}))
+ registerGame(GameInfo(116, Spaces, "Spaces",
+                       GI.GT_MONTANA, 1, 2,
+                       si={"ncards": 48}))
+ registerGame(GameInfo(63, BlueMoon, "Blue Moon",
+                       GI.GT_MONTANA, 1, 2))
++registerGame(GameInfo(100001, DoubleBlueMoon, "Double Blue Moon",
++                      GI.GT_MONTANA, 2, 2))
+ registerGame(GameInfo(117, RedMoon, "Red Moon",
+                       GI.GT_MONTANA, 1, 2))
++registerGame(GameInfo(100002, DoubleRedMoon, "Double Red Moon",
++                      GI.GT_MONTANA, 2, 2))
+ 

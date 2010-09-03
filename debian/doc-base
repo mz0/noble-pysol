@@ -1,0 +1,10 @@
+Document: pysolfc
+Title: PySolFC - Solitaire card games collection
+Author: The PySolFC authors
+Abstract: PySol is a collection of more than 1000 solitaire card games
+ featuring modern look and feel, multiple cardsets, and much more.
+Section: Games/Card
+
+Format: HTML
+Index: /usr/share/doc/pysolfc/html/index.html
+Files: /usr/share/doc/pysolfc/html/*.html

@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+%:
+	dh --buildsystem=python_distutils $@
+
+override_dh_auto_install:
+	dh_auto_install --buildsystem=python_distutils \
+			-- --install-scripts=/usr/share/games/pysolfc \
+			   --install-lib /usr/share/games/pysolfc/
+
+override_dh_installdocs:
+	dh_installdocs
+	mv debian/pysolfc/usr/share/doc/pysolfc/all_games.html \
+	   debian/pysolfc/usr/share/doc/pysolfc/html/
+
+override_dh_installman:
+	dh_installman
+	mv debian/pysolfc/usr/share/man/man6/pysol.6 \
+	   debian/pysolfc/usr/share/man/man6/pysolfc.6
