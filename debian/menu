@@ -1,2 +1,0 @@
-?package(pysolfc):needs="X11" section="Games/Card" \
-	title="PySolFC Solitaire Games" command="/usr/games/pysolfc"
