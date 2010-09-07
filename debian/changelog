@@ -3,6 +3,7 @@ pysolfc (2.0-1) unstable; urgency=low
   * Forgot to add a colon after "LP" in the inital changelog entry. 
     Closing it properly now (LP: #179298)
   * debian/control: Add Vcs-Git and Vcs-Browser
+  * debian/gbp.conf: Create.
 
  -- Bernhard Reiter <ockham@raz.or.at>  Thu, 6 May 2010 18:52:23 +0200
 
