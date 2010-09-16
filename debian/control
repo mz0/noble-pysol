@@ -15,9 +15,9 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-tk, python-configobj,
   python-gnome2
 Recommends: python-pygame, tk-tile (>= 0.8.0), python-imaging
-Replaces: pysol (<< 2.0-1~)
+Replaces: pysol
 Suggests: pysolfc-cardsets, freecell-solver
-Conflicts: pysol (<< 2.0-1~), pysol-cardsets (<< 2.0-1~)
+Conflicts: pysol, pysol-cardsets
 Description: collection of more than 1000 solitaire card games
  There are games that use the 52 card International Pattern deck,
  games for the 78 card Tarock deck, eight and ten suit Ganjifa games,
