@@ -5,7 +5,7 @@ Maintainer: Bernhard Reiter <ockham@raz.or.at>
 Build-Depends: debhelper (>= 7.3.0)
 Build-Depends-Indep: python (>= 2.4), python-support
 XS-Python-Version: >= 2.4
-Standards-Version: 3.8.4
+Standards-Version: 3.9.1
 Homepage: http://pysolfc.sourceforge.net/
 Vcs-Git: git://git.debian.org/git/pkg-games/pysolfc.git
 Vcs-Browser: http://git.debian.org/?p=pkg-games/pysolfc.git

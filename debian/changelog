@@ -5,9 +5,10 @@ pysolfc (2.0-1) unstable; urgency=low
   * debian/control:
     - Add Vcs-Git and Vcs-Browser
     - Amend Replaces and Conflicts fields.
+    - Bump Standards-Version.
   * debian/gbp.conf: Create.
 
- -- Bernhard Reiter <ockham@raz.or.at>  Thu, 6 May 2010 18:52:23 +0200
+ -- Bernhard Reiter <ockham@raz.or.at>  Fri, 17 Sep 2010 18:52:23 +0200
 
 pysolfc (2.0-0ubuntu1) lucid; urgency=low
 
