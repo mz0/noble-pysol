@@ -1,7 +1,9 @@
 pysolfc (2.0-1) unstable; urgency=low
 
-  * Forgot to add a colon after "LP" in the inital changelog entry. 
-    Closing it properly now (LP: #179298)
+  * First Debian release (Closes: #519752).
+  * debian/changelog:
+    - Moved Debian bug number from initial changelog entry to this one.
+    - Forgot to add a colon after "LP" in the inital changelog entry.
   * debian/control:
     - Add Vcs-Git and Vcs-Browser
     - Amend Replaces and Conflicts fields.
@@ -12,6 +14,6 @@ pysolfc (2.0-1) unstable; urgency=low
 
 pysolfc (2.0-0ubuntu1) lucid; urgency=low
 
-  * Initial release (Closes: #519752, LP #179298)
+  * Initial release (LP: #179298)
 
  -- Bernhard Reiter <ockham@raz.or.at>  Fri, 4 Feb 2010 16:16:38 +0100
