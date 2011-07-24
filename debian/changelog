@@ -7,10 +7,17 @@ pysolfc (2.0-1) unstable; urgency=low
   * debian/control:
     - Add Vcs-Git and Vcs-Browser
     - Amend Replaces and Conflicts fields.
-    - Bump Standards-Version.
+    - Bump Standards-Version to 3.9.2 (no changes needed).
   * debian/gbp.conf: Create.
+  * Migrate from python-support to dh_python2.
+    debian/control:
+    - Remove python-support from Build-Depends.
+    - Build-Depend on python (>= 2.6.6-3~) instead of (>= 2.4)
+    - s/XS-Python-Version/X-Python-Version/
+    debian/rules:
+    - Add '--with python2' after 'dh'
 
- -- Bernhard Reiter <ockham@raz.or.at>  Fri, 17 Sep 2010 18:52:23 +0200
+ -- Bernhard Reiter <ockham@raz.or.at>  Sun, 24 Jul 2011 18:35:52 +0200
 
 pysolfc (2.0-0ubuntu1) lucid; urgency=low
 
