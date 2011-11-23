@@ -39,6 +39,59 @@ License: BSD
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+Files: pysollib/games/canfield.py
+Copyright: 1998 Andrew Csillag <drew_csillag@geocities.com>
+           1998-2003 Markus Franz Xaver Johannes Oberhumer
+           2003 Mt. Hood Playing Card Co.
+           2005-2009 Skomoroh
+License: GPL-3+
+
+Files: html-src/rules/canfield.html,
+       data/html/rules/canfield.html
+Copyright: 1998 Andrew Csillag <drew_csillag@geocities.com>
+License: GPL-2+
+
+Files: pysollib/games/larasgame.py
+Copyright: 1999 Matthew Hohlfeld <hohlfeld@cs.ucsd.edu>
+           1998-2003 Markus Franz Xaver Johannes Oberhumer
+           2003 Mt. Hood Playing Card Co.
+           2005-2009 Skomoroh
+License: GPL-3+
+
+Files: html-src/rules/larasgame.html,
+       data/html/rules/larasgame.html
+Copyright: 1999 Matthew Hohlfeld <hohlfeld@cs.ucsd.edu>
+License: GPL-2+
+
+Files: html-src/rules/nomad.html,
+       data/html/rules/nomad.html
+Copyright: Deon Ramsey <miavir@furry.de>
+License: GPL-2+
+
+Files: pysollib/games/numerica.py
+Copyright: 1998 Galen Brooks <galen@nine.com>
+           1998-2003 Markus Franz Xaver Johannes Oberhumer
+           2003 Mt. Hood Playing Card Co.
+           2005-2009 Skomoroh
+License: GPL-3+
+
+Files: html-src/rules/numerica.html,
+       data/html/rules/numerica.html
+Copyright: 1998 Galen Brooks <galen@nine.com>
+License: GPL-2+
+
+Files: pysollib/games/sanibel.py
+Copyright: 1998, 2000 John Stoneham <obijohn99@aol.com>
+           1998-2003 Markus Franz Xaver Johannes Oberhumer
+           2003 Mt. Hood Playing Card Co.
+           2005-2009 Skomoroh
+License: GPL-3+
+
+Files: html-src/rules/sanibel.html,
+       data/html/rules/sanibel.html
+Copyright: 1998 John Stoneham <obijohn99@aol.com>
+License: GPL-2+
+
 Files: html-src/wikipedia/*
 Copyright: See online versions of articles linked by the respective files.
 License: GFDL-NIV

@@ -8,6 +8,7 @@ pysolfc (2.0-1) unstable; urgency=low
     - Add Vcs-Git and Vcs-Browser
     - Amend Replaces and Conflicts fields.
     - Bump Standards-Version to 3.9.2 (no changes needed).
+  * debian/copyright: Add more copyright holders.
   * debian/gbp.conf: Create.
   * Migrate from python-support to dh_python2.
     debian/control:
