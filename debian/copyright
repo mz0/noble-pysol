@@ -46,7 +46,7 @@ Copyright: 1998 Andrew Csillag <drew_csillag@geocities.com>
            2005-2009 Skomoroh
 License: GPL-3+
 
-Files: html-src/rules/canfield.html,
+Files: html-src/rules/canfield.html
        data/html/rules/canfield.html
 Copyright: 1998 Andrew Csillag <drew_csillag@geocities.com>
 License: GPL-2+
@@ -58,12 +58,12 @@ Copyright: 1999 Matthew Hohlfeld <hohlfeld@cs.ucsd.edu>
            2005-2009 Skomoroh
 License: GPL-3+
 
-Files: html-src/rules/larasgame.html,
+Files: html-src/rules/larasgame.html
        data/html/rules/larasgame.html
 Copyright: 1999 Matthew Hohlfeld <hohlfeld@cs.ucsd.edu>
 License: GPL-2+
 
-Files: html-src/rules/nomad.html,
+Files: html-src/rules/nomad.html
        data/html/rules/nomad.html
 Copyright: Deon Ramsey <miavir@furry.de>
 License: GPL-2+
@@ -75,7 +75,7 @@ Copyright: 1998 Galen Brooks <galen@nine.com>
            2005-2009 Skomoroh
 License: GPL-3+
 
-Files: html-src/rules/numerica.html,
+Files: html-src/rules/numerica.html
        data/html/rules/numerica.html
 Copyright: 1998 Galen Brooks <galen@nine.com>
 License: GPL-2+
@@ -87,7 +87,7 @@ Copyright: 1998, 2000 John Stoneham <obijohn99@aol.com>
            2005-2009 Skomoroh
 License: GPL-3+
 
-Files: html-src/rules/sanibel.html,
+Files: html-src/rules/sanibel.html
        data/html/rules/sanibel.html
 Copyright: 1998 John Stoneham <obijohn99@aol.com>
 License: GPL-2+
@@ -96,7 +96,7 @@ Files: html-src/wikipedia/*
 Copyright: See online versions of articles linked by the respective files.
 License: GFDL-NIV
 
-Files: data/tcl/clrpick8.4.tcl,
+Files: data/tcl/clrpick8.4.tcl
        data/tcl/clrpick8.5.tcl
 Copyright: 1996 Sun Microsystems, Inc.
 License: TCL
@@ -140,7 +140,7 @@ License: TCL
  permission to use and distribute the software in accordance with the
  terms specified in this license.
 
-Files: data/tcl/fsdialog.8.4.tcl,
+Files: data/tcl/fsdialog.8.4.tcl
        data/tcl/fsdialog.8.5.tcl
 Copyright: Schelte Bron
 License: FR
@@ -175,14 +175,14 @@ License: TILE
  DIRECT, INDIRECT, SPECIAL, INCIDENTAL, or CONSEQUENTIAL DAMAGES
  arising out of the USE of THIS SOFTWARE and its DOCUMENTATION.
 
-Files: data/cardset-2000/*,
-       data/cardset-crystal-mahjongg/*,
-       data/cardset-dashavatara-ganjifa/*,
-       data/cardset-hexadeck/*,
-       data/cardset-kintengu/*,
-       data/cardset-matrix/*,
-       data/cardset-mughal-ganjifa/*,
-       data/cardset-tuxedo/*,
+Files: data/cardset-2000/*
+       data/cardset-crystal-mahjongg/*
+       data/cardset-dashavatara-ganjifa/*
+       data/cardset-hexadeck/*
+       data/cardset-kintengu/*
+       data/cardset-matrix/*
+       data/cardset-mughal-ganjifa/*
+       data/cardset-tuxedo/*
        data/cardset-vienna-2k/*
 Copyright: 1999-2000 T. Kirk <grania@mailcity.com>
 License: GPL-2+
