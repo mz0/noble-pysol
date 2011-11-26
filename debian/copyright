@@ -10,7 +10,7 @@ License: GPL-3+
 
 Files: pysollib/configobj/*
 Copyright: 2005-2006 Michael Foord, Mark Andrews, Nicola Larosa
-License: BSD
+License: BSD-3-clause
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are
  met:
