@@ -15,6 +15,7 @@ pysolfc (2.0-1) unstable; urgency=low
     - Remove python-support from Build-Depends.
     - Build-Depend on python (>= 2.6.6-3~) instead of (>= 2.4)
     - s/XS-Python-Version/X-Python-Version/
+    - Make Debian Games Team the Maintainer, and myself the Uploader.
     debian/rules:
     - Add '--with python2' after 'dh'
 
