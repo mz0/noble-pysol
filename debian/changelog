@@ -19,7 +19,7 @@ pysolfc (2.0-1) unstable; urgency=low
     debian/rules:
     - Add '--with python2' after 'dh'
 
- -- Bernhard Reiter <ockham@raz.or.at>  Sun, 24 Jul 2011 18:35:52 +0200
+ -- Bernhard Reiter <ockham@raz.or.at>  Sat, 26 Nov 2011 19:32:47 +0100
 
 pysolfc (2.0-0ubuntu1) lucid; urgency=low
 
