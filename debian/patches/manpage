@@ -1,6 +1,6 @@
-# Description: Update project name and some details in manpage
-# Author: Bernhard Reiter <ockham@raz.or.at>
-# Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2946830&group_id=150718&atid=778745
+Description: Update project name and some details in manpage
+Author: Bernhard Reiter <ockham@raz.or.at>
+Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2946830&group_id=150718&atid=778745
 
 Index: pysolfc-2.0/docs/pysol.6
 ===================================================================

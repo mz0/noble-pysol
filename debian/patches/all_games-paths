@@ -1,5 +1,5 @@
-# Description: Fix links to game rules docs.
-# Author: Bernhard Reiter <ockham@raz.or.at>
+Description: Fix links to game rules docs.
+Author: Bernhard Reiter <ockham@raz.or.at>
 
 --- a/docs/all_games.html
 +++ b/docs/all_games.html

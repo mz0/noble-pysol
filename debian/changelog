@@ -20,6 +20,7 @@ pysolfc (2.0-1) unstable; urgency=low
     - Make Debian Games Team the Maintainer, and myself an Uploader.
     debian/rules:
     - Add '--with python2' after 'dh'
+  * debian/patches/*: Remove # in front of comments.
 
  -- Bernhard Reiter <ockham@raz.or.at>  Sat, 26 Nov 2011 19:32:47 +0100
 

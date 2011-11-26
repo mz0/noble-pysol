@@ -1,6 +1,6 @@
-# Description: Remove configobj from package; 
-#  use python-configobj package instead
-# Author: Bernhard Reiter <ockham@raz.or.at>
+Description: Remove configobj from package; 
+ use python-configobj package instead
+Author: Bernhard Reiter <ockham@raz.or.at>
 
 --- a/setup.py
 +++ b/setup.py

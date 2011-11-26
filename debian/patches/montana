@@ -1,7 +1,7 @@
-# Description: Replace some magic numbers by constants, and add double montana
-#  game mode.
-# Origin: vendor, http://patch-tracker.debian.org/patch/misc/view/pysol/4.82.1-4.1/src/games/montana.py
-# Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2934413&group_id=150718&atid=778745
+Description: Replace some magic numbers by constants, and add double montana
+ game mode.
+Origin: vendor, http://patch-tracker.debian.org/patch/misc/view/pysol/4.82.1-4.1/src/games/montana.py
+Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2934413&group_id=150718&atid=778745
 
 Index: pysolfc-2.0/pysollib/games/montana.py
 ===================================================================

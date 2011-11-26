@@ -1,5 +1,5 @@
-# Description: Change some data and doc locations
-# Author: Bernhard Reiter <ockham@raz.or.at>
+Description: Change some data and doc locations
+Author: Bernhard Reiter <ockham@raz.or.at>
 
 Index: pysolfc-2.0/setup.py
 ===================================================================
