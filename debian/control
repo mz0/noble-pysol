@@ -16,9 +16,9 @@ Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-tk, python-configobj,
   python-gnome2
 Recommends: python-pygame, tk-tile (>= 0.8.0), python-imaging-tk
-Replaces: pysol (<< 10)
+Replaces: pysol (<< 1:2.0-1)
 Suggests: pysolfc-cardsets, freecell-solver
-Conflicts: pysol (<< 10), pysol-cardsets (<< 10), pysol-sounds,
+Conflicts: pysol (<< 1:2.0-1), pysol-cardsets (<< 1:2.0+dfsg-1), pysol-sounds,
  pysol-sound-server
 Description: collection of more than 1000 solitaire card games
  There are games that use the 52 card International Pattern deck,
@@ -33,3 +33,12 @@ Description: collection of more than 1000 solitaire card games
  and lots of documentation.
  .
  PySolFC is a fork of PySol Solitaire.
+
+Package: pysol
+Architecture: all
+Depends: pysolfc, ${misc:Depends}
+Description: transitional package from pysol to pysolfc
+Section: oldlibs
+ Package to ease upgrading from older pysol to new pysolfc.
+ .
+ This package can be purged once pysolfc has been installed.

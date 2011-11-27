@@ -6,6 +6,7 @@ pysolfc (2.0-1) unstable; urgency=low
     - Forgot to add a colon after "LP" in the inital changelog entry.
   * debian/control:
     - Recommends: s/python-imaging/python-imaging-tk/ (LP: #716403).
+    - Add pysol transitional binary package.
     - Add Vcs-Git and Vcs-Browser
     - Amend Replaces and Conflicts fields.
     - Bump Standards-Version to 3.9.2 (no changes needed).
@@ -13,6 +14,8 @@ pysolfc (2.0-1) unstable; urgency=low
     - Add more copyright holders.
     - Minor updates for current DEP-5 revision.
   * debian/gbp.conf: Create.
+  * debian/rules: Add override_dh_gencontrol section with some epoch magic
+    to ensure proper upgrade path from pysol.
   * Migrate from python-support to dh_python2.
     debian/control:
     - Remove python-support from Build-Depends.

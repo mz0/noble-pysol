@@ -1,7 +1,13 @@
 #!/usr/bin/make -f
 
+VERSION := $(shell dpkg-parsechangelog | awk '/^Version:/ { print $$2 }')
+
 %:
 	dh --with python2 --buildsystem=python_distutils $@
+
+override_dh_gencontrol:
+	dh_gencontrol -Npysol
+	dh_gencontrol -ppysol -- -v"1:$(VERSION)"
 
 override_dh_auto_install:
 	dh_auto_install --buildsystem=python_distutils \
