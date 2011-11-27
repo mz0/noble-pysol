@@ -15,7 +15,7 @@ Package: pysolfc
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-tk, python-configobj,
   python-gnome2
-Recommends: python-pygame, tk-tile (>= 0.8.0), python-imaging
+Recommends: python-pygame, tk-tile (>= 0.8.0), python-imaging-tk
 Replaces: pysol (<< 10)
 Suggests: pysolfc-cardsets, freecell-solver
 Conflicts: pysol (<< 10), pysol-cardsets (<< 10), pysol-sounds,

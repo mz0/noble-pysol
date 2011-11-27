@@ -5,6 +5,7 @@ pysolfc (2.0-1) unstable; urgency=low
     - Moved Debian bug number from initial changelog entry to this one.
     - Forgot to add a colon after "LP" in the inital changelog entry.
   * debian/control:
+    - Recommends: s/python-imaging/python-imaging-tk/ (LP: #716403).
     - Add Vcs-Git and Vcs-Browser
     - Amend Replaces and Conflicts fields.
     - Bump Standards-Version to 3.9.2 (no changes needed).
