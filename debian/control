@@ -36,9 +36,9 @@ Description: collection of more than 1000 solitaire card games
 
 Package: pysol
 Architecture: all
+Section: oldlibs
 Depends: pysolfc, ${misc:Depends}
 Description: transitional package from pysol to pysolfc
-Section: oldlibs
  Package to ease upgrading from older pysol to new pysolfc.
  .
  This package can be purged once pysolfc has been installed.
