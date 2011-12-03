@@ -5,6 +5,8 @@ pysolfc (2.0-1) unstable; urgency=low
     - Moved Debian bug number from initial changelog entry to this one.
     - Forgot to add a colon after "LP" in the inital changelog entry.
   * debian/control:
+    - Replace "Build-Depends-Indep: python (>= 2.6.6-3~)" with
+      "Build-Depends: python-all (>= 2.6.6-3~)"
     - Recommends: s/python-imaging/python-imaging-tk/ (LP: #716403).
     - Add pysol transitional binary package.
     - Add Vcs-Git and Vcs-Browser
