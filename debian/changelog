@@ -13,6 +13,7 @@ pysolfc (2.0-1) unstable; urgency=low
     - Add Vcs-Git and Vcs-Browser
     - Amend Replaces and Conflicts fields.
     - Bump Standards-Version to 3.9.2 (no changes needed).
+    - Make Debian Games Team the Maintainer, and myself an Uploader.
   * debian/copyright:
     - Add more copyright holders.
     - Minor updates for current DEP-5 revision.
@@ -24,7 +25,6 @@ pysolfc (2.0-1) unstable; urgency=low
     - Remove python-support from Build-Depends.
     - Build-Depend on python (>= 2.6.6-3~) instead of (>= 2.4)
     - s/XS-Python-Version/X-Python-Version/
-    - Make Debian Games Team the Maintainer, and myself an Uploader.
     debian/rules:
     - Add '--with python2' after 'dh'
   * debian/patches/*: Remove # in front of comments.
