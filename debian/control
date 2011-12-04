@@ -13,8 +13,8 @@ Vcs-Browser: http://git.debian.org/?p=pkg-games/pysolfc.git
 Package: pysolfc
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-tk, python-configobj,
-  python-gnome2
-Recommends: python-pygame, tk-tile (>= 0.8.0), python-imaging-tk
+  python-gnome2, python-pygame
+Recommends: tk-tile (>= 0.8.0), python-imaging-tk
 Replaces: pysol (<< 1:2.0)
 Suggests: pysolfc-cardsets, freecell-solver
 Conflicts: pysol (<< 1:2.0), pysol-cardsets (<< 1:2.0), pysol-sounds,
