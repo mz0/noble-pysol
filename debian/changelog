@@ -16,6 +16,7 @@ pysolfc (2.0-1) unstable; urgency=low
     - Make Debian Games Team the Maintainer, and myself an Uploader.
   * debian/copyright:
     - Add more copyright holders.
+    - Annotate cardsets entries with comments of their origins.
     - Minor updates for current DEP-5 revision.
   * debian/gbp.conf: Create.
   * debian/rules:
