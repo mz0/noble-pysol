@@ -14,6 +14,9 @@ override_dh_auto_install:
 			-- --install-scripts=/usr/share/games/pysolfc \
 			   --install-lib /usr/share/games/pysolfc/
 
+override_dh_install:
+	dh_install --exclude COPYRIGHT
+
 override_dh_installdocs:
 	dh_installdocs
 	mv debian/pysolfc/usr/share/doc/pysolfc/all_games.html \
