@@ -1,0 +1,85 @@
+Description: Remove checks for individual cardsets' COPYRIGHT files
+ which we remove in order to comply with Debian policy.
+Author: Bernhard Reiter <ockham@raz.or.at>
+Forwarded: not-needed
+
+Index: pysolfc/pysollib/app.py
+===================================================================
+--- pysolfc.orig/pysollib/app.py	2011-12-13 23:11:09.611745235 +0100
++++ pysolfc/pysollib/app.py	2011-12-13 23:19:33.306242924 +0100
+@@ -1394,11 +1394,10 @@
+                     if not name.startswith('cardset-'): continue
+                     d = os.path.join(dir, name)
+                     if not os.path.isdir(d): continue
+-                    f1 = os.path.join(d, "config.txt")
+-                    f2 = os.path.join(d, "COPYRIGHT")
+-                    if os.path.isfile(f1) and os.path.isfile(f2):
++                    f = os.path.join(d, "config.txt")
++                    if os.path.isfile(f):
+                         try:
+-                            cs = self._readCardsetConfig(d, f1)
++                            cs = self._readCardsetConfig(d, f)
+                             if cs:
+                                 ##from pprint import pprint
+                                 ##print cs.name
+@@ -1412,7 +1411,7 @@
+                                     #print '+', cs.name
+                             else:
+                                 print_err('fail _readCardsetConfig: %s %s'
+-                                          % (d, f1))
++                                          % (d, f))
+                                 pass
+                         except Exception, err:
+                             ##traceback.print_exc()
+Index: pysolfc/pysollib/tile/selectcardset.py
+===================================================================
+--- pysolfc.orig/pysollib/tile/selectcardset.py	2011-12-13 23:11:09.619745274 +0100
++++ pysolfc/pysollib/tile/selectcardset.py	2011-12-13 23:19:33.306242924 +0100
+@@ -357,15 +357,12 @@
+         frame.columnconfigure(0, weight=1)
+         frame.rowconfigure(1, weight=1)
+         #
+-        text = ''
+-        f = os.path.join(cardset.dir, "COPYRIGHT")
+-        try:
+-            text = open(f).read()
+-        except:
+-            pass
+-        if text:
+-            text_w.config(state="normal")
+-            text_w.insert("insert", text)
++        text = '''\
++Copyright and license information for all cardsets and
++other game components can be found in the file
++/usr/share/doc/pysolfc/copyright
++'''
++        text_w.insert("insert", text)
+         text_w.config(state="disabled")
+         #
+         focus = self.createButtons(bottom_frame, kw)
+Index: pysolfc/pysollib/tk/selectcardset.py
+===================================================================
+--- pysolfc.orig/pysollib/tk/selectcardset.py	2011-12-13 23:19:45.874305245 +0100
++++ pysolfc/pysollib/tk/selectcardset.py	2011-12-13 23:23:03.583285630 +0100
+@@ -357,15 +357,12 @@
+         frame.columnconfigure(0, weight=1)
+         frame.rowconfigure(1, weight=1)
+         #
+-        text = ''
+-        f = os.path.join(cardset.dir, "COPYRIGHT")
+-        try:
+-            text = open(f).read()
+-        except:
+-            pass
+-        if text:
+-            text_w.config(state="normal")
+-            text_w.insert("insert", text)
++        text = '''
++Copyright and license information for all cardsets and
++other game components can be found in the file
++/usr/share/doc/pysolfc/copyright
++'''
++        text_w.insert("insert", text)
+         text_w.config(state="disabled")
+         #
+         focus = self.createButtons(bottom_frame, kw)
