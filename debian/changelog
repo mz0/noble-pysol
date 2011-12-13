@@ -33,7 +33,9 @@ pysolfc (2.0-1) unstable; urgency=low
     - Add '--with python2' after 'dh'
   * debian/patches/*: Remove # in front of comments.
   * debian/patches/montana, debian/patches/series: Update patch, add to series.
-  * debian/patches/remove_checks_for_copyright_files, debian/patches/series: Add.
+  * debian/patches/remove_checks_for_copyright_files, debian/patches/series:
+    Remove checks for individual cardsets' COPYRIGHT files
+    which we remove in order to comply with Debian policy.
   * debian/pysolfc.install: Add.
 
  -- Bernhard Reiter <ockham@raz.or.at>  Sat, 26 Nov 2011 19:32:47 +0100
