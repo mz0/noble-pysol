@@ -1,3 +1,9 @@
+pysolfc (2.0-2) unstable; urgency=low
+
+  * Remove python-gnome2 dependency.
+
+ -- Bernhard Reiter <ockham@raz.or.at>  Sun, 01 Jan 2012 21:58:23 +0100
+
 pysolfc (2.0-1) unstable; urgency=low
 
   * First Debian release (Closes: #519752).
