@@ -1,3 +1,15 @@
+pysolfc (2.0-3) UNRELEASED; urgency=low
+
+  * debian/copyright: Change Format from DEP-5 to copyright-format/1.0 link.
+  * debian/control:
+    - Move pysol (<< 1:2.0) and pysol-cardsets (<< 1:2.0) from Conflicts:
+      to Breaks:
+    - Remove X-Python-Version line.
+    - Bump Standards-Version to 3.9.4 (no changes needed).
+  * Fix PIL imports for pillow compatibility -- see 5117D0B7.801@debian.org (LP: 1160571).
+
+ -- Bernhard Reiter <ockham@raz.or.at>  Wed, 17 Apr 2013 08:10:25 +0200
+
 pysolfc (2.0-2) unstable; urgency=low
 
   * Remove python-gnome2 dependency.
