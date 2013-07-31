@@ -1,3 +1,10 @@
+Description: Fix PIL imports for pillow compatibility --
+ see 5117D0B7.801@debian.org (LP: 1160571).
+ There's a version of this patch (without the checks for ImportError) in
+ upstream's patch tracker at https://sourceforge.net/p/pysolfc/patches/10/
+Author: Bernhard Reiter <ockham@raz.or.at>
+Forwarded: no
+
 --- a/pysollib/mfxutil.py
 +++ b/pysollib/mfxutil.py
 @@ -41,18 +41,30 @@
