@@ -31,13 +31,3 @@ Description: collection of more than 1000 solitaire card games
  and lots of documentation.
  .
  PySolFC is a fork of PySol Solitaire.
-
-Package: pysol
-Architecture: all
-Section: oldlibs
-Priority: extra
-Depends: pysolfc, ${misc:Depends}
-Description: transitional package from pysol to pysolfc
- Package to ease upgrading from older pysol to new pysolfc.
- .
- This package can be purged once pysolfc has been installed.
