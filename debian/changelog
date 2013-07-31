@@ -1,4 +1,4 @@
-pysolfc (2.0-3) UNRELEASED; urgency=low
+pysolfc (2.0-3) unstable; urgency=low
 
   * debian/copyright:
     - Change Format from DEP-5 to copyright-format/1.0 link.
