@@ -8,6 +8,7 @@ pysolfc (2.0-3) UNRELEASED; urgency=low
     - Bump Standards-Version to 3.9.4 (no changes needed).
   * debian/control, debian/rules:
     - Drop transitional pysol package now that wheezy is out.
+  * debian/pysolfc.install: Remove.
   * debian/patches/pillow, debian/patches/series: Fix PIL imports for pillow
     compatibility -- see 5117D0B7.801@debian.org (LP: 1160571).
 
