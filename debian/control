@@ -6,8 +6,8 @@ Uploaders: Bernhard Reiter <ockham@raz.or.at>
 Build-Depends: debhelper (>= 7.3.0), python-all (>= 2.6.6-3~)
 Standards-Version: 3.9.4
 Homepage: http://pysolfc.sourceforge.net/
-Vcs-Git: git://git.debian.org/git/pkg-games/pysolfc.git
-Vcs-Browser: http://git.debian.org/?p=pkg-games/pysolfc.git
+Vcs-Git: git://anonscm.debian.org/pkg-games/pysolfc.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-games/pysolfc.git
 
 Package: pysolfc
 Architecture: all

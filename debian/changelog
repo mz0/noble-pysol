@@ -7,6 +7,7 @@ pysolfc (2.0-3) unstable; urgency=low
     - Move pysol (<< 1:2.0) and pysol-cardsets (<< 1:2.0) from Conflicts:
       to Breaks:
     - Remove X-Python-Version line.
+    - Switch to canonical Vcs-* fields.
     - Bump Standards-Version to 3.9.4 (no changes needed).
   * debian/control, debian/rules:
     - Drop transitional pysol package now that wheezy is out.
