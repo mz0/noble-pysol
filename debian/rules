@@ -1,7 +1,5 @@
 #!/usr/bin/make -f
 
-VERSION := $(shell dpkg-parsechangelog | awk '/^Version:/ { print $$2 }')
-
 %:
 	dh --with python2 --buildsystem=python_distutils $@
 
