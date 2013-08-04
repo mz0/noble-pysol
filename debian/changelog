@@ -9,7 +9,7 @@ pysolfc (2.0-3) unstable; urgency=low
     - Remove X-Python-Version line.
     - Switch to canonical Vcs-* fields.
     - Bump Standards-Version to 3.9.4.
-    - Bump debhelper Build-Depends to >= 8.1.
+    - Bump debhelper Build-Depends to >= 9.
   * debian/control, debian/rules:
     - Drop transitional pysol package now that wheezy is out.
   * debian/pysolfc.install: Remove.
