@@ -3,7 +3,7 @@ Section: games
 Priority: optional
 Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
 Uploaders: Bernhard Reiter <ockham@raz.or.at>
-Build-Depends: debhelper (>= 7.3.0), python-all (>= 2.6.6-3~)
+Build-Depends: debhelper (>= 8.1), python-all (>= 2.6.6-3~)
 Standards-Version: 3.9.4
 Homepage: http://pysolfc.sourceforge.net/
 Vcs-Git: git://anonscm.debian.org/pkg-games/pysolfc.git
