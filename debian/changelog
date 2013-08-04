@@ -13,6 +13,7 @@ pysolfc (2.0-3) unstable; urgency=low
   * debian/compat: Bump to 9.
   * debian/control, debian/rules:
     - Drop transitional pysol package now that wheezy is out.
+  * debian/rules: Fix order of arguments for the dh command.
   * debian/pysolfc.install: Remove.
   * debian/patches/pillow, debian/patches/series: Fix PIL imports for pillow
     compatibility -- see 5117D0B7.801@debian.org (LP: 1160571).
