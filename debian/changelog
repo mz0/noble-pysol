@@ -4,8 +4,8 @@ pysolfc (2.0-3) unstable; urgency=low
     - Change Format from DEP-5 to copyright-format/1.0 link.
     - Point to GFDL-1.3 instead of just GFDL.
   * debian/control:
-    - Move pysol (<< 1:2.0) and pysol-cardsets (<< 1:2.0) from Conflicts:
-      to Breaks:
+    - Remove Replaces: and Conflicts: lines as those packages aren't in
+      Debian anymore.
     - Remove X-Python-Version line.
     - Switch to canonical Vcs-* fields.
     - Bump Standards-Version to 3.9.4.
