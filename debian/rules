@@ -7,9 +7,7 @@ override_dh_auto_install:
 	dh_auto_install --buildsystem=python_distutils \
 			-- --install-scripts=/usr/share/games/pysolfc \
 			   --install-lib /usr/share/games/pysolfc/
-
-override_dh_install:
-	dh_install --exclude COPYRIGHT
+	find debian/pysolfc/usr/share/games/pysolfc/ -name "COPYRIGHT" -delete
 
 override_dh_installdocs:
 	dh_installdocs
