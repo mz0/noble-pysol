@@ -3,7 +3,6 @@ Section: games
 Priority: optional
 Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
 Uploaders:
- Bernhard Reiter <ockham@raz.or.at>
 Build-Depends:
  debhelper (>= 9),
  python-all (>= 2.6.6-3~)

@@ -1,12 +1,19 @@
-pysolfc (2.0-4) UNRELEASED; urgency=low
+pysolfc (2.0-5) UNRELEASED; urgency=low
 
+  * Please add yourself to Uploaders before uploading this package or ask on
+    debian-devel-games for volunteers.
+
+  [ Bernhard Reiter ]
   * debian/control:
     - Bump Standards-Version to 3.9.5 (no changes needed).
     - s/freecell-solver/freecell-solver-bin/.
     - Ran wrap-and-sort -sa.
   * debian/menu: Add longtitle and icon fields (Closes: #726857).
 
- -- Bernhard Reiter <ockham@raz.or.at>  Sat, 02 Nov 2013 21:33:09 +0100
+  [ Markus Koschany ]
+  * Remove Bernhard Reiter from Uploaders at his own request.
+
+ -- Markus Koschany <apo@gambaru.de>  Tue, 28 Oct 2014 12:38:08 +0100
 
 pysolfc (2.0-3) unstable; urgency=low
 
