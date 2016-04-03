@@ -140,8 +140,8 @@ License: TCL
  permission to use and distribute the software in accordance with the
  terms specified in this license.
 
-Files: data/tcl/fsdialog.8.4.tcl
-       data/tcl/fsdialog.8.5.tcl
+Files: data/tcl/fsdialog8.4.tcl
+       data/tcl/fsdialog8.5.tcl
 Copyright: Schelte Bron
 License: FR
  Freely redistributable.
@@ -230,6 +230,7 @@ Comment: This cardset was adapted from kdegames 1.0 (KPoker).
 
 Files: debian/*
 Copyright: 2010 Bernhard Reiter <ockham@raz.or.at>
+           2016 Hugo Lefeuvre <hle@debian.org>
 License: GPL-3+
 
 License: GPL-3+

@@ -3,9 +3,9 @@ Description: Point to pysolfc instead of pysol.py, and remove Encoding=UTF-8
 Author: Bernhard Reiter <ockham@raz.or.at>
 Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2946832&group_id=150718&atid=778745
 
---- a/data/pysol.desktop
-+++ b/data/pysol.desktop
-@@ -1,7 +1,6 @@
+--- a/data/pysol.desktop	2016-04-03 15:43:59.870446470 +0200
++++ b/data/pysol.desktop	2016-04-03 15:45:37.294327816 +0200
+@@ -1,8 +1,8 @@
  [Desktop Entry]
 -Encoding=UTF-8
  Name=PySol Fan Club Edition
@@ -14,3 +14,5 @@ Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2946832&group_id=150
  Terminal=false
  Type=Application
  Categories=Game;CardGame;
++Keywords=Game;CardGame;
+ Icon=/usr/share/icons/pysol01.png

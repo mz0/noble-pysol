@@ -2,29 +2,26 @@ Source: pysolfc
 Section: games
 Priority: optional
 Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
-Uploaders:
-Build-Depends:
- debhelper (>= 9),
- python-all (>= 2.6.6-3~)
-Standards-Version: 3.9.5
+Uploaders: Hugo Lefeuvre <hle@debian.org>
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               python-all (>= 2.6.6-3~)
+Standards-Version: 3.9.7
 Homepage: http://pysolfc.sourceforge.net/
-Vcs-Git: git://anonscm.debian.org/pkg-games/pysolfc.git
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-games/pysolfc.git
+Vcs-Git: https://anonscm.debian.org/git/pkg-games/pysolfc.git
+Vcs-Browser: https://anonscm.debian.org/gitweb/?p=pkg-games/pysolfc.git
 
 Package: pysolfc
 Architecture: all
-Depends:
- python-configobj,
- python-pygame,
- python-tk,
- ${misc:Depends},
- ${python:Depends}
-Recommends:
- python-imaging-tk,
- tk-tile (>= 0.8.0)
-Suggests:
- freecell-solver-bin,
- pysolfc-cardsets
+Depends: python-configobj,
+         python-pygame,
+         python-tk,
+         ${misc:Depends},
+         ${python:Depends}
+Recommends: python-imaging-tk,
+            tk-tile (>= 0.8.0)
+Suggests: freecell-solver-bin,
+          pysolfc-cardsets
 Description: collection of more than 1000 solitaire card games
  There are games that use the 52 card International Pattern deck,
  games for the 78 card Tarock deck, eight and ten suit Ganjifa games,
