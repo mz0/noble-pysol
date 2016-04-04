@@ -6,6 +6,7 @@ pysolfc (2.0-4) unstable; urgency=low
     - Bump Standards-Version to 3.9.7.
     - Update Vcs-Git and Vcs-Browser fields to use an encrypted
       transport protocol.
+    - Add a dependency on dh-python.
   * debian/copyright:
     - Add a copyright entry for Hugo Lefeuvre.
   * debian/patches/desktop:
