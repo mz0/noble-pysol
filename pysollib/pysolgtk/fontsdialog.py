@@ -1,35 +1,35 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = ['FontsDialog']
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
-## import os, sys
-## import types
-import gtk, gobject, pango
+#  import os, sys
+#  import types
+import gtk
+import pango
 import gtk.glade
 
 # PySol imports
+from pysollib.mygettext import _
 from tkutil import create_pango_font_desc
 
 
@@ -80,7 +80,6 @@ class FontsDialog:
 
         dialog.destroy()
 
-
     def _setFont(self, name, font):
         label = self.widgets_tree.get_widget(name+'_label')
         font_desc = create_pango_font_desc(font)
@@ -88,7 +87,6 @@ class FontsDialog:
         text = ' '.join([str(i) for i in font if i not in ('roman', 'normal')])
         label.set_text(text)
         label.set_data('user_data', font)
-
 
     def _changeFont(self, w, name):
         label = self.widgets_tree.get_widget(name+'_label')
@@ -113,15 +111,14 @@ class FontsDialog:
             fd = pango.FontDescription(font)
             family = fd.get_family()
             size = fd.get_size()/pango.SCALE
-            style = (fd.get_style() == pango.STYLE_NORMAL
-                     and 'roman' or 'italic')
-            weight = (fd.get_weight() == pango.WEIGHT_NORMAL
-                      and 'normal' or 'bold')
+            style = ('roman' if fd.get_style() == pango.STYLE_NORMAL
+                     else 'italic')
+            weight = ('normal' if fd.get_weight() == pango.WEIGHT_NORMAL
+                      else 'bold')
             font = (family, size, style, weight)
             self._setFont(name, font)
 
         dialog.destroy()
-
 
     def _translateLabels(self):
         for n in (
@@ -139,10 +136,6 @@ class FontsDialog:
             'label73',
             'label74',
             'label75',
-            ):
+                ):
             w = self.widgets_tree.get_widget(n)
             w.set_text(_(w.get_text()))
-
-
-
-

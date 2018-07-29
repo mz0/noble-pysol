@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
 
-import sys, os, re
+import sys
+import os
 
 alpha = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
 
 def decode_layout(layout):
     # decode tile positions
@@ -21,19 +23,20 @@ def decode_layout(layout):
     tiles.sort()
     return tiles
 
+
 def encode_layout(layout):
     # encode positions
     s = '0'
-    ##layout.sort()
+    # layout.sort()
     x_max = max([t[1] for t in layout])
     y_max = max([t[2] for t in layout])
     for x in range(x_max+1):
         for y in range(y_max+1):
-            l = [t[0] for t in layout if t[1] == x and t[2] == y]
-            if not l:
+            mylist = [t[0] for t in layout if t[1] == x and t[2] == y]
+            if not mylist:
                 continue
-            i_0 = i_n = l[0]
-            for i in l[1:]:
+            i_0 = i_n = mylist[0]
+            for i in mylist[1:]:
                 if i == i_n+1:
                     i_n = i
                     continue
@@ -41,10 +44,9 @@ def encode_layout(layout):
                 i_0 = i_n = i
             s += alpha[i_0*7+(i_n-i_0)] + alpha[x] + alpha[y]
 
-##     for tl, tx, ty in layout:
-##         s += alpha[tl*7]+alpha[tx]+alpha[ty]
+#     for tl, tx, ty in layout:
+#         s += alpha[tl*7]+alpha[tx]+alpha[ty]
     return s
-
 
 
 def parse_kyodai(filename):
@@ -79,17 +81,17 @@ def parse_kyodai(filename):
 
 def parse_ace(filename):
     # Ace of Penguins (http://www.delorie.com/store/ace/)
-    l = open(filename).read().replace('\n', '').split(',')
-    l.reverse()
+    mylist = open(filename).read().replace('\n', '').split(',')
+    mylist.reverse()
     layout = []
     layer = 0
     while True:
-        x = int(l.pop())
+        x = int(mylist.pop())
         if x == 127:
             break
         if x <= 0:
             x = -x
-            y, z = int(l.pop()), int(l.pop())
+            y, z = int(mylist.pop()), int(mylist.pop())
             if layer < z:
                 layer = z
         layout.append((z, x, y))
@@ -139,14 +141,14 @@ def parse_xmahjongg(filename):
     return normalize(layout)
 
 
-def normalize(l):
-    minx = min([i[1] for i in l])
+def normalize(mylist):
+    minx = min([i[1] for i in mylist])
     if minx:
-        l = [(i[0], i[1]-minx, i[2]) for i in l]
-    miny = min([i[2] for i in l])
+        mylist = [(i[0], i[1]-minx, i[2]) for i in mylist]
+    miny = min([i[2] for i in mylist])
     if miny:
-        l = [(i[0], i[1], i[2]-miny) for i in l]
-    return l
+        mylist = [(i[0], i[1], i[2]-miny) for i in mylist]
+    return mylist
 
 
 if __name__ == '__main__':
@@ -179,30 +181,29 @@ if __name__ == '__main__':
         layout = parse_func(filename)
         layout = normalize(layout)
 
-        #print filename, len(layout)
+        # print filename, len(layout)
 
         s = encode_layout(layout)
 
         # check
         lt = decode_layout(s)
         if lt != layout:
-            print '*** ERROR ***'
+            print('*** ERROR ***')
         else:
-            ##print s
+            # print s
 
             gamename = os.path.split(filename)[1].split('.')[0]
-            #classname = gamename.replace(' ', '_')
-            #classname = 'Mahjongg_' + re.sub('\W', '', classname)
+            # classname = gamename.replace(' ', '_')
+            # classname = 'Mahjongg_' + re.sub('\W', '', classname)
 
             ncards = len(layout)
 
             if ncards != 144:
-                print '''r(%d, "%s", ncards=%d, layout="%s")
-''' % (gameid, gamename, ncards, s)
+                print('''r(%d, "%s", ncards=%d, layout="%s")
+''' % (gameid, gamename, ncards, s))
 
             else:
-                print '''r(%d, "%s", layout="%s")
-''' % (gameid, gamename, s)
+                print('''r(%d, "%s", layout="%s")
+''' % (gameid, gamename, s))
 
             gameid += 1
-

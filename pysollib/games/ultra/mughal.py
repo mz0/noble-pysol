@@ -1,45 +1,61 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # Imports
-import sys, math
+import math
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint, FreeCellType_Hint
+from pysollib.hint import AbstractHint, DefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
+from pysollib.util import ANY_RANK, ANY_SUIT, NO_RANK, UNLIMITED_ACCEPTS, \
+        UNLIMITED_CARDS,  UNLIMITED_MOVES
+
+from pysollib.stack import \
+        AC_RowStack, \
+        AbstractFoundationStack, \
+        BasicRowStack, \
+        DealRowTalonStack, \
+        InitialDealTalonStack, \
+        RK_RowStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        StackWrapper, \
+        WasteStack, \
+        WasteTalonStack, \
+        isSameSuitSequence, \
+        OpenStack
 
 # ************************************************************************
 #  * Mughal Foundation Stacks
 #  ***********************************************************************/
+
 
 class Mughal_FoundationStack(AbstractFoundationStack):
 
@@ -69,8 +85,8 @@ class Triumph_Foundation(AbstractFoundationStack):
             card_dir = (cards[0].rank - self.cards[-1].rank) % self.cap.mod
             return card_dir in (1, 11)
         else:
-            return (self.cards[-1].rank + stack_dir) % self.cap.mod == cards[0].rank
-
+            return (self.cards[-1].rank + stack_dir) % self.cap.mod \
+                == cards[0].rank
 
 
 # ************************************************************************
@@ -100,8 +116,7 @@ class Mughal_OpenStack(OpenStack):
             dir = self.cap.dir
         c1 = cards[0]
         for c2 in cards[1:]:
-            if not ((c1.suit + c2.suit) % 2
-                    and c1.rank + dir == c2.rank):
+            if not ((c1.suit + c2.suit) % 2 and c1.rank + dir == c2.rank):
                 return 0
             c1 = c2
         return 1
@@ -111,9 +126,9 @@ class Mughal_OpenStack(OpenStack):
             dir = self.cap.dir
         c1 = cards[0]
         for c2 in cards[1:]:
-            if not ((c1.suit < 4 and c2.suit > 3
-                    or c1.suit > 3 and c2.suit < 4)
-                    and c1.rank + dir == c2.rank):
+            if not ((c1.suit < 4 and c2.suit > 3 or
+                     c1.suit > 3 and c2.suit < 4) and
+                    c1.rank + dir == c2.rank):
                 return 0
             c1 = c2
         return 1
@@ -123,8 +138,7 @@ class Mughal_OpenStack(OpenStack):
             dir = self.cap.dir
         c1 = cards[0]
         for c2 in cards[1:]:
-            if not (c1.suit == c2.suit
-                    and c1.rank + dir == c2.rank):
+            if not (c1.suit == c2.suit and c1.rank + dir == c2.rank):
                 return 0
             c1 = c2
         return 1
@@ -133,8 +147,8 @@ class Mughal_OpenStack(OpenStack):
 class Mughal_AC_RowStack(Mughal_OpenStack):
 
     def acceptsCards(self, from_stack, cards):
-        if (not self.basicAcceptsCards(from_stack, cards)
-            or not self.isAlternateColorSequence(cards)):
+        if (not self.basicAcceptsCards(from_stack, cards) or
+                not self.isAlternateColorSequence(cards)):
             return 0
         stackcards = self.cards
         if not len(stackcards):
@@ -145,8 +159,8 @@ class Mughal_AC_RowStack(Mughal_OpenStack):
 class Mughal_AF_RowStack(Mughal_OpenStack):
 
     def acceptsCards(self, from_stack, cards):
-        if (not self.basicAcceptsCards(from_stack, cards)
-            or not self.isAlternateForceSequence(cards)):
+        if (not self.basicAcceptsCards(from_stack, cards) or
+                not self.isAlternateForceSequence(cards)):
             return 0
         stackcards = self.cards
         if not len(stackcards):
@@ -157,8 +171,8 @@ class Mughal_AF_RowStack(Mughal_OpenStack):
 class Mughal_RK_RowStack(Mughal_OpenStack):
 
     def acceptsCards(self, from_stack, cards):
-        if (not self.basicAcceptsCards(from_stack, cards)
-            or not self.isRankSequence(cards)):
+        if (not self.basicAcceptsCards(from_stack, cards) or
+                not self.isRankSequence(cards)):
             return 0
         stackcards = self.cards
         if not len(stackcards):
@@ -169,8 +183,8 @@ class Mughal_RK_RowStack(Mughal_OpenStack):
 class Mughal_SS_RowStack(Mughal_OpenStack):
 
     def acceptsCards(self, from_stack, cards):
-        if (not self.basicAcceptsCards(from_stack, cards)
-            or not self.isSuitSequence(cards)):
+        if (not self.basicAcceptsCards(from_stack, cards) or
+                not self.isSuitSequence(cards)):
             return 0
         stackcards = self.cards
         if not len(stackcards):
@@ -181,8 +195,9 @@ class Mughal_SS_RowStack(Mughal_OpenStack):
 class Circles_RowStack(SS_RowStack):
 
     def __init__(self, x, y, game, base_rank, yoffset):
-        SS_RowStack.__init__(self, x, y, game, base_rank=base_rank,
-                                max_accept=1, max_move=1)
+        SS_RowStack.__init__(
+            self, x, y, game, base_rank=base_rank,
+            max_accept=1, max_move=1)
         self.CARD_YOFFSET = 1
 
 
@@ -190,7 +205,6 @@ class Triumph_BraidStack(OpenStack):
 
     def __init__(self, x, y, game, xoffset, yoffset):
         OpenStack.__init__(self, x, y, game)
-        CW = self.game.app.images.CARDW
         self.CARD_YOFFSET = int(self.game.app.images.CARD_YOFFSET * yoffset)
         # use a sine wave for the x offsets
         self.CARD_XOFFSET = []
@@ -239,7 +253,6 @@ class Triumph_ReserveStack(ReserveStack):
         return self.game.app.images.getTalonBottom()
 
 
-
 # ************************************************************************
 #  *
 #  ***********************************************************************/
@@ -258,14 +271,12 @@ class AbstractMughalGame(Game):
         pass
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return (card1.rank + 1 == card2.rank
-                or card2.rank + 1 == card1.rank)
+        return (card1.rank + 1 == card2.rank or card2.rank + 1 == card1.rank)
 
 
 class Triumph_Hint(DefaultHint):
     # FIXME: demo is not too clever in this game
     pass
-
 
 
 # ************************************************************************
@@ -280,25 +291,29 @@ class MughalCircles(AbstractMughalGame):
 
     def createGame(self):
         l, s = Layout(self), self.s
-        font = self.app.getFont("canvas_default")
 
         # Set window size
         w, h = l.XM + l.XS * 9, l.YM + l.YS * 7
         self.setSize(w, h)
 
         # Create row stacks
-        x = w / 2 - l.CW / 2
-        y = h / 2 - l.YS / 2
+        x = w // 2 - l.CW // 2
+        y = h // 2 - l.YS // 2
         x0 = (-1, -.8, 0, .8, 1, .8, 0, -.8,
-            -2, -1.9, -1.5, -.8, 0, .8, 1.5, 1.9, 2, 1.9, 1.5, .8, 0, -.8, -1.5, -1.9)
+              -2, -1.9, -1.5, -.8, 0, .8, 1.5, 1.9, 2, 1.9, 1.5, .8,
+              0, -.8, -1.5, -1.9)
         y0 = (0, -.8, -1, -.8, 0, .8, 1, .8,
-            0, -.8, -1.5, -1.9, -2, -1.9, -1.5, -.8, 0, .8, 1.5, 1.9, 2, 1.9, 1.5, .8)
+              0, -.8, -1.5, -1.9, -2, -1.9, -1.5, -.8,
+              0, .8, 1.5, 1.9, 2, 1.9, 1.5, .8)
         for i in range(24):
             # FIXME:
             _x, _y = x+l.XS*x0[i]+l.XM*x0[i]*2, y+l.YS*y0[i]+l.YM*y0[i]*2
-            if _x < 0: _x = 0
-            if _y < 0: _y = 0
-            s.rows.append(Circles_RowStack(_x, _y, self, base_rank=ANY_RANK, yoffset=0))
+            if _x < 0:
+                _x = 0
+            if _y < 0:
+                _y = 0
+            s.rows.append(
+                Circles_RowStack(_x, _y, self, base_rank=ANY_RANK, yoffset=0))
 
         # Create reserve stacks
         s.reserves.append(ReserveStack(l.XM, h - l.YS, self))
@@ -308,20 +323,26 @@ class MughalCircles(AbstractMughalGame):
         x = l.XM
         y = l.YM
         for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, i, mod = 12,
-                                             max_move = 0, max_cards = 12))
+            s.foundations.append(
+                SS_FoundationStack(
+                    x, y, self, i, mod=12,
+                    max_move=0, max_cards=12))
             y = y + l.YS
         x = self.width - l.XS
         y = l.YM
         for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, i + 4, mod = 12,
-                                             max_move = 0, max_cards = 12))
+            s.foundations.append(
+                SS_FoundationStack(
+                    x, y, self, i + 4, mod=12,
+                    max_move=0, max_cards=12))
             y = y + l.YS
         # FIXME:
         _x1, _x2 = l.XM + l.XS, w - l.XS - l.XM
         for i in s.rows:
-            if i.x < _x1: i.x = _x1
-            elif i.x > _x2: i.x = _x2
+            if i.x < _x1:
+                i.x = _x1
+            elif i.x > _x2:
+                i.x = _x2
         self.setRegion(s.rows, (_x1, 0, _x2, 999999))
 
         # Create talon
@@ -336,17 +357,12 @@ class MughalCircles(AbstractMughalGame):
 
     def startGame(self):
         assert len(self.s.talon.cards) == 96
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
+        self._startDealNumRowsAndDealRowAndCards(3)
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return ((card1.suit == card2.suit)
-                and ((card1.rank + 1 == card2.rank)
-                or (card1.rank - 1 == card2.rank)))
-
+        return ((card1.suit == card2.suit) and
+                ((card1.rank + 1 == card2.rank) or
+                 (card1.rank - 1 == card2.rank)))
 
 
 # ************************************************************************
@@ -361,7 +377,6 @@ class EightLegions(AbstractMughalGame):
 
     def createGame(self):
         l, s = Layout(self), self.s
-        font = self.app.getFont("canvas_default")
 
         # Set window size
         self.setSize(l.XM * 3 + l.XS * 9, l.YM + l.YS * 6)
@@ -370,8 +385,8 @@ class EightLegions(AbstractMughalGame):
         x = l.XM
         y = l.YM
         for i in range(8):
-            s.rows.append(RK_RowStack(x, y, self, base_rank = 11,
-                                        max_move = 12, max_cards = 99))
+            s.rows.append(RK_RowStack(x, y, self, base_rank=11,
+                                      max_move=12, max_cards=99))
             x = x + l.XS
 
         # Create reserve stacks
@@ -400,9 +415,7 @@ class EightLegions(AbstractMughalGame):
 
     def startGame(self):
         assert len(self.s.talon.cards) == 96
-        for i in range(4):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(4)
         self.s.talon.dealCards()
 
     def isGameWon(self):
@@ -414,13 +427,12 @@ class EightLegions(AbstractMughalGame):
         return 1
 
 
-
 # ************************************************************************
 #  * Shamsher
 #  ***********************************************************************/
 
 class Shamsher(AbstractMughalGame):
-    Layout_Method = Layout.ghulamLayout
+    Layout_Method = staticmethod(Layout.ghulamLayout)
     Talon_Class = InitialDealTalonStack
     Foundation_Class = SS_FoundationStack
     RowStack_Class = RK_RowStack
@@ -438,8 +450,10 @@ class Shamsher(AbstractMughalGame):
 
         # Create foundations
         for r in l.s.foundations:
-            s.foundations.append(self.Foundation_Class(r.x, r.y, self,
-                                    r.suit, mod=12, max_cards=12))
+            s.foundations.append(
+                self.Foundation_Class(
+                    r.x, r.y, self,
+                    r.suit, mod=12, max_cards=12))
 
         # Create reserve stacks
         for r in l.s.reserves:
@@ -447,8 +461,10 @@ class Shamsher(AbstractMughalGame):
 
         # Create row stacks
         for r in l.s.rows:
-            s.rows.append(self.RowStack_Class(r.x, r.y, self, max_cards=12,
-                                suit=ANY_SUIT, base_rank=self.BASE_RANK))
+            s.rows.append(
+                self.RowStack_Class(
+                    r.x, r.y, self, max_cards=12,
+                    suit=ANY_SUIT, base_rank=self.BASE_RANK))
 
         # Create talon
         s.talon = self.Talon_Class(l.s.talon.x, l.s.talon.y, self)
@@ -462,12 +478,9 @@ class Shamsher(AbstractMughalGame):
 
     def startGame(self):
         assert len(self.s.talon.cards) == 96
-        for i in range(6):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(6)
         self.s.talon.dealRow(rows=self.s.rows[:12])
         self.s.talon.dealCards()
-
 
 
 # ************************************************************************
@@ -475,7 +488,7 @@ class Shamsher(AbstractMughalGame):
 #  ***********************************************************************/
 
 class Ashrafi(Shamsher):
-    Layout_Method = Layout.ghulamLayout
+    Layout_Method = staticmethod(Layout.ghulamLayout)
     Talon_Class = InitialDealTalonStack
     Foundation_Class = SS_FoundationStack
     RowStack_Class = RK_RowStack
@@ -489,13 +502,12 @@ class Ashrafi(Shamsher):
         Shamsher.createGame(self)
 
 
-
 # ************************************************************************
 #  * Ghulam
 #  ***********************************************************************/
 
 class Ghulam(Shamsher):
-    Layout_Method = Layout.ghulamLayout
+    Layout_Method = staticmethod(Layout.ghulamLayout)
     Talon_Class = InitialDealTalonStack
     Foundation_Class = SS_FoundationStack
     RowStack_Class = SS_RowStack
@@ -509,10 +521,9 @@ class Ghulam(Shamsher):
         Shamsher.createGame(self)
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return ((card1.suit == card2.suit)
-                and ((card1.rank + 1 == card2.rank)
-                or (card1.rank - 1 == card2.rank)))
-
+        return ((card1.suit == card2.suit) and
+                ((card1.rank + 1 == card2.rank) or
+                 (card1.rank - 1 == card2.rank)))
 
 
 # ************************************************************************
@@ -520,7 +531,7 @@ class Ghulam(Shamsher):
 #  ***********************************************************************/
 
 class Tipati(AbstractMughalGame):
-    Layout_Method = Layout.klondikeLayout
+    Layout_Method = staticmethod(Layout.klondikeLayout)
     Talon_Class = WasteTalonStack
     Foundation_Class = SS_FoundationStack
     RowStack_Class = RK_RowStack
@@ -538,19 +549,24 @@ class Tipati(AbstractMughalGame):
         self.setSize(l.size[0], l.size[1])
 
         # Create talon
-        s.talon = self.Talon_Class(l.s.talon.x, l.s.talon.y, self,
-                            max_rounds = max_rounds, num_deal = num_deal)
+        s.talon = self.Talon_Class(
+            l.s.talon.x, l.s.talon.y, self,
+            max_rounds=max_rounds, num_deal=num_deal)
         s.waste = WasteStack(l.s.waste.x, l.s.waste.y, self)
 
         # Create foundations
         for r in l.s.foundations:
-            s.foundations.append(self.Foundation_Class(r.x, r.y, self,
-                                    r.suit, mod = 12, max_cards = 12, max_move = self.MAX_MOVE))
+            s.foundations.append(
+                self.Foundation_Class(
+                    r.x, r.y, self,
+                    r.suit, mod=12, max_cards=12, max_move=self.MAX_MOVE))
 
         # Create row stacks
         for r in l.s.rows:
-            s.rows.append(self.RowStack_Class(r.x, r.y, self,
-                                suit = ANY_SUIT, base_rank = self.BASE_RANK))
+            s.rows.append(
+                self.RowStack_Class(
+                    r.x, r.y, self,
+                    suit=ANY_SUIT, base_rank=self.BASE_RANK))
 
         # Define stack groups
         l.defaultAll()
@@ -568,8 +584,6 @@ class Tipati(AbstractMughalGame):
         self.s.talon.dealCards()
 
 
-
-
 # ************************************************************************
 #  * Ashwapati
 #  ***********************************************************************/
@@ -584,13 +598,12 @@ class Ashwapati(Tipati):
     #
 
     def createGame(self, **layout):
-        Tipati.createGame(self, max_rounds = -1, num_deal = 1)
+        Tipati.createGame(self, max_rounds=-1, num_deal=1)
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return ((card1.suit == card2.suit)
-                and ((card1.rank + 1 == card2.rank)
-                or (card1.rank - 1 == card2.rank)))
-
+        return ((card1.suit == card2.suit) and
+                ((card1.rank + 1 == card2.rank) or
+                 (card1.rank - 1 == card2.rank)))
 
 
 # ************************************************************************
@@ -610,10 +623,9 @@ class Gajapati(Tipati):
         Tipati.createGame(self, max_rounds=-1, num_deal=3)
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return ((card1.suit == card2.suit)
-                and ((card1.rank + 1 == card2.rank)
-                or (card1.rank - 1 == card2.rank)))
-
+        return ((card1.suit == card2.suit) and
+                ((card1.rank + 1 == card2.rank) or
+                 (card1.rank - 1 == card2.rank)))
 
 
 # ************************************************************************
@@ -632,7 +644,6 @@ class Narpati(Tipati):
         Tipati.createGame(self, max_rounds=1, num_deal=1)
 
 
-
 # ************************************************************************
 #  * Garhpati
 #  ***********************************************************************/
@@ -648,7 +659,6 @@ class Garhpati(Tipati):
         Tipati.createGame(self, max_rounds=-1, num_deal=3)
 
 
-
 # ************************************************************************
 #  * Dhanpati
 #  ***********************************************************************/
@@ -661,7 +671,6 @@ class Dhanpati(Tipati):
 
     def createGame(self, **layout):
         Tipati.createGame(self, max_rounds=2, num_deal=3)
-
 
 
 # ************************************************************************
@@ -692,52 +701,60 @@ class AkbarsTriumph(AbstractMughalGame):
         self.base_card = None
 
         # Create foundations, rows, reserves
-        s.addattr(braidstrong = None)      # register extra stack variable
-        s.addattr(braidweak = None)      # register extra stack variable
+        s.addattr(braidstrong=None)      # register extra stack variable
+        s.addattr(braidweak=None)      # register extra stack variable
         x, y = l.XM, l.YM
         for j in range(4):
             for i in range(decks):
-                s.foundations.append(Triumph_Foundation(x + l.XS * i, y, self,
-                                                j, mod = 12, max_cards = 12))
+                s.foundations.append(
+                    Triumph_Foundation(
+                        x + l.XS * i, y, self,
+                        j, mod=12, max_cards=12))
             s.rows.append(Triumph_StrongStack(x + l.XS * decks, y, self))
-            s.rows.append(Triumph_ReserveStack(x + l.XS * (1 + decks), y, self))
+            s.rows.append(Triumph_ReserveStack(
+                x + l.XS * (1 + decks), y, self))
             y = y + l.YS
         x, y = x + l.XS * (5 + decks), l.YM
         for j in range(4):
             s.rows.append(Triumph_ReserveStack(x, y, self))
             s.rows.append(Triumph_WeakStack(x + l.XS, y, self))
             for i in range(decks, 0, -1):
-                s.foundations.append(Triumph_Foundation(x + l.XS * (1 + i), y, self,
-                                                j + 4, mod = 12, max_cards = 12))
+                s.foundations.append(Triumph_Foundation(
+                    x + l.XS * (1 + i), y, self,
+                    j + 4, mod=12, max_cards=12))
             y = y + l.YS
-        self.texts.info = MfxCanvasText(self.canvas,
-                                        self.width / 2, h - l.YM / 2,
-                                        anchor = "center",
-                                        font = self.app.getFont("canvas_default"))
+        self.texts.info = MfxCanvasText(
+            self.canvas,
+            self.width // 2, h - l.YM // 2,
+            anchor="center",
+            font=self.app.getFont("canvas_default"))
 
         # Create braids
         x, y = l.XM + l.XS * 2.3 + l.XS * decks, l.YM
-        s.braidstrong = Triumph_BraidStack(x, y, self, xoffset = 12, yoffset = self.BRAID_OFFSET)
-        x = x + l.XS * 1.4
-        s.braidweak = Triumph_BraidStack(x, y, self, xoffset = -12, yoffset = self.BRAID_OFFSET)
+        s.braidstrong = Triumph_BraidStack(
+            x, y, self, xoffset=12, yoffset=self.BRAID_OFFSET)
+        x += l.XS * 1.4
+        s.braidweak = Triumph_BraidStack(
+            x, y, self, xoffset=-12, yoffset=self.BRAID_OFFSET)
 
         # Create talon
         x, y = l.XM + l.XS * 2 + l.XS * decks, h - l.YS - l.YM
-        s.talon = WasteTalonStack(x, y, self, max_rounds = 3)
+        s.talon = WasteTalonStack(x, y, self, max_rounds=3)
         l.createText(s.talon, "s")
-        s.talon.texts.rounds = MfxCanvasText(self.canvas,
-                                             self.width / 2, h - l.YM * 2.5,
-                                             anchor = "center",
-                                             font=self.app.getFont("canvas_default"))
-        x = x + l.XS * 2
+        s.talon.texts.rounds = MfxCanvasText(
+            self.canvas,
+            self.width // 2, h - l.YM * 2.5,
+            anchor="center",
+            font=self.app.getFont("canvas_default"))
+        x += l.XS * 2
         s.waste = WasteStack(x, y, self)
         l.createText(s.waste, "s")
 
         # define stack-groups
         self.sg.talonstacks = [s.talon] + [s.waste]
         self.sg.openstacks = s.foundations + s.rows
-        self.sg.dropstacks = [s.braidstrong] + [s.braidweak] + s.rows + [s.waste]
-
+        self.sg.dropstacks = [s.braidstrong] + [s.braidweak] + s.rows \
+            + [s.waste]
 
     #
     # game overrides
@@ -748,13 +765,14 @@ class AkbarsTriumph(AbstractMughalGame):
         self.base_card = None
         self.updateText()
         for i in range(self.BRAID_CARDS):
-            self.s.talon.dealRow(rows = [self.s.braidstrong])
+            self.s.talon.dealRow(rows=[self.s.braidstrong])
         for i in range(self.BRAID_CARDS):
-            self.s.talon.dealRow(rows = [self.s.braidweak])
+            self.s.talon.dealRow(rows=[self.s.braidweak])
         self.s.talon.dealRow()
         # deal base_card to foundations, update cap.base_rank
         self.base_card = self.s.talon.getCard()
-        to_stack = self.s.foundations[self.base_card.suit * self.gameinfo.decks]
+        to_stack = self.s.foundations[
+            self.base_card.suit * self.gameinfo.decks]
         self.flipMove(self.s.talon)
         self.moveMove(1, self.s.talon, to_stack)
         self.updateText()
@@ -765,7 +783,8 @@ class AkbarsTriumph(AbstractMughalGame):
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
         return (card1.suit == card2.suit and
-                ((card1.rank + 1) % 12 == card2.rank or (card2.rank + 1) % 12 == card1.rank))
+                ((card1.rank + 1) % 12 == card2.rank or
+                 (card2.rank + 1) % 12 == card1.rank))
 
     def getHighlightPilesStacks(self):
         return ()
@@ -781,7 +800,6 @@ class AkbarsTriumph(AbstractMughalGame):
 
     def _saveGameHook(self, p):
         p.dump(self.base_card.id)
-
 
     #
     # game extras
@@ -799,8 +817,7 @@ class AkbarsTriumph(AbstractMughalGame):
                 t = t + _(" Ascending")
             elif dir == 11:
                 t = t + _(" Descending")
-        self.texts.info.config(text = t)
-
+        self.texts.info.config(text=t)
 
 
 # ************************************************************************
@@ -811,7 +828,6 @@ class AkbarsConquest(AkbarsTriumph):
 
     BRAID_CARDS = 16
     BRAID_OFFSET = .9
-
 
 
 # ************************************************************************
@@ -834,7 +850,7 @@ class Vajra(AbstractMughalGame):
         self.setSize(l.XM + (maxrows + 2) * l.XS, l.YM + 6 * l.YS)
 
         #
-        playcards = 4 * l.YS / l.YOFFSET
+        playcards = 4 * l.YS // l.YOFFSET
         xoffset, yoffset = [], []
         for i in range(playcards):
             xoffset.append(0)
@@ -844,12 +860,12 @@ class Vajra(AbstractMughalGame):
             yoffset.append(0)
 
         # create stacks
-        x, y = l.XM + (maxrows - reserves) * l.XS / 2, l.YM
+        x, y = l.XM + (maxrows - reserves) * l.XS // 2, l.YM
         for i in range(reserves):
             s.reserves.append(ReserveStack(x, y, self))
             x = x + l.XS
-        x, y = l.XM + (maxrows - rows) * l.XS / 2, l.YM + l.YS
-        self.setRegion(s.reserves, (-999, -999, 999999, y - l.YM / 2))
+        x, y = l.XM + (maxrows - rows) * l.XS // 2, l.YM + l.YS
+        self.setRegion(s.reserves, (-999, -999, 999999, y - l.YM // 2))
         for i in range(rows):
             stack = self.RowStack_Class(x, y, self, yoffset=l.YOFFSET)
             stack.CARD_XOFFSET = xoffset
@@ -859,12 +875,14 @@ class Vajra(AbstractMughalGame):
         x, y = l.XM + maxrows * l.XS, l.YM
         for i in range(2):
             for suit in range(4):
-                s.foundations.append(SS_FoundationStack(x, y, self, suit=suit + (4 * i)))
+                s.foundations.append(
+                    SS_FoundationStack(x, y, self, suit=suit+(4 * i)))
                 y = y + l.YS
             x, y = x + l.XS, l.YM
         self.setRegion(self.s.foundations, (x - l.XS * 2, -999, 999999,
-                        self.height - (l.YS + l.YM)), priority=1)
-        s.talon = InitialDealTalonStack(self.width - 3 * l.XS / 2, self.height - l.YS, self)
+                       self.height - (l.YS + l.YM)), priority=1)
+        s.talon = InitialDealTalonStack(
+            self.width - 3 * l.XS // 2, self.height - l.YS, self)
 
         # define stack-groups
         l.defaultStackGroups()
@@ -887,7 +905,8 @@ class Vajra(AbstractMughalGame):
         closest, cdist = None, 999999999
         for stack in stacks:
             if stack.cards and stack is not dragstack:
-                dist = (stack.cards[-1].x - cx)**2 + (stack.cards[-1].y - cy)**2
+                dist = (stack.cards[-1].x - cx)**2 + \
+                    (stack.cards[-1].y - cy)**2
             else:
                 dist = (stack.x - cx)**2 + (stack.y - cy)**2
             if dist < cdist:
@@ -913,7 +932,6 @@ class Danda(Vajra):
         return (sequence([card1, card2]) or sequence([card2, card1]))
 
 
-
 # ************************************************************************
 # *
 # ************************************************************************
@@ -925,7 +943,6 @@ class Khadga(Vajra):
         row = self.s.rows[0]
         sequence = row.isAlternateColorSequence
         return (sequence([card1, card2]) or sequence([card2, card1]))
-
 
 
 # ************************************************************************
@@ -941,7 +958,6 @@ class Makara(Vajra):
         return (sequence([card1, card2]) or sequence([card2, card1]))
 
 
-
 # ************************************************************************
 # * Ashta Dikapala Game Stacks
 # ************************************************************************
@@ -949,7 +965,8 @@ class Makara(Vajra):
 class Dikapala_TableauStack(Mughal_OpenStack):
 
     def __init__(self, x, y, game, base_rank, yoffset, **cap):
-        kwdefault(cap, dir=3, max_move=99, max_cards=4, max_accept=1, base_rank=base_rank)
+        kwdefault(cap, dir=3, max_move=99, max_cards=4, max_accept=1,
+                  base_rank=base_rank)
         OpenStack.__init__(self, x, y, game, **cap)
         self.CARD_YOFFSET = yoffset
 
@@ -975,8 +992,8 @@ class Dikapala_ReserveStack(ReserveStack):
         OpenStack.__init__(self, x, y, game, **cap)
 
     def acceptsCards(self, from_stack, cards):
-        return (ReserveStack.acceptsCards(self, from_stack, cards)
-                and self.game.s.talon.cards)
+        return (ReserveStack.acceptsCards(self, from_stack, cards) and
+                self.game.s.talon.cards)
 
 
 class Dikapala_RowStack(BasicRowStack):
@@ -1076,22 +1093,24 @@ class AshtaDikapala(Game):
     def createGame(self):
         # create layout
         l, s = Layout(self), self.s
-        TABLEAU_YOFFSET = min(9, max(3, l.YOFFSET / 3))
+        TABLEAU_YOFFSET = min(9, max(3, l.YOFFSET // 3))
 
         # set window
         th = l.YS + 3 * TABLEAU_YOFFSET
         # (set piles so that at least 2/3 of a card is visible with 10 cards)
-        h = 8 * l.YOFFSET + l.CH * 2/3
+        h = 8 * l.YOFFSET + l.CH * 2//3
         self.setSize(9 * l.XS + l.XM * 2, l.YM + 3 * th + l.YM + h)
 
         # create stacks
         s.addattr(tableaux=[])     # register extra stack variable
-        x = l.XM + 8 * l.XS + l.XS / 2
+        x = l.XM + 8 * l.XS + l.XS // 2
         y = l.YM
         for i in range(3, 0, -1):
             x = l.XM
             for j in range(8):
-                s.tableaux.append(Dikapala_TableauStack(x, y, self, i - 1, TABLEAU_YOFFSET))
+                s.tableaux.append(
+                    Dikapala_TableauStack(
+                        x, y, self, i - 1, TABLEAU_YOFFSET))
                 x = x + l.XS
             x = x + l.XM
             s.reserves.append(Dikapala_ReserveStack(x, y, self))
@@ -1116,8 +1135,7 @@ class AshtaDikapala(Game):
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.tableaux, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def isGameWon(self):
         for stack in self.s.tableaux:
@@ -1145,14 +1163,17 @@ class AshtaDikapala(Game):
 def r(id, gameclass, name, game_type, decks, redeals, skill_level):
     game_type = game_type | GI.GT_MUGHAL_GANJIFA
     gi = GameInfo(id, gameclass, name, game_type, decks, redeals, skill_level,
-                    suits=range(8), ranks=range(12))
+                  suits=list(range(8)), ranks=list(range(12)))
     registerGame(gi)
     return gi
 
-r(14401, MughalCircles, 'Mughal Circles', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
+
+r(14401, MughalCircles, 'Mughal Circles', GI.GT_MUGHAL_GANJIFA, 1, 0,
+  GI.SL_MOSTLY_SKILL)
 r(14402, Ghulam, 'Ghulam', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
 r(14403, Shamsher, 'Shamsher', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
-r(14404, EightLegions, 'Eight Legions', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
+r(14404, EightLegions, 'Eight Legions', GI.GT_MUGHAL_GANJIFA, 1, 0,
+  GI.SL_MOSTLY_SKILL)
 r(14405, Ashrafi, 'Ashrafi', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
 r(14406, Tipati, 'Tipati', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_BALANCED)
 r(14407, Ashwapati, 'Ashwapati', GI.GT_MUGHAL_GANJIFA, 1, -1, GI.SL_BALANCED)
@@ -1160,12 +1181,15 @@ r(14408, Gajapati, 'Gajapati', GI.GT_MUGHAL_GANJIFA, 1, -1, GI.SL_BALANCED)
 r(14409, Narpati, 'Narpati', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_BALANCED)
 r(14410, Garhpati, 'Garhpati', GI.GT_MUGHAL_GANJIFA, 1, -1, GI.SL_BALANCED)
 r(14411, Dhanpati, 'Dhanpati', GI.GT_MUGHAL_GANJIFA, 1, 1, GI.SL_BALANCED)
-r(14412, AkbarsTriumph, 'Akbar\'s Triumph', GI.GT_MUGHAL_GANJIFA, 1, 2, GI.SL_BALANCED)
-r(14413, AkbarsConquest, 'Akbar\'s Conquest', GI.GT_MUGHAL_GANJIFA, 2, 2, GI.SL_BALANCED)
+r(14412, AkbarsTriumph, 'Akbar\'s Triumph', GI.GT_MUGHAL_GANJIFA, 1, 2,
+  GI.SL_BALANCED)
+r(14413, AkbarsConquest, 'Akbar\'s Conquest', GI.GT_MUGHAL_GANJIFA, 2, 2,
+  GI.SL_BALANCED)
 r(16000, Vajra, 'Vajra', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
 r(16001, Danda, 'Danda', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
 r(16002, Khadga, 'Khadga', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
 r(16003, Makara, 'Makara', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_MOSTLY_SKILL)
-r(16004, AshtaDikapala, 'Ashta Dikapala', GI.GT_MUGHAL_GANJIFA, 1, 0, GI.SL_BALANCED)
+r(16004, AshtaDikapala, 'Ashta Dikapala', GI.GT_MUGHAL_GANJIFA, 1, 0,
+  GI.SL_BALANCED)
 
 del r

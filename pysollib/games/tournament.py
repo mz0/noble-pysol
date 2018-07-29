@@ -1,45 +1,52 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
-from pysollib.pysoltk import MfxCanvasText
+from pysollib.hint import CautiousDefaultHint
 
+from pysollib.util import ACE, JACK, KING, QUEEN
+
+from pysollib.stack import \
+        AC_RowStack, \
+        BasicRowStack, \
+        DealRowRedealTalonStack, \
+        DealRowTalonStack, \
+        OpenStack, \
+        ReserveStack, \
+        SS_RowStack, \
+        Stack, \
+        SS_FoundationStack
 
 # ************************************************************************
 # * Tournament
 # ************************************************************************
+
 
 class Tournament_Talon(DealRowRedealTalonStack):
     def dealCards(self, sound=False):
@@ -147,6 +154,7 @@ class LaNivernaise(Tournament):
 # * Kingsdown Eights
 # ************************************************************************
 
+
 class KingsdownEights_Talon(DealRowTalonStack):
     def dealCards(self, sound=False):
         if len(self.cards) == 0:
@@ -160,6 +168,7 @@ class KingsdownEights_Talon(DealRowTalonStack):
                 n += self.dealRow([r])
         self.game.stopSamples()
         return n
+
 
 class KingsdownEights(Game):
 
@@ -215,6 +224,7 @@ class KingsdownEights(Game):
 
 class Saxony_Reserve(SS_RowStack):
     getBottomImage = Stack._getReserveBottomImage
+
     def getHelp(self):
         return _('Reserve. Build down by suit.')
 
@@ -232,11 +242,12 @@ class Saxony(Game):
 
         x, y, = l.XM+1.5*l.XS, l.YM
         for i in range(8):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i%4))
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i % 4))
             x += l.XS
         x, y = l.XM+1.5*l.XS, 2*l.YM+l.YS
         for i in range(8):
-            s.reserves.append(BasicRowStack(x, y, self, max_move=1, max_accept=0))
+            s.reserves.append(
+                BasicRowStack(x, y, self, max_move=1, max_accept=0))
             x += l.XS
         x, y = l.XM, 2*l.YM+l.YS
         for i in range(4):
@@ -252,7 +263,6 @@ class Saxony(Game):
         l.createText(s.talon, "ne")
 
         l.defaultStackGroups()
-
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.reserves[8:], frames=0)
@@ -286,11 +296,11 @@ class LadiesBattle(Game):
             s.rows.append(LadiesBattle_RowStack(x, y, self,
                                                 max_move=1, mod=13))
             x = x + l.XS
-        x, y = l.XM, l.YM+l.YS/2
+        x, y = l.XM, l.YM+l.YS//2
         for i in range(4):
             s.reserves.append(OpenStack(x, y, self, max_accept=0))
             y += l.YS
-        x, y = self.width-l.XS, l.YM+l.YS/2
+        x, y = self.width-l.XS, l.YM+l.YS//2
         for i in range(4):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i,
                                                     base_rank=QUEEN, mod=13))
@@ -301,14 +311,14 @@ class LadiesBattle(Game):
         l.defaultStackGroups()
 
     def _shuffleHook(self, cards):
-        return self._shuffleHookMoveToTop(cards,
+        return self._shuffleHookMoveToTop(
+            cards,
             lambda c: (c.rank in (JACK, QUEEN), (c.rank, c.suit)))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.reserves, frames=0)
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def fillStack(self, stack):
         if stack in self.s.rows and not stack.cards:
@@ -319,20 +329,15 @@ class LadiesBattle(Game):
     shallHighlightMatch = Game._shallHighlightMatch_ACW
 
 
-
 # register the game
 registerGame(GameInfo(303, Tournament, "Tournament",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(304, LaNivernaise, "La Nivernaise",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
-                      altnames = ("Napoleon's Flank", ),))
+                      altnames=("Napoleon's Flank", ),))
 registerGame(GameInfo(386, KingsdownEights, "Kingsdown Eights",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(645, Saxony, "Saxony",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(652, LadiesBattle, "Ladies Battle",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
-
-
-
-

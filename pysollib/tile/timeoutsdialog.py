@@ -1,37 +1,36 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = ['TimeoutsDialog']
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import Tkinter
-import ttk
+from six.moves import tkinter
+from . import ttk
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.mfxutil import KwStruct
 
 # Toolkit imports
-from tkwidget import MfxDialog, PysolScale
+from .tkwidget import MfxDialog, PysolScale
 
 
 # ************************************************************************
@@ -43,27 +42,28 @@ class TimeoutsDialog(MfxDialog):
         kw = self.initKw(kw)
         MfxDialog.__init__(self, parent, title, kw.resizable, kw.default)
         top_frame, bottom_frame = self.createFrames(kw)
-        #self.createBitmaps(top_frame, kw)
+        # self.createBitmaps(top_frame, kw)
 
         frame = ttk.Frame(top_frame)
         frame.pack(expand=True, fill='both', padx=5, pady=10)
         frame.columnconfigure(0, weight=1)
 
-        self.demo_sleep_var = Tkinter.DoubleVar()
+        self.demo_sleep_var = tkinter.DoubleVar()
         self.demo_sleep_var.set(app.opt.timeouts['demo'])
-        self.hint_sleep_var = Tkinter.DoubleVar()
+        self.hint_sleep_var = tkinter.DoubleVar()
         self.hint_sleep_var.set(app.opt.timeouts['hint'])
-        self.raise_card_sleep_var = Tkinter.DoubleVar()
+        self.raise_card_sleep_var = tkinter.DoubleVar()
         self.raise_card_sleep_var.set(app.opt.timeouts['raise_card'])
-        self.highlight_piles_sleep_var = Tkinter.DoubleVar()
+        self.highlight_piles_sleep_var = tkinter.DoubleVar()
         self.highlight_piles_sleep_var.set(app.opt.timeouts['highlight_piles'])
-        self.highlight_cards_sleep_var = Tkinter.DoubleVar()
+        self.highlight_cards_sleep_var = tkinter.DoubleVar()
         self.highlight_cards_sleep_var.set(app.opt.timeouts['highlight_cards'])
-        self.highlight_samerank_sleep_var = Tkinter.DoubleVar()
-        self.highlight_samerank_sleep_var.set(app.opt.timeouts['highlight_samerank'])
+        self.highlight_samerank_sleep_var = tkinter.DoubleVar()
+        self.highlight_samerank_sleep_var.set(
+            app.opt.timeouts['highlight_samerank'])
         #
         lframe = ttk.LabelFrame(frame, text=_('Set delays in seconds'),
-                                 padding=(10, 5))
+                                padding=(10, 5))
         lframe.pack(expand=True, fill='both', padx=4)
         row = 0
         for title, var in (
@@ -73,9 +73,10 @@ class TimeoutsDialog(MfxDialog):
             (_('Highlight piles:'),     self.highlight_piles_sleep_var),
             (_('Highlight cards:'),     self.highlight_cards_sleep_var),
             (_('Highlight same rank:'), self.highlight_samerank_sleep_var),
-            ):
-            ttk.Label(lframe, text=title, anchor='w'
-                       ).grid(row=row, column=0, sticky='we')
+                ):
+            ttk.Label(
+                lframe, text=title, anchor='w').grid(
+                    row=row, column=0, sticky='we')
             widget = PysolScale(lframe, from_=0.2, to=9.9, value=var.get(),
                                 resolution=0.1, orient='horizontal',
                                 length="3i", variable=var, takefocus=0)
@@ -90,7 +91,8 @@ class TimeoutsDialog(MfxDialog):
         self.raise_card_timeout = self.raise_card_sleep_var.get()
         self.highlight_piles_timeout = self.highlight_piles_sleep_var.get()
         self.highlight_cards_timeout = self.highlight_cards_sleep_var.get()
-        self.highlight_samerank_timeout = self.highlight_samerank_sleep_var.get()
+        self.highlight_samerank_timeout = \
+            self.highlight_samerank_sleep_var.get()
 
     def initKw(self, kw):
         kw = KwStruct(kw,
@@ -98,7 +100,3 @@ class TimeoutsDialog(MfxDialog):
                       padx=10, pady=10,
                       )
         return MfxDialog.initKw(self, kw)
-
-
-
-

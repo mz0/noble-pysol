@@ -1,33 +1,33 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
 import os
-import Tkinter
+from six.moves import tkinter
 
 # Toolkit imports
-from tkutil import bind
-from tkwidget import MfxScrolledCanvas
+from pysollib.ui.tktile.tkutil import bind
+from .tkwidget import MfxScrolledCanvas
 
 
 # ************************************************************************
@@ -50,9 +50,9 @@ class MfxTreeBaseNode:
 
     def registerKey(self):
         if self.key is not None:
-            l = self.tree.keys.get(self.key, [])
-            l.append(self)
-            self.tree.keys[self.key] = l
+            lst = self.tree.keys.get(self.key, [])
+            lst.append(self)
+            self.tree.keys[self.key] = lst
 
     def whoami(self):
         if self.parent_node is None:
@@ -63,10 +63,12 @@ class MfxTreeBaseNode:
     def draw(self, x, y, lastx=None, lasty=None):
         canvas, style = self.tree.canvas, self.tree.style
         topleftx = x + style.distx
-        toplefty = y - style.height / 2 #+++
+        toplefty = y - style.height // 2  # +++
         # draw the horizontal line
         if lastx is not None:
-            canvas.create_line(x, y, topleftx, y, stipple=style.linestyle, fill=style.linecolor)
+            canvas.create_line(
+                x, y, topleftx, y, stipple=style.linestyle,
+                fill=style.linecolor)
         # draw myself - ugly, ugly...
         self.selected = 0
         self.symbol_id = -1
@@ -93,7 +95,7 @@ class MfxTreeBaseNode:
             # note: I don't use Label + canvas.create_window here
             #   because it doesn't propagate events to the canvas
             #   and has some other re-display annoyances
-            ##print 'style.font:', style.font
+            # print 'style.font:', style.font
             self.text_id = canvas.create_text(x+1, y, text=self.text,
                                               anchor="w", justify="left",
                                               font=style.font,
@@ -104,12 +106,13 @@ class MfxTreeBaseNode:
             try:
                 # _tkinter.TclError: unknown option "-fill" ???
                 canvas.itemconfig(self.textrect_id, fill=bg)
-            except Tkinter.TclError:
+            except tkinter.TclError:
                 pass
         elif self.selected:
             b = canvas.bbox(self.text_id)
-            self.textrect_id = canvas.create_rectangle(b[0]-1, b[1]-1, b[2]+1, b[3]+1,
-                                                       fill=bg, outline="")
+            self.textrect_id = canvas.create_rectangle(
+                b[0]-1, b[1]-1, b[2]+1, b[3]+1,
+                fill=bg, outline="")
             canvas.tag_lower(self.textrect_id, self.text_id)
             self.tree.nodes[self.textrect_id] = self
 
@@ -172,23 +175,22 @@ class MfxTreeNode(MfxTreeBaseNode):
         # draw the vertical line
         if self.subnodes:
             style = self.tree.style
-            dy = (style.disty-style.width)/2
-            y = y-style.disty/2-dy
+            dy = (style.disty-style.width)//2
+            y = y-style.disty//2-dy
             self.tree.canvas.create_line(x, y, nx, ly,
                                          stipple=style.linestyle,
                                          fill=style.linecolor)
         return ny
-
 
     def draw(self, x, y, ilastx=None, ilasty=None):
         # draw myself
         lx, ly, nx, ny = MfxTreeBaseNode.draw(self, x, y, ilastx, ilasty)
         if self.expanded:
             style = self.tree.style
-            childx = nx + style.distx + style.width / 2
+            childx = nx + style.distx + style.width // 2
             childy = ny
-            clastx = nx + style.distx + style.width / 2
-            clasty = ly + style.height /2
+            clastx = nx + style.distx + style.width // 2
+            clasty = ly + style.height // 2
             ny = self.drawChildren(childx, childy, clastx, clasty)
         return lx, ly, x, ny
 
@@ -239,13 +241,16 @@ class MfxTreeInCanvas(MfxScrolledCanvas):
         self.keys = {}
         #
         self.style = self.Style()
-        ##self.style.text_normal_fg = self.canvas.cget("insertbackground")
-        #self.style.text_normal_fg = self.canvas.option_get('foreground', '') or self.canvas.cget("insertbackground")
-        #self.style.text_normal_bg = self.canvas.option_get('background', self.canvas.cget("background"))
+        # self.style.text_normal_fg = self.canvas.cget("insertbackground")
+        # self.style.text_normal_fg = \
+        #   self.canvas.option_get('foreground', '') or \
+        #   self.canvas.cget("insertbackground")
+        # self.style.text_normal_bg = self.canvas.option_get(
+        #   'background', self.canvas.cget("background"))
         #
         bind(self.canvas, "<ButtonPress-1>", self.singleClick)
         bind(self.canvas, "<Double-Button-1>", self.doubleClick)
-        ##bind(self.canvas, "<ButtonRelease-1>", xxx)
+        # bind(self.canvas, "<ButtonRelease-1>", xxx)
         self.pack(fill='both', expand=True)
 
     def destroy(self):
@@ -268,23 +273,23 @@ class MfxTreeInCanvas(MfxScrolledCanvas):
         # Account for initial offsets, see topleft[xy] in BaseNode.draw().
         # We do this so that our bounding box always starts at (0,0)
         # and the yscrollincrement works nicely.
-        nx = nx - self.style.distx
-        ny = ny + self.style.height / 2
+        nx -= self.style.distx
+        ny += self.style.height // 2
         for node in self.rootnodes:
             # update tree
             node.tree = self
             # draw
             try:
                 lx, ly, nx, ny = node.draw(nx, ny, None, None)
-            except Tkinter.TclError:
+            except tkinter.TclError:
                 # FIXME: Tk bug ???
                 raise
         # set scroll region
         bbox = self.canvas.bbox("all")
-        ##self.canvas.config(scrollregion=bbox)
-        ##self.canvas.config(scrollregion=(0,0,bbox[2],bbox[3]))
-        dx, dy = 8, 0 # margins
-        self.canvas.config(scrollregion=(-dx,-dy,bbox[2]+dx,bbox[3]+dy))
+        # self.canvas.config(scrollregion=bbox)
+        # self.canvas.config(scrollregion=(0,0,bbox[2],bbox[3]))
+        dx, dy = 8, 0  # margins
+        self.canvas.config(scrollregion=(-dx, -dy, bbox[2]+dx, bbox[3]+dy))
         self.canvas.config(yscrollincrement=self.style.disty)
 
     def clear(self):
@@ -374,7 +379,7 @@ class DirectoryBrowser(MfxTreeInCanvas):
             return node.subnodes
         #
         dir = node.key
-        print "Getting %s" % dir
+        print("Getting %s" % dir)
         try:
             filenames = os.listdir(dir)
             filenames.sort()
@@ -383,14 +388,14 @@ class DirectoryBrowser(MfxTreeInCanvas):
         contents = []
         for filename in filenames:
             self.addNode(contents, node, os.path.join(dir, filename), filename)
-        ##print "gotten"
+        # print "gotten"
         return contents
 
     def singleClick(self, event=None):
         node = self.findNode(event)
         if not node:
             return
-        print "Clicked node %s %s" % (node.text, node.key)
+        print("Clicked node %s %s" % (node.text, node.key))
         if isinstance(node, MfxTreeLeaf):
             self.updateSelection(key=node.key)
         elif isinstance(node, MfxTreeNode):
@@ -400,11 +405,9 @@ class DirectoryBrowser(MfxTreeInCanvas):
 
 
 if __name__ == "__main__":
-    tk = Tkinter.Tk()
+    tk = tkinter.Tk()
     if os.name == "nt":
         app = DirectoryBrowser(tk, ("c:\\", "c:\\windows"))
     else:
         app = DirectoryBrowser(tk, ("/", "/home"))
     tk.mainloop()
-
-

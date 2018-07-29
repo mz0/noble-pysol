@@ -1,36 +1,32 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 
 # imports
 import os
 import traceback
 
-try:
-    import thread
-    from threading import Thread
-except ImportError:
-    thread = None
+from threading import Thread
 
 try:
     import pysolsoundserver
@@ -74,8 +70,9 @@ class AbstractAudioClient:
             try:
                 if self._connectServer():
                     self.connected = 1
-            except:
-                if traceback: traceback.print_exc()
+            except Exception:
+                if traceback:
+                    traceback.print_exc()
                 self.destroy()
 
     # disconnect and stop server
@@ -92,7 +89,7 @@ class AbstractAudioClient:
     #
 
     def playSample(self, name, priority=0, loop=0, volume=-1):
-        ##print 'AbstractAudioClient.playSample', name
+        # print 'AbstractAudioClient.playSample', name
         if self.audiodev is None or not self.app or not self.app.opt.sound:
             return 0
         if priority <= self.sample_priority and self.sample_loop:
@@ -105,8 +102,9 @@ class AbstractAudioClient:
                 self.sample_priority = priority
                 self.sample_loop = loop
                 return 1
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
         return 0
 
     def stopSamples(self):
@@ -114,8 +112,9 @@ class AbstractAudioClient:
             return
         try:
             self._stopSamples()
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
         self.sample_priority = -1
         self.sample_loop = 0
 
@@ -124,8 +123,9 @@ class AbstractAudioClient:
             return
         try:
             self._stopSamplesLoop()
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
         self.sample_priority = -1
         self.sample_loop = 0
 
@@ -176,16 +176,17 @@ class PysolSoundServerModuleClient(AbstractAudioClient):
 
     def __init__(self):
         AbstractAudioClient.__init__(self)
-        import pysolsoundserver
 
     def startServer(self):
         # use the module
         try:
+            import pysolsoundserver
             self.audiodev = pysolsoundserver
             self.audiodev.init()
             self.server = 1
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
             self.server = None
             self.audiodev = None
 
@@ -197,7 +198,7 @@ class PysolSoundServerModuleClient(AbstractAudioClient):
         r = self.cmd("protocol 6")
         if r != 0:
             return 0
-        ##self.cmd("debug 1")
+        # self.cmd("debug 1")
         return 1
 
     # disconnect and stop server
@@ -209,7 +210,8 @@ class PysolSoundServerModuleClient(AbstractAudioClient):
     #
 
     def _playSample(self, filename, priority, loop, volume):
-        self.cmd("playwav '%s' %d %d %d %d" % (filename, -1, priority, loop, volume))
+        self.cmd("playwav '%s' %d %d %d %d"
+                 % (filename, -1, priority, loop, volume))
         return 1
 
     def _stopSamples(self):
@@ -230,10 +232,13 @@ class PysolSoundServerModuleClient(AbstractAudioClient):
             loop = 999999
             for music in music_list:
                 if music.absname:
-                    self.cmd("queuemus '%s' %d %d %d %d" % (music.absname, music.index, 0, loop, music.volume))
+                    self.cmd("queuemus '%s' %d %d %d %d"
+                             % (music.absname, music.index, 0, loop,
+                                music.volume))
             self.cmd("startqueue")
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
 
     def playNextMusic(self):
         self.cmd("nextmus")
@@ -248,8 +253,9 @@ class PysolSoundServerModuleClient(AbstractAudioClient):
         try:
             self.cmd("setwavvol %d" % s)
             self.cmd("setmusvol %d" % m)
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
 
 
 # ************************************************************************
@@ -276,11 +282,12 @@ class Win32AudioClient(AbstractAudioClient):
             flags = flags | a.SND_LOOP
         if priority <= self.sample_priority:
             flags = flags | a.SND_NOSTOP
-        ###print filename, flags, priority
+        # print filename, flags, priority
         try:
             a.PlaySound(filename, flags)
             return 1
-        except: pass
+        except Exception:
+            pass
         return 0
 
     def _stopSamples(self):
@@ -297,8 +304,8 @@ class OSSAudioServer:
 
     def __init__(self, pipe):
         self.pipe = pipe
-        #import ossaudiodev
-        #self.audiodev = ossaudiodev.open('w')
+        # import ossaudiodev
+        # self.audiodev = ossaudiodev.open('w')
         self.sound_priority = -1
         self._busy = False
 
@@ -321,7 +328,8 @@ class OSSAudioServer:
                     self.play(filename, priority)
 
     def _getParameters(self, filename):
-        import ossaudiodev, wave
+        import ossaudiodev
+        import wave
         w = wave.open(filename)
         fmt = ossaudiodev.AFMT_U8
         nch = w.getnchannels()
@@ -330,42 +338,44 @@ class OSSAudioServer:
         return (frames, fmt, nch, rate)
 
     def playLoop(self, filename, priority=None):
-        ##print '_playLoop:', filename
-        import ossaudiodev, wave
+        # print '_playLoop:', filename
+        import ossaudiodev
         try:
-            #audiodev = self.audiodev
+            # audiodev = self.audiodev
             audiodev = ossaudiodev.open('w')
-            #audiodev.nonblock()
+            # audiodev.nonblock()
             frames, fmt, nch, rate = self._getParameters(filename)
             audiodev.setparameters(fmt, nch, rate)
             while self._play_loop:
                 audiodev.write(frames)
             audiodev.reset()
-            #audiodev.close()
-            #self.audiodev = ossaudiodev.open('w')
+            # audiodev.close()
+            # self.audiodev = ossaudiodev.open('w')
             return 1
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
             return 0
 
     def play(self, filename, priority):
-        ##print '_play:', filename
-        import ossaudiodev, wave
+        # print '_play:', filename
+        import ossaudiodev
         try:
             self._busy = True
-            #audiodev = self.audiodev
+            # audiodev = self.audiodev
             audiodev = ossaudiodev.open('w')
-            #audiodev.nonblock()
+            # audiodev.nonblock()
             frames, fmt, nch, rate = self._getParameters(filename)
             audiodev.setparameters(fmt, nch, rate)
             audiodev.write(frames)
-            #audiodev.close()
-            #self.audiodev = ossaudiodev.open('w')
+            # audiodev.close()
+            # self.audiodev = ossaudiodev.open('w')
             self.sound_priority = priority
             self._busy = False
             return 1
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
             self._busy = False
             return 0
 
@@ -377,7 +387,7 @@ class OSSAudioClient(AbstractAudioClient):
 
     def __init__(self):
         AbstractAudioClient.__init__(self)
-        import ossaudiodev, wave
+        import ossaudiodev
         self.audiodev = ossaudiodev
 
     def startServer(self):
@@ -389,7 +399,7 @@ class OSSAudioClient(AbstractAudioClient):
             server.mainLoop()
 
     def _playSample(self, filename, priority, loop, volume):
-        ##print '_playSample:', filename, loop
+        # print '_playSample:', filename, loop
         os.write(self.pout, '%s\0%s\0%s\0' % (filename, priority, loop))
         return 1
 
@@ -413,10 +423,13 @@ class PyGameAudioClient(AbstractAudioClient):
 
     def __init__(self):
         AbstractAudioClient.__init__(self)
-        import pygame.mixer, pygame.time
+        import pygame.mixer
+        import pygame.time
         if os.name == 'nt':
             # for py2exe
-            import pygame.base, pygame.rwobject, pygame.mixer_music
+            import pygame.base
+            import pygame.rwobject
+            import pygame.mixer_music
         self.mixer = pygame.mixer
         self.time = pygame.time
         self.music = self.mixer.music
@@ -430,22 +443,22 @@ class PyGameAudioClient(AbstractAudioClient):
 
     def connectServer(self, app):
         AbstractAudioClient.connectServer(self, app)
-        ## http://www.pygame.org/docs/ref/mixer.html
-        ## NOTE: there is currently a bug on some windows machines which
-        ## makes sound play back 'scratchy'. There is not enough cpu in
-        ## the sound thread to feed the buffer to the sound api. To get
-        ## around this you can increase the buffer size. However this
-        ## means that there is more of a delay between the time you ask to
-        ## play the sound and when it gets played. Try calling this before
-        ## the pygame.init or pygame.mixer.init calls.
-        ## pygame.mixer.pre_init(44100,-16,2, 1024 * 3)
-        #self.mixer.pre_init(44100, -16, 2, 1024 * 3)
+        # http://www.pygame.org/docs/ref/mixer.html
+        # NOTE: there is currently a bug on some windows machines which
+        # makes sound play back 'scratchy'. There is not enough cpu in
+        # the sound thread to feed the buffer to the sound api. To get
+        # around this you can increase the buffer size. However this
+        # means that there is more of a delay between the time you ask to
+        # play the sound and when it gets played. Try calling this before
+        # the pygame.init or pygame.mixer.init calls.
+        # pygame.mixer.pre_init(44100,-16,2, 1024 * 3)
+        # self.mixer.pre_init(44100, -16, 2, 1024 * 3)
         buff_size = self.app.opt.sound_sample_buffer_size
         self.mixer.pre_init(44100, -16, 2, 1024*buff_size)
         self.mixer.init()
 
     def _playSample(self, filename, priority, loop, volume):
-        ##print '_playSample:', filename, priority, loop, volume
+        # print '_playSample:', filename, priority, loop, volume
         if self.sound_channel and self.sound_channel.get_busy():
             if self.sound_priority >= priority:
                 return 0
@@ -456,8 +469,9 @@ class PyGameAudioClient(AbstractAudioClient):
             self.sound = self.mixer.Sound(filename)
             self.sound.set_volume(vol)
             self.sound_channel = self.sound.play(loop)
-        except:
-            if traceback: traceback.print_exc()
+        except Exception:
+            if traceback:
+                traceback.print_exc()
             pass
         self.sound_priority = priority
         return 1
@@ -469,7 +483,7 @@ class PyGameAudioClient(AbstractAudioClient):
         self.sound_channel = None
 
     def _playMusicLoop(self):
-        ##print '_playMusicLoop'
+        # print '_playMusicLoop'
         music_list = self.music_list
         if not music_list:
             return
@@ -487,8 +501,8 @@ class PyGameAudioClient(AbstractAudioClient):
                     while self.music and self.music.get_busy():
                         self._wait(200)
                     self._wait(300)
-                except:
-                    ##if traceback: traceback.print_exc()
+                except Exception:
+                    # if traceback: traceback.print_exc()
                     self._wait(1000)
 
     def _destroy(self):
@@ -502,9 +516,9 @@ class PyGameAudioClient(AbstractAudioClient):
             self.time.wait(s)
 
     def playContinuousMusic(self, music_list):
-        ##print 'playContinuousMusic'
+        # print 'playContinuousMusic'
         self.music_list = music_list
-        #if self.audiodev is None or not self.app:
+        # if self.audiodev is None or not self.app:
         #    return
         if not music_list:
             return
@@ -528,4 +542,3 @@ class PyGameAudioClient(AbstractAudioClient):
     def playNextMusic(self):
         if self.music:
             self.music.stop()
-

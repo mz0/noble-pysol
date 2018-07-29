@@ -1,44 +1,45 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 
 # imports
 import os
-import ttk
-from UserList import UserList
+from . import ttk
+from six.moves import UserList
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.mfxutil import destruct, Struct, KwStruct
 from pysollib.mfxutil import format_time
 from pysollib.gamedb import GI
-from pysollib.help import help_html
 from pysollib.resource import CSI
 
 # Toolkit imports
-from tkutil import unbind_destroy
-from tkwidget import MfxDialog, MfxScrolledCanvas
-from selecttree import SelectDialogTreeLeaf, SelectDialogTreeNode
-from selecttree import SelectDialogTreeData, SelectDialogTreeCanvas
+from pysollib.ui.tktile.tkutil import unbind_destroy
+from pysollib.ui.tktile.selecttree import SelectDialogTreeData
+from .tkwidget import MfxDialog, MfxScrolledCanvas
+from .selecttree import SelectDialogTreeLeaf, SelectDialogTreeNode
+from .selecttree import SelectDialogTreeCanvas
 
 
 # ************************************************************************
@@ -62,7 +63,7 @@ class SelectGameNode(SelectDialogTreeNode):
             for gi in self.tree.data.all_games_gi:
                 if gi and self.select_func is None:
                     # All games
-                    ##name = '%s (%s)' % (gi.name, CSI.TYPE_NAME[gi.category])
+                    # name = '%s (%s)' % (gi.name, CSI.TYPE_NAME[gi.category])
                     name = gi.name
                     node = SelectGameLeaf(self.tree, self, name, key=gi.id)
                     contents.append(node)
@@ -80,10 +81,12 @@ class SelectGameNode(SelectDialogTreeNode):
 class SelectGameData(SelectDialogTreeData):
     def __init__(self, app):
         SelectDialogTreeData.__init__(self)
-        self.all_games_gi = map(app.gdb.get, app.gdb.getGamesIdSortedByName())
-        self.no_games = [ SelectGameLeaf(None, None, _("(no games)"), None), ]
+        self.all_games_gi = list(map(
+            app.gdb.get, app.gdb.getGamesIdSortedByName()))
+        self.no_games = [SelectGameLeaf(None, None, _("(no games)"), None), ]
         #
-        s_by_type = s_oriental = s_special = s_original = s_contrib = s_mahjongg = None
+        s_by_type = s_oriental = s_special = s_original = s_contrib = \
+            s_mahjongg = None
         g = []
         for data in (GI.SELECT_GAME_BY_TYPE,
                      GI.SELECT_ORIENTAL_GAME_BY_TYPE,
@@ -93,13 +96,17 @@ class SelectGameData(SelectDialogTreeData):
                      ):
             gg = []
             for name, select_func in data:
-                if name is None or not filter(select_func, self.all_games_gi):
+                if name is None or not list(filter(
+                        select_func, self.all_games_gi)):
                     continue
                 gg.append(SelectGameNode(None, _(name), select_func))
             g.append(gg)
-        select_mahjongg_game = lambda gi: gi.si.game_type == GI.GT_MAHJONGG
+
+        def select_mahjongg_game(gi):
+            return gi.si.game_type == GI.GT_MAHJONGG
+
         gg = None
-        if filter(select_mahjongg_game, self.all_games_gi):
+        if list(filter(select_mahjongg_game, self.all_games_gi)):
             gg = SelectGameNode(None, _("Mahjongg Games"),
                                 select_mahjongg_game)
         g.append(gg)
@@ -115,15 +122,17 @@ class SelectGameData(SelectDialogTreeData):
         if g[3]:
             s_original = SelectGameNode(None, _("Original Games"),
                                         tuple(g[3]))
-##         if g[4]:
-##             s_contrib = SelectGameNode(None, "Contributed Games", tuple(g[4]))
+        # if g[4]:
+        #   s_contrib = SelectGameNode(None, "Contributed Games", tuple(g[4]))
         if g[5]:
             s_mahjongg = g[5]
         #
         s_by_compatibility, gg = None, []
         for name, games in GI.GAMES_BY_COMPATIBILITY:
-            select_func = lambda gi, games=games: gi.id in games
-            if name is None or not filter(select_func, self.all_games_gi):
+            def select_func(gi, games=games):
+                return gi.id in games
+            if name is None or not list(filter(
+                    select_func, self.all_games_gi)):
                 continue
             gg.append(SelectGameNode(None, name, select_func))
         if 1 and gg:
@@ -132,9 +141,11 @@ class SelectGameData(SelectDialogTreeData):
         #
         s_by_pysol_version, gg = None, []
         for name, games in GI.GAMES_BY_PYSOL_VERSION:
-            select_func = lambda gi, games=games: gi.id in games
-            if name is None or not filter(select_func, self.all_games_gi):
-               continue
+            def select_func(gi, games=games):
+                return gi.id in games
+            if name is None or not list(filter(
+                    select_func, self.all_games_gi)):
+                continue
             name = _("New games in v. ") + name
             gg.append(SelectGameNode(None, name, select_func))
         if 1 and gg:
@@ -142,17 +153,20 @@ class SelectGameData(SelectDialogTreeData):
                                                 tuple(gg))
         s_by_inventors, gg = None, []
         for name, games in GI.GAMES_BY_INVENTORS:
-            select_func = lambda gi, games=games: gi.id in games
-            if name is None or not filter(select_func, self.all_games_gi):
-               continue
+            def select_func(gi, games=games):
+                return gi.id in games
+            if name is None or not list(filter(
+                    select_func, self.all_games_gi)):
+                continue
             gg.append(SelectGameNode(None, name, select_func))
         if 1 and gg:
             s_by_inventors = SelectGameNode(None, _("by Inventors"),
                                             tuple(gg))
         #
-        ul_alternate_names = UserList(list(app.gdb.getGamesTuplesSortedByAlternateName()))
+        ul_alternate_names = UserList(
+            list(app.gdb.getGamesTuplesSortedByAlternateName()))
         #
-        self.rootnodes = filter(None, (
+        self.rootnodes = [_f for _f in (
             SelectGameNode(None, _("All Games"), None, expanded=0),
             SelectGameNode(None, _("Alternate Names"), ul_alternate_names),
             SelectGameNode(None, _("Popular Games"),
@@ -170,8 +184,9 @@ class SelectGameData(SelectDialogTreeData):
                                lambda gi: gi.skill_level == GI.SL_MOSTLY_LUCK),
                 SelectGameNode(None, _('Balanced'),
                                lambda gi: gi.skill_level == GI.SL_BALANCED),
-                SelectGameNode(None, _('Mostly skill'),
-                               lambda gi: gi.skill_level == GI.SL_MOSTLY_SKILL),
+                SelectGameNode(
+                    None, _('Mostly skill'),
+                    lambda gi: gi.skill_level == GI.SL_MOSTLY_SKILL),
                 SelectGameNode(None, _('Skill only'),
                                lambda gi: gi.skill_level == GI.SL_SKILL),
                 )),
@@ -191,8 +206,10 @@ class SelectGameData(SelectDialogTreeData):
                                    lambda gi: gi.si.ncards == 104),
                     SelectGameNode(None, _("144 cards"),
                                    lambda gi: gi.si.ncards == 144),
-                    SelectGameNode(None, _("Other number"),
-                                   lambda gi: gi.si.ncards not in (32, 48, 52, 64, 78, 104, 144)),
+                    SelectGameNode(
+                        None, _("Other number"),
+                        lambda gi: gi.si.ncards not in (32, 48, 52,
+                                                        64, 78, 104, 144)),
                 )),
                 SelectGameNode(None, _("by Number of Decks"), (
                     SelectGameNode(None, _("1 deck games"),
@@ -215,10 +232,11 @@ class SelectGameData(SelectDialogTreeData):
                                    lambda gi: gi.si.redeals == 3),
                     SelectGameNode(None, _("Unlimited redeals"),
                                    lambda gi: gi.si.redeals == -1),
-##                     SelectGameNode(None, "Variable redeals",
-##                                    lambda gi: gi.si.redeals == -2),
-                    SelectGameNode(None, _("Other number of redeals"),
-                                   lambda gi: gi.si.redeals not in (-1, 0, 1, 2, 3)),
+                    # SelectGameNode(None, "Variable redeals",
+                    #                 lambda gi: gi.si.redeals == -2),
+                    SelectGameNode(
+                        None, _("Other number of redeals"),
+                        lambda gi: gi.si.redeals not in (-1, 0, 1, 2, 3)),
                 )),
                 s_by_compatibility,
             )),
@@ -229,8 +247,9 @@ class SelectGameData(SelectDialogTreeData):
                                lambda gi: gi.si.game_flags & GI.GT_CHILDREN),
                 SelectGameNode(None, _("Games with Scoring"),
                                lambda gi: gi.si.game_flags & GI.GT_SCORE),
-                SelectGameNode(None, _("Games with Separate Decks"),
-                               lambda gi: gi.si.game_flags & GI.GT_SEPARATE_DECKS),
+                SelectGameNode(
+                    None, _("Games with Separate Decks"),
+                    lambda gi: gi.si.game_flags & GI.GT_SEPARATE_DECKS),
                 SelectGameNode(None, _("Open Games (all cards visible)"),
                                lambda gi: gi.si.game_flags & GI.GT_OPEN),
                 SelectGameNode(None, _("Relaxed Variants"),
@@ -238,7 +257,7 @@ class SelectGameData(SelectDialogTreeData):
             )),
             s_original,
             s_contrib,
-        ))
+        ) if _f]
 
 
 # ************************************************************************
@@ -309,6 +328,7 @@ class SelectGameDialog(MfxDialog):
             if not doc:
                 return
             dir = os.path.join("html", "rules")
+            from pysollib.help import help_html
             help_html(self.app, doc, dir, self.top)
             return
         MfxDialog.mDone(self, button)
@@ -344,11 +364,11 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             w1, w2 = 220, 480
         else:
             w1, w2 = 200, 300
-        ##print sw, w1, w2
+        # print sw, w1, w2
         w2 = max(200, min(w2, 10 + 12*(app.subsampled_images.CARDW+10)))
-        ##print sw, w1, w2
-        ##padx, pady = kw.padx, kw.pady
-        #padx, pady = kw.padx/2, kw.pady/2
+        # print sw, w1, w2
+        # padx, pady = kw.padx, kw.pady
+        # padx, pady = kw.padx/2, kw.pady/2
         padx, pady = 4, 4
         # PanedWindow
         paned_window = ttk.PanedWindow(top_frame, orient='horizontal')
@@ -371,7 +391,6 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                          ipadx=4, ipady=4, sticky='nws')
         # Info
         self.info_labels = {}
-        i = 0
         for n, t, f, row in (
             ('name',        _('Name:'),             info_frame,   0),
             ('altnames',    _('Alternate names:'),  info_frame,   1),
@@ -387,13 +406,13 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             ('time',        _('Playing time:'),     stats_frame,  3),
             ('moves',       _('Moves:'),            stats_frame,  4),
             ('percent',     _('% won:'),            stats_frame,  5),
-            ):
+                ):
             title_label = ttk.Label(f, text=t, justify='left', anchor='w')
             title_label.grid(row=row, column=0, sticky='nw', padx=4)
             text_label = ttk.Label(f, justify='left', anchor='w')
             text_label.grid(row=row, column=1, sticky='nw', padx=4)
             self.info_labels[n] = (title_label, text_label)
-        ##info_frame.columnconfigure(1, weight=1)
+        # info_frame.columnconfigure(1, weight=1)
         info_frame.rowconfigure(6, weight=1)
         stats_frame.rowconfigure(6, weight=1)
         # Canvas
@@ -412,7 +431,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         self.preview_game = None
         self.preview_app = None
         self.updatePreview(gameid, animations=0)
-        ##focus = self.tree.frame
+        # focus = self.tree.frame
         self.mainloop(focus, kw.timeout)
 
     def initKw(self, kw):
@@ -437,7 +456,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             if destroy:
                 self.preview.canvas.delete("all")
         #
-        #for l in self.info_labels.values():
+        # for l in self.info_labels.values():
         #    l.config(text='')
         # destruct the game
         if self.preview_game:
@@ -465,37 +484,38 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         if self.preview_app is None:
             self.preview_app = Struct(
                 # variables
-                audio = self.app.audio,
-                canvas = canvas,
-                cardset = self.app.cardset.copy(),
-                comments = self.app.comments.new(),
-                gamerandom = self.app.gamerandom,
-                gdb = self.app.gdb,
-                gimages = self.app.gimages,
-                images = self.app.subsampled_images,
-                menubar = None,
-                miscrandom = self.app.miscrandom,
-                opt = self.app.opt.copy(),
-                startup_opt = self.app.startup_opt,
-                stats = self.app.stats.new(),
-                top = None,
-                top_cursor = self.app.top_cursor,
-                toolbar = None,
+                audio=self.app.audio,
+                canvas=canvas,
+                cardset=self.app.cardset.copy(),
+                comments=self.app.comments.new(),
+                gamerandom=self.app.gamerandom,
+                gdb=self.app.gdb,
+                gimages=self.app.gimages,
+                images=self.app.subsampled_images,
+                menubar=None,
+                miscrandom=self.app.miscrandom,
+                opt=self.app.opt.copy(),
+                startup_opt=self.app.startup_opt,
+                stats=self.app.stats.new(),
+                top=None,
+                top_cursor=self.app.top_cursor,
+                toolbar=None,
                 # methods
-                constructGame = self.app.constructGame,
-                getFont = self.app.getFont,
+                constructGame=self.app.constructGame,
+                getFont=self.app.getFont,
             )
             self.preview_app.opt.shadow = 0
             self.preview_app.opt.shade = 0
         #
-        self.preview_app.audio = None    # turn off audio for intial dealing
+        self.preview_app.audio = None    # turn off audio for initial dealing
         if animations >= 0:
             self.preview_app.opt.animations = animations
         #
         if self.preview_game:
             self.preview_game.endGame()
             self.preview_game.destruct()
-        ##self.top.wm_title("Select Game - " + self.app.getGameTitleName(gameid))
+        # self.top.wm_title("Select Game - " +
+        #   self.app.getGameTitleName(gameid))
         title = self.app.getGameTitleName(gameid)
         self.top.wm_title(_("Playable Preview - ") + title)
         #
@@ -549,13 +569,19 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             GI.SL_SKILL:        _('Skill only'),
             }
         skill_level = sl.get(gi.skill_level)
-        if    gi.redeals == -2: redeals = _('variable')
-        elif  gi.redeals == -1: redeals = _('unlimited')
-        else:                   redeals = str(gi.redeals)
+        if gi.redeals == -2:
+            redeals = _('variable')
+        elif gi.redeals == -1:
+            redeals = _('unlimited')
+        else:
+            redeals = str(gi.redeals)
         # stats
-        won, lost, time, moves = self.app.stats.getFullStats(self.app.opt.player, gameid)
-        if won+lost > 0: percent = "%.1f" % (100.0*won/(won+lost))
-        else: percent = "0.0"
+        won, lost, time, moves = self.app.stats.getFullStats(
+            self.app.opt.player, gameid)
+        if won+lost > 0:
+            percent = "%.1f" % (100.0*won/(won+lost))
+        else:
+            percent = "0.0"
         time = format_time(time)
         moves = str(round(moves, 1))
         for n, t in (
@@ -572,7 +598,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             ('time',        time),
             ('moves',       moves),
             ('percent',     percent),
-            ):
+                ):
             title_label, text_label = self.info_labels[n]
             if t in ('', None):
                 title_label.grid_remove()
@@ -581,4 +607,3 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                 title_label.grid()
                 text_label.grid()
             text_label.config(text=t)
-

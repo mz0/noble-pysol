@@ -1,42 +1,43 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
+
+from pysollib.stack import \
+        InitialDealTalonStack, \
+        isRankSequence, \
+        BasicRowStack
 
 # ************************************************************************
 # * Tower of Hanoy
 # ************************************************************************
+
 
 class TowerOfHanoy_Hint(CautiousDefaultHint):
     # FIXME: demo is completely clueless
@@ -75,7 +76,8 @@ class TowerOfHanoy(Game):
         # create stacks
         for i in range(3):
             x, y, = l.XM + (i+1)*l.XS, l.YM
-            s.rows.append(self.RowStack_Class(x, y, self, max_accept=1, max_move=1))
+            s.rows.append(
+                self.RowStack_Class(x, y, self, max_accept=1, max_move=1))
         s.talon = InitialDealTalonStack(l.XM, self.height-l.YS, self)
 
         # define stack-groups
@@ -138,20 +140,34 @@ class HanoiPuzzle6(HanoiPuzzle4):
     pass
 
 
+# ************************************************************************
+# * Hanoi Sequence
+# ************************************************************************
+
+class HanoiSequence(TowerOfHanoy):
+    def isGameWon(self):
+        for s in self.s.rows:
+            if len(s.cards) == len(self.cards) and isRankSequence(s.cards):
+                return 1
+        return 0
+
+
 # register the game
 registerGame(GameInfo(124, TowerOfHanoy, "Tower of Hanoy",
                       GI.GT_PUZZLE_TYPE, 1, 0, GI.SL_SKILL,
-                      suits=(2,), ranks=range(9)))
+                      suits=(2,), ranks=list(range(9))))
 registerGame(GameInfo(207, HanoiPuzzle4, "Hanoi Puzzle 4",
                       GI.GT_PUZZLE_TYPE, 1, 0, GI.SL_SKILL,
-                      suits=(2,), ranks=range(4),
+                      suits=(2,), ranks=list(range(4)),
                       rules_filename="hanoipuzzle.html"))
 registerGame(GameInfo(208, HanoiPuzzle5, "Hanoi Puzzle 5",
                       GI.GT_PUZZLE_TYPE, 1, 0, GI.SL_SKILL,
-                      suits=(2,), ranks=range(5),
+                      suits=(2,), ranks=list(range(5)),
                       rules_filename="hanoipuzzle.html"))
 registerGame(GameInfo(209, HanoiPuzzle6, "Hanoi Puzzle 6",
                       GI.GT_PUZZLE_TYPE, 1, 0, GI.SL_SKILL,
-                      suits=(2,), ranks=range(6),
+                      suits=(2,), ranks=list(range(6)),
                       rules_filename="hanoipuzzle.html"))
-
+registerGame(GameInfo(769, HanoiSequence, "Hanoi Sequence",
+                      GI.GT_PUZZLE_TYPE, 1, 0, GI.SL_SKILL,
+                      suits=(2,), ranks=list(range(9))))

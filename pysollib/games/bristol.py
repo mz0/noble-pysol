@@ -1,61 +1,72 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
+from pysollib.util import ACE, ANY_RANK, NO_RANK, KING, RANKS, UNLIMITED_CARDS
+from pysollib.stack import \
+        AC_RowStack, \
+        KingAC_RowStack, \
+        OpenStack, \
+        OpenTalonStack, \
+        ReserveStack, \
+        RK_FoundationStack, \
+        RK_RowStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        TalonStack, \
+        WasteStack, \
+        StackWrapper
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
 # ************************************************************************
 # *
 # ************************************************************************
 
+
 class Bristol_Hint(CautiousDefaultHint):
     # FIXME: demo is not too clever in this game
 
-    BONUS_CREATE_EMPTY_ROW     = 0           # 0..9000
-    BONUS_CAN_DROP_ALL_CARDS   = 0           # 0..4000
+    BONUS_CREATE_EMPTY_ROW = 0           # 0..9000
+    BONUS_CAN_DROP_ALL_CARDS = 0           # 0..4000
     BONUS_CAN_CREATE_EMPTY_ROW = 0           # 0..4000
 
     # Score for moving a pile from stack r to stack t.
     # Increased score must be in range 0..9999
     def _getMovePileScore(self, score, color, r, t, pile, rpile):
         # prefer reserves
-        if not r in self.game.s.reserves:
+        if r not in self.game.s.reserves:
             score = score - 10000
             # an empty pile doesn't gain anything
             if len(pile) == len(r.cards):
                 return -1, color
-        return CautiousDefaultHint._getMovePileScore(self, score, color, r, t, pile, rpile)
+        return CautiousDefaultHint._getMovePileScore(
+            self, score, color, r, t, pile, rpile)
 
 
 # ************************************************************************
@@ -87,9 +98,9 @@ class Bristol(Game):
             s.foundations.append(RK_FoundationStack(x, y, self, max_move=0))
             x += l.XS
         for i in range(2):
-            y = l.YM + (i*2+3)*l.YS/2
+            y = l.YM + (i*2+3)*l.YS//2
             for j in range(4):
-                x = l.XM + (j*5)*l.XS/2
+                x = l.XM + (j*5)*l.XS//2
                 stack = RK_RowStack(x, y, self,  base_rank=NO_RANK, max_move=1)
                 stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
                 s.rows.append(stack)
@@ -184,8 +195,10 @@ class Dover(Bristol):
 
     Talon_Class = Bristol_Talon
     Foundation_Class = StackWrapper(SS_FoundationStack, max_move=0)
-    RowStack_Class = StackWrapper(Dover_RowStack, base_rank=NO_RANK, max_move=1)
-    ReserveStack_Class = StackWrapper(ReserveStack, max_accept=0, max_cards=UNLIMITED_CARDS)
+    RowStack_Class = StackWrapper(
+        Dover_RowStack, base_rank=NO_RANK, max_move=1)
+    ReserveStack_Class = StackWrapper(
+        ReserveStack, max_accept=0, max_cards=UNLIMITED_CARDS)
 
     def createGame(self, rows=8, text=False):
         # create layout
@@ -193,7 +206,7 @@ class Dover(Bristol):
 
         # set window
         max_rows = max(rows, self.gameinfo.decks*4)
-        w, h = 2*l.XM+l.XS+max_rows*l.XS+l.XS/2, l.YM+l.TEXT_HEIGHT+5*l.YS
+        w, h = 2*l.XM+l.XS+max_rows*l.XS+l.XS//2, l.YM+l.TEXT_HEIGHT+5*l.YS
         self.setSize(w, h)
 
         # create stacks
@@ -231,7 +244,6 @@ class Dover(Bristol):
         # define stack-groups
         l.defaultStackGroups()
 
-
     def _shuffleHook(self, cards):
         return cards
 
@@ -248,7 +260,8 @@ class NewYork_Hint(CautiousDefaultHint):
         if not self.game.s.talon.cards:
             return
         c = self.game.s.talon.cards[-1].rank - self.game.base_card.rank
-        if c < 0: c += 13
+        if c < 0:
+            c += 13
         if 0 <= c <= 3:
             r = self.game.s.reserves[0]
         elif 4 <= c <= 7:
@@ -285,8 +298,10 @@ class NewYork(Dover):
     Hint_Class = NewYork_Hint
     Foundation_Class = StackWrapper(SS_FoundationStack, mod=13, max_move=0)
     Talon_Class = NewYork_Talon
-    RowStack_Class = StackWrapper(NewYork_RowStack, base_rank=ANY_RANK, mod=13, max_move=1)
-    ReserveStack_Class = StackWrapper(NewYork_ReserveStack, max_accept=1, max_cards=UNLIMITED_CARDS, mod=13)
+    RowStack_Class = StackWrapper(
+        NewYork_RowStack, base_rank=ANY_RANK, mod=13, max_move=1)
+    ReserveStack_Class = StackWrapper(
+        NewYork_ReserveStack, max_accept=1, max_cards=UNLIMITED_CARDS, mod=13)
 
     def createGame(self):
         # extra settings
@@ -314,7 +329,7 @@ class NewYork(Dover):
         n = self.base_card.suit
         self.flipMove(self.s.talon)
         self.moveMove(1, self.s.talon, self.s.foundations[n])
-        ##self.updateText()
+        # self.updateText()
         self.s.talon.dealRow()
         self.s.talon.fillStack()
 
@@ -368,11 +383,12 @@ class Gotham_RowStack(RK_RowStack):
                     from_stack in self.game.s.reserves)
         return True
 
+
 class Gotham(NewYork):
     RowStack_Class = StackWrapper(Gotham_RowStack, base_rank=ANY_RANK, mod=13)
+
     def startGame(self):
-        self.s.talon.dealRow(frames=0)
-        self.s.talon.dealRow(frames=0)
+        self._dealNumRows(2)
         NewYork.startGame(self)
 
     shallHighlightMatch = Game._shallHighlightMatch_RKW
@@ -434,7 +450,7 @@ class Interment(Game):
         l.createText(s.talon, 'ne')
         x += 1.5*l.XS
         for i in range(8):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i/2))
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i//2))
             x += l.XS
         x, y = l.XM, l.YM+l.YS
         for i in range(3):
@@ -461,7 +477,6 @@ class Interment(Game):
         self.sg.openstacks += s.xwastes
         self.sg.dropstacks.append(s.talon)
 
-
     def startGame(self):
         for i in range(13):
             self.s.talon.dealRow(rows=[self.s.reserves[0]], flip=0, frames=0)
@@ -469,7 +484,6 @@ class Interment(Game):
         self.startDealSample()
         self.s.talon.dealRow()
         self.s.talon.fillStack()
-
 
     def fillStack(self, stack):
         if not stack.cards:
@@ -484,15 +498,12 @@ class Interment(Game):
                     from_stack.moveMove(1, stack)
             self.leaveState(old_state)
 
-
     shallHighlightMatch = Game._shallHighlightMatch_SS
-
 
     def getQuickPlayScore(self, ncards, from_stack, to_stack):
         if to_stack in self.s.xwastes:
             return 0
         return 1+Game.getQuickPlayScore(self, ncards, from_stack, to_stack)
-
 
 
 # register the game
@@ -510,4 +521,3 @@ registerGame(GameInfo(519, Gotham, "Gotham",
                       GI.GT_FAN_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(604, Interment, "Interment",
                       GI.GT_FAN_TYPE, 2, 0, GI.SL_BALANCED))
-

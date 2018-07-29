@@ -1,46 +1,49 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # Imports
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
-from golf import Golf_Waste, Golf_Hint
+from pysollib.games.golf import Golf_Waste, Golf_Hint
 
+from pysollib.util import ANY_RANK
+
+from pysollib.stack import \
+        OpenStack, \
+        StackWrapper, \
+        WasteTalonStack
 
 # ************************************************************************
 # * Three Peaks Row Stack
 # ************************************************************************
+
 
 class ThreePeaks_TalonStack(WasteTalonStack):
 
@@ -78,7 +81,8 @@ class ThreePeaks_RowStack(OpenStack):
         OpenStack.__init__(self, x, y, game, **cap)
 
     def basicIsBlocked(self):
-        r, step = self.game.s.rows, (3, 4, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9)
+        r = self.game.s.rows
+        step = (3, 4, 5, 6, 6, 7, 7, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9)
         i = self.id
         while i < 18:
             i = i + step[i]
@@ -110,7 +114,6 @@ class ThreePeaks(Game):
         l, s = Layout(self), self.s
 
         # set window
-        decks = self.gameinfo.decks
         # compute best XOFFSET
         xoffset = int(l.XS * 8 / self.gameinfo.ncards)
         if xoffset < l.XOFFSET:
@@ -157,10 +160,11 @@ class ThreePeaks(Game):
 
         # Create text for scores
         if self.preview <= 1:
-            self.texts.info = MfxCanvasText(self.canvas,
-                                            l.XM + l.XS * 3, h - l.YM,
-                                            anchor="sw",
-                                            font=self.app.getFont("canvas_default"))
+            self.texts.info = MfxCanvasText(
+                self.canvas,
+                l.XM + l.XS * 3, h - l.YM,
+                anchor="sw",
+                font=self.app.getFont("canvas_default"))
 
         # Define stack groups
         l.defaultStackGroups()
@@ -198,13 +202,14 @@ class ThreePeaks(Game):
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
         if stack1 == self.s.waste or stack2 == self.s.waste:
-            return ((card1.rank + 1) % 13 == card2.rank
-                    or (card1.rank - 1) % 13 == card2.rank)
+            return ((card1.rank + 1) % 13 == card2.rank or
+                    (card1.rank - 1) % 13 == card2.rank)
         return False
 
     def getHandScore(self):
+        # FIXME: bug #2937253
         score, i = self.hand_score, 1
-        if self.busy:
+        if 0:  # self.busy:
             return score
         # First count the empty peaks
         for r in self.s.rows[:3]:
@@ -218,6 +223,7 @@ class ThreePeaks(Game):
         if self.sequence and len(self.s.waste.cards) - 1:
             score = score + i * 2 ** int((self.sequence - 1) / 4)
         self.hand_score = score
+        # print 'getHandScore: score:', score
         return score
 
     def canUndo(self):
@@ -257,12 +263,9 @@ class ThreePeaksNoScore(ThreePeaks):
         return True
 
 
-
 registerGame(GameInfo(22216, ThreePeaks, "Three Peaks",
                       GI.GT_PAIRING_TYPE | GI.GT_SCORE, 1, 0, GI.SL_BALANCED,
                       altnames=("Tri Peaks",)
                       ))
 registerGame(GameInfo(22231, ThreePeaksNoScore, "Three Peaks Non-scoring",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_BALANCED))
-
-

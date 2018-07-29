@@ -1,55 +1,64 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 
 # imports
-import os, glob, traceback
+import os
+import sys
+import glob
+import traceback
 
 # PySol imports
-from mfxutil import Struct, KwStruct
-from settings import DEBUG
+from pysollib.mfxutil import Struct, KwStruct
+from pysollib.settings import DEBUG
 
+from pysollib.mygettext import _
 
 # ************************************************************************
 # * Abstract
 # ************************************************************************
 
+if sys.version_info > (3,):
+    basestring = str
+
+
 class Resource(Struct):
     def __init__(self, **kw):
-        kw = KwStruct(kw,
-            name = "",
-            filename = "",
-            basename = "",      # basename of filename
-            absname = "",       # absolute filename
+        kw = KwStruct(
+            kw,
+            name="",
+            filename="",
+            basename="",      # basename of filename
+            absname="",       # absolute filename
             # implicit
-            index = -1,
-            error = 0,          # error while loading this resource
+            index=-1,
+            error=0,          # error while loading this resource
         )
         Struct.__init__(self, **kw.getKw())
 
     def getSortKey(self):
         return self.name.lower()
-        #return latin1_to_ascii(self.name).lower()
+        # return latin1_to_ascii(self.name).lower()
 
 
 class ResourceManager:
@@ -102,9 +111,9 @@ class ResourceManager:
 
     def getAllSortedByName(self):
         if self._objects_by_name is None:
-            l = [(obj.getSortKey(), obj) for obj in self._objects]
-            l.sort()
-            self._objects_by_name = tuple([item[1] for item in l])
+            lst = [(obj.getSortKey(), obj) for obj in self._objects]
+            lst.sort()
+            self._objects_by_name = tuple([item[1] for item in lst])
         return self._objects_by_name
 
     #
@@ -117,7 +126,7 @@ class ResourceManager:
                 dir = os.path.normpath(dir)
                 if dir and os.path.isdir(dir) and dir not in result:
                     result.append(dir)
-        except EnvironmentError, ex:
+        except EnvironmentError:
             pass
 
     def getSearchDirs(self, app, search, env=None):
@@ -144,11 +153,11 @@ class ResourceManager:
                             self._addDir(result, d)
                     else:
                         self._addDir(result, os.path.join(dir, s))
-                except EnvironmentError, ex:
+                except EnvironmentError:
                     traceback.print_exc()
                     pass
         if DEBUG >= 6:
-            print "getSearchDirs", env, search, "->", result
+            print("getSearchDirs", env, search, "->", result)
         return result
 
 
@@ -159,16 +168,16 @@ class ResourceManager:
 # CardsetInfo constants
 class CSI:
     # cardset size
-    SIZE_TINY   = 1
-    SIZE_SMALL  = 2
+    SIZE_TINY = 1
+    SIZE_SMALL = 2
     SIZE_MEDIUM = 3
-    SIZE_LARGE  = 4
+    SIZE_LARGE = 4
     SIZE_XLARGE = 5
 
     # cardset types
-    TYPE_FRENCH   = 1
+    TYPE_FRENCH = 1
     TYPE_HANAFUDA = 2
-    TYPE_TAROCK   = 3
+    TYPE_TAROCK = 3
     TYPE_MAHJONGG = 4
     TYPE_HEXADECK = 5
     TYPE_MUGHAL_GANJIFA = 6
@@ -223,28 +232,28 @@ class CSI:
         7:  _("Classic look"),         #
         8:  _("Collectors"),           # scanned collectors cardsets
         9:  _("Computers"),            #
-       10:  _("Engines"),              #
-       11:  _("Fantasy"),              #
-       30:  _("Ganjifa"),              #
-       12:  _("Hanafuda"),             #
-       29:  _("Hex A Deck"),           #
-       13:  _("Holiday"),              #
-       28:  _("Mahjongg"),             #
-       14:  _("Movies"),               #
-       31:  _("Matrix"),               #
-       15:  _("Music"),                #
-       16:  _("Nature"),               #
-       17:  _("Operating Systems"),    # e.g. cards with Linux logos
-       19:  _("People"),               # famous people
-       20:  _("Places"),               #
-       21:  _("Plain"),                #
-       22:  _("Products"),             #
-       18:  _("Round cardsets"),       #
-       23:  _("Science Fiction"),      #
-       24:  _("Sports"),               #
-       27:  _("Tarock"),               #
-       25:  _("Vehicels"),             #
-       26:  _("Video Games"),          #
+        10:  _("Engines"),              #
+        11:  _("Fantasy"),              #
+        30:  _("Ganjifa"),              #
+        12:  _("Hanafuda"),             #
+        29:  _("Hex A Deck"),           #
+        13:  _("Holiday"),              #
+        28:  _("Mahjongg"),             #
+        14:  _("Movies"),               #
+        31:  _("Matrix"),               #
+        15:  _("Music"),                #
+        16:  _("Nature"),               #
+        17:  _("Operating Systems"),    # e.g. cards with Linux logos
+        19:  _("People"),               # famous people
+        20:  _("Places"),               #
+        21:  _("Plain"),                #
+        22:  _("Products"),             #
+        18:  _("Round cardsets"),       #
+        23:  _("Science Fiction"),      #
+        24:  _("Sports"),               #
+        27:  _("Tarock"),               #
+        25:  _("Vehicels"),             #
+        26:  _("Video Games"),          #
     }
 
     # cardset nationality (suit and rank symbols)
@@ -293,33 +302,34 @@ class CSI:
 class CardsetConfig(Struct):
     # see config.txt and _readCardsetConfig()
     def __init__(self):
-        Struct.__init__(self,
+        Struct.__init__(
+            self,
             # line[0]
-            version = 1,
-            ext = ".gif",
-            type = CSI.TYPE_FRENCH,
-            ncards = -1,
-            styles = [],
-            year = 0,
+            version=1,
+            ext=".gif",
+            type=CSI.TYPE_FRENCH,
+            ncards=-1,
+            styles=[],
+            year=0,
             # line[1]
-            ident = "",
-            name = "",
+            ident="",
+            name="",
             # line[2]
-            CARDW = 0,
-            CARDH = 0,
-            CARDD = 0,
+            CARDW=0,
+            CARDH=0,
+            CARDD=0,
             # line[3]
-            CARD_XOFFSET = 0,
-            CARD_YOFFSET = 0,
-            SHADOW_XOFFSET = 0,
-            SHADOW_YOFFSET = 0,
+            CARD_XOFFSET=0,
+            CARD_YOFFSET=0,
+            SHADOW_XOFFSET=0,
+            SHADOW_YOFFSET=0,
             # line[4]
-            backindex = 0,
+            backindex=0,
             # line[5]
-            backnames = (),
+            backnames=(),
             # other
-            CARD_DX = 0,        # relative pos of real card image within Card
-            CARD_DY = 0,
+            CARD_DX=0,        # relative pos of real card image within Card
+            CARD_DY=0,
         )
 
 
@@ -331,19 +341,20 @@ class Cardset(Resource):
         # si is the SelectionInfo struct that will be queried by
         # the "select cardset" dialogs. It can be freely modified.
         si = Struct(type=0, size=0, styles=[], nationalities=[], dates=[])
-        kw = KwStruct(kw,
+        kw = KwStruct(
+            kw,
             # essentials
-            ranks = (),
-            suits = (),
-            trumps = (),
-            nbottoms = 7,
-            nletters = 4,
-            nshadows = 1 + 13,
-            # selection criterias
-            si = si,
+            ranks=(),
+            suits=(),
+            trumps=(),
+            nbottoms=7,
+            nletters=4,
+            nshadows=1 + 13,
+            # selection criteria
+            si=si,
             # implicit
-            backname = None,
-            dir = "",
+            backname=None,
+            dir="",
         )
         Resource.__init__(self, **kw.getKw())
 
@@ -367,8 +378,8 @@ class Cardset(Resource):
         if lr >= 4:
             ls = min(ls, 4)
         low_ranks, high_ranks = 1, 3
-        ###if self.type == 3: high_ranks = 4
-        for rank in range(0, low_ranks) + range(lr-high_ranks, lr):
+        # if self.type == 3: high_ranks = 4
+        for rank in list(range(0, low_ranks)) + list(range(lr-high_ranks, lr)):
             for suit in range(ls):
                 index = suit * len(self.ranks) + rank
                 pnames.append(names[index % len(names)])
@@ -382,6 +393,9 @@ class Cardset(Resource):
         if isinstance(backindex, int):
             self.backindex = backindex % len(self.backnames)
         self.backname = self.backnames[self.backindex]
+
+    def saveSettings(self):
+        print('saveSettings')
 
 
 class CardsetManager(ResourceManager):
@@ -399,55 +413,55 @@ class CardsetManager(ResourceManager):
             return 0
         cs.si.type = s
         if s == CSI.TYPE_FRENCH:
-            cs.ranks = range(13)
+            cs.ranks = list(range(13))
             cs.suits = "cshd"
         elif s == CSI.TYPE_HANAFUDA:
             cs.nbottoms = 15
-            cs.ranks = range(4)
+            cs.ranks = list(range(4))
             cs.suits = "abcdefghijkl"
         elif s == CSI.TYPE_TAROCK:
             cs.nbottoms = 8
-            cs.ranks = range(14)
+            cs.ranks = list(range(14))
             cs.suits = "cshd"
-            cs.trumps = range(22)
+            cs.trumps = list(range(22))
         elif s == CSI.TYPE_MAHJONGG:
-            cs.ranks = range(10)
+            cs.ranks = list(range(10))
             cs.suits = "abc"
-            cs.trumps = range(12)
+            cs.trumps = list(range(12))
             #
             cs.nbottoms = 0
             cs.nletters = 0
             cs.nshadows = 0
         elif s == CSI.TYPE_HEXADECK:
             cs.nbottoms = 8
-            cs.ranks = range(16)
+            cs.ranks = list(range(16))
             cs.suits = "cshd"
-            cs.trumps = range(4)
+            cs.trumps = list(range(4))
         elif s == CSI.TYPE_MUGHAL_GANJIFA:
             cs.nbottoms = 11
-            cs.ranks = range(12)
+            cs.ranks = list(range(12))
             cs.suits = "abcdefgh"
         elif s == CSI.TYPE_NAVAGRAHA_GANJIFA:
-            #???return 0                            ## FIXME
+            # ???return 0                            ## FIXME
             cs.nbottoms = 12
-            cs.ranks = range(12)
+            cs.ranks = list(range(12))
             cs.suits = "abcdefghi"
         elif s == CSI.TYPE_DASHAVATARA_GANJIFA:
             cs.nbottoms = 13
-            cs.ranks = range(12)
+            cs.ranks = list(range(12))
             cs.suits = "abcdefghij"
         elif s == CSI.TYPE_TRUMP_ONLY:
-            #???return 0                            ## FIXME
-            #cs.nbottoms = 7
-            #cs.ranks = ()
-            #cs.suits = ""
-            #cs.trumps = range(cs.ncards)
+            # ???return 0                            ## FIXME
+            # cs.nbottoms = 7
+            # cs.ranks = ()
+            # cs.suits = ""
+            # cs.trumps = range(cs.ncards)
             cs.nbottoms = 1
             cs.nletters = 0
             cs.nshadows = 0
             cs.ranks = ()
             cs.suits = ""
-            cs.trumps = range(cs.ncards)
+            cs.trumps = list(range(cs.ncards))
 
         else:
             return 0
@@ -477,8 +491,9 @@ class CardsetManager(ResourceManager):
             self.registered_styles[s] = self.registered_styles.get(s, 0) + 1
         cs.si.nationalities = tuple([s for s in keys if s in CSI.NATIONALITY])
         for s in cs.si.nationalities:
-            self.registered_nationalities[s] = self.registered_nationalities.get(s, 0) + 1
-        keys = (cs.year / 100,)
+            self.registered_nationalities[s] = \
+                self.registered_nationalities.get(s, 0) + 1
+        keys = (cs.year // 100,)
         cs.si.dates = tuple([s for s in keys if s in CSI.DATE])
         for s in cs.si.dates:
             self.registered_dates[s] = self.registered_dates.get(s, 0) + 1
@@ -531,4 +546,3 @@ class Music(Sample):
 
 class MusicManager(SampleManager):
     pass
-

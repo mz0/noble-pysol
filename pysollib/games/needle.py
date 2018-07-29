@@ -1,46 +1,50 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 
+# from pysollib.util import ANY_SUIT, KING
+
+from pysollib.stack import \
+        AC_RowStack, \
+        InitialDealTalonStack, \
+        OpenStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        StackWrapper
 
 # ************************************************************************
 # * Needle
 # * Haystack
 # * Pitchfork
 # ************************************************************************
+
 
 class Needle(Game):
 
@@ -64,14 +68,15 @@ class Needle(Game):
         stack = self.ReserveStack_Class(x, y, self)
         stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
         s.reserves.append(stack)
-        self.setRegion(s.reserves, (-999, -999, w-4*l.XS-l.CW/2, l.YM+l.YS-l.CH/2))
+        self.setRegion(
+            s.reserves, (-999, -999, w-4*l.XS-l.CW//2, l.YM+l.YS-l.CH//2))
 
         x = w-4*l.XS
         for i in range(4):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
             x += l.XS
 
-        x, y = l.XM+(w-(l.XM+9*l.XS))/2, l.YM+l.YS
+        x, y = l.XM+(w-(l.XM+9*l.XS))//2, l.YM+l.YS
         for i in range(9):
             s.rows.append(AC_RowStack(x, y, self, max_move=1))
             x += l.XS
@@ -119,4 +124,3 @@ registerGame(GameInfo(319, Haystack, "Haystack",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(367, Pitchfork, "Pitchfork",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
-

@@ -1,64 +1,68 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
+# ---------------------------------------------------------------------------##
+#
+#  Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+#  Copyright (C) 2003 Mt. Hood Playing Card Co.
+#  Copyright (C) 2005-2009 Skomoroh
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys, os, time, types, locale
+import sys
+import os
+import time
+import locale
 import webbrowser
+from six import print_
 
-try:
-    from cPickle import Pickler, Unpickler, UnpicklingError
-except ImportError:
-    from pickle import Pickler, Unpickler, UnpicklingError
+from pickle import Pickler, Unpickler, UnpicklingError
 
-try:
-    import thread
-except:
-    thread = None
-
-from settings import PACKAGE, TOOLKIT
+from pysollib.settings import PACKAGE, TOOLKIT
 
 Image = ImageTk = ImageOps = None
 if TOOLKIT == 'tk':
-    try: # PIL
-        import Image
-        import ImageTk
-        import ImageOps
+    try:  # PIL
+        from PIL import Image
+        from PIL import ImageTk
+        from PIL import ImageOps
     except ImportError:
         Image = None
     else:
         # for py2exe
-        import GifImagePlugin
-        import PngImagePlugin
-        import JpegImagePlugin
-        import BmpImagePlugin
-        import PpmImagePlugin
+        from PIL import GifImagePlugin
+        from PIL import PngImagePlugin
+        from PIL import JpegImagePlugin
+        from PIL import BmpImagePlugin
+        from PIL import PpmImagePlugin
         Image._initialized = 2
+USE_PIL = False
+if TOOLKIT == 'tk' and Image and Image.VERSION >= '1.1.7':
+    USE_PIL = True
 
+if sys.version_info > (3,):
+    unicode = str
+# debug
+# Image = None
+# USE_PIL = False
 
 # ************************************************************************
 # * exceptions
 # ************************************************************************
+
 
 class SubclassResponsibility(Exception):
     pass
@@ -70,9 +74,11 @@ class SubclassResponsibility(Exception):
 
 
 def latin1_to_ascii(n):
-    #return n
+    if sys.version_info > (3,):
+        return n
+    # return n
     n = n.encode('iso8859-1', 'replace')
-    ## FIXME: rewrite this for better speed
+    # FIXME: rewrite this for better speed
     n = (n.replace("\xc4", "Ae")
          .replace("\xd6", "Oe")
          .replace("\xdc", "Ue")
@@ -83,10 +89,12 @@ def latin1_to_ascii(n):
 
 
 def format_time(t):
-    ##print 'format_time:', t
-    if t <= 0: return "0:00"
-    if t < 3600: return "%d:%02d" % (t / 60, t % 60)
-    return "%d:%02d:%02d" % (t / 3600, (t % 3600) / 60, t % 60)
+    # print 'format_time:', t
+    if t <= 0:
+        return "0:00"
+    if t < 3600:
+        return "%d:%02d" % (t // 60, t % 60)
+    return "%d:%02d:%02d" % (t // 3600, (t % 3600) // 60, t % 60)
 
 
 def print_err(s, level=1):
@@ -96,7 +104,7 @@ def print_err(s, level=1):
         ss = PACKAGE+': WARNING:'
     elif level == 2:
         ss = PACKAGE+': DEBUG WARNING:'
-    print >> sys.stderr, ss, s.encode(locale.getpreferredencoding())
+    print_(ss, s.encode(locale.getpreferredencoding()), file=sys.stderr)
     sys.stderr.flush()
 
 
@@ -107,9 +115,9 @@ def print_err(s, level=1):
 def getusername():
     if os.name == "nt":
         return win32_getusername()
-    user = os.environ.get("USER","").strip()
+    user = os.environ.get("USER", "").strip()
     if not user:
-        user = os.environ.get("LOGNAME","").strip()
+        user = os.environ.get("LOGNAME", "").strip()
     return user
 
 
@@ -132,13 +140,15 @@ if os.name == "posix":
 # * MSWin util
 # ************************************************************************
 
+
 def win32_getusername():
-    user = os.environ.get('USERNAME','').strip()
+    user = os.environ.get('USERNAME', '').strip()
     try:
         user = unicode(user, locale.getpreferredencoding())
-    except:
+    except Exception:
         user = ''
     return user
+
 
 def win32_getprefdir(package):
     portprefdir = 'config'      # portable varsion
@@ -148,7 +158,7 @@ def win32_getprefdir(package):
     hd = os.environ.get('APPDATA')
     if not hd:
         hd = os.path.expanduser('~')
-        if hd == '~': # win9x
+        if hd == '~':  # win9x
             hd = os.path.abspath('/windows/Application Data')
             if not os.path.exists(hd):
                 hd = os.path.abspath('/')
@@ -162,10 +172,9 @@ def win32_getprefdir(package):
 def destruct(obj):
     # assist in breaking circular references
     if obj is not None:
-        assert isinstance(obj, types.InstanceType)
         for k in obj.__dict__.keys():
             obj.__dict__[k] = None
-            ##del obj.__dict__[k]
+            # del obj.__dict__[k]
 
 
 # ************************************************************************
@@ -262,10 +271,12 @@ def pickle(obj, filename, protocol=0):
         f = open(filename, "wb")
         p = Pickler(f, protocol)
         p.dump(obj)
-        f.close(); f = None
-        ##print "Pickled", filename
+        f.close()
+        f = None
+        # print "Pickled", filename
     finally:
-        if f: f.close()
+        if f:
+            f.close()
 
 
 def unpickle(filename):
@@ -274,11 +285,13 @@ def unpickle(filename):
         f = open(filename, "rb")
         p = Unpickler(f)
         x = p.load()
-        f.close(); f = None
+        f.close()
+        f = None
         obj = x
-        ##print "Unpickled", filename
+        # print "Unpickled", filename
     finally:
-        if f: f.close()
+        if f:
+            f.close()
     return obj
 
 
@@ -291,7 +304,6 @@ def openURL(url):
         webbrowser.open(url)
     except OSError:                  # raised on windows if link is unreadable
         pass
-    except:
+    except Exception:
         return 0
     return 1
-

@@ -1,44 +1,45 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 
 # imports
-import os, sys
 
 import gtk
-gdk = gtk.gdk
 
 # PySol imports
+from pysollib.mygettext import _
 
 # Toolkit imports
-from tkutil import makeToplevel, setTransient, wm_withdraw
+from tkutil import setTransient
 
 from pysollib.mfxutil import kwdefault, KwStruct, openURL
 
 
+gdk = gtk.gdk
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class _MyDialog(gtk.Dialog):
     def __init__(self):
@@ -59,6 +60,7 @@ class _MyDialog(gtk.Dialog):
 class MfxDialog(_MyDialog):
     img = {}
     button_img = {}
+
     def __init__(self, parent, title='',
                  timeout=0,
                  resizable=0,
@@ -77,18 +79,17 @@ class MfxDialog(_MyDialog):
         self.button = -1
         self.buttons = []
 
-        modal=True
+        modal = True
         if modal:
             setTransient(self, parent)
 
         # settings
         if width > 0 or height > 0:
             self.set_size_request(width, height)
-            #self.window.resize(width, height)
+            # self.window.resize(width, height)
         self.set_title(title)
         #
         self.connect('key-press-event', self._keyPressEvent)
-
 
     def createBox(self, widget_class=gtk.HBox):
         box = widget_class(spacing=5)
@@ -111,7 +112,7 @@ class MfxDialog(_MyDialog):
             stock = {"info":     gtk.STOCK_DIALOG_INFO,
                      "error":    gtk.STOCK_DIALOG_ERROR,
                      "warning":  gtk.STOCK_DIALOG_WARNING,
-                     "question": gtk.STOCK_DIALOG_QUESTION} [kw['bitmap']]
+                     "question": gtk.STOCK_DIALOG_QUESTION}[kw['bitmap']]
             im = gtk.image_new_from_stock(stock, gtk.ICON_SIZE_DIALOG)
             box.pack_start(im)
             im.set_property('xpad', kw['bitmap_padx'])
@@ -136,14 +137,14 @@ class MfxDialog(_MyDialog):
                 continue
             if isinstance(text, (list, tuple)):
                 text, index = text
-            else: # str
+            else:  # str
                 index = i
             text = text.replace('&', '_')
             b = gtk.Button(text)
             b.set_property('can-default', True)
             if index == default:
                 b.grab_focus()
-                #b.grab_default()
+                # b.grab_default()
             b.set_data("user_data", index)
             b.connect("clicked", self.done)
             box.pack_start(b)
@@ -163,9 +164,9 @@ class MfxDialog(_MyDialog):
                   image=None, image_side="left",
                   image_padx=10, image_pady=20,
                   )
-##         # default to separator if more than one button
-##         sw = len(kw.strings) > 1
-##         kwdefault(kw.__dict__, separator=sw)
+        #  # default to separator if more than one button
+        #  sw = len(kw.strings) > 1
+        #  kwdefault(kw.__dict__, separator=sw)
         return kw
 
     def done(self, button):
@@ -180,7 +181,7 @@ class MfxDialog(_MyDialog):
 
 class MfxMessageDialog(MfxDialog):
     def __init__(self, parent, title, **kw):
-        ##print 'MfxMessageDialog', kw
+        # print 'MfxMessageDialog', kw
         kw = self.initKw(kw)
         MfxDialog.__init__(self, parent, title, **kw)
 
@@ -197,13 +198,13 @@ class MfxMessageDialog(MfxDialog):
 
         label.show()
         self.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
-        ##self.set_position(gtk.WIN_POS_CENTER)
+        # self.set_position(gtk.WIN_POS_CENTER)
 
         self.show_all()
         gtk.main()
 
     def initKw(self, kw):
-        #if kw.has_key('bitmap'):
+        # if kw.has_key('bitmap'):
         #    kwdefault(kw, width=250, height=150)
         return MfxDialog.initKw(self, kw)
 
@@ -242,14 +243,14 @@ class PysolAboutDialog(MfxDialog):
         self.createButtons(bottom_box, kw)
 
         self.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
-        ##self.set_position(gtk.WIN_POS_CENTER)
+        # self.set_position(gtk.WIN_POS_CENTER)
 
         self.show_all()
         event_box.window.set_cursor(gdk.Cursor(gdk.HAND2))
         gtk.main()
 
     def initKw(self, kw):
-        #if kw.has_key('bitmap'):
+        # if kw.has_key('bitmap'):
         #    kwdefault(kw, width=250, height=150)
         return MfxDialog.initKw(self, kw)
 
@@ -269,7 +270,8 @@ class MfxExceptionDialog(MfxDialog):
             text = text + "\n"
         text = text + "\n"
         if isinstance(ex, EnvironmentError) and ex.filename is not None:
-            t = '[Errno %s] %s:\n%s' % (ex.errno, ex.strerror, repr(ex.filename))
+            t = '[Errno %s] %s:\n%s' % \
+                (ex.errno, ex.strerror, repr(ex.filename))
         else:
             t = str(ex)
         kw.text = text + t
@@ -325,10 +327,5 @@ class MfxSimpleEntry(_MyDialog):
         self.quit()
 
 
-        
-
-
-
 class SelectDialogTreeData:
     pass
-

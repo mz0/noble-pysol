@@ -1,27 +1,27 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
-from mahjongg import r
+from pysollib.games.mahjongg.mahjongg import r
 
 # ************************************************************************
 # * game definitions
@@ -123,7 +123,7 @@ r(5078, "Squaring", layout="0caaacaceaciaakacmacqaasacuacyaaAacCaaacaecaicdkcamc
 r(5079, "Stairs", layout="0aoaaebaybeacdccagcaicakcbmccocbqcascaucawcdAceCcaedayddaeaieaoeauedCebefbyfaagaigaogaugaCgbchcehbghakhbmhbqhashbwhcyhbAhaaiaiiaoiauiaCibejbyjdakaikaokaukdCkaelayleamdcmagmaimakmbmmcombqmasmaumawmdAmeCmaenaynaoohechychofhahkohhChhojhemhym")
 r(5080, "Star Ship", layout="0eoaaabdmbdqbaCbaccckccscaAcaadbidbudaCdbceagecoeawebAeaafaefamfaqfayfaCfecgaggaigbkgdogbsgaugawgeAgaahaehamhaqhayhaChbciagicoiawibAiaajbijbujaCjackckkcskaAkaaldmldqlaCleomhachCchaehCehaghegimgiqghyghCghaihCihakhCkoadoCdoafoCfoahoChoajoCjvaevCevagvCgvaivCiCafCCfCahCCh")
 #
-r(5081, "Step Pyramid", layout="0aaaacaaeaagaaiaakaamaaoaaqaaacaccaecagcaicakcamcaocaqcaaeaceaoeaqeaagacgaogaqgaaiaciaoiaqiaakackaekagkaikakkamkaokaqkaamacmaemagmaimakmammaomaqmhbbhdbhfbhhbhjbhlbhnbhpbhbdhddhfdhhdhjdhldhndhpdhbfhdfhnfhpfhbhhdhhnhhphhbjhdjhfjhhjhjjhljhnjhpjhblhdlhflhhlhjlhllhnlhplpccoecogcoicokcomcpococepeepgepiepkepmeooeocgpegpmgoogocipeipgipiipkipmiooipckoekogkoikokkomkpokCffChfCjfClfCfhChhCjhClh")
+r(5081, "Steps Pyramid", layout="0aaaacaaeaagaaiaakaamaaoaaqaaacaccaecagcaicakcamcaocaqcaaeaceaoeaqeaagacgaogaqgaaiaciaoiaqiaakackaekagkaikakkamkaokaqkaamacmaemagmaimakmammaomaqmhbbhdbhfbhhbhjbhlbhnbhpbhbdhddhfdhhdhjdhldhndhpdhbfhdfhnfhpfhbhhdhhnhhphhbjhdjhfjhhjhjjhljhnjhpjhblhdlhflhhlhjlhllhnlhplpccoecogcoicokcomcpococepeepgepiepkepmeooeocgpegpmgoogocipeipgipiipkipmiooipckoekogkoikokkomkpokCffChfCjfClfCfhChhCjhClh")
 r(5082, "Stonehenge", layout="0cdachackacoacracvacyacCacaccFcajeaneareavecagcFgddhdhhdlhdphdthdxhdBhcajcFjajkankarkavkcancFncdpchpckpcopcrpcvpcypcCpveavgavlavnavsavuavzavBavadvFdvafvFfvakvFkvamvFmvepvgpvlpvnpvspvupvzpvBpCehCghCihCkhCmhCohCqhCshCuhCwhCyhCAh")
 r(5083, "SunMoon", layout="0dgaciabkaamabyadebbrbbBbdccbvccaddcecheckecnebDecafbtfbAfdcgdjgdlgbxgcahchhcnhdcidjidlibribDicajbvjdckchkckkcnkbAkcalbsldcmbxmdenbBndgociobkoamobuovaevagvaivakCkh")
 r(5084, "Temple", layout="0baaacaaeaalaanaapaaraataaAaaCabEaaacaccalcbncbpcbrcatcaCcaEcajdavdaaeblebnebpebrebteaEeaffahfajfavfaxfazfblgbngbpgbrgbtgadhafhahhajhavhaxhazhaBhblibnibpibribtiafjahjajjavjaxjazjaakblkbnkbpkbrkbtkaEkajlavlaamacmalmbnmbpmbrmatmaCmaEmbaoacoaeoaloanoapoaroatoaAoaCobEohhghjghvghxghhihjihvihxiooeoqeokgomgoogoqgosgougokiomiooioqiosiouiookoqkvpgvpi")

@@ -1,40 +1,51 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT, KING, QUEEN
+from pysollib.stack import \
+        AbstractFoundationStack, \
+        BasicRowStack, \
+        DealRowTalonStack, \
+        OpenStack, \
+        OpenTalonStack, \
+        RedealTalonStack, \
+        ReserveStack, \
+        RK_FoundationStack, \
+        SS_FoundationStack, \
+        Stack, \
+        StackWrapper, \
+        WasteStack, \
+        WasteTalonStack
+
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
-from pysollib.pysoltk import MfxCanvasText
 
-from numerica import Numerica_Hint
+from pysollib.games.numerica import Numerica_Hint
 
 
 # ************************************************************************
@@ -58,7 +69,7 @@ class TamOShanter(Game):
 
         # create stacks
         if texts:
-            x, y, = l.XM, l.YM+l.YS/2
+            x, y, = l.XM, l.YM+l.YS//2
         else:
             x, y, = l.XM, l.YM
         s.talon = self.Talon_Class(x, y, self)
@@ -67,7 +78,8 @@ class TamOShanter(Game):
             l.createRoundText(s.talon, 'nn')
         x, y = l.XM+2*l.XS, l.YM
         for i in range(4*self.gameinfo.decks):
-            s.foundations.append(self.Foundation_Class(x, y, self, suit=i%4))
+            s.foundations.append(
+                self.Foundation_Class(x, y, self, suit=i % 4))
             x += l.XS
         x, y = l.XM+2*l.XS, l.YM+l.YS
         for i in range(rows):
@@ -84,8 +96,7 @@ class TamOShanter(Game):
     #
 
     def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def getAutoStacks(self, event=None):
         return ((), (), self.sg.dropstacks)
@@ -98,17 +109,18 @@ class TamOShanter(Game):
 class AuldLangSyne(TamOShanter):
     def _shuffleHook(self, cards):
         # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards, lambda c: (c.rank == 0, c.suit))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == 0, c.suit))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
 # ************************************************************************
 # * Strategy
 # * Strategy +
 # ************************************************************************
+
 
 class Strategy_Foundation(SS_FoundationStack):
     def acceptsCards(self, from_stack, cards):
@@ -164,7 +176,8 @@ class Strategy(Game):
         l.createText(s.talon, "se")
         for i in range(4):
             x, y = l.XM + (i+2)*l.XS, l.YM
-            s.foundations.append(Strategy_Foundation(x, y, self, suit=i, max_move=0))
+            s.foundations.append(
+                Strategy_Foundation(x, y, self, suit=i, max_move=0))
         x, y = l.XM, l.YM+l.YS
         for i in range(rows):
             s.rows.append(Strategy_RowStack(x, y,
@@ -181,7 +194,8 @@ class Strategy(Game):
 
     def _shuffleHook(self, cards):
         # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards, lambda c: (c.rank == 0, c.suit))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == 0, c.suit))
 
     def startGame(self):
         self.startDealSample()
@@ -245,7 +259,7 @@ class Interregnum(Game):
         l, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM+max(9,rows)*l.XS, l.YM+3*l.YS+playcards*l.YOFFSET)
+        self.setSize(l.XM+max(9, rows)*l.XS, l.YM+3*l.YS+playcards*l.YOFFSET)
 
         # extra settings
         self.base_cards = None
@@ -256,9 +270,10 @@ class Interregnum(Game):
             s.reserves.append(ReserveStack(x, y, self, max_accept=0))
         for i in range(8):
             x, y, = l.XM + i*l.XS, l.YM + l.YS
-            s.foundations.append(Interregnum_Foundation(x, y, self, mod=13, max_move=0))
+            s.foundations.append(
+                Interregnum_Foundation(x, y, self, mod=13, max_move=0))
         for i in range(rows):
-            x, y, = l.XM + (2*i+8-rows)*l.XS/2, l.YM + 2*l.YS
+            x, y, = l.XM + (2*i+8-rows)*l.XS//2, l.YM + 2*l.YS
             s.rows.append(self.RowStack_Class(x, y, self))
         s.talon = self.Talon_Class(self.width-l.XS, self.height-l.YS, self)
         if texts:
@@ -280,7 +295,8 @@ class Interregnum(Game):
         self.base_cards = []
         for i in range(8):
             self.base_cards.append(self.s.talon.getCard())
-            self.s.foundations[i].cap.base_rank = (self.base_cards[i].rank + 1) % 13
+            self.s.foundations[i].cap.base_rank = \
+                (self.base_cards[i].rank + 1) % 13
             self.flipMove(self.s.talon)
             self.moveMove(1, self.s.talon, self.s.reserves[i])
 
@@ -294,7 +310,8 @@ class Interregnum(Game):
         for i in range(8):
             id = game.loadinfo.base_card_ids[i]
             self.base_cards[i] = self.cards[id]
-            self.s.foundations[i].cap.base_rank = (self.base_cards[i].rank + 1) % 13
+            self.s.foundations[i].cap.base_rank = \
+                (self.base_cards[i].rank + 1) % 13
 
     def _loadGameHook(self, p):
         ids = []
@@ -319,8 +336,6 @@ class Primrose_Talon(DealRowTalonStack):
         return not self.game.isGameWon()
 
     def _redeal(self):
-        lr = len(self.game.s.rows)
-        rows = self.game.s.rows
         r = self.game.s.rows[self.round-1]
         for i in range(len(r.cards)):
             self.game.moveMove(1, r, self, frames=4)
@@ -337,7 +352,6 @@ class Primrose_Talon(DealRowTalonStack):
         else:
             rows = self.game.s.rows
             n = self.dealRowAvail(rows=rows[self.round-2:], sound=False)
-            #n = 0
             while self.cards:
                 n += self.dealRowAvail(rows=rows, sound=False)
         if sound:
@@ -352,8 +366,7 @@ class Primrose(Interregnum):
         Interregnum.createGame(self, playcards=16, texts=True)
 
     def startGame(self):
-        for i in range(11):
-            self.s.talon.dealRow(frames=0)
+        self._dealNumRows(11)
         Interregnum.startGame(self)
 
 
@@ -424,7 +437,9 @@ class Colorado(Game):
         self.s.talon.dealCards()
 
     def _shuffleHook(self, cards):
-        return self._shuffleHookMoveToTop(cards, lambda c: (c.deck == 0 and c.rank in (0, 12), (c.rank, c.suit)), 8)
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.deck == 0 and c.rank in (0, 12),
+                              (c.rank, c.suit)), 8)
 
     def fillStack(self, stack):
         if stack in self.s.rows and not stack.cards and self.s.waste.cards:
@@ -445,7 +460,8 @@ class Amazons_Talon(RedealTalonStack):
             RedealTalonStack.redealCards(self, frames=4, sound=sound)
         return self.dealRowAvail(sound=sound)
 
-    def dealRowAvail(self, rows=None, flip=1, reverse=0, frames=-1, sound=False):
+    def dealRowAvail(self, rows=None, flip=1, reverse=0,
+                     frames=-1, sound=False):
         if rows is None:
             rows = []
             i = 0
@@ -453,8 +469,9 @@ class Amazons_Talon(RedealTalonStack):
                 if len(f.cards) < 7:
                     rows.append(self.game.s.rows[i])
                 i += 1
-        return RedealTalonStack.dealRowAvail(self, rows=rows, flip=flip,
-                   reverse=reverse, frames=frames, sound=sound)
+        return RedealTalonStack.dealRowAvail(
+            self, rows=rows, flip=flip, reverse=reverse, frames=frames,
+            sound=sound)
 
 
 class Amazons_Foundation(AbstractFoundationStack):
@@ -487,8 +504,7 @@ class Amazons(AuldLangSyne):
         return cards
 
     def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
 
 # ************************************************************************
@@ -512,6 +528,7 @@ class Scuffle_Talon(RedealTalonStack):
 
 class Scuffle(AuldLangSyne):
     Talon_Class = StackWrapper(Scuffle_Talon, max_rounds=3)
+
     def createGame(self):
         AuldLangSyne.createGame(self, texts=True, yoffset=0)
 
@@ -523,12 +540,14 @@ class Acquaintance_Talon(Scuffle_Talon):
 
 class Acquaintance(AuldLangSyne):
     Talon_Class = StackWrapper(Acquaintance_Talon, max_rounds=3)
+
     def createGame(self, texts=False, yoffset=None):
         AuldLangSyne.createGame(self, texts=True)
 
 
 class DoubleAcquaintance(AuldLangSyne):
     Talon_Class = StackWrapper(Acquaintance_Talon, max_rounds=3)
+
     def createGame(self):
         AuldLangSyne.createGame(self, rows=8, texts=True)
 
@@ -581,14 +600,12 @@ class Formic(TamOShanter):
                 cards.remove(c)
             if len(suits) == 4:
                 break
-        top_cards.sort(lambda a, b: cmp(b.suit, a.suit)) # sort by suit
+        top_cards.sort(key=lambda x: -x.suit)  # sort by suit
         return cards+top_cards
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-
+        self._startAndDealRow()
 
 
 # register the game
@@ -596,7 +613,7 @@ registerGame(GameInfo(172, TamOShanter, "Tam O'Shanter",
                       GI.GT_NUMERICA, 1, 0, GI.SL_LUCK))
 registerGame(GameInfo(95, AuldLangSyne, "Auld Lang Syne",
                       GI.GT_NUMERICA, 1, 0, GI.SL_LUCK,
-                      altnames=("Patience",) ))
+                      altnames=("Patience",)))
 registerGame(GameInfo(173, Strategy, "Strategy",
                       GI.GT_NUMERICA, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(123, Interregnum, "Interregnum",
@@ -619,4 +636,3 @@ registerGame(GameInfo(636, StrategyPlus, "Strategy +",
                       GI.GT_NUMERICA, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(688, Formic, "Formic",
                       GI.GT_NUMERICA, 1, 0, GI.SL_MOSTLY_SKILL))
-

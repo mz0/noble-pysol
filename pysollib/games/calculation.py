@@ -1,43 +1,27 @@
-#!/usr/bin/env python
-# -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
-
-# imports
-import sys
-
-# PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import DefaultHint
 from pysollib.pysoltk import MfxCanvasText, get_text_width
+from pysollib.mygettext import _
+
+from pysollib.util import ANY_SUIT, KING, \
+        RANKS
+
+from pysollib.stack import \
+        BasicRowStack, \
+        DealRowTalonStack, \
+        InitialDealTalonStack, \
+        RK_FoundationStack, \
+        Stack, \
+        WasteStack, \
+        WasteTalonStack, \
+        StackWrapper
 
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class Calculation_Hint(DefaultHint):
     # FIXME: demo logic is a complete nonsense
@@ -101,7 +85,8 @@ class Calculation_RowStack(BasicRowStack):
 class Calculation(Game):
     Hint_Class = Calculation_Hint
     Foundation_Class = Calculation_Foundation
-    RowStack_Class = StackWrapper(Calculation_RowStack, max_move=1, max_accept=1)
+    RowStack_Class = StackWrapper(
+        Calculation_RowStack, max_move=1, max_accept=1)
 
     #
     # game layout
@@ -115,7 +100,7 @@ class Calculation(Game):
 4: 8 Q 3 7 J 2 6 T A 5 9 K'''))
         # calculate text_width
         lines = help.split('\n')
-        lines.sort(lambda a, b: cmp(len(a), len(b)))
+        lines.sort(key=len)
         max_line = lines[-1]
         text_width = get_text_width(max_line,
                                     font=self.app.getFont("canvas_fixed"))
@@ -134,7 +119,7 @@ class Calculation(Game):
         self.setSize(w, l.YM + l.YS + l.TEXT_HEIGHT + h)
 
         # create stacks
-        x0 = l.XM + l.XS * 3 / 2
+        x0 = l.XM + l.XS * 3 // 2
         x, y = x0, l.YM
         for i in range(4):
             stack = self.Foundation_Class(x, y, self,
@@ -145,14 +130,15 @@ class Calculation(Game):
             stack.texts.misc = MfxCanvasText(self.canvas, tx, ty,
                                              anchor=ta, font=font)
             x = x + l.XS
-        self.texts.help = MfxCanvasText(self.canvas, x + l.XM, y + l.CH / 2, text=help,
-                                        anchor="w", font=self.app.getFont("canvas_fixed"))
+        self.texts.help = MfxCanvasText(
+            self.canvas, x + l.XM, y + l.CH // 2, text=help,
+            anchor="w", font=self.app.getFont("canvas_fixed"))
         x = x0
         y = l.YM + l.YS + l.TEXT_HEIGHT
         for i in range(4):
             s.rows.append(self.RowStack_Class(x, y, self))
             x = x + l.XS
-        self.setRegion(s.rows, (-999, y-l.CH/2, 999999, 999999))
+        self.setRegion(s.rows, (-999, y-l.CH//2, 999999, 999999))
         x = l.XM
         s.talon = WasteTalonStack(x, y, self, max_rounds=1)
         l.createText(s.talon, "n")
@@ -168,7 +154,7 @@ class Calculation(Game):
 
     def _shuffleHook(self, cards):
         # prepare first cards
-        topcards = [ None ] * 4
+        topcards = [None] * 4
         for c in cards[:]:
             if c.rank <= 3 and topcards[c.rank] is None:
                 topcards[c.rank] = c
@@ -192,7 +178,7 @@ class Calculation(Game):
 class Hopscotch(Calculation):
     def _shuffleHook(self, cards):
         # prepare first cards
-        topcards = [ None ] * 4
+        topcards = [None] * 4
         for c in cards[:]:
             if c.suit == 0 and c.rank <= 3 and topcards[c.rank] is None:
                 topcards[c.rank] = c
@@ -221,7 +207,7 @@ class BetsyRoss(Calculation):
         self.setSize(5.5*l.XS+l.XM+text_width, l.YM+3*l.YS+l.TEXT_HEIGHT)
 
         # create stacks
-        x0 = l.XM + l.XS * 3 / 2
+        x0 = l.XM + l.XS * 3 // 2
         x, y = x0, l.YM
         for i in range(4):
             stack = BetsyRoss_Foundation(x, y, self, base_rank=i,
@@ -240,7 +226,7 @@ class BetsyRoss(Calculation):
                                              anchor=ta, font=font)
             s.foundations.append(stack)
             x += l.XS
-        self.texts.help = MfxCanvasText(self.canvas, x + l.XM, y + l.CH / 2,
+        self.texts.help = MfxCanvasText(self.canvas, x + l.XM, y + l.CH // 2,
                                         text=help, anchor="w",
                                         font=self.app.getFont("canvas_fixed"))
         x = l.XM
@@ -254,20 +240,19 @@ class BetsyRoss(Calculation):
         # define stack-groups
         l.defaultStackGroups()
 
-
     #
     # game overrides
     #
 
     def _shuffleHook(self, cards):
         # prepare first cards
-        topcards = [ None ] * 8
+        topcards = [None] * 8
         for c in cards[:]:
             if c.rank <= 3 and topcards[c.rank] is None:
                 topcards[c.rank] = c
                 cards.remove(c)
             elif c.rank in (1, 3, 5, 7):
-                i = 4 + (c.rank - 1) / 2
+                i = 4 + (c.rank - 1) // 2
                 if topcards[i] is None:
                     topcards[i] = c
                     cards.remove(c)
@@ -284,12 +269,13 @@ class One234_Foundation(BetsyRoss_Foundation):
         if not BetsyRoss_Foundation.canMoveCards(self, cards):
             return False
         return len(self.cards) > 1
+
     def updateText(self):
         BetsyRoss_Foundation.updateText(self, update_empty=False)
 
 
 class One234_RowStack(BasicRowStack):
-    ##clickHandler = BasicRowStack.doubleclickHandler
+    # clickHandler = BasicRowStack.doubleclickHandler
     pass
 
 
@@ -320,8 +306,9 @@ class One234(Calculation):
             stack.texts.misc = MfxCanvasText(self.canvas, tx, ty,
                                              anchor=ta, font=font)
             x = x + l.XS
-        self.texts.help = MfxCanvasText(self.canvas, x + l.XM, y + l.CH / 2, text=help,
-                                        anchor="w", font=self.app.getFont("canvas_fixed"))
+        self.texts.help = MfxCanvasText(
+            self.canvas, x + l.XM, y + l.CH // 2, text=help,
+            anchor="w", font=self.app.getFont("canvas_fixed"))
         x, y = l.XM, l.YM+l.YS+l.TEXT_HEIGHT
         for i in range(8):
             s.rows.append(self.RowStack_Class(x, y, self))
@@ -336,9 +323,7 @@ class One234(Calculation):
         return cards
 
     def startGame(self):
-        for i in range(4):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(4)
         self.s.talon.dealRow()
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.foundations)
@@ -376,8 +361,9 @@ class SeniorWrangler_Talon(DealRowTalonStack):
             self.game.stopSamples()
         return num_cards
 
+
 class SeniorWrangler_RowStack(BasicRowStack):
-    #clickHandler = BasicRowStack.doubleclickHandler
+    # clickHandler = BasicRowStack.doubleclickHandler
     pass
 
 
@@ -410,7 +396,6 @@ class SeniorWrangler(Game):
         # define stack-groups
         l.defaultStackGroups()
 
-
     def _shuffleHook(self, cards):
         top = []
         ranks = []
@@ -419,16 +404,12 @@ class SeniorWrangler(Game):
                 ranks.append(c.rank)
                 cards.remove(c)
                 top.append(c)
-        top.sort(lambda a, b: cmp(b.rank, a.rank))
+        top.sort(key=lambda x: -x.rank)
         return cards+top
-
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations[:8], frames=0)
-        for i in range(11):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(11)
 
 
 # ************************************************************************
@@ -462,7 +443,7 @@ class SPatience(Game):
                                  max_cards=8, mod=13, max_move=0))
 
         x, y = l.XM+5.5*l.XS, l.YM+2*l.YS
-        for i in (0,1):
+        for i in (0, 1):
             stack = Calculation_RowStack(x, y, self, max_move=1, max_accept=1)
             stack.CARD_YOFFSET = 0
             s.rows.append(stack)
@@ -484,7 +465,7 @@ class SPatience(Game):
                 ranks.append(c.rank)
                 cards.remove(c)
                 top.append(c)
-        top.sort(lambda a, b: cmp(b.rank, a.rank))
+        top.sort(key=lambda x: -x.rank)
         return cards+top[7:]+top[:7]
 
     def startGame(self):
@@ -493,21 +474,19 @@ class SPatience(Game):
         self.s.talon.dealCards()
 
 
-
 # register the game
 registerGame(GameInfo(256, Calculation, "Calculation",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Progression",) ))
+                      altnames=("Progression",)))
 registerGame(GameInfo(94, Hopscotch, "Hopscotch",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(134, BetsyRoss, "Betsy Ross",
                       GI.GT_1DECK_TYPE, 1, 2, GI.SL_MOSTLY_LUCK,
                       altnames=("Fairest", "Four Kings", "Musical Patience",
-                                "Quadruple Alliance", "Plus Belle") ))
+                                "Quadruple Alliance", "Plus Belle")))
 registerGame(GameInfo(550, One234, "One234",
                       GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(653, SeniorWrangler, "Senior Wrangler",
                       GI.GT_2DECK_TYPE, 2, 8, GI.SL_BALANCED))
 registerGame(GameInfo(704, SPatience, "S Patience",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
-

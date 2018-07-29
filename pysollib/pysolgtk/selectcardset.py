@@ -1,32 +1,34 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 
 # imports
-import os, re, sys, types
-import gtk, gobject
+import os
+import gtk
+import gobject
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.resource import CSI
 from pysollib.mfxutil import kwdefault
 
@@ -61,8 +63,7 @@ class SelectCardsetDialogWithPreview(MfxDialog):
         if self._cardset_store is None:
             self._createStore()
 
-        #padx, pady = kw.padx, kw.pady
-        padx, pady = 5, 5
+        # padx, pady = kw.padx, kw.pady
         # left
         # paned
         hpaned = gtk.HPaned()
@@ -73,44 +74,41 @@ class SelectCardsetDialogWithPreview(MfxDialog):
         treeview = PysolTreeView(self, self._cardset_store)
         self.treeview = treeview
         hpaned.pack1(treeview.scrolledwindow, True, True)
-        ##treeview.treeview.expand_all()
+        # treeview.treeview.expand_all()
         # right
         sw = gtk.ScrolledWindow()
         sw.show()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         hpaned.pack2(sw, True, True)
-        ##self.scrolledwindow = sw
+        # self.scrolledwindow = sw
         #
         self.preview = MfxCanvas(self)
         self.preview.show()
         sw.add(self.preview)
-        #hpaned.pack2(self.preview, True, True)
+        # hpaned.pack2(self.preview, True, True)
         self.preview.setTile(app, app.tabletile_index, force=True)
         #
         hpaned.set_position(240)
 
         self.createButtons(bottom_box, kw)
 
-        ##~self.updatePreview(key)
+        # ~self.updatePreview(key)
 
         self.show_all()
         gtk.main()
-
 
     def _selectCardset(self, all_cardsets, selecter):
         if selecter is None:
             return [(cs.index, cs.name) for cs in all_cardsets]
         return [(cs.index, cs.name) for cs in all_cardsets if selecter(cs)]
 
-
     def _addCardsets(self, store, root_iter, root_label, cardsets):
         iter = store.append(root_iter)
         store.set(iter, 0, root_label, 1, -1)
         for index, name in cardsets:
             child_iter = store.append(iter)
-            ##~ name = _(name)
+            # ~ name = _(name)
             store.set(child_iter, 0, name, 1, index)
-
 
     def _addCardsetsByType(self, store, root_label, all_cardsets,
                            cardset_types, selecter_type, registered):
@@ -118,7 +116,7 @@ class SelectCardsetDialogWithPreview(MfxDialog):
         root_iter = store.append(None)
         store.set(root_iter, 0, root_label, 1, -1)
         items = cardset_types.items()
-        items.sort(lambda a, b: cmp(a[1], b[1]))
+        items.sort(key=lambda x: x[1])
         added = False
         for key, label in items:
             if key not in getattr(manager, registered):
@@ -126,18 +124,18 @@ class SelectCardsetDialogWithPreview(MfxDialog):
             cardsets = []
             for cs in all_cardsets:
                 si = getattr(cs.si, selecter_type)
-                if isinstance(si, int): # type
+                if isinstance(si, int):  # type
                     if key == si:
                         cardsets.append((cs.index, cs.name))
-                else: # style, nationality, date
+                else:  # style, nationality, date
                     if key in si:
                         cardsets.append((cs.index, cs.name))
             if cardsets:
                 added = True
                 self._addCardsets(store, root_iter, label, cardsets)
         if added:
-            selecter = lambda cs, selecter_type=selecter_type: \
-                           not getattr(cs.si, selecter_type)
+            def selecter(cs, selecter_type=selecter_type):
+                return getattr(cs.si, selecter_type)
             cs = self._selectCardset(all_cardsets, selecter)
             if cs:
                 self._addCardsets(store, root_iter, _('Uncategorized'), cs)
@@ -158,11 +156,12 @@ class SelectCardsetDialogWithPreview(MfxDialog):
         root_iter = store.append(None)
         store.set(root_iter, 0, _('by Size'), 1, -1)
         for label, selecter in (
-            (_("Tiny cardsets"),   lambda cs: cs.si.size == CSI.SIZE_TINY),
-            (_("Small cardsets"),  lambda cs: cs.si.size == CSI.SIZE_SMALL),
+            (_("Tiny cardsets"), lambda cs: cs.si.size == CSI.SIZE_TINY),
+            (_("Small cardsets"), lambda cs: cs.si.size == CSI.SIZE_SMALL),
             (_("Medium cardsets"), lambda cs: cs.si.size == CSI.SIZE_MEDIUM),
-            (_("Large cardsets"),  lambda cs: cs.si.size == CSI.SIZE_LARGE),
-            (_("XLarge cardsets"), lambda cs: cs.si.size == CSI.SIZE_XLARGE),):
+            (_("Large cardsets"), lambda cs: cs.si.size == CSI.SIZE_LARGE),
+            (_("XLarge cardsets"), lambda cs: cs.si.size == CSI.SIZE_XLARGE),
+                ):
             cs = self._selectCardset(all_cardsets, selecter)
             if cs:
                 self._addCardsets(store, root_iter, label, cs)
@@ -179,20 +178,17 @@ class SelectCardsetDialogWithPreview(MfxDialog):
 
         self._cardset_store = store
 
-
     def getSelected(self):
         index = self.treeview.getSelected()
         if index < 0:
             return None
         return index
 
-
     def showSelected(self, w):
         key = self.getSelected()
         if key is not None:
             self.updatePreview(key)
         pass
-
 
     def updatePreview(self, key):
         if key == self.preview_key:
@@ -206,11 +202,11 @@ class SelectCardsetDialogWithPreview(MfxDialog):
             return
         names, columns = cs.getPreviewCardNames()
         try:
-            #???names, columns = cs.getPreviewCardNames()
+            # ???names, columns = cs.getPreviewCardNames()
             for n in names:
                 f = os.path.join(cs.dir, n + cs.ext)
                 self.preview_images.append(loadImage(file=f))
-        except:
+        except Exception:
             self.preview_key = -1
             self.preview_images = []
             return
@@ -227,7 +223,6 @@ class SelectCardsetDialogWithPreview(MfxDialog):
         canvas.set_scroll_region(0, 0, sx+dx, sy+dy)
         self.preview_key = key
 
-
     def initKw(self, kw):
         kwdefault(kw,
                   strings=(_("&Load"), _("&Cancel"), _("&Info..."),),
@@ -238,10 +233,8 @@ class SelectCardsetDialogWithPreview(MfxDialog):
                   )
         return MfxDialog.initKw(self, kw)
 
-
     def createInfo(self):
         pass
-
 
     def done(self, button):
         b = button.get_data('user_data')
@@ -256,7 +249,3 @@ class SelectCardsetDialogWithPreview(MfxDialog):
         self.button = b
         self.hide()
         self.quit()
-
-
-
-

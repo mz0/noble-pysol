@@ -1,28 +1,30 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
-import sys, os, traceback
+import os
+import traceback
 
+from pysollib.mygettext import _
 from pysollib.settings import TITLE
 from pysollib.settings import VERSION
 from pysollib.settings import TOOLKIT, USE_TILE
@@ -41,8 +43,8 @@ def init_tile(app, top):
             if os.path.exists(os.path.join(d, t, 'pkgIndex.tcl')):
                 try:
                     top.tk.eval('package require ttk::theme::'+t)
-                    #print 'load theme:', t
-                except:
+                    # print 'load theme:', t
+                except Exception:
                     traceback.print_exc()
                     pass
 
@@ -52,7 +54,7 @@ def set_theme(app, top, theme):
     style = ttk.Style(top)
     try:
         style.theme_use(theme)
-    except:
+    except Exception:
         print_err(_('invalid theme name: ') + theme)
         style.theme_use(app.opt.default_tile_theme)
 
@@ -60,11 +62,11 @@ def set_theme(app, top, theme):
 def get_font_name(font):
     # create font name
     # i.e. "helvetica 12" -> ("helvetica", 12, "roman", "normal")
-    from tkFont import Font
+    from six.moves.tkinter_font import Font
     font_name = None
     try:
         f = Font(font=font)
-    except:
+    except Exception:
         print_err(_('invalid font name: ') + font)
         if DEBUG:
             traceback.print_exc()
@@ -78,13 +80,11 @@ def get_font_name(font):
 
 
 def base_init_root_window(root, app):
-    #root.wm_group(root)
+    # root.wm_group(root)
     root.wm_title(TITLE + ' ' + VERSION)
     root.wm_iconname(TITLE + ' ' + VERSION)
     # set minsize
-    sw, sh, sd = (root.winfo_screenwidth(),
-                  root.winfo_screenheight(),
-                  root.winfo_screendepth())
+    sw, sh = (root.winfo_screenwidth(), root.winfo_screenheight())
     if sw < 640 or sh < 480:
         root.wm_minsize(400, 300)
     else:
@@ -115,5 +115,3 @@ class BaseTkSettings:
         toolbar_separator_relief = 'sunken'
         toolbar_borderwidth = 1
         toolbar_button_borderwidth = 1
-
-

@@ -1,47 +1,52 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
-from pysollib.pysoltk import MfxCanvasText
 
-from fortythieves import FortyThieves_Hint
-from spider import Spider_Hint
+from pysollib.games.fortythieves import FortyThieves_Hint
+from pysollib.games.spider import Spider_Hint
 
+from pysollib.util import ACE, KING
+
+from pysollib.stack import \
+        RK_RowStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        Spider_SS_RowStack, \
+        UD_SS_RowStack, \
+        WasteStack, \
+        WasteTalonStack, \
+        StackWrapper
 
 # ************************************************************************
 # * Diplomat
 # ************************************************************************
+
 
 class Diplomat(Game):
     Foundation_Class = SS_FoundationStack
@@ -82,7 +87,6 @@ class Diplomat(Game):
 
         # define stack-groups
         l.defaultStackGroups()
-
 
     #
     # game overrides
@@ -170,8 +174,8 @@ class Parliament(Congress):
 
     def _shuffleHook(self, cards):
         # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards,
-                   lambda c: (c.rank == ACE, (c.deck, c.suit)))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == ACE, (c.deck, c.suit)))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
@@ -239,9 +243,7 @@ class LittleNapoleon(Diplomat):
     def startGame(self):
         for i in range(3):
             self.s.talon.dealRow(frames=0, flip=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
+        self._startAndDealRowAndCards()
 
     getQuickPlayScore = Game._getSpiderQuickPlayScore
 
@@ -263,7 +265,6 @@ class TwinQueens(Congress):
     shallHighlightMatch = Game._shallHighlightMatch_SS
 
 
-
 # register the game
 registerGame(GameInfo(149, Diplomat, "Diplomat",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
@@ -283,4 +284,3 @@ registerGame(GameInfo(549, Wheatsheaf, "Wheatsheaf",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(563, TwinQueens, "Twin Queens",
                       GI.GT_FORTY_THIEVES, 2, 1, GI.SL_MOSTLY_SKILL))
-

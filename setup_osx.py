@@ -3,8 +3,10 @@ Usage:
     python setup.py py2app
 """
 
-import os, sys
+import os
+import sys
 import shutil
+from six.moves import tkinter
 from subprocess import call
 from setuptools import setup
 from pysollib.settings import PACKAGE, VERSION
@@ -26,19 +28,18 @@ call("./scripts/all_games.py > docs/all_games.html", shell=True)
 
 # Use Tile widgets, if they are installed.
 # http://tktable.sourceforge.net/tile/
-import Tkinter
-root = Tkinter.Tk()
+root = tkinter.Tk()
 root.withdraw()
 try:
     root.tk.call('package', 'require', 'tile', '0.7.8')
-except:
+except Exception:
     TILE = None
 else:
     TILE = "tile0.7.8"
     TCL_EXTENSION_PATH = "/Library/Tcl"
 finally:
     root.destroy()
-    del root, Tkinter
+    del root, tkinter
 
 # Use Freecell Solver, if it is installed.
 # http://fc-solve.berlios.de/
@@ -52,19 +53,19 @@ GETINFO_STRING = "PySol Fan Club Edition \
                 %s %s, (C) 1998-2003 Markus F.X.J Oberhumer \
                 (C) 2006-2007 Skomoroh" % (PACKAGE, VERSION)
 PLIST = dict(
-    CFBundleDevelopmentRegion = 'en_US',
-    CFBundleExecutable = PACKAGE,
-    CFBundleDisplayName = PACKAGE,
-    CFBundleGetInfoString = GETINFO_STRING,
-    CFBundleIdentifier = 'net.sourceforge.pysolfc',
-    CFBundleName = PACKAGE,
-    CFBundleVersion = '%s' % VERSION,
-    CFBundleShortVersionString = '%s' % VERSION, 
-    NSHumanReadableCopyright = "Copyright (C) 1998-2003 Markus F.X.J. Oberhumer",
+    CFBundleDevelopmentRegion='en_US',
+    CFBundleExecutable=PACKAGE,
+    CFBundleDisplayName=PACKAGE,
+    CFBundleGetInfoString=GETINFO_STRING,
+    CFBundleIdentifier='net.sourceforge.pysolfc',
+    CFBundleName=PACKAGE,
+    CFBundleVersion='%s' % VERSION,
+    CFBundleShortVersionString='%s' % VERSION,
+    NSHumanReadableCopyright="Copyright (C) 1998-2003 Markus F.X.J. Oberhumer",
     )
 APP = ['pysol.py']
 ICON_FILE = 'data/PySol.icns'
-DATA_FILES = ['docs', 'data', 'scripts','COPYING', 'README'] + SOLVER
+DATA_FILES = ['docs', 'data', 'scripts', 'COPYING', 'README.md'] + SOLVER
 RESOURCES = [os.path.join(TCL_EXTENSION_PATH, TILE)] if TILE else []
 FRAMEWORKS = [SOLVER_LIB_PATH] if SOLVER_LIB_PATH else []
 OPTIONS = dict(argv_emulation=True,
@@ -82,7 +83,7 @@ setup(
     setup_requires=['py2app'],
     )
 
-##
+#
 top = os.getcwd()
 # FIXME: a hack to get Tcl extensions working
 # from inside the app bundle

@@ -1,44 +1,57 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import DefaultHint, CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT, RANKS
+
+from pysollib.stack import \
+        AC_RowStack, \
+        AbstractFoundationStack, \
+        DealRowTalonStack, \
+        InitialDealTalonStack, \
+        RK_RowStack, \
+        Stack, \
+        UD_AC_RowStack, \
+        UD_RK_RowStack, \
+        WasteStack, \
+        WasteTalonStack, \
+        cardsFaceDown, \
+        isRankSequence, \
+        ReserveStack
 
 # ************************************************************************
 # * PileOn
 # ************************************************************************
+
 
 class PileOn_RowStack(RK_RowStack):
     getBottomImage = Stack._getReserveBottomImage
@@ -54,8 +67,8 @@ class PileOn_RowStack(RK_RowStack):
 
 class PileOn(Game):
     Hint_Class = DefaultHint
-    ##Hint_Class = CautiousDefaultHint
-    TWIDTH = 4     
+    # Hint_Class = CautiousDefaultHint
+    TWIDTH = 4
     NSTACKS = 15
     PLAYCARDS = 4
 
@@ -69,7 +82,7 @@ class PileOn(Game):
 
         # set window
         # (set size so that at least 4 cards are fully playable)
-        #w = max(2*l.XS, l.XS+(self.PLAYCARDS-1)*l.XOFFSET+2*l.XM)
+        # w = max(2*l.XS, l.XS+(self.PLAYCARDS-1)*l.XOFFSET+2*l.XM)
         w = l.XS+(self.PLAYCARDS-1)*l.XOFFSET+3*l.XOFFSET
         twidth, theight = self.TWIDTH, int((self.NSTACKS-1)/self.TWIDTH+1)
         self.setSize(l.XM+twidth*w, l.YM+theight*l.YS)
@@ -81,7 +94,8 @@ class PileOn(Game):
             for j in range(twidth):
                 if i*twidth+j >= self.NSTACKS:
                     break
-                stack = PileOn_RowStack(x, y, self, dir=0, max_cards=self.PLAYCARDS)
+                stack = PileOn_RowStack(
+                    x, y, self, dir=0, max_cards=self.PLAYCARDS)
                 stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
                 s.rows.append(stack)
                 x = x + w
@@ -121,12 +135,12 @@ class SmallPileOn(PileOn):
     PLAYCARDS = 4
 
 
-## class PileOn2Decks(PileOn):
-##     TWIDTH = 4
-##     NSTACKS = 15
-##     PLAYCARDS = 8
-## registerGame(GameInfo(341, PileOn2Decks, "PileOn (2 decks)",
-##                       GI.GT_2DECK_TYPE | GI.GT_OPEN,, 2, 0))
+#  class PileOn2Decks(PileOn):
+#      TWIDTH = 4
+#      NSTACKS = 15
+#      PLAYCARDS = 8
+#  registerGame(GameInfo(341, PileOn2Decks, "PileOn (2 decks)",
+#                        GI.GT_2DECK_TYPE | GI.GT_OPEN,, 2, 0))
 
 
 # ************************************************************************
@@ -142,7 +156,7 @@ class Foursome(Game):
         l, s = Layout(self), self.s
         max_rows = max(8, rows)
         self.setSize(l.XM+max_rows*l.XS, l.YM+2*l.YS+13*l.YOFFSET)
-        x, y = l.XM+l.XS*(max_rows-4)/2, l.YM
+        x, y = l.XM+l.XS*(max_rows-4)//2, l.YM
         for i in range(4):
             s.reserves.append(ReserveStack(x, y, self))
             x += l.XS
@@ -150,7 +164,7 @@ class Foursome(Game):
         s.foundations.append(AbstractFoundationStack(x, y, self,
                              suit=ANY_SUIT, max_cards=52, max_accept=0))
         l.createText(s.foundations[0], 'nw')
-        x, y = l.XM+l.XS*(max_rows-rows)/2, l.YM+l.YS
+        x, y = l.XM+l.XS*(max_rows-rows)//2, l.YM+l.YS
         for i in range(rows):
             s.rows.append(UD_AC_RowStack(x, y, self, mod=13))
             x += l.XS
@@ -178,7 +192,6 @@ class Foursome(Game):
             self.flipMove(self.s.foundations[0])
         self.leaveState(old_state)
 
-
     shallHighlightMatch = Game._shallHighlightMatch_ACW
 
 
@@ -189,9 +202,7 @@ class Quartets(Foursome):
         Foursome.createGame(self, rows=8, texts=False)
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow()
         self.s.talon.dealRowAvail()
 
@@ -281,7 +292,6 @@ class FourByFour(Game):
 
         l.defaultStackGroups()
 
-
     def startGame(self):
         self.startDealSample()
         self.s.talon.dealRow(rows=self.s.foundations)
@@ -356,9 +366,7 @@ class Footling(FourByFour):
         l.defaultStackGroups()
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow()
         self.s.talon.dealRowAvail()
 
@@ -368,10 +376,9 @@ class Footling(FourByFour):
 class DoubleFootling(Footling):
     def createGame(self):
         Footling.createGame(self, rows=10, reserves=5, playcards=18)
+
     def startGame(self):
-        for i in range(9):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(9)
         self.s.talon.dealRow()
         self.s.talon.dealRowAvail()
 
@@ -379,20 +386,22 @@ class DoubleFootling(Footling):
 # register the game
 registerGame(GameInfo(41, PileOn, "PileOn",
                       GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Fifteen Puzzle",) ))
+                      altnames=("Fifteen Puzzle",)))
 registerGame(GameInfo(289, SmallPileOn, "Small PileOn",
-                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL,
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL,
                       ranks=(0, 5, 6, 7, 8, 9, 10, 11, 12),
-                      rules_filename = "pileon.html"))
+                      rules_filename="pileon.html"))
 registerGame(GameInfo(554, Foursome, "Foursome",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(555, Quartets, "Quartets",
-                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(703, FourByFour, "Four by Four",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(740, Footling, "Footling",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(741, DoubleFootling, "Double Footling",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
-
-
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))

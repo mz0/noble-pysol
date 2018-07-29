@@ -1,57 +1,71 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import DefaultHint
 from pysollib.hint import FreeCellType_Hint, FreeCellSolverWrapper
 
-from spider import Spider_AC_Foundation
+from pysollib.games.spider import Spider_AC_Foundation
 
+from pysollib.util import ACE, ANY_SUIT, KING, NO_RANK, UNLIMITED_CARDS
+
+from pysollib.stack import \
+        AC_FoundationStack, \
+        AC_RowStack, \
+        BasicRowStack, \
+        FreeCell_AC_RowStack, \
+        FreeCell_SS_RowStack, \
+        InitialDealTalonStack, \
+        KingAC_RowStack, \
+        OpenStack, \
+        RK_FoundationStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        Stack, \
+        SuperMoveAC_RowStack, \
+        SuperMoveRK_RowStack, \
+        isAlternateColorSequence, \
+        StackWrapper
 
 # ************************************************************************
 # * FreeCell
 # ************************************************************************
 
+
 class FreeCell(Game):
-    Layout_Method = Layout.freeCellLayout
+    Layout_Method = staticmethod(Layout.freeCellLayout)
     Talon_Class = InitialDealTalonStack
     Foundation_Class = SS_FoundationStack
     RowStack_Class = SuperMoveAC_RowStack
     ReserveStack_Class = ReserveStack
     Hint_Class = FreeCellType_Hint
     Solver_Class = FreeCellSolverWrapper()
-
 
     #
     # game layout
@@ -62,11 +76,14 @@ class FreeCell(Game):
         l, s = Layout(self), self.s
         kwdefault(layout, rows=8, reserves=4, texts=0)
         self.Layout_Method(l, **layout)
+        # self.__class__.__dict__['Layout_Method'](l, **layout)
+        # self.__class__.Layout_Method(l, **layout)
         self.setSize(l.size[0], l.size[1])
         # create stacks
         s.talon = self.Talon_Class(l.s.talon.x, l.s.talon.y, self)
         for r in l.s.foundations:
-            s.foundations.append(self.Foundation_Class(r.x, r.y, self, suit=r.suit))
+            s.foundations.append(
+                self.Foundation_Class(r.x, r.y, self, suit=r.suit))
         for r in l.s.rows:
             s.rows.append(self.RowStack_Class(r.x, r.y, self))
         for r in l.s.reserves:
@@ -79,12 +96,10 @@ class FreeCell(Game):
     #
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow()
         r = self.s.rows
-        ##self.s.talon.dealRow(rows=(r[0], r[2], r[4], r[6]))
+        # self.s.talon.dealRow(rows=(r[0], r[2], r[4], r[6]))
         self.s.talon.dealRow(rows=r[:4])
 
     shallHighlightMatch = Game._shallHighlightMatch_AC
@@ -108,9 +123,7 @@ class ForeCell(FreeCell):
     Solver_Class = FreeCellSolverWrapper(esf='kings')
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.reserves)
 
@@ -123,8 +136,9 @@ class ForeCell(FreeCell):
 class ChallengeFreeCell(FreeCell):
     def _shuffleHook(self, cards):
         # move Aces and Twos to top of the Talon
-        return self._shuffleHookMoveToTop(cards,
-                   lambda c: (c.rank in (ACE, 1), (-c.rank, c.suit)))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank in (ACE, 1), (-c.rank, c.suit)))
+
 
 class SuperChallengeFreeCell(ChallengeFreeCell):
     RowStack_Class = StackWrapper(FreeCell_AC_RowStack, base_rank=KING)
@@ -136,7 +150,8 @@ class SuperChallengeFreeCell(ChallengeFreeCell):
 # ************************************************************************
 
 class Stalactites(FreeCell):
-    Foundation_Class = StackWrapper(RK_FoundationStack, suit=ANY_SUIT, mod=13, min_cards=1)
+    Foundation_Class = StackWrapper(
+        RK_FoundationStack, suit=ANY_SUIT, mod=13, min_cards=1)
     RowStack_Class = StackWrapper(BasicRowStack, max_move=1, max_accept=0)
     Solver_Class = None
 
@@ -144,9 +159,7 @@ class Stalactites(FreeCell):
         FreeCell.createGame(self, reserves=2)
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.foundations)
         self._restoreGameHook(None)
@@ -180,7 +193,9 @@ class DoubleFreecell(FreeCell):
         s.talon = self.Talon_Class(l.XM, h-l.YS, self)
         x, y = 3*l.XM + 6*l.XS, l.YM
         for i in range(4):
-            s.foundations.append(self.Foundation_Class(x, y, self, suit=i, mod=13, max_cards=26))
+            s.foundations.append(
+                self.Foundation_Class(
+                    x, y, self, suit=i, mod=13, max_cards=26))
             x += l.XS
         x, y = 2*l.XM, l.YM + l.YS + l.YM
         for i in range(10):
@@ -199,13 +214,11 @@ class DoubleFreecell(FreeCell):
 
     def _shuffleHook(self, cards):
         # move 4 Aces to bottom of the Talon (i.e. last cards to be dealt)
-        return self._shuffleHookMoveToBottom(cards,
-                   lambda c: (c.rank == ACE and c.deck == 0, c.suit))
+        return self._shuffleHookMoveToBottom(
+            cards, lambda c: (c.rank == ACE and c.deck == 0, c.suit))
 
     def startGame(self):
-        for i in range(9):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(9)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.foundations)
 
@@ -235,16 +248,16 @@ class TripleFreecell(FreeCell):
         # create stacks
         s.talon = self.Talon_Class(l.XM, h-l.YS, self)
 
-        x, y = l.XM+(max_rows-decks*4)*l.XS/2, l.YM
+        x, y = l.XM+(max_rows-decks*4)*l.XS//2, l.YM
         for j in range(4):
             for i in range(decks):
                 s.foundations.append(self.Foundation_Class(x, y, self, suit=j))
                 x += l.XS
-        x, y = l.XM+(max_rows-reserves)*l.XS/2, l.YM+l.YS
+        x, y = l.XM+(max_rows-reserves)*l.XS//2, l.YM+l.YS
         for i in range(reserves):
             s.reserves.append(ReserveStack(x, y, self))
             x += l.XS
-        x, y = l.XM+(max_rows-rows)*l.XS/2, l.YM+2*l.YS
+        x, y = l.XM+(max_rows-rows)*l.XS//2, l.YM+2*l.YS
         for i in range(rows):
             s.rows.append(self.RowStack_Class(x, y, self))
             x += l.XS
@@ -257,10 +270,7 @@ class TripleFreecell(FreeCell):
     #
 
     def startGame(self):
-        for i in range(11):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(11)
 
 
 class Cell11(TripleFreecell):
@@ -268,11 +278,9 @@ class Cell11(TripleFreecell):
         TripleFreecell.createGame(self, rows=12, reserves=11)
 
     def startGame(self):
-        for i in range(12):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(12)
         self.s.talon.dealRow(rows=self.s.rows[1:-1])
-        self.s.talon.dealRow(rows=[self.s.reserves[0],self.s.reserves[-1]])
+        self.s.talon.dealRow(rows=[self.s.reserves[0], self.s.reserves[-1]])
 
 
 class BigCell(TripleFreecell):
@@ -282,10 +290,7 @@ class BigCell(TripleFreecell):
         TripleFreecell.createGame(self, rows=13, reserves=4)
 
     def startGame(self):
-        for i in range(11):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(11)
 
 
 # ************************************************************************
@@ -297,6 +302,7 @@ class Spidercells_RowStack(SuperMoveAC_RowStack):
         if len(cards) == 13 and isAlternateColorSequence(cards):
             return True
         return SuperMoveAC_RowStack.canMoveCards(self, cards)
+
     def canDropCards(self, stacks):
         if len(self.cards) < 13:
             return (None, 0)
@@ -322,7 +328,8 @@ class Spidercells(FreeCell):
         # create stacks
         s.talon = self.Talon_Class(l.s.talon.x, l.s.talon.y, self)
         for r in l.s.foundations:
-            s.foundations.append(self.Foundation_Class(r.x, r.y, self, suit=ANY_SUIT))
+            s.foundations.append(
+                self.Foundation_Class(r.x, r.y, self, suit=ANY_SUIT))
         for r in l.s.rows:
             s.rows.append(self.RowStack_Class(r.x, r.y, self))
         for r in l.s.reserves:
@@ -340,22 +347,25 @@ class Spidercells(FreeCell):
 class SevenByFour(FreeCell):
     def createGame(self):
         FreeCell.createGame(self, rows=7)
+
     def startGame(self):
-        for i in range(6):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(6)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.rows[:3])
+
 
 class SevenByFive(SevenByFour):
     def createGame(self):
         FreeCell.createGame(self, rows=7, reserves=5)
 
+
 class Bath(FreeCell):
     Solver_Class = FreeCellSolverWrapper(esf='kings')
     RowStack_Class = StackWrapper(SuperMoveAC_RowStack, base_rank=KING)
+
     def createGame(self):
         FreeCell.createGame(self, rows=10, reserves=2)
+
     def startGame(self):
         for i in range(6):
             self.s.talon.dealRow(rows=self.s.rows[i:], frames=0)
@@ -395,9 +405,7 @@ class Clink(FreeCell):
         l.defaultAll()
 
     def startGame(self):
-        for i in range(4):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(4)
         self.s.talon.dealRow()
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.reserves)
@@ -405,8 +413,9 @@ class Clink(FreeCell):
 
     def _shuffleHook(self, cards):
         # move two Aces to bottom of the Talon (i.e. last cards to be dealt)
-        return self._shuffleHookMoveToBottom(cards,
-                   lambda c: (c.rank == ACE and c.suit in (0, 2), (c.suit)))
+        return self._shuffleHookMoveToBottom(
+            cards,
+            lambda c: (c.rank == ACE and c.suit in (0, 2), (c.suit)))
 
 
 # ************************************************************************
@@ -421,9 +430,7 @@ class Repair(FreeCell):
         FreeCell.createGame(self, rows=10, reserves=4, playcards=26)
 
     def startGame(self):
-        for i in range(9):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(9)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.reserves)
 
@@ -435,6 +442,7 @@ class Repair(FreeCell):
 
 class FourColours_RowStack(AC_RowStack):
     getBottomImage = Stack._getReserveBottomImage
+
 
 class FourColours(FreeCell):
     Solver_Class = None
@@ -503,9 +511,7 @@ class OceanTowers(TripleFreecell):
         TripleFreecell.createGame(self, rows=14, reserves=8, playcards=20)
 
     def startGame(self):
-        for i in range(6):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(6)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.reserves[1:-1])
 
@@ -541,9 +547,9 @@ class Headquarters(Game):
         l, s = Layout(self), self.s
         w, h = l.XM+(rows+reserves+1)*l.XS, l.YM+3*l.YS+16*l.YOFFSET
         self.setSize(w, h)
-        x, y = l.XM+(rows+reserves+1-8)*l.XS/2, l.YM
+        x, y = l.XM+(rows+reserves+1-8)*l.XS//2, l.YM
         for i in range(8):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i%4))
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i % 4))
             x += l.XS
         x, y = l.XM, l.YM+l.YS
         for i in range(reserves):
@@ -563,12 +569,8 @@ class Headquarters(Game):
 
         l.defaultStackGroups()
 
-
     def startGame(self):
-        for i in range(12):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(12)
 
     shallHighlightMatch = Game._shallHighlightMatch_AC
 
@@ -587,9 +589,7 @@ class CanCan(FreeCell):
         FreeCell.createGame(self, rows=13, reserves=3)
 
     def startGame(self):
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(3)
         self.s.talon.dealRow(rows=self.s.reserves)
         self.s.talon.dealRowAvail()
 
@@ -609,8 +609,8 @@ class Limpopo(Game):
         self.setSize(l.XM+10.5*l.XS, l.YM+2*l.YS+20*l.YOFFSET)
 
         # create stacks
-        x, y = l.XM, l.YM+l.YS/2
-        for i in (0,1):
+        x, y = l.XM, l.YM+l.YS//2
+        for i in (0, 1):
             stack = ReserveStack(x, y, self, max_cards=4)
             s.reserves.append(stack)
             stack.CARD_YOFFSET = l.YOFFSET
@@ -619,7 +619,7 @@ class Limpopo(Game):
 
         x, y = l.XM+2.5*l.XS, l.YM
         for i in range(8):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i/2))
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i//2))
             x += l.XS
 
         x, y = l.XM+2.5*l.XS, l.YM+l.YS
@@ -634,25 +634,29 @@ class Limpopo(Game):
         l.defaultStackGroups()
 
     def startGame(self):
-        for i in range(12):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(12)
 
     shallHighlightMatch = Game._shallHighlightMatch_AC
 
 
+class PairFcFreeCell(FreeCell):
+    def createGame(self):
+        FreeCell.createGame(self, reserves=2)
+
 
 # register the game
 registerGame(GameInfo(5, RelaxedFreeCell, "Relaxed FreeCell",
-                      GI.GT_FREECELL | GI.GT_RELAXED | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
+                      GI.GT_FREECELL | GI.GT_RELAXED | GI.GT_OPEN, 1, 0,
+                      GI.SL_SKILL))
 registerGame(GameInfo(8, FreeCell, "FreeCell",
+                      GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
+registerGame(GameInfo(1900, PairFcFreeCell, "FreeCell with Two Reserves",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(46, ForeCell, "ForeCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(77, Stalactites, "Stalactites",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Grampus", "Old Mole") ))
+                      altnames=("Grampus", "Old Mole")))
 registerGame(GameInfo(264, DoubleFreecell, "Double FreeCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(265, TripleFreecell, "Triple FreeCell",
@@ -671,7 +675,8 @@ registerGame(GameInfo(365, SevenByFive, "Seven by Five",
 registerGame(GameInfo(383, Bath, "Bath",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(394, Clink, "Clink",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(448, Repair, "Repair",
                       GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(451, Cell11, "Cell 11",
@@ -679,17 +684,20 @@ registerGame(GameInfo(451, Cell11, "Cell 11",
 registerGame(GameInfo(464, FourColours, "Four Colours",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(509, BigCell, "Big Cell",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 3, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 3, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(513, OceanTowers, "Ocean Towers",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(520, GermanFreeCell, "German FreeCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(542, KingCell, "KingCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(648, Headquarters, "Headquarters",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(698, CanCan, "Can Can",
                       GI.GT_RAGLAN | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(746, Limpopo, "Limpopo",
-                      GI.GT_FREECELL | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
-
+                      GI.GT_FREECELL | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))

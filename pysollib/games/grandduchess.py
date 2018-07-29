@@ -1,45 +1,45 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
-from pysollib.pysoltk import MfxCanvasText
 
+from pysollib.util import ACE, KING
+
+from pysollib.stack import \
+        ArbitraryStack, \
+        BasicRowStack, \
+        RedealTalonStack, \
+        SS_FoundationStack
 
 # ************************************************************************
 # * Grand Duchess
 # ************************************************************************
+
 
 class GrandDuchess_Talon(RedealTalonStack):
 
@@ -103,13 +103,13 @@ class GrandDuchess(Game):
             s.foundations.append(SS_FoundationStack(x, y, self,
                                  suit=i, base_rank=KING, dir=-1))
             x += l.XS
-        x, y = l.XM+(max_rows-rows)*l.XS/2, l.YM+l.YS
+        x, y = l.XM+(max_rows-rows)*l.XS//2, l.YM+l.YS
         for i in range(rows):
             stack = BasicRowStack(x, y, self, max_move=1, max_accept=0)
             stack.CARD_YOFFSET = l.YOFFSET
             s.rows.append(stack)
             x += l.XS
-        dx = (max_rows-rows)*l.XS/4-l.XS/2
+        dx = (max_rows-rows)*l.XS//4-l.XS//2
         x, y = l.XM+dx, l.YM+l.YS
         s.reserves.append(GrandDuchess_Reserve(x, y, self))
         x, y = self.width-dx-l.XS, l.YM+l.YS
@@ -117,7 +117,6 @@ class GrandDuchess(Game):
 
         # define stack-groups
         l.defaultStackGroups()
-
 
     #
     # game overrides
@@ -132,7 +131,6 @@ class GrandDuchess(Game):
     def redealCards(self):
         pass
 
-
     def getAutoStacks(self, event=None):
         return ((), (), self.sg.dropstacks)
 
@@ -145,8 +143,10 @@ class Parisienne(GrandDuchess):
     def _shuffleHook(self, cards):
         # move one Ace and one King of each suit to top of the Talon
         # (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards,
-            lambda c: (c.rank in (ACE, KING) and c.deck == 0, (c.rank, c.suit)))
+        return self._shuffleHookMoveToTop(
+            cards,
+            lambda c: (c.rank in (ACE, KING) and c.deck == 0,
+                       (c.rank, c.suit)))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
@@ -158,13 +158,11 @@ class GrandDuchessPlus(GrandDuchess):
         GrandDuchess.createGame(self, rows=6)
 
 
-
 registerGame(GameInfo(557, GrandDuchess, "Grand Duchess",
                       GI.GT_2DECK_TYPE, 2, 3))
 registerGame(GameInfo(617, Parisienne, "Parisienne",
                       GI.GT_2DECK_TYPE, 2, 3,
                       rules_filename='grandduchess.html',
-                      altnames=('La Parisienne', 'Parisian') ))
+                      altnames=('La Parisienne', 'Parisian')))
 registerGame(GameInfo(618, GrandDuchessPlus, "Grand Duchess +",
                       GI.GT_2DECK_TYPE, 2, 3))
-
