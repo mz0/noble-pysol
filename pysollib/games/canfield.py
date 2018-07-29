@@ -1,50 +1,35 @@
-#!/usr/bin/env python
-# -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
-
-# imports
-import sys
-
-# PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
+from pysollib.mygettext import _
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
+from pysollib.util import KING, RANKS, QUEEN, UNLIMITED_REDEALS
+
+from pysollib.stack import \
+        AC_RowStack, \
+        KingAC_RowStack, \
+        OpenStack, \
+        RK_RowStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        WasteStack, \
+        WasteTalonStack, \
+        StackWrapper
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class Canfield_Hint(CautiousDefaultHint):
     # FIXME: demo is not too clever in this game
 
     # Score for moving a pile (usually a single card) from the WasteStack.
     def _getMoveWasteScore(self, score, color, r, t, pile, rpile):
-        score, color = CautiousDefaultHint._getMovePileScore(self, score, color, r, t, pile, rpile)
+        score, color = CautiousDefaultHint._getMovePileScore(
+            self, score, color, r, t, pile, rpile)
         # we prefer moving cards from the waste over everything else
         return score + 100000, color
 
@@ -100,66 +85,68 @@ class Canfield(Game):
     def createGame(self, rows=4, max_rounds=-1, num_deal=3,
                    text=True, round_text=False):
         # create layout
-        l, s = Layout(self), self.s
+        lay, s = Layout(self), self.s
         decks = self.gameinfo.decks
 
         # set window
         if self.INITIAL_RESERVE_FACEUP == 1:
-            yoffset = l.YOFFSET ##min(l.YOFFSET, 14)
+            yoffset = lay.YOFFSET  # min(lay.YOFFSET, 14)
         else:
             yoffset = 10
             if self.INITIAL_RESERVE_CARDS > 30:
                 yoffset = 5
         # (piles up to 20 cards are playable in default window size)
-        h = max(3*l.YS, l.YS+self.INITIAL_RESERVE_CARDS*yoffset)
+        h = max(3*lay.YS, lay.YS+self.INITIAL_RESERVE_CARDS*yoffset)
         if round_text:
-            h += l.TEXT_HEIGHT
-        self.setSize(l.XM + (2+max(rows, 4*decks))*l.XS + l.XM, l.YM + l.YS + l.TEXT_HEIGHT + h)
+            h += lay.TEXT_HEIGHT
+        self.setSize(
+            lay.XM + (2+max(rows, 4*decks))*lay.XS + lay.XM,
+            lay.YM + lay.YS + lay.TEXT_HEIGHT + h)
 
         # extra settings
         self.base_card = None
 
         # create stacks
-        x, y = l.XM, l.YM
+        x, y = lay.XM, lay.YM
         s.talon = self.Talon_Class(x, y, self,
                                    max_rounds=max_rounds, num_deal=num_deal)
-        l.createText(s.talon, "s")
+        lay.createText(s.talon, "s")
         if round_text:
-            l.createRoundText(s.talon, 'sss')
-        x += l.XS
+            lay.createRoundText(s.talon, 'sss')
+        x += lay.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, "s")
-        x += l.XM
-        y = l.YM
+        lay.createText(s.waste, "s")
+        x += lay.XM
+        y = lay.YM
         for i in range(4):
             for j in range(decks):
-                x += l.XS
+                x += lay.XS
                 s.foundations.append(self.Foundation_Class(x, y, self, i,
                                                            mod=13, max_move=0))
         if text:
             if rows > 4 * decks:
-                tx, ty, ta, tf = l.getTextAttr(None, "se")
-                tx, ty = x + tx + l.XM, y + ty
+                tx, ty, ta, tf = lay.getTextAttr(None, "se")
+                tx, ty = x + tx + lay.XM, y + ty
             else:
-                tx, ty, ta, tf = l.getTextAttr(None, "ss")
+                tx, ty, ta, tf = lay.getTextAttr(None, "ss")
                 tx, ty = x + tx, y + ty
             font = self.app.getFont("canvas_default")
             self.texts.info = MfxCanvasText(self.canvas, tx, ty,
                                             anchor=ta, font=font)
-        x, y = l.XM, l.YM + l.YS + l.TEXT_HEIGHT
+        x, y = lay.XM, lay.YM + lay.YS + lay.TEXT_HEIGHT
         if round_text:
-            y += l.TEXT_HEIGHT
+            y += lay.TEXT_HEIGHT
         s.reserves.append(self.ReserveStack_Class(x, y, self))
         s.reserves[0].CARD_YOFFSET = yoffset
-        x, y = l.XM + 2 * l.XS + l.XM, l.YM + l.YS
+        x, y = lay.XM + 2 * lay.XS + lay.XM, lay.YM + lay.YS
         if text:
-            y += l.TEXT_HEIGHT
+            y += lay.TEXT_HEIGHT
         for i in range(rows):
             s.rows.append(self.RowStack_Class(x, y, self))
-            x += l.XS
+            x += lay.XS
 
         # define stack-groups
-        l.defaultStackGroups()
+        lay.defaultStackGroups()
 
     #
     # game extras
@@ -199,7 +186,8 @@ class Canfield(Game):
         for i in range(self.INITIAL_RESERVE_CARDS):
             if self.INITIAL_RESERVE_FACEUP:
                 self.flipMove(self.s.talon)
-            self.moveMove(1, self.s.talon, self.s.reserves[0], frames=4, shadow=0)
+            self.moveMove(
+                1, self.s.talon, self.s.reserves[0], frames=4, shadow=0)
         if self.s.reserves[0].canFlipCard():
             self.flipMove(self.s.reserves[0])
         self.s.talon.dealRow(reverse=1)
@@ -262,6 +250,7 @@ class Rainbow(Canfield):
 # * Storehouse (aka Straight Up)
 # ************************************************************************
 
+
 class Storehouse(Canfield):
     RowStack_Class = StackWrapper(Canfield_SS_RowStack, mod=13)
 
@@ -270,7 +259,8 @@ class Storehouse(Canfield):
 
     def _shuffleHook(self, cards):
         # move Twos to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards, lambda c: (c.rank == 1, c.suit))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == 1, c.suit))
 
     def startGame(self):
         self.startDealSample()
@@ -339,7 +329,8 @@ class VariegatedCanfield(Canfield):
 
     def _shuffleHook(self, cards):
         # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards, lambda c: (c.rank == 0, c.suit))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == 0, c.suit))
 
     def startGame(self):
         self.startDealSample()
@@ -366,43 +357,45 @@ class EagleWing(Canfield):
     ReserveStack_Class = EagleWing_ReserveStack
 
     def createGame(self):
-        ##Canfield.createGame(self, rows=8, max_rounds=3, num_deal=1)
+        # Canfield.createGame(self, rows=8, max_rounds=3, num_deal=1)
         # create layout
-        l, s = Layout(self), self.s
+        lay, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM + 9*l.XS + l.XM, l.YM + 4*l.YS)
+        self.setSize(lay.XM + 9*lay.XS + lay.XM, lay.YM + 4*lay.YS)
 
         # extra settings
         self.base_card = None
 
         # create stacks
-        x, y = l.XM, l.YM
+        x, y = lay.XM, lay.YM
         s.talon = WasteTalonStack(x, y, self, max_rounds=3, num_deal=1)
-        l.createText(s.talon, "s")
-        l.createRoundText(s.talon, 'ne', dx=l.XS)
-        x += l.XS
+        lay.createText(s.talon, "s")
+        lay.createRoundText(s.talon, 'ne', dx=lay.XS)
+        x += lay.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, "s")
+        lay.createText(s.waste, "s")
         for i in range(4):
-            x = l.XM + (i+3)*l.XS
-            s.foundations.append(self.Foundation_Class(x, y, self, i, mod=13, max_move=0))
-        tx, ty, ta, tf = l.getTextAttr(None, "se")
-        tx, ty = x + tx + l.XM, y + ty
+            x = lay.XM + (i+3)*lay.XS
+            s.foundations.append(
+                self.Foundation_Class(x, y, self, i, mod=13, max_move=0))
+        tx, ty, ta, tf = lay.getTextAttr(None, "se")
+        tx, ty = x + tx + lay.XM, y + ty
         font = self.app.getFont("canvas_default")
-        self.texts.info = MfxCanvasText(self.canvas, tx, ty, anchor=ta, font=font)
-        ry = l.YM + 2*l.YS
+        self.texts.info = MfxCanvasText(
+            self.canvas, tx, ty, anchor=ta, font=font)
+        ry = lay.YM + 2*lay.YS
         for i in range(8):
-            x = l.XM + (i + (i >= 4))*l.XS
-            y = ry - (0.2, 0.4, 0.6, 0.4, 0.4, 0.6, 0.4, 0.2)[i]*l.CH
+            x = lay.XM + (i + (i >= 4))*lay.XS
+            y = ry - (0.2, 0.4, 0.6, 0.4, 0.4, 0.6, 0.4, 0.2)[i]*lay.CH
             s.rows.append(self.RowStack_Class(x, y, self))
-        x, y = l.XM + 4*l.XS, ry
+        x, y = lay.XM + 4*lay.XS, ry
         s.reserves.append(self.ReserveStack_Class(x, y, self))
-        ##s.reserves[0].CARD_YOFFSET = 0
-        l.createText(s.reserves[0], "s")
+        # s.reserves[0].CARD_YOFFSET = 0
+        lay.createText(s.reserves[0], "s")
 
         # define stack-groups
-        l.defaultStackGroups()
+        lay.defaultStackGroups()
 
     shallHighlightMatch = Game._shallHighlightMatch_SSW
 
@@ -421,33 +414,34 @@ class Gate(Game):
 
     def createGame(self):
         # create layout
-        l, s = Layout(self), self.s
+        lay, s = Layout(self), self.s
 
         # set window
-        w, h = max(8*l.XS, 6*l.XS+8*l.XOFFSET), l.YM+3*l.YS+12*l.YOFFSET
-        self.setSize(w+l.XM, h)
+        w = max(8*lay.XS, 6*lay.XS+8*lay.XOFFSET)
+        h = lay.YM+3*lay.YS+12*lay.YOFFSET
+        self.setSize(w+lay.XM, h)
 
         # create stacks
-        y = l.YM
-        for x in (l.XM, l.XM+w-l.XS-4*l.XOFFSET):
+        y = lay.YM
+        for x in (lay.XM, lay.XM+w-lay.XS-4*lay.XOFFSET):
             stack = OpenStack(x, y, self, max_accept=0)
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
+            stack.CARD_XOFFSET, stack.CARD_YOFFSET = lay.XOFFSET, 0
             s.reserves.append(stack)
-        x, y = l.XM+(w-4*l.XS)/2, l.YM
+        x, y = lay.XM+(w-4*lay.XS)//2, lay.YM
         for i in range(4):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
-            x += l.XS
-        x, y = l.XM+(w-8*l.XS)/2, l.YM+l.YS
+            x += lay.XS
+        x, y = lay.XM+(w-8*lay.XS)//2, lay.YM+lay.YS
         for i in range(8):
             s.rows.append(AC_RowStack(x, y, self))
-            x += l.XS
-        s.talon = WasteTalonStack(l.XM, h-l.YS, self, max_rounds=1)
-        l.createText(s.talon, "n")
-        s.waste = WasteStack(l.XM+l.XS, h-l.YS, self)
-        l.createText(s.waste, "n")
+            x += lay.XS
+        s.talon = WasteTalonStack(lay.XM, h-lay.YS, self, max_rounds=1)
+        lay.createText(s.talon, "n")
+        s.waste = WasteStack(lay.XM+lay.XS, h-lay.YS, self)
+        lay.createText(s.waste, "n")
 
         # define stack-groups
-        l.defaultStackGroups()
+        lay.defaultStackGroups()
 
     #
     # game overrides
@@ -487,36 +481,36 @@ class LittleGate(Gate):
 
     def createGame(self, rows=4):
         # create layout
-        l, s = Layout(self), self.s
+        lay, s = Layout(self), self.s
 
         # set window
         max_rows = max(7, rows+3)
-        w, h = l.XM+max_rows*l.XS, l.YM+2*l.YS+12*l.YOFFSET
+        w, h = lay.XM+max_rows*lay.XS, lay.YM+2*lay.YS+12*lay.YOFFSET
         self.setSize(w, h)
 
         # create stacks
-        y = l.YM+l.YS+l.TEXT_HEIGHT
-        for x in (l.XM, w-l.XS):
+        y = lay.YM+lay.YS+lay.TEXT_HEIGHT
+        for x in (lay.XM, w-lay.XS):
             stack = self.ReserveStack_Class(x, y, self)
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = 0, l.YOFFSET
+            stack.CARD_XOFFSET, stack.CARD_YOFFSET = 0, lay.YOFFSET
             s.reserves.append(stack)
-        x, y = l.XM+(max_rows-4)*l.XS, l.YM
+        x, y = lay.XM+(max_rows-4)*lay.XS, lay.YM
         for i in range(4):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
-            x += l.XS
-        x, y = l.XM+(max_rows-rows)*l.XS/2, l.YM+l.YS+l.TEXT_HEIGHT
+            x += lay.XS
+        x, y = lay.XM+(max_rows-rows)*lay.XS//2, lay.YM+lay.YS+lay.TEXT_HEIGHT
         for i in range(rows):
             s.rows.append(self.RowStack_Class(x, y, self))
-            x += l.XS
-        s.talon = WasteTalonStack(l.XM, l.YM, self, max_rounds=1)
-        l.createText(s.talon, "s")
-        s.waste = WasteStack(l.XM+l.XS, l.YM, self)
-        l.createText(s.waste, "s")
+            x += lay.XS
+        s.talon = WasteTalonStack(lay.XM, lay.YM, self, max_rounds=1)
+        lay.createText(s.talon, "s")
+        s.waste = WasteStack(lay.XM+lay.XS, lay.YM, self)
+        lay.createText(s.waste, "s")
 
         # define stack-groups
-        l.defaultStackGroups()
+        lay.defaultStackGroups()
 
-        return l
+        return lay
 
 
 class Doorway(LittleGate):
@@ -526,14 +520,14 @@ class Doorway(LittleGate):
     ReserveStack_Class = ReserveStack
 
     def createGame(self):
-        l = LittleGate.createGame(self, rows=5)
+        lay = LittleGate.createGame(self, rows=5)
         king_stack, queen_stack = self.s.reserves
-        tx, ty, ta, tf = l.getTextAttr(king_stack, "s")
+        tx, ty, ta, tf = lay.getTextAttr(king_stack, "s")
         font = self.app.getFont("canvas_default")
         king_stack.texts.misc = MfxCanvasText(self.canvas, tx, ty,
                                               anchor=ta, font=font,
                                               text=_('King'))
-        tx, ty, ta, tf = l.getTextAttr(queen_stack, "s")
+        tx, ty, ta, tf = lay.getTextAttr(queen_stack, "s")
         font = self.app.getFont("canvas_default")
         queen_stack.texts.misc = MfxCanvasText(self.canvas, tx, ty,
                                                anchor=ta, font=font,
@@ -575,7 +569,8 @@ class Minerva(Canfield):
         self.startDealSample()
         self.s.talon.dealRow()
         for i in range(self.INITIAL_RESERVE_CARDS):
-            self.moveMove(1, self.s.talon, self.s.reserves[0], frames=4, shadow=0)
+            self.moveMove(
+                1, self.s.talon, self.s.reserves[0], frames=4, shadow=0)
         self.flipMove(self.s.reserves[0])
         self.s.talon.dealCards()
 
@@ -583,14 +578,17 @@ class Minerva(Canfield):
 
     def _restoreGameHook(self, game):
         pass
+
     def _loadGameHook(self, p):
         pass
+
     def _saveGameHook(self, p):
         pass
 
 
 class Munger(Minerva):
     INITIAL_RESERVE_CARDS = 7
+
     def createGame(self):
         Canfield.createGame(self, rows=7, max_rounds=1, num_deal=1, text=False)
 
@@ -606,6 +604,7 @@ class Mystique(Munger):
 
 class TripleCanfield(Canfield):
     INITIAL_RESERVE_CARDS = 26
+
     def createGame(self):
         Canfield.createGame(self, rows=7)
 
@@ -624,13 +623,15 @@ class Acme(Canfield):
 
     def _shuffleHook(self, cards):
         # move Aces to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards, lambda c: (c.rank == 0, c.suit))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == 0, c.suit))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
         self.startDealSample()
         for i in range(13):
-            self.moveMove(1, self.s.talon, self.s.reserves[0], frames=4, shadow=0)
+            self.moveMove(
+                1, self.s.talon, self.s.reserves[0], frames=4, shadow=0)
         self.flipMove(self.s.reserves[0])
         self.s.talon.dealRow(reverse=1)
         self.s.talon.dealCards()
@@ -639,10 +640,13 @@ class Acme(Canfield):
 
     def updateText(self):
         pass
+
     def _restoreGameHook(self, game):
         pass
+
     def _loadGameHook(self, p):
         pass
+
     def _saveGameHook(self, p):
         pass
 
@@ -657,36 +661,37 @@ class Duke(Game):
     RowStack_Class = AC_RowStack
 
     def createGame(self):
-        l, s = Layout(self), self.s
+        lay, s = Layout(self), self.s
 
-        w, h = l.XM + 6*l.XS + 4*l.XOFFSET, l.YM + l.TEXT_HEIGHT + 2*l.YS + 12*l.YOFFSET
+        w, h = lay.XM + 6*lay.XS + 4*lay.XOFFSET, \
+            lay.YM + lay.TEXT_HEIGHT + 2*lay.YS + 12*lay.YOFFSET
         self.setSize(w, h)
 
-        x, y = l.XM, l.YM
+        x, y = lay.XM, lay.YM
         s.talon = WasteTalonStack(x, y, self, max_rounds=3)
-        l.createText(s.talon, 's')
-        l.createRoundText(s.talon, 'ne', dx=l.XS)
-        x += l.XS
+        lay.createText(s.talon, 's')
+        lay.createRoundText(s.talon, 'ne', dx=lay.XS)
+        x += lay.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 's')
-        x += l.XS+4*l.XOFFSET
-        y = l.YM
+        lay.createText(s.waste, 's')
+        x += lay.XS+4*lay.XOFFSET
+        y = lay.YM
         for i in range(4):
             s.foundations.append(self.Foundation_Class(x, y, self, suit=i))
-            x += l.XS
-        x0, y0, w = l.XM, l.YM+l.YS+2*l.TEXT_HEIGHT, l.XS+2*l.XOFFSET
-        for i, j in ((0,0), (0,1), (1,0), (1,1)):
-            x, y = x0+i*w, y0+j*l.YS
+            x += lay.XS
+        x0, y0, w = lay.XM, lay.YM+lay.YS+2*lay.TEXT_HEIGHT,\
+            lay.XS+2*lay.XOFFSET
+        for i, j in ((0, 0), (0, 1), (1, 0), (1, 1)):
+            x, y = x0+i*w, y0+j*lay.YS
             stack = self.ReserveStack_Class(x, y, self, max_accept=0)
-            stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
+            stack.CARD_XOFFSET, stack.CARD_YOFFSET = lay.XOFFSET, 0
             s.reserves.append(stack)
-        x, y = l.XM+2*l.XS+4*l.XOFFSET, l.YM+l.YS
+        x, y = lay.XM+2*lay.XS+4*lay.XOFFSET, lay.YM+lay.YS
         for i in range(4):
             s.rows.append(self.RowStack_Class(x, y, self))
-            x += l.XS
+            x += lay.XS
 
-        l.defaultStackGroups()
-
+        lay.defaultStackGroups()
 
     def startGame(self):
         for i in range(3):
@@ -694,7 +699,6 @@ class Duke(Game):
         self.startDealSample()
         self.s.talon.dealRow()
         self.s.talon.dealCards()
-
 
     shallHighlightMatch = Game._shallHighlightMatch_AC
 
@@ -706,8 +710,10 @@ class Duke(Game):
 class Demon(Canfield):
     INITIAL_RESERVE_CARDS = 40
     RowStack_Class = StackWrapper(AC_RowStack, mod=13)
+
     def createGame(self):
-        Canfield.createGame(self, rows=8, max_rounds=UNLIMITED_REDEALS, num_deal=3)
+        Canfield.createGame(
+            self, rows=8, max_rounds=UNLIMITED_REDEALS, num_deal=3)
 
 
 # ************************************************************************
@@ -719,9 +725,11 @@ class CanfieldRush_Talon(WasteTalonStack):
         self.num_deal = 4-self.round
         WasteTalonStack.dealCards(self, sound=sound)
 
+
 class CanfieldRush(Canfield):
     Talon_Class = CanfieldRush_Talon
-    #RowStack_Class = StackWrapper(AC_RowStack, mod=13)
+    # RowStack_Class = StackWrapper(AC_RowStack, mod=13)
+
     def createGame(self):
         Canfield.createGame(self, max_rounds=3, round_text=True)
 
@@ -735,52 +743,51 @@ class Skippy(Canfield):
 
     def createGame(self):
         # create layout
-        l, s = Layout(self), self.s
+        lay, s = Layout(self), self.s
 
         # set window
         playcards = 8
-        w0 = l.XS+playcards*l.XOFFSET
-        w = l.XM+l.XS/2+max(10*l.XS, l.XS+4*w0)
-        h = l.YM+5*l.YS+l.TEXT_HEIGHT
+        w0 = lay.XS+playcards*lay.XOFFSET
+        w = lay.XM+lay.XS//2+max(10*lay.XS, lay.XS+4*w0)
+        h = lay.YM+5*lay.YS+lay.TEXT_HEIGHT
         self.setSize(w, h)
 
         # extra settings
         self.base_card = None
 
         # create stacks
-        x, y = l.XM, l.YM
+        x, y = lay.XM, lay.YM
         s.talon = WasteTalonStack(x, y, self, max_rounds=1)
-        l.createText(s.talon, 's')
-        x += l.XS
+        lay.createText(s.talon, 's')
+        x += lay.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 's')
-        x = self.width - 8*l.XS
+        lay.createText(s.waste, 's')
+        x = self.width - 8*lay.XS
         for i in range(8):
             s.foundations.append(SS_FoundationStack(x, y, self,
-                                                    suit=i%4, mod=13))
-            x += l.XS
-        tx, ty, ta, tf = l.getTextAttr(None, "ss")
-        tx, ty = x-l.XS+tx, y+ty
+                                                    suit=i % 4, mod=13))
+            x += lay.XS
+        tx, ty, ta, tf = lay.getTextAttr(None, "ss")
+        tx, ty = x-lay.XS+tx, y+ty
         font = self.app.getFont("canvas_default")
         self.texts.info = MfxCanvasText(self.canvas, tx, ty,
                                         anchor=ta, font=font)
-        x, y = l.XM, l.YM+l.YS+l.TEXT_HEIGHT
+        x, y = lay.XM, lay.YM+lay.YS+lay.TEXT_HEIGHT
         for i in range(4):
             s.reserves.append(ReserveStack(x, y, self))
-            y += l.YS
-        y = l.YM+l.YS+l.TEXT_HEIGHT
+            y += lay.YS
+        y = lay.YM+lay.YS+lay.TEXT_HEIGHT
         for i in range(4):
-            x = l.XM+l.XS+l.XS/2
+            x = lay.XM+lay.XS+lay.XS//2
             for j in range(4):
                 stack = RK_RowStack(x, y, self, max_move=1, mod=13)
                 s.rows.append(stack)
-                stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
+                stack.CARD_XOFFSET, stack.CARD_YOFFSET = lay.XOFFSET, 0
                 x += w0
-            y += l.YS
+            y += lay.YS
 
         # define stack-groups
-        l.defaultStackGroups()
-
+        lay.defaultStackGroups()
 
     def startGame(self):
         self.base_card = None
@@ -794,16 +801,11 @@ class Skippy(Canfield):
         self.moveMove(1, self.s.talon, self.s.foundations[n], frames=0)
         self.updateText()
         # update rows cap.base_rank
-        row_base_rank = (self.base_card.rank-1)%13
+        row_base_rank = (self.base_card.rank-1) % 13
         for s in self.s.rows:
             s.cap.base_rank = row_base_rank
         #
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
-
+        self._startDealNumRowsAndDealRowAndCards(3)
 
     shallHighlightMatch = Game._shallHighlightMatch_RKW
 
@@ -814,33 +816,33 @@ class Skippy(Canfield):
 
 class Lafayette(Game):
     def createGame(self):
-        l, s = Layout(self), self.s
-        self.setSize(l.XM+8*l.XS, l.YM+2*l.YS+12*l.YOFFSET)
+        lay, s = Layout(self), self.s
+        self.setSize(lay.XM+8*lay.XS, lay.YM+2*lay.YS+12*lay.YOFFSET)
 
-        x, y = l.XM, l.YM
+        x, y = lay.XM, lay.YM
         for i in range(4):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
-            s.foundations.append(SS_FoundationStack(x+4*l.XS, y, self, suit=i,
+            s.foundations.append(SS_FoundationStack(x+4*lay.XS, y, self,
+                                 suit=i,
                                  base_rank=KING, dir=-1))
-            x += l.XS
-        x, y = l.XM, l.YM+l.YS
+            x += lay.XS
+        x, y = lay.XM, lay.YM+lay.YS
         s.talon = WasteTalonStack(x, y, self, max_rounds=UNLIMITED_REDEALS,
                                   num_deal=3)
-        l.createText(s.talon, 'ne')
-        y += l.YS
+        lay.createText(s.talon, 'ne')
+        y += lay.YS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 'ne')
-        x, y = l.XM+2*l.XS, l.YM+l.YS
+        lay.createText(s.waste, 'ne')
+        x, y = lay.XM+2*lay.XS, lay.YM+lay.YS
         for i in range(4):
             s.rows.append(AC_RowStack(x, y, self, base_rank=6))
-            x += l.XS
-        x += l.XS
+            x += lay.XS
+        x += lay.XS
         stack = OpenStack(x, y, self)
         s.reserves.append(stack)
-        stack.CARD_YOFFSET = l.YOFFSET
+        stack.CARD_YOFFSET = lay.YOFFSET
 
-        l.defaultStackGroups()
-
+        lay.defaultStackGroups()
 
     def startGame(self):
         for i in range(13):
@@ -849,7 +851,6 @@ class Lafayette(Game):
         self.s.talon.dealRow()
         self.s.talon.dealCards()
 
-
     def fillStack(self, stack):
         if stack in self.s.rows and not stack.cards:
             if self.s.reserves[0].cards:
@@ -857,9 +858,7 @@ class Lafayette(Game):
                 self.s.reserves[0].moveMove(1, stack)
                 self.leaveState(old_state)
 
-
     shallHighlightMatch = Game._shallHighlightMatch_AC
-
 
 
 # register the game
@@ -873,7 +872,7 @@ registerGame(GameInfo(108, Rainbow, "Rainbow",
                       GI.GT_CANFIELD, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(100, Storehouse, "Storehouse",
                       GI.GT_CANFIELD, 1, 2, GI.SL_BALANCED,
-                      altnames=("Provisions", "Straight Up", "Thirteen Up") ))
+                      altnames=("Provisions", "Straight Up", "Thirteen Up")))
 registerGame(GameInfo(43, Chameleon, "Chameleon",
                       GI.GT_CANFIELD, 1, 0, GI.SL_BALANCED,
                       altnames="Kansas"))
@@ -907,9 +906,8 @@ registerGame(GameInfo(521, CanfieldRush, "Canfield Rush",
                       GI.GT_CANFIELD, 1, 2, GI.SL_BALANCED))
 registerGame(GameInfo(527, Doorway, "Doorway",
                       GI.GT_KLONDIKE, 1, 0, GI.SL_BALANCED,
-                      altnames=('Solstice',) ))
+                      altnames=('Solstice',)))
 registerGame(GameInfo(605, Skippy, "Skippy",
                       GI.GT_FAN_TYPE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(642, Lafayette, "Lafayette",
                       GI.GT_CANFIELD, 1, -1, GI.SL_BALANCED))
-

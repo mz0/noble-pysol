@@ -1,49 +1,58 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # Imports
-import sys
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
 from pysollib.games.braid import Braid_Foundation, Braid_BraidStack, \
      Braid_RowStack, Braid_ReserveStack, Braid
 from pysollib.games.bakersdozen import Cruel_Talon
 
+from pysollib.util import ANY_RANK, NO_RANK, UNLIMITED_ACCEPTS, UNLIMITED_MOVES
+
+from pysollib.stack import \
+        InitialDealTalonStack, \
+        OpenStack, \
+        RK_RowStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        StackWrapper, \
+        WasteStack, \
+        WasteTalonStack, \
+        SS_RowStack
 
 # ************************************************************************
 # * Tarock Talon Stacks
 # ************************************************************************
+
 
 class Wicked_Talon(Cruel_Talon):
     pass
@@ -100,7 +109,8 @@ class Skiz_RowStack(RK_RowStack):
                 return cards[0].rank == len(self.game.gameinfo.trumps) - 1
             else:
                 return cards[0].rank == len(self.game.gameinfo.ranks) - 1
-        return self.cards[-1].suit == cards[0].suit and self.cards[-1].rank - 1 == cards[0].rank
+        return self.cards[-1].suit == cards[0].suit and \
+            self.cards[-1].rank - 1 == cards[0].rank
 
 
 class Pagat_RowStack(RK_RowStack):
@@ -109,7 +119,8 @@ class Pagat_RowStack(RK_RowStack):
             return 0
         if not self.cards:
             return 1
-        return self.cards[-1].suit == cards[0].suit and self.cards[-1].rank - 1 == cards[0].rank
+        return self.cards[-1].suit == cards[0].suit and \
+            self.cards[-1].rank - 1 == cards[0].rank
 
 
 class TrumpWild_RowStack(Tarock_OpenStack):
@@ -156,8 +167,8 @@ class WheelOfFortune_RowStack(Tarock_OpenStack):
             return 0
         if not self.cards:
             return 1
-        return ((cards[0].suit == self.cards[-1].suit)
-                and (cards[0].rank == self.cards[-1].rank - 1))
+        return ((cards[0].suit == self.cards[-1].suit) and
+                (cards[0].rank == self.cards[-1].rank - 1))
 
     def getBottomImage(self):
         return self.game.app.images.getReserveBottom()
@@ -196,8 +207,8 @@ class Nasty_RowStack(SS_RowStack):
         if not self.basicAcceptsCards(from_stack, cards):
             return 0
         if self.cards:
-            return (cards[0].rank == self.cards[-1].rank - 1
-                    and cards[0].suit == self.cards[-1].suit)
+            return (cards[0].rank == self.cards[-1].rank - 1 and
+                    cards[0].suit == self.cards[-1].suit)
         return cards[0].rank == 13 + 8 * (cards[0].suit == 4)
 
 
@@ -231,23 +242,23 @@ class WheelOfFortune(AbstractTarockGame):
 
     def createGame(self):
         l, s = Layout(self), self.s
-        font = self.app.getFont("canvas_default")
 
         # Set window size
         self.setSize(l.XM + l.XS * 11.5, l.YM + l.YS * 5.5)
 
         # Create wheel
         xoffset = (1, 2, 3, 3.9, 3, 2, 1, 0, -1, -2, -3,
-                    -3.9, -3, -2, -1, 0, -2, -1, 0, 1, 2)
+                   -3.9, -3, -2, -1, 0, -2, -1, 0, 1, 2)
         yoffset = (0.2, 0.5, 1.1, 2.2, 3.3, 3.9, 4.2, 4.4,
-                    4.2, 3.9, 3.3, 2.2, 1.1, 0.5, 0.2, 0,
-                    1.8, 2.1, 2.2, 2.4, 2.6)
+                   4.2, 3.9, 3.3, 2.2, 1.1, 0.5, 0.2, 0,
+                   1.8, 2.1, 2.2, 2.4, 2.6)
         x = l.XM + l.XS * 4
         y = l.YM
         for i in range(21):
             x0 = x + xoffset[i] * l.XS
             y0 = y + yoffset[i] * l.YS
-            s.rows.append(WheelOfFortune_RowStack(x0, y0, self, yoffset=l.CH/4,
+            s.rows.append(WheelOfFortune_RowStack(x0, y0, self,
+                          yoffset=l.CH//4,
                           max_cards=2, max_move=1, max_accept=1))
         self.setRegion(s.rows, (-999, -999, l.XS * 9, 999999))
 
@@ -305,17 +316,16 @@ class ImperialTrumps(AbstractTarockGame):
 
     def createGame(self):
         l, s = Layout(self), self.s
-        font = self.app.getFont("canvas_default")
 
         # Set window size
         self.setSize(l.XM + l.XS * 8, l.YM + l.YS * 5)
-
 
         # Create foundations
         x = l.XM + l.XS * 3
         y = l.YM
         for i in range(4):
-            s.foundations.append(ImperialTrump_Foundation(x, y, self, i, max_cards=14))
+            s.foundations.append(
+                ImperialTrump_Foundation(x, y, self, i, max_cards=14))
             x = x + l.XS
         s.foundations.append(SS_FoundationStack(x, y, self, 4, max_cards=22))
 
@@ -366,7 +376,6 @@ class Pagat(AbstractTarockGame):
 
     def createGame(self):
         l, s = Layout(self), self.s
-        font = self.app.getFont("canvas_default")
 
         # Set window size
         h = max(3 * l.YS, 20 * l.YOFFSET)
@@ -415,15 +424,12 @@ class Pagat(AbstractTarockGame):
 
     def startGame(self):
         assert len(self.s.talon.cards) == 78
-        for i in range(6):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(6)
         self.s.talon.dealRow(rows=self.s.rows[3:9])
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
         return (card1.suit == card2.suit and
-                (card1.rank + 1 == card2.rank
-                or card2.rank + 1 == card1.rank))
+                (card1.rank + 1 == card2.rank or card2.rank + 1 == card1.rank))
 
 
 # ************************************************************************
@@ -438,7 +444,6 @@ class Skiz(AbstractTarockGame):
 
     def createGame(self):
         l, s = Layout(self), self.s
-        font = self.app.getFont("canvas_default")
 
         # Set window size
         h = max(3 * l.YS, 20 * l.YOFFSET)
@@ -487,15 +492,12 @@ class Skiz(AbstractTarockGame):
 
     def startGame(self):
         assert len(self.s.talon.cards) == 78
-        for i in range(6):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(6)
         self.s.talon.dealRow(rows=self.s.rows[3:9])
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
         return (card1.suit == card2.suit and
-                (card1.rank + 1 == card2.rank
-                or card2.rank + 1 == card1.rank))
+                (card1.rank + 1 == card2.rank or card2.rank + 1 == card1.rank))
 
 
 # ************************************************************************
@@ -511,7 +513,6 @@ class FifteenPlus(AbstractTarockGame):
 
     def createGame(self):
         l, s = Layout(self), self.s
-        font = self.app.getFont("canvas_default")
 
         # Set window size
         h = max(5 * l.YS, 20 * l.YOFFSET)
@@ -523,7 +524,8 @@ class FifteenPlus(AbstractTarockGame):
         s.foundations.append(SS_FoundationStack(x, y, self, 4, max_cards=22))
         y = y + l.YS
         for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, i, max_cards=14))
+            s.foundations.append(
+                SS_FoundationStack(x, y, self, i, max_cards=14))
             y = y + l.YS
 
         # Create rows
@@ -531,7 +533,8 @@ class FifteenPlus(AbstractTarockGame):
         y = l.YM
         for j in range(2):
             for i in range(8):
-                s.rows.append(Tarock_AC_RowStack(x, y, self, max_move=1, max_accept=1))
+                s.rows.append(
+                    Tarock_AC_RowStack(x, y, self, max_move=1, max_accept=1))
                 x = x + l.XS
             x = l.XM
             y = y + l.YS * 3
@@ -553,13 +556,11 @@ class FifteenPlus(AbstractTarockGame):
             self.s.talon.dealRow(flip=0, frames=0)
         for i in range(2):
             self.s.talon.dealRow(rows=self.s.rows[:15], flip=0, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
         return (card1.suit == card2.suit and
-                (card1.rank + 1 == card2.rank
-                or card2.rank + 1 == card1.rank))
+                (card1.rank + 1 == card2.rank or card2.rank + 1 == card1.rank))
 
 
 # ************************************************************************
@@ -576,7 +577,6 @@ class Excuse(AbstractTarockGame):
 
     def createGame(self):
         l, s = Layout(self), self.s
-        font = self.app.getFont("canvas_default")
 
         # Set window size
         h = max(5 * l.YS, 20 * l.YOFFSET)
@@ -588,7 +588,8 @@ class Excuse(AbstractTarockGame):
         s.foundations.append(SS_FoundationStack(x, y, self, 4, max_cards=22))
         y = y + l.YS
         for i in range(4):
-            s.foundations.append(SS_FoundationStack(x, y, self, i, max_cards=14))
+            s.foundations.append(
+                SS_FoundationStack(x, y, self, i, max_cards=14))
             y = y + l.YS
 
         # Create rows
@@ -616,7 +617,8 @@ class Excuse(AbstractTarockGame):
     def _shuffleHook(self, cards):
         # move Kings to bottom of each stack (see Baker's Dozen)
         def isKing(c):
-            return (c.suit < 4 and c.rank == 13) or (c.suit == 4 and c.rank == 21)
+            return ((c.suit < 4 and c.rank == 13) or
+                    (c.suit == 4 and c.rank == 21))
         i, n = 0, len(self.s.rows)
         kings = []
         for c in cards:
@@ -635,15 +637,13 @@ class Excuse(AbstractTarockGame):
 
     def startGame(self):
         assert len(self.s.talon.cards) == 78
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
+        self._dealNumRows(3)
         self.s.talon.dealRow(rows=self.s.rows[:15], frames=0)
         self.startDealSample()
         self.s.talon.dealRow(rows=self.s.rows[:15])
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return (card1.rank + 1 == card2.rank
-                or card1.rank - 1 == card2.rank)
+        return (card1.rank + 1 == card2.rank or card1.rank - 1 == card2.rank)
 
 
 # ************************************************************************
@@ -665,12 +665,13 @@ class Grasshopper(AbstractTarockGame):
         # Set window size
         decks = self.gameinfo.decks
         self.setSize(2*l.XM + (2 + 5*decks)*l.XS, 3*l.YM + 5*l.YS)
-        yoffset = min(l.YOFFSET, max(10, l.YOFFSET / 2))
+        yoffset = min(l.YOFFSET, max(10, l.YOFFSET // 2))
 
         # Create talon
         x = l.XM
         y = l.YM
-        s.talon = WasteTalonStack(x, y, self, num_deal=1, max_rounds=self.MAX_ROUNDS)
+        s.talon = WasteTalonStack(
+            x, y, self, num_deal=1, max_rounds=self.MAX_ROUNDS)
         l.createText(s.talon, "s")
         x = x + l.XS
         s.waste = WasteStack(x, y, self)
@@ -680,10 +681,12 @@ class Grasshopper(AbstractTarockGame):
         x = x + l.XM + l.XS
         for j in range(4):
             for i in range(decks):
-                s.foundations.append(SS_FoundationStack(x, y, self, j, max_cards=14))
+                s.foundations.append(
+                    SS_FoundationStack(x, y, self, j, max_cards=14))
                 x = x + l.XS
         for i in range(decks):
-            s.foundations.append(SS_FoundationStack(x, y, self, 4, max_cards=22))
+            s.foundations.append(
+                SS_FoundationStack(x, y, self, 4, max_cards=22))
             x = x + l.XS
 
         # Create reserve
@@ -716,7 +719,7 @@ class Grasshopper(AbstractTarockGame):
         for i in range(14 * decks):
             self.s.talon.dealRow(rows=self.s.reserves, flip=0, frames=4)
         self.s.reserves[0].flipMove()
-        self.s.talon.dealRow(rows = self.s.rows[decks:])
+        self.s.talon.dealRow(rows=self.s.rows[decks:])
         self.s.talon.dealCards()          # deal first card to WasteStack
 
     def fillStack(self, stack):
@@ -728,9 +731,9 @@ class Grasshopper(AbstractTarockGame):
             r.flipMove()
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return ((card1.rank + 1 == card2.rank
-                or card1.rank - 1 == card2.rank)
-                and card1.color != card2.color)
+        return ((card1.rank + 1 == card2.rank or
+                card1.rank - 1 == card2.rank) and
+                card1.color != card2.color)
 
 
 class DoubleGrasshopper(Grasshopper):
@@ -752,7 +755,8 @@ class Ponytail(Tarock_GameMethods, Braid):
         l, s = Layout(self), self.s
 
         # set window
-        # (piles up to 20 cards are playable - needed for Ponytail_PonytailStack)
+        # (piles up to 20 cards are playable -
+        #       needed for Ponytail_PonytailStack)
         h = max(5*l.YS + l.TEXT_HEIGHT, l.YS+(self.BRAID_CARDS-1)*l.YOFFSET)
         self.setSize(10*l.XS+l.XM, l.YM + h)
 
@@ -777,33 +781,40 @@ class Ponytail(Tarock_GameMethods, Braid):
             s.rows.append(Ponytail_ReserveStack(x, y + 2 * l.YS, self))
             s.rows.append(Ponytail_ReserveStack(x + l.XS, y + 2 * l.YS, self))
             x = x + 4 * l.XS
-        x = l.XM + 5*l.XS/2
+        x = l.XM + 5*l.XS//2
         y = l.YM
         s.braid = Ponytail_PonytailStack(x, y, self, sine=1)
         x = l.XM + 7 * l.XS
         y = l.YM + 2*l.YS
         s.talon = WasteTalonStack(x, y, self, max_rounds=3)
         l.createText(s.talon, "s")
-        s.talon.texts.rounds = MfxCanvasText(self.canvas,
-                                             x + l.CW / 2, y - l.YM,
-                                             anchor="s",
-                                             font=self.app.getFont("canvas_default"))
+        s.talon.texts.rounds = MfxCanvasText(
+            self.canvas,
+            x + l.CW // 2, y - l.YM,
+            anchor="s",
+            font=self.app.getFont("canvas_default"))
         x = x - l.XS
         s.waste = WasteStack(x, y, self)
         l.createText(s.waste, "s")
         x = l.XM + 8 * l.XS
         y = l.YM
         for i in range(4):
-            s.foundations.append(Ponytail_Foundation(x, y, self, i, mod=14, max_cards=14))
-            s.foundations.append(Ponytail_Foundation(x + l.XS, y, self, i, mod=14, max_cards=14))
+            s.foundations.append(
+                Ponytail_Foundation(x, y, self, i, mod=14, max_cards=14))
+            s.foundations.append(
+                Ponytail_Foundation(
+                    x + l.XS, y, self, i, mod=14, max_cards=14))
             y = y + l.YS
-        s.foundations.append(Ponytail_Foundation(x, y, self, 4, mod=22, max_cards=22))
-        s.foundations.append(Ponytail_Foundation(x + l.XS, y, self, 4, mod=22, max_cards=22))
+        s.foundations.append(
+            Ponytail_Foundation(x, y, self, 4, mod=22, max_cards=22))
+        s.foundations.append(
+            Ponytail_Foundation(x + l.XS, y, self, 4, mod=22, max_cards=22))
         # ???
-        self.texts.info = MfxCanvasText(self.canvas,
-                                        x + l.CW + l.XM / 2, y + l.YS,
-                                        anchor="n",
-                                        font=self.app.getFont("canvas_default"))
+        self.texts.info = MfxCanvasText(
+            self.canvas,
+            x + l.CW + l.XM // 2, y + l.YS,
+            anchor="n",
+            font=self.app.getFont("canvas_default"))
 
         # define stack-groups
         self.sg.openstacks = s.foundations + s.rows
@@ -819,7 +830,7 @@ class Ponytail(Tarock_GameMethods, Braid):
 # ************************************************************************
 
 class Cavalier(AbstractTarockGame):
-    Layout_Method = Layout.bakersDozenLayout
+    Layout_Method = staticmethod(Layout.bakersDozenLayout)
     Talon_Class = InitialDealTalonStack
     Foundation_Class = SS_FoundationStack
     RowStack_Class = Cavalier_RowStack
@@ -851,7 +862,6 @@ class Cavalier(AbstractTarockGame):
         # Define stack groups
         l.defaultAll()
 
-
     #
     # Game over rides
     #
@@ -869,15 +879,16 @@ class Cavalier(AbstractTarockGame):
             self.s.talon.dealRow(rows=self.s.rows[:6])
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return ((card1.rank + 1 == card2.rank
-                or card1.rank - 1 == card2.rank)
-                and ((card1.suit == 4 or card2.suit == 4)
-                or card1.color != card2.color))
+        return ((card1.rank + 1 == card2.rank or
+                 card1.rank - 1 == card2.rank) and
+                ((card1.suit == 4 or card2.suit == 4) or
+                 card1.color != card2.color))
 
 
 class FiveAces(Cavalier):
     def _shuffleHook(self, cards):
-        return self._shuffleHookMoveToBottom(cards, lambda c: (c.rank == 0, c.suit))
+        return self._shuffleHookMoveToBottom(
+            cards, lambda c: (c.rank == 0, c.suit))
 
     def startGame(self):
         Cavalier.startGame(self, foundations=1)
@@ -885,20 +896,22 @@ class FiveAces(Cavalier):
 
 class Wicked(FiveAces):
     Talon_Class = StackWrapper(Wicked_Talon, max_rounds=-1)
-    RowStack_Class = StackWrapper(SS_RowStack, max_move=1, max_accept=1, base_rank=NO_RANK)
+    RowStack_Class = StackWrapper(
+        SS_RowStack, max_move=1, max_accept=1, base_rank=NO_RANK)
     Hint_Class = CautiousDefaultHint
 
     def startGame(self):
         Cavalier.startGame(self, flip=(1, 1, 1), foundations=1)
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
-        return ((card1.rank + 1 == card2.rank
-                or card1.rank - 1 == card2.rank)
-                and card1.suit == card2.suit)
+        return ((card1.rank + 1 == card2.rank or
+                 card1.rank - 1 == card2.rank) and
+                card1.suit == card2.suit)
 
 
 class Nasty(Wicked):
-    RowStack_Class = StackWrapper(Nasty_RowStack, max_move=1, max_accept=1, base_rank=ANY_RANK)
+    RowStack_Class = StackWrapper(
+        Nasty_RowStack, max_move=1, max_accept=1, base_rank=ANY_RANK)
 
 
 # ************************************************************************
@@ -908,9 +921,10 @@ class Nasty(Wicked):
 def r(id, gameclass, name, game_type, decks, redeals, skill_level):
     game_type = game_type | GI.GT_TAROCK | GI.GT_CONTRIB | GI.GT_ORIGINAL
     gi = GameInfo(id, gameclass, name, game_type, decks, redeals, skill_level,
-                  ranks=range(14), trumps=range(22))
+                  ranks=list(range(14)), trumps=list(range(22)))
     registerGame(gi)
     return gi
+
 
 r(157, WheelOfFortune, "Wheel of Fortune", GI.GT_TAROCK, 1, 0, GI.SL_BALANCED)
 r(158, ImperialTrumps, "Imperial Trumps", GI.GT_TAROCK, 1, -1, GI.SL_BALANCED)
@@ -919,7 +933,8 @@ r(160, Skiz, "Skiz", GI.GT_TAROCK | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL)
 r(161, FifteenPlus, "Fifteen plus", GI.GT_TAROCK, 1, 0, GI.SL_BALANCED)
 r(162, Excuse, "Excuse", GI.GT_TAROCK | GI.GT_OPEN, 1, 0, GI.SL_BALANCED)
 r(163, Grasshopper, "Grasshopper", GI.GT_TAROCK, 1, 1, GI.SL_MOSTLY_SKILL)
-r(164, DoubleGrasshopper, "Double Grasshopper", GI.GT_TAROCK, 2, 1, GI.SL_MOSTLY_SKILL)
+r(164, DoubleGrasshopper, "Double Grasshopper", GI.GT_TAROCK, 2, 1,
+  GI.SL_MOSTLY_SKILL)
 r(179, Ponytail, "Ponytail", GI.GT_TAROCK, 2, 2, GI.SL_MOSTLY_SKILL)
 r(202, Cavalier, "Cavalier", GI.GT_TAROCK, 1, 0, GI.SL_MOSTLY_SKILL)
 r(203, FiveAces, "Five Aces", GI.GT_TAROCK, 1, 0, GI.SL_MOSTLY_SKILL)
@@ -927,4 +942,3 @@ r(204, Wicked, "Wicked", GI.GT_TAROCK | GI.GT_OPEN, 1, -1, GI.SL_BALANCED)
 r(205, Nasty, "Nasty", GI.GT_TAROCK | GI.GT_OPEN, 1, -1, GI.SL_BALANCED)
 
 del r
-

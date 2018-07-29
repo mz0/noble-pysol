@@ -1,39 +1,41 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
+from pysollib.util import ACE, KING
+from pysollib.stack import \
+        DealRowTalonStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        UD_SS_RowStack, \
+        StackWrapper
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 
 
 # ************************************************************************
@@ -78,20 +80,20 @@ class Carthage(Game):
         self.setSize(w, h)
 
         # create stacks
-        x, y = l.XM+l.XS+(max_rows-foundations)*l.XS/2, l.YM
+        x, y = l.XM+l.XS+(max_rows-foundations)*l.XS//2, l.YM
         for fclass in self.Foundation_Classes:
             for i in range(4):
                 s.foundations.append(fclass(x, y, self, suit=i))
                 x += l.XS
 
-        x, y = l.XM+l.XS+(max_rows-rows)*l.XS/2, l.YM+l.YS
+        x, y = l.XM+l.XS+(max_rows-rows)*l.XS//2, l.YM+l.YS
         for i in range(rows):
             s.rows.append(self.RowStack_Class(x, y, self,
                                               max_move=1, max_accept=1))
             x += l.XS
-        self.setRegion(s.rows, (-999, y-l.CH/2, 999999, h-l.YS-l.CH/2))
+        self.setRegion(s.rows, (-999, y-l.CH//2, 999999, h-l.YS-l.CH//2))
 
-        d = (w-reserves*l.XS)/reserves
+        d = (w-reserves*l.XS)//reserves
         x, y = l.XM, h-l.YS
         for i in range(reserves):
             stack = ReserveStack(x, y, self)
@@ -126,13 +128,14 @@ class Carthage(Game):
 class AlgerianPatience(Carthage):
 
     Foundation_Classes = (SS_FoundationStack,
-                          StackWrapper(SS_FoundationStack, base_rank=KING, dir=-1))
+                          StackWrapper(SS_FoundationStack, base_rank=KING,
+                                       dir=-1))
     RowStack_Class = StackWrapper(UD_SS_RowStack, mod=13)
 
     def _shuffleHook(self, cards):
         # move 4 Kings to top of the Talon
-        return self._shuffleHookMoveToTop(cards,
-               lambda c: (c.rank == KING and c.deck == 0, c.suit))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == KING and c.deck == 0, c.suit))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations[4:], frames=0)
@@ -149,13 +152,12 @@ class AlgerianPatience3(Carthage):
         Carthage.createGame(self, rows=8, reserves=8, playcards=20)
 
     def _shuffleHook(self, cards):
-        return self._shuffleHookMoveToTop(cards,
-               lambda c: (c.rank == ACE, (c.deck, c.suit)))
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == ACE, (c.deck, c.suit)))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
         Carthage.startGame(self)
-
 
 
 # register the game
@@ -164,5 +166,5 @@ registerGame(GameInfo(321, Carthage, "Carthage",
 registerGame(GameInfo(322, AlgerianPatience, "Algerian Patience",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(457, AlgerianPatience3, "Algerian Patience (3 decks)",
-                      GI.GT_3DECK_TYPE | GI.GT_ORIGINAL, 3, 0, GI.SL_MOSTLY_SKILL))
-
+                      GI.GT_3DECK_TYPE | GI.GT_ORIGINAL, 3, 0,
+                      GI.SL_MOSTLY_SKILL))

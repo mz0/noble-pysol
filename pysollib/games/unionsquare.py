@@ -1,42 +1,52 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
+import pysollib.game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
+
+from pysollib.util import ACE, ANY_RANK, NO_RANK
+
+from pysollib.stack import \
+        AbstractFoundationStack, \
+        OpenStack, \
+        Stack, \
+        UD_SS_RowStack, \
+        WasteStack, \
+        WasteTalonStack, \
+        StackWrapper
+
 
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class UnionSquare_Foundation(AbstractFoundationStack):
     def acceptsCards(self, from_stack, cards):
@@ -54,7 +64,7 @@ class UnionSquare_RowStack(OpenStack):
         kwdefault(cap, mod=8192, dir=0, base_rank=ANY_RANK,
                   max_accept=1, max_move=1)
         OpenStack.__init__(self, x, y, game, **cap)
-        #self.CARD_YOFFSET = 1
+        # self.CARD_YOFFSET = 1
 
     def acceptsCards(self, from_stack, cards):
         if not OpenStack.acceptsCards(self, from_stack, cards):
@@ -67,8 +77,10 @@ class UnionSquare_RowStack(OpenStack):
             card_dir = cards[0].rank - self.cards[-1].rank
             return card_dir == 1 or card_dir == -1
         else:
-            stack_dir = (self.cards[1].rank - self.cards[0].rank) % self.cap.mod
-            return (self.cards[-1].rank + stack_dir) % self.cap.mod == cards[0].rank
+            stack_dir = (self.cards[1].rank - self.cards[0].rank) % \
+                self.cap.mod
+            return (self.cards[-1].rank + stack_dir) % \
+                self.cap.mod == cards[0].rank
 
     getBottomImage = Stack._getReserveBottomImage
 
@@ -77,7 +89,7 @@ class UnionSquare_RowStack(OpenStack):
 # *
 # ************************************************************************
 
-class UnionSquare(Game):
+class UnionSquare(pysollib.game.StartDealRowAndCards, Game):
     Hint_Class = CautiousDefaultHint
     Foundation_Class = StackWrapper(UnionSquare_Foundation, max_cards=26)
     RowStack_Class = UnionSquare_RowStack
@@ -91,7 +103,7 @@ class UnionSquare(Game):
         l, s = Layout(self, card_y_space=20), self.s
 
         # set window
-        self.setSize(l.XM + (5+rows/4)*l.XS, l.YM + 4*l.YS)
+        self.setSize(l.XM + (5+rows//4)*l.XS, l.YM + 4*l.YS)
 
         # create stacks
         x, y, = l.XM, l.YM
@@ -102,7 +114,7 @@ class UnionSquare(Game):
         l.createText(s.waste, "s")
         for i in range(4):
             x = 3*l.XS
-            for j in range(rows/4):
+            for j in range(rows//4):
                 stack = self.RowStack_Class(x, y, self)
                 stack.CARD_XOFFSET, stack.CARD_YOFFSET = 0, 1
                 s.rows.append(stack)
@@ -119,15 +131,9 @@ class UnionSquare(Game):
         # define stack-groups
         l.defaultStackGroups()
 
-
     #
     # game overrides
     #
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
 
     shallHighlightMatch = Game._shallHighlightMatch_SS
 
@@ -142,12 +148,14 @@ class UnionSquare(Game):
 class SolidSquare(UnionSquare):
     RowStack_Class = StackWrapper(UD_SS_RowStack, base_rank=NO_RANK,
                                   max_accept=1,  max_move=1, mod=13)
+
     def createGame(self):
         UnionSquare.createGame(self, rows=20)
 
     def _shuffleHook(self, cards):
-        return self._shuffleHookMoveToTop(cards,
-                   lambda c: (c.rank == ACE and c.deck == 0, c.suit))
+        return self._shuffleHookMoveToTop(
+            cards,
+            lambda c: (c.rank == ACE and c.deck == 0, c.suit))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
@@ -181,8 +189,9 @@ class Boomerang_Foundation(AbstractFoundationStack):
             return cards[0].rank == ACE
         elif len(self.cards) < 15:
             return cards[0].rank == 20 - len(self.cards)
-        else: # len(self.cards) == 15
+        else:  # len(self.cards) == 15
             return cards[0].rank == ACE
+
 
 class Boomerang(UnionSquare):
     Foundation_Class = StackWrapper(Boomerang_Foundation,

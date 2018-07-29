@@ -1,52 +1,68 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import DefaultHint, FreeCellType_Hint, CautiousDefaultHint
+from pysollib.hint import FreeCellType_Hint, CautiousDefaultHint
 from pysollib.hint import FreeCellSolverWrapper
 from pysollib.pysoltk import MfxCanvasText
 
 
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT, KING, NO_RANK, RANKS, \
+        QUEEN, \
+        UNLIMITED_ACCEPTS
+
+from pysollib.stack import \
+        AC_RowStack, \
+        AbstractFoundationStack, \
+        FreeCell_AC_RowStack, \
+        InitialDealTalonStack, \
+        OpenStack, \
+        RK_FoundationStack, \
+        RK_RowStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        StackWrapper, \
+        TalonStack, \
+        WasteStack, \
+        WasteTalonStack
+
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class DerKatzenschwanz_Hint(FreeCellType_Hint):
     def _getMovePileScore(self, score, color, r, t, pile, rpile):
         if len(rpile) == 0:
             # don't create empty row
             return -1, color
-        return FreeCellType_Hint._getMovePileScore(self, score, color, r, t, pile, rpile)
+        return FreeCellType_Hint._getMovePileScore(
+            self, score, color, r, t, pile, rpile)
 
 
 # ************************************************************************
@@ -71,7 +87,7 @@ class DerKatzenschwanz(Game):
         self.setSize(l.XM + (maxrows+2)*l.XS, l.YM + 6*l.YS)
 
         #
-        playcards = 4*l.YS / l.YOFFSET
+        playcards = 4*l.YS // l.YOFFSET
         xoffset, yoffset = [], []
         for i in range(playcards):
             xoffset.append(0)
@@ -81,12 +97,12 @@ class DerKatzenschwanz(Game):
             yoffset.append(0)
 
         # create stacks
-        x, y = l.XM + (maxrows-reserves)*l.XS/2, l.YM
+        x, y = l.XM + (maxrows-reserves)*l.XS//2, l.YM
         for i in range(reserves):
             s.reserves.append(ReserveStack(x, y, self))
             x = x + l.XS
-        x, y = l.XM + (maxrows-rows)*l.XS/2, l.YM + l.YS
-        self.setRegion(s.reserves, (-999, -999, 999999, y - l.CH / 2))
+        x, y = l.XM + (maxrows-rows)*l.XS//2, l.YM + l.YS
+        self.setRegion(s.reserves, (-999, -999, 999999, y - l.CH // 2))
         for i in range(rows):
             stack = self.RowStack_Class(x, y, self)
             stack.CARD_XOFFSET = xoffset
@@ -96,10 +112,13 @@ class DerKatzenschwanz(Game):
         x, y = l.XM + maxrows*l.XS, l.YM
         for suit in range(4):
             for i in range(2):
-                s.foundations.append(SS_FoundationStack(x+i*l.XS, y, self, suit=suit))
+                s.foundations.append(
+                    SS_FoundationStack(x+i*l.XS, y, self, suit=suit))
             y = y + l.YS
-        self.setRegion(self.s.foundations, (x - l.CW / 2, -999, 999999, y), priority=1)
-        s.talon = InitialDealTalonStack(self.width-3*l.XS/2, self.height-l.YS, self)
+        self.setRegion(
+            self.s.foundations, (x - l.CW // 2, -999, 999999, y), priority=1)
+        s.talon = InitialDealTalonStack(
+            self.width-3*l.XS//2, self.height-l.YS, self)
 
         # define stack-groups
         l.defaultStackGroups()
@@ -124,7 +143,8 @@ class DerKatzenschwanz(Game):
         closest, cdist = None, 999999999
         for stack in stacks:
             if stack.cards and stack is not dragstack:
-                dist = (stack.cards[-1].x - cx)**2 + (stack.cards[-1].y - cy)**2
+                dist = (stack.cards[-1].x - cx)**2 + \
+                    (stack.cards[-1].y - cy)**2
             else:
                 dist = (stack.x - cx)**2 + (stack.y - cy)**2
             if dist < cdist:
@@ -192,8 +212,10 @@ class Retinue(DieSchlange, Kings):
 
     def createGame(self):
         return DerKatzenschwanz.createGame(self, rows=8, reserves=8)
+
     def _shuffleHook(self, cards):
         return Kings._shuffleHook(self, cards)
+
     def startGame(self):
         return DieSchlange.startGame(self)
 
@@ -214,8 +236,8 @@ class SalicLaw_Talon(TalonStack):
     def dealCards(self, sound=False):
         if len(self.cards) == 0:
             return 0
-        base_rank=self.game.ROW_BASE_RANK
-        old_state = self.game.enterState(self.game.S_DEAL)
+        base_rank = self.game.ROW_BASE_RANK
+        self.game.enterState(self.game.S_DEAL)
         rows = self.game.s.rows
         c = self.cards[-1]
         ri = len([r for r in rows if r.cards])
@@ -229,6 +251,7 @@ class SalicLaw_Talon(TalonStack):
         if sound and not self.game.demo:
             self.game.stopSamples()
         return 1
+
 
 # all Aces go to the Foundations
 class SalicLaw_Talon_2(SalicLaw_Talon):
@@ -286,7 +309,7 @@ class SalicLaw(DerKatzenschwanz):
     # game layout
     #
 
-    def createGame(self): #, rows=9, reserves=8):
+    def createGame(self):  # , rows=9, reserves=8):
         # create layout
         l, s = Layout(self), self.s
 
@@ -294,7 +317,7 @@ class SalicLaw(DerKatzenschwanz):
         self.setSize(l.XM+10*l.XS, l.YM+(5+len(self.Foundation_Classes))*l.YS)
 
         #
-        playcards = 4*l.YS / l.YOFFSET
+        playcards = 4*l.YS // l.YOFFSET
         xoffset, yoffset = [], []
         for i in range(playcards):
             xoffset.append(0)
@@ -314,7 +337,7 @@ class SalicLaw(DerKatzenschwanz):
             y += l.YS
 
         x, y = l.XM, l.YM+l.YS*len(self.Foundation_Classes)
-        self.setRegion(s.foundations, (-999, -999, 999999, y - l.XM / 2))
+        self.setRegion(s.foundations, (-999, -999, 999999, y - l.XM // 2))
         for i in range(8):
             stack = self.RowStack_Class(x, y, self, max_move=1)
             stack.CARD_XOFFSET = xoffset
@@ -343,8 +366,8 @@ class SalicLaw(DerKatzenschwanz):
 
     def startGame(self):
         self.startDealSample()
-        self.s.talon.dealRow(self.s.foundations[:8]) # deal Queens
-        self.s.talon.dealRow(self.s.rows[:1]) # deal King
+        self.s.talon.dealRow(self.s.foundations[:8])  # deal Queens
+        self.s.talon.dealRow(self.s.rows[:1])  # deal King
 
     def isGameWon(self):
         for s in self.s.foundations[8:]:
@@ -365,10 +388,7 @@ class Deep(DerKatzenschwanz):
         return DerKatzenschwanz.createGame(self, rows=8, reserves=8)
 
     def startGame(self):
-        for i in range(12):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(12)
 
 
 # ************************************************************************
@@ -390,7 +410,8 @@ class FaerieQueen(SalicLaw):
     Foundation_Classes = [
         StackWrapper(RK_FoundationStack, max_move=0, max_cards=12)
         ]
-    RowStack_Class = StackWrapper(FaerieQueen_RowStack, min_cards=1, max_move=1)
+    RowStack_Class = StackWrapper(
+        FaerieQueen_RowStack, min_cards=1, max_move=1)
 
     def _shuffleHook(self, cards):
         for c in cards[:]:
@@ -402,7 +423,7 @@ class FaerieQueen(SalicLaw):
 
     def startGame(self):
         self.startDealSample()
-        self.s.talon.dealRow(self.s.rows[:1]) # deal King
+        self.s.talon.dealRow(self.s.rows[:1])  # deal King
 
     def isGameWon(self):
         if self.s.talon.cards:
@@ -436,7 +457,8 @@ class Intrigue(SalicLaw):
     Talon_Class = SalicLaw_Talon
     Foundation_Classes = [
         StackWrapper(RK_FoundationStack, base_rank=5, max_cards=6),
-        StackWrapper(RK_FoundationStack, base_rank=4, max_cards=6, dir=-1, mod=13),
+        StackWrapper(
+            RK_FoundationStack, base_rank=4, max_cards=6, dir=-1, mod=13),
         ]
     RowStack_Class = StackWrapper(Intrigue_RowStack, max_accept=1, min_cards=1)
 
@@ -452,7 +474,7 @@ class Intrigue(SalicLaw):
 
     def startGame(self):
         self.startDealSample()
-        self.s.talon.dealRow(self.s.rows[:1]) # deal King
+        self.s.talon.dealRow(self.s.rows[:1])  # deal King
 
     def isGameWon(self):
         if self.s.talon.cards:
@@ -475,10 +497,12 @@ class LaggardLady_Foundation(RK_FoundationStack):
                 return False
         return True
 
+
 class LaggardLady(Intrigue):
     Foundation_Classes = [
         StackWrapper(LaggardLady_Foundation, base_rank=5, max_cards=6),
-        StackWrapper(LaggardLady_Foundation, base_rank=4, max_cards=6, dir=-1, mod=13),
+        StackWrapper(
+            LaggardLady_Foundation, base_rank=4, max_cards=6, dir=-1, mod=13),
         ]
 
 
@@ -495,10 +519,12 @@ class Glencoe_Foundation(RK_FoundationStack):
             return c.suit == r.cards[0].suit
         return True
 
+
 class Glencoe(Intrigue):
     Foundation_Classes = [
         StackWrapper(Glencoe_Foundation, base_rank=5, max_cards=6),
-        StackWrapper(Glencoe_Foundation, base_rank=4, max_cards=6, dir=-1, mod=13),
+        StackWrapper(
+            Glencoe_Foundation, base_rank=4, max_cards=6, dir=-1, mod=13),
         ]
 
 
@@ -517,6 +543,7 @@ class StepUp_Foundation(SS_FoundationStack):
                 return True
         return False
 
+
 class StepUp_Talon(WasteTalonStack):
     def canDealCards(self):
         if not WasteTalonStack.canDealCards(self):
@@ -526,12 +553,13 @@ class StepUp_Talon(WasteTalonStack):
                 return False
         return True
 
+
 class StepUp_RowStack(AC_RowStack):
     def acceptsCards(self, from_stack, cards):
         if not AC_RowStack.acceptsCards(self, from_stack, cards):
             return False
         if (from_stack in self.game.s.reserves or
-            from_stack in self.game.s.foundations):
+                from_stack in self.game.s.foundations):
             return False
         return True
 
@@ -547,7 +575,7 @@ class StepUp(Game):
         x, y = l.XM+2.5*l.XS, l.YM
         for i in range(8):
             s.foundations.append(StepUp_Foundation(x, y, self,
-                                 suit=i%4, mod=13, base_rank=ANY_RANK))
+                                 suit=i % 4, mod=13, base_rank=ANY_RANK))
             x += l.XS
         tx, ty, ta, tf = l.getTextAttr(s.foundations[0], "sw")
         font = self.app.getFont("canvas_default")
@@ -571,7 +599,6 @@ class StepUp(Game):
         l.createText(s.waste, 'se')
 
         l.defaultStackGroups()
-
 
     def startGame(self):
         c = self.s.talon.cards[-1]
@@ -625,7 +652,7 @@ class Kentish(Kings):
         self.setSize(l.XM + (rows+2)*l.XS, l.YM + 5*l.YS)
 
         #
-        playcards = 4*l.YS / l.YOFFSET
+        playcards = 4*l.YS // l.YOFFSET
         xoffset, yoffset = [], []
         for i in range(playcards):
             xoffset.append(0)
@@ -649,8 +676,8 @@ class Kentish(Kings):
                                                         suit=suit))
             y += l.YS
         self.setRegion(self.s.foundations,
-                       (x - l.CW / 2, -999, 999999, y), priority=1)
-        x, y = self.width-3*l.XS/2, self.height-l.YS
+                       (x - l.CW // 2, -999, 999999, y), priority=1)
+        x, y = self.width-3*l.XS//2, self.height-l.YS
         s.talon = InitialDealTalonStack(x, y, self)
 
         # define stack-groups
@@ -676,22 +703,23 @@ class Kentish(Kings):
     shallHighlightMatch = Game._shallHighlightMatch_RK
 
 
-
 # register the game
 registerGame(GameInfo(141, DerKatzenschwanz, "Cat's Tail",
                       GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Der Katzenschwanz",) ))
+                      altnames=("Der Katzenschwanz",)))
 registerGame(GameInfo(142, DieSchlange, "Snake",
                       GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Die Schlange",) ))
+                      altnames=("Die Schlange",)))
 registerGame(GameInfo(279, Kings, "Kings",
                       GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(286, Retinue, "Retinue",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(299, SalicLaw, "Salic Law",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(442, Deep, "Deep",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(523, Intrigue, "Intrigue",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(611, FaerieQueen, "Faerie Queen",
@@ -705,7 +733,5 @@ registerGame(GameInfo(616, LaggardLady, "Laggard Lady",
 registerGame(GameInfo(624, StepUp, "Step-Up",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(766, Kentish, "Kentish",
-                      GI.GT_2DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
-
-
-
+                      GI.GT_2DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))

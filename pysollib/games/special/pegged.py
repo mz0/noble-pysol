@@ -1,42 +1,46 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # Imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import AbstractHint
+
+from pysollib.util import ANY_SUIT
+
+from pysollib.stack import \
+        AbstractFoundationStack, \
+        InitialDealTalonStack, \
+        InvisibleStack, \
+        ReserveStack
 
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class Pegged_Hint(AbstractHint):
     # FIXME: no intelligence whatsoever is implemented here
@@ -80,10 +84,11 @@ class Pegged_RowStack(ReserveStack):
         other_stack.fillStack()
 
     def _getMiddleStack(self, from_stack):
-        dx, dy = from_stack.pos[0] - self.pos[0], from_stack.pos[1] - self.pos[1]
+        dx, dy = from_stack.pos[0] - self.pos[0], \
+            from_stack.pos[1] - self.pos[1]
         if not self.game.STEP_MAP.get((dx, dy)):
             return None
-        s = self.game.map.get((self.pos[0] + dx/2, self.pos[1] + dy/2))
+        s = self.game.map.get((self.pos[0] + dx//2, self.pos[1] + dy//2))
         if not s or not s.cards:
             return None
         return s
@@ -126,14 +131,17 @@ class Pegged(Game):
             r = self.ROWS[i]
             for j in range(r):
                 d = m - r + 2*j
-                x, y = l.XM + d*l.XS/2, l.YM + i*l.YS
+                x, y = l.XM + d*l.XS//2, l.YM + i*l.YS
                 stack = Pegged_RowStack(x, y, self)
                 stack.pos = (d, 2*i)
-                ##print stack.id, stack.pos
+                # print stack.id, stack.pos
                 s.rows.append(stack)
                 self.map[stack.pos] = stack
         x, y = self.width - l.XS, l.YM
-        s.foundations.append(AbstractFoundationStack(x, y, self, ANY_SUIT, max_move=0, max_accept=0, max_cards=self.gameinfo.ncards))
+        s.foundations.append(
+            AbstractFoundationStack(
+                x, y, self, ANY_SUIT, max_move=0, max_accept=0,
+                max_cards=self.gameinfo.ncards))
         l.createText(s.foundations[0], "s")
         y = self.height - l.YS
         s.talon = InitialDealTalonStack(x, y, self)
@@ -144,11 +152,10 @@ class Pegged(Game):
         for step in self.STEPS:
             self.STEP_MAP[step] = 1
         if self.EMPTY_STACK_ID < 0:
-            self.EMPTY_STACK_ID = len(s.rows) / 2
+            self.EMPTY_STACK_ID = len(s.rows) // 2
 
         # Define stack groups
         l.defaultStackGroups()
-
 
     #
     # game overrides
@@ -201,7 +208,7 @@ class Pegged(Game):
             for dx, dy in self.STEPS:
                 s = self.map.get((rx + dx, ry + dy))
                 if s and not s.cards:
-                    m = self.map.get((rx + dx/2, ry + dy/2))
+                    m = self.map.get((rx + dx//2, ry + dy//2))
                     if m and m.cards:
                         rows.append(r)
         return ((rows, 1),)
@@ -210,12 +217,15 @@ class Pegged(Game):
 class PeggedCross1(Pegged):
     ROWS = (3, 3, 7, 7, 7, 3, 3)
 
+
 class PeggedCross2(Pegged):
     ROWS = (3, 3, 3, 9, 9, 9, 3, 3, 3)
+
 
 class Pegged6x6(Pegged):
     EMPTY_STACK_ID = 14
     ROWS = (6, 6, 6, 6, 6, 6)
+
 
 class Pegged7x7(Pegged):
     ROWS = (7, 7, 7, 7, 7, 7, 7)
@@ -230,9 +240,9 @@ class PeggedTriangle1(Pegged):
     ROWS = (1, 2, 3, 4, 5)
     EMPTY_STACK_ID = 4
 
+
 class PeggedTriangle2(PeggedTriangle1):
     ROWS = (1, 2, 3, 4, 5, 6)
-
 
 
 # ************************************************************************
@@ -247,11 +257,12 @@ def r(id, gameclass, name):
     gi = GameInfo(id, gameclass, name,
                   GI.GT_PUZZLE_TYPE, 1, 0, GI.SL_SKILL,
                   category=GI.GC_TRUMP_ONLY,
-                  suits=(), ranks=(), trumps=range(ncards),
-                  si = {"decks": 1, "ncards": ncards},
-                  rules_filename = "pegged.html")
+                  suits=(), ranks=(), trumps=list(range(ncards)),
+                  si={"decks": 1, "ncards": ncards},
+                  rules_filename="pegged.html")
     registerGame(gi)
     return gi
+
 
 r(180, Pegged, "Pegged")
 r(181, PeggedCross1, "Pegged Cross 1")

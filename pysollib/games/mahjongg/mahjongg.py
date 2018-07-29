@@ -1,46 +1,52 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # Imports
-import sys, re
+import sys
+import re
 import time
-#from tkFont import Font
 from gettext import ungettext
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
 from pysollib.mfxutil import kwdefault, Struct, Image
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import AbstractHint
 from pysollib.settings import TOOLKIT, DEBUG
 from pysollib.pysoltk import MfxCanvasText, MfxCanvasImage
 from pysollib.pysoltk import bind, EVENT_HANDLED, ANCHOR_NW
 from pysollib.pysoltk import MfxMessageDialog
+
+from pysollib.util import ANY_SUIT, NO_RANK
+
+from pysollib.stack import \
+        InitialDealTalonStack, \
+        OpenStack
+
+if sys.version_info > (3,):
+    xrange = range
 
 
 def factorial(x):
@@ -71,14 +77,14 @@ class Mahjongg_Hint(AbstractHint):
             for t in stacks[i+1:]:
                 if game.cardsMatch(r.cards[0], t.cards[0]):
                     # simple scoring...
-                    ##score = 10000 + r.id + t.id
+                    # score = 10000 + r.id + t.id
                     rb = r.blockmap
                     tb = t.blockmap
                     score = \
-                          10000 + \
-                          1000 * (len(rb.below) + len(tb.below)) + \
-                          len(rb.all_left) + len(rb.all_right) + \
-                          len(tb.all_left) + len(tb.all_right)
+                        10000 + \
+                        1000 * (len(rb.below) + len(tb.below)) + \
+                        len(rb.all_left) + len(rb.all_right) + \
+                        len(tb.all_left) + len(tb.all_right)
                     self.addHint(score, 1, r, t)
             i += 1
 
@@ -87,7 +93,7 @@ class Mahjongg_Hint(AbstractHint):
 # *
 # ************************************************************************
 
-#class Mahjongg_Foundation(AbstractFoundationStack):
+# class Mahjongg_Foundation(AbstractFoundationStack):
 class Mahjongg_Foundation(OpenStack):
 
     def __init__(self, x, y, game, suit=ANY_SUIT, **cap):
@@ -102,11 +108,11 @@ class Mahjongg_Foundation(OpenStack):
     def basicIsBlocked(self):
         return 1
 
-    #def initBindings(self):
+    # def initBindings(self):
     #    pass
 
     def _position(self, card):
-        #AbstractFoundationStack._position(self, card)
+        # AbstractFoundationStack._position(self, card)
         OpenStack._position(self, card)
 
         fnds = self.game.s.foundations
@@ -165,8 +171,9 @@ class Mahjongg_RowStack(OpenStack):
         self._dropPairMove(ncards, to_stack, frames=-1, shadow=shadow)
 
     def _dropPairMove(self, n, other_stack, frames=-1, shadow=-1):
-        ##print 'drop:', self.id, other_stack.id
-        assert n == 1 and self.acceptsCards(other_stack, [other_stack.cards[-1]])
+        # print 'drop:', self.id, other_stack.id
+        assert n == 1 and self.acceptsCards(
+            other_stack, [other_stack.cards[-1]])
         if not self.game.demo:
             self.game.playSample("droppair", priority=200)
         old_state = self.game.enterState(self.game.S_FILL)
@@ -212,24 +219,23 @@ class Mahjongg_RowStack(OpenStack):
             for s in self.game.s.rows[self.id+1:]:
                 s.group.tkraise()
 
-
     # In Mahjongg games type there are a lot of stacks, so we optimize
     # and don't create bindings that are not used anyway.
     def initBindings(self):
         group = self.group
         # FIXME: dirty hack to access the Stack's private methods
-        #bind(group, "<1>", self._Stack__clickEventHandler)
-        #bind(group, "<3>", self._Stack__controlclickEventHandler)
-        #bind(group, "<Control-1>", self._Stack__controlclickEventHandler)
+        # bind(group, "<1>", self._Stack__clickEventHandler)
+        # bind(group, "<3>", self._Stack__controlclickEventHandler)
+        # bind(group, "<Control-1>", self._Stack__controlclickEventHandler)
         #
         bind(group, "<1>", self.__clickEventHandler)
         bind(group, "<3>", self.__controlclickEventHandler)
         bind(group, "<Control-1>", self.__controlclickEventHandler)
-        ##bind(group, "<Enter>", self._Stack__enterEventHandler)
-        ##bind(group, "<Leave>", self._Stack__leaveEventHandler)
+        # bind(group, "<Enter>", self._Stack__enterEventHandler)
+        # bind(group, "<Leave>", self._Stack__leaveEventHandler)
 
     def __defaultClickEventHandler(self, event, handler):
-        self.game.event_handled = True # for Game.undoHandler
+        self.game.event_handled = True  # for Game.undoHandler
         if self.game.demo:
             self.game.stopDemo(event)
         if self.game.busy:
@@ -238,7 +244,7 @@ class Mahjongg_RowStack(OpenStack):
         return EVENT_HANDLED
 
     def __clickEventHandler(self, event):
-        ##print 'click:', self.id
+        # print 'click:', self.id
         return self.__defaultClickEventHandler(event, self.clickHandler)
 
     def __controlclickEventHandler(self, event):
@@ -258,8 +264,8 @@ class Mahjongg_RowStack(OpenStack):
             self._stopDrag()
             return 1
         if self.basicIsBlocked():
-            ### remove selection
-            ##self.game.playSample("nomove")
+            # remove selection
+            # self.game.playSample("nomove")
             return 1
         # possible move
         if from_stack:
@@ -272,11 +278,12 @@ class Mahjongg_RowStack(OpenStack):
         self.game.playSample("startdrag")
         # create the shade image (see stack.py, _updateShade)
         if drag.shade_img:
-            #drag.shade_img.dtag(drag.shade_stack.group)
+            # drag.shade_img.dtag(drag.shade_stack.group)
             drag.shade_img.delete()
-            #game.canvas.delete(drag.shade_img)
+            # game.canvas.delete(drag.shade_img)
             drag.shade_img = None
-        img = game.app.images.getShadowCard(card.deck, card.suit, card.rank)
+        img = game.app.images.getHighlightedCard(
+            card.deck, card.suit, card.rank)
         if img is None:
             return 1
         img = MfxCanvasImage(game.canvas, self.x, self.y, image=img,
@@ -334,10 +341,9 @@ class AbstractMahjonggGame(Game):
             for tl in range(level, level + height):
                 tiles.append((tl, tx, ty))
         assert len(tiles) == self.NCARDS
-        #tiles.sort()
-        #tiles = tuple(tiles)
+        # tiles.sort()
+        # tiles = tuple(tiles)
         return tiles, max_tl, max_tx, max_ty
-
 
     #
     # game layout
@@ -350,8 +356,8 @@ class AbstractMahjonggGame(Game):
         l, s = Layout(self), self.s
         show_removed = self.app.opt.mahjongg_show_removed
 
-        ##dx, dy = 2, -2
-        ##dx, dy = 3, -3
+        # dx, dy = 2, -2
+        # dx, dy = 3, -3
         cs = self.app.cardset
         if cs.version >= 6:
             dx = l.XOFFSET
@@ -360,7 +366,7 @@ class AbstractMahjonggGame(Game):
             d_y = cs.SHADOW_YOFFSET
             if self.preview:
                 # Fixme
-                dx, dy, d_x, d_y = dx/2, dy/2, d_x/2, d_y/2
+                dx, dy, d_x, d_y = dx//2, dy//2, d_x//2, d_y//2
             self._delta_x, self._delta_y = dx, -dy
         else:
             dx = 3
@@ -368,12 +374,12 @@ class AbstractMahjonggGame(Game):
             d_x = 0
             d_y = 0
             self._delta_x, self._delta_y = 0, 0
-        #print dx, dy, d_x, d_y, cs.version
+        # print dx, dy, d_x, d_y, cs.version
 
         font = self.app.getFont("canvas_default")
 
         # width of self.texts.info
-        #ti_width = Font(self.canvas, font).measure(_('Remaining'))
+        # ti_width = Font(self.canvas, font).measure(_('Remaining'))
         ti_width = 80
 
         # set window size
@@ -390,10 +396,10 @@ class AbstractMahjonggGame(Game):
             left_margin = l.XM + 4*cardw+fdxx+d_x + l.XM
         else:
             left_margin = l.XM
-        tableau_width = (max_tx+2)*cardw/2+dxx+d_x
+        tableau_width = (max_tx+2)*cardw//2+dxx+d_x
         right_margin = l.XM+ti_width+l.XM
         w = left_margin + tableau_width + right_margin
-        h = l.YM + dyy + (max_ty + 2) * cardh / 2 + d_y + l.YM
+        h = l.YM + dyy + (max_ty + 2) * cardh // 2 + d_y + l.YM
         if show_removed:
             h = max(h, l.YM+fdyy+cardh*9+d_y+l.YM)
         self.setSize(w, h)
@@ -402,21 +408,18 @@ class AbstractMahjonggGame(Game):
         self.check_dist = l.CW*l.CW + l.CH*l.CH     # see _getClosestStack()
 
         # sort tiles (for 3D)
-        tiles.sort(lambda a, b:
-                   cmp(a[0], b[0]) or
-                   cmp(-a[1]+a[2], -b[1]+b[2])
-                   )
+        tiles.sort(key=lambda x: (x[0], x[2]-x[1]))
 
         # create a row stack for each tile and compute the tilemap
         tilemap = {}
         x0 = left_margin
         y0 = l.YM + dyy
         for level, tx, ty in tiles:
-            #print level, tx, ty
-            x = x0 + (tx * cardw) / 2 + level * dx
-            y = y0 + (ty * cardh) / 2 + level * dy
+            # print level, tx, ty
+            x = x0 + (tx * cardw) // 2 + level * dx
+            y = y0 + (ty * cardh) // 2 + level * dy
             stack = self.RowStack_Class(x, y, self)
-            ##stack.G = (level, tx, ty)
+            # stack.G = (level, tx, ty)
             stack.CARD_XOFFSET = dx
             stack.CARD_YOFFSET = dy
             s.rows.append(stack)
@@ -429,7 +432,7 @@ class AbstractMahjonggGame(Game):
         # compute blockmap
         for stack in s.rows:
             level, tx, ty = tiles[stack.id]
-            above, below, left, right, up, bottom = {}, {}, {}, {}, {}, {}
+            above, below, left, right = {}, {}, {}, {}
             # above blockers
             for tl in range(level+1, level+2):
                 above[tilemap.get((tl, tx, ty))] = 1
@@ -449,34 +452,34 @@ class AbstractMahjonggGame(Game):
             right[tilemap.get((level, tx+2, ty))] = 1
             right[tilemap.get((level, tx+2, ty+1))] = 1
             # up blockers
-            ##up[tilemap.get((level, tx, ty-1))] = 1
-            ##up[tilemap.get((level, tx+1, ty-1))] = 1
+            # up[tilemap.get((level, tx, ty-1))] = 1
+            # up[tilemap.get((level, tx+1, ty-1))] = 1
             # bottom blockers
-            ##bottom[tilemap.get((level, tx, ty+2))] = 1
-            ##bottom[tilemap.get((level, tx+1, ty+2))] = 1
+            # bottom[tilemap.get((level, tx, ty+2))] = 1
+            # bottom[tilemap.get((level, tx+1, ty+2))] = 1
             # sanity check - assert that there are no overlapping tiles
             assert tilemap.get((level, tx, ty)) is stack
             assert tilemap.get((level, tx+1, ty)) is stack
             assert tilemap.get((level, tx, ty+1)) is stack
             assert tilemap.get((level, tx+1, ty+1)) is stack
             #
-            above = tuple(filter(None, above.keys()))
-            below = tuple(filter(None, below.keys()))
-            left = tuple(filter(None, left.keys()))
-            right = tuple(filter(None, right.keys()))
-            ##up = tuple(filter(None, up.keys()))
-            ##bottom = tuple(filter(None, bottom.keys()))
+            above = tuple([_f for _f in above.keys() if _f])
+            below = tuple([_f for _f in below.keys() if _f])
+            left = tuple([_f for _f in left.keys() if _f])
+            right = tuple([_f for _f in right.keys() if _f])
+            # up = tuple(filter(None, up.keys()))
+            # bottom = tuple(filter(None, bottom.keys()))
 
             # assemble
             stack.blockmap = Struct(
-                above = above,
-                below = below,
-                left = left,
-                right = right,
-                ##up = up,
-                ##bottom = bottom,
-                all_left = None,
-                all_right = None,
+                above=above,
+                below=below,
+                left=left,
+                right=right,
+                # up=up,
+                # bottom=bottom,
+                all_left=None,
+                all_right=None,
             )
 
         def get_all_left(s):
@@ -487,6 +490,7 @@ class AbstractMahjonggGame(Game):
                     get_all_left(t)
                 s.blockmap.all_left.update(t.blockmap.all_left)
                 s.blockmap.all_left[t] = 1
+
         def get_all_right(s):
             if s.blockmap.all_right is None:
                 s.blockmap.all_right = {}
@@ -503,7 +507,6 @@ class AbstractMahjonggGame(Game):
             r.blockmap.all_left = tuple(r.blockmap.all_left.keys())
             r.blockmap.all_right = tuple(r.blockmap.all_right.keys())
 
-
         # create other stacks
         for i in range(4):
             for j in range(9):
@@ -516,7 +519,7 @@ class AbstractMahjonggGame(Game):
                         y = l.YM+dyy
                     elif TOOLKIT == 'gtk':
                         # FIXME
-                        x = self.width -l.XS
+                        x = self.width - l.XS
                         y = self.height - l.YS
                 stack = Mahjongg_Foundation(x, y, self)
                 if show_removed:
@@ -535,7 +538,6 @@ class AbstractMahjonggGame(Game):
         # Define stack groups
         l.defaultStackGroups()
 
-
     #
     # game overrides
     #
@@ -552,7 +554,6 @@ class AbstractMahjonggGame(Game):
         if new_cards is None:
             return cards
         return new_cards
-
 
     def _shuffleHook1(self, cards):
         # old version; it generate a very easy layouts
@@ -596,7 +597,7 @@ class AbstractMahjonggGame(Game):
             if len(free_stacks) < 2:
                 return None             # try another way
             #
-            i = factorial(len(free_stacks))/2/factorial(len(free_stacks)-2)
+            i = factorial(len(free_stacks))//2//factorial(len(free_stacks)-2)
             old_pairs = []
             for j in xrange(i):
                 nc = new_cards[:]
@@ -624,9 +625,8 @@ class AbstractMahjonggGame(Game):
         if new_cards:
             new_cards.reverse()
             return new_cards
-        print 'oops! can\'t create a solvable game'
+        print('oops! can\'t create a solvable game')
         return old_cards
-
 
     def _shuffleHook2(self, rows, cards):
 
@@ -689,15 +689,16 @@ class AbstractMahjonggGame(Game):
                     break
 
             # find suitable stacks
-##             suitable_stacks = []
-##             for r in rows:
-##                 if nc[r.id] is None and is_suitable(r, nc):
-##                     suitable_stacks.append(r)
+            #  suitable_stacks = []
+            #  for r in rows:
+            #      if nc[r.id] is None and is_suitable(r, nc):
+            #          suitable_stacks.append(r)
             suitable_stacks = [r for r in rows
                                if nc[r.id] is None and is_suitable(r, nc)]
 
             old_pairs = []
-            i = factorial(len(suitable_stacks))/2/factorial(len(suitable_stacks)-2)
+            i = factorial(len(suitable_stacks))//2 \
+                // factorial(len(suitable_stacks)-2)
             for j in xrange(i):
                 if iters[0] > max_iters:
                     return None
@@ -727,11 +728,11 @@ class AbstractMahjonggGame(Game):
                 if ret:
                     ret = [x for x in ret if x != 1]
                     return ret
-                nc[s1.id] = nc[s2.id] = None # try another way
+                nc[s1.id] = nc[s2.id] = None  # try another way
 
             return None
 
-        new_cards = [None]*len(self.s.rows) # None - empty stack, 1 - non-used
+        new_cards = [None]*len(self.s.rows)  # None - empty stack, 1 - non-used
         drows = dict.fromkeys(rows)     # optimization
         for r in self.s.rows:
             if r not in drows:
@@ -741,16 +742,16 @@ class AbstractMahjonggGame(Game):
         while True:
             ret = create_solvable(cards[:], new_cards)
             if DEBUG:
-                print 'create_solvable time:', time.time() - start_time
+                print('create_solvable time:', time.time() - start_time)
             if ret:
                 ret.reverse()
                 return ret
             if time.time() - start_time > max_time or \
-                   iters[0] <= max_iters:
-                print 'oops! can\'t create a solvable game'
+                    iters[0] <= max_iters:
+                print('oops! can\'t create a solvable game')
                 return None
             iters = [0]
-        print 'oops! can\'t create a solvable game'
+        print('oops! can\'t create a solvable game')
         return None
 
     def _mahjonggShuffle(self):
@@ -784,13 +785,13 @@ class AbstractMahjonggGame(Game):
 
         new_cards = self._shuffleHook2(rows, cards)
         if new_cards is None:
-            d = MfxMessageDialog(self.top, title=_('Warning'),
-                                 text=_('''\
+            MfxMessageDialog(self.top, title=_('Warning'),
+                             text=_('''\
 Sorry, I can\'t find
 a solvable configuration.'''),
-                                 bitmap='warning')
+                             bitmap='warning')
             self.leaveState(old_state)
-            ##self.finishMove()
+            # self.finishMove()
             # hack
             am = self.moves.current[0]
             am.undo(self)               # restore random
@@ -816,7 +817,7 @@ a solvable configuration.'''),
 
     def startGame(self):
         assert len(self.s.talon.cards) == self.NCARDS
-        #self.s.talon.dealRow(rows = self.s.rows, frames = 0)
+        # self.s.talon.dealRow(rows = self.s.rows, frames = 0)
         n = 12
         self.s.talon.dealRow(rows=self.s.rows[:self.NCARDS-n], frames=0)
         self.startDealSample()
@@ -849,8 +850,8 @@ a solvable configuration.'''),
             for t in stacks[i+1:]:
                 if self.cardsMatch(r.cards[0], t.cards[0]):
                     n += 1
-            #if n == 3: n = 1
-            #elif n == 2: n = 0
+            # if n == 3: n = 1
+            # elif n == 2: n = 0
             n = n % 2
             f += n
             i += 1
@@ -880,7 +881,7 @@ a solvable configuration.'''),
         # Mahjongg special: highlight all moveable tiles
         return ((self.s.rows, 1),)
 
-    def _highlightCards(self, info, sleep=1.5, delta=(1,1,1,1)):
+    def _highlightCards(self, info, sleep=1.5, delta=(1, 1, 1, 1)):
         if not Image:
             delta = (-self._delta_x, 0, 0, -self._delta_y)
             return Game._highlightCards(self, info, sleep=sleep, delta=delta)
@@ -894,9 +895,9 @@ a solvable configuration.'''),
         for s, c1, c2, color in info:
             assert c1 is c2
             assert c1 in s.cards
-            tkraise = False
             x, y = s.x, s.y
-            img = self.app.images.getHighlightCard(c1.deck, c1.suit, c1.rank)
+            img = self.app.images.getHighlightedCard(
+                c1.deck, c1.suit, c1.rank, 'black')
             if img is None:
                 continue
             img = MfxCanvasImage(self.canvas, x, y, image=img,
@@ -943,8 +944,8 @@ a solvable configuration.'''),
         return self.getCardFaceImage(deck, suit, rank)
 
     def _createCard(self, id, deck, suit, rank, x, y):
-        ##if deck >= 1 and suit == 3 and rank >= 4:
-        if deck%4 and suit == 3 and rank >= 4:
+        # if deck >= 1 and suit == 3 and rank >= 4:
+        if deck % 4 and suit == 3 and rank >= 4:
             return None
         return Game._createCard(self, id, deck, suit, rank, x, y)
 
@@ -976,17 +977,17 @@ a solvable configuration.'''),
         return card1.rank == card2.rank
 
 
-## mahjongg util
+#  mahjongg util
 def comp_cardset(ncards):
     # calc decks, ranks & trumps
     assert ncards % 4 == 0
-    assert 0 < ncards <= 288 # ???
+    assert 0 < ncards <= 288  # ???
     decks = 1
-    cards = ncards/4
+    cards = ncards//4
     if ncards > 144:
         assert ncards % 8 == 0
         decks = 2
-        cards = cards/2
+        cards = cards//2
     ranks, trumps = divmod(cards, 3)
     if ranks > 10:
         trumps += (ranks-10)*3
@@ -1000,7 +1001,6 @@ def comp_cardset(ncards):
 # * register a Mahjongg type game
 # ************************************************************************
 
-from new import classobj
 
 def r(id, short_name, name=None, ncards=144, layout=None):
     assert layout
@@ -1008,17 +1008,17 @@ def r(id, short_name, name=None, ncards=144, layout=None):
         name = "Mahjongg " + short_name
     classname = re.sub('\W', '', name)
     # create class
-    gameclass = classobj(classname, (AbstractMahjonggGame,), {})
+    gameclass = type(classname, (AbstractMahjonggGame,), {})
     gameclass.L = layout
     gameclass.NCARDS = ncards
     decks, ranks, trumps = comp_cardset(ncards)
     gi = GameInfo(id, gameclass, name,
-                  GI.GT_MAHJONGG, 4*decks, 0, ##GI.SL_MOSTLY_SKILL,
+                  GI.GT_MAHJONGG, 4*decks, 0,  # GI.SL_MOSTLY_SKILL,
                   category=GI.GC_MAHJONGG, short_name=short_name,
-                  suits=range(3), ranks=range(ranks), trumps=range(trumps),
+                  suits=list(range(3)), ranks=list(range(ranks)),
+                  trumps=list(range(trumps)),
                   si={"decks": decks, "ncards": ncards})
     gi.ncards = ncards
     gi.rules_filename = "mahjongg.html"
     registerGame(gi)
     return gi
-

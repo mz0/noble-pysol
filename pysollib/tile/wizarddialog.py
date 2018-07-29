@@ -1,46 +1,49 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = ['WizardDialog']
-
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
-import Tkinter
-import ttk
+import sys
+
+from six.moves import tkinter
+from . import ttk
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.mfxutil import KwStruct
 from pysollib.wizardutil import WizardWidgets
 from pysollib.wizardpresets import presets
 
 # Toolkit imports
-from tkwidget import MfxDialog
-from tkwidget import PysolScale, PysolCombo
+from .tkwidget import MfxDialog
+from .tkwidget import PysolScale, PysolCombo
 
+if sys.version_info > (3,):
+    basestring = str
 
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class WizardDialog(MfxDialog):
     def __init__(self, parent, title, app, **kw):
@@ -68,13 +71,15 @@ class WizardDialog(MfxDialog):
 
             if w.widget == 'preset':
                 if w.variable is None:
-                    w.variable = Tkinter.StringVar()
+                    w.variable = tkinter.StringVar()
                 values = [_(v) for v in w.values]
                 default = _(w.default)
                 values.remove(default)
                 values.sort()
                 values.insert(0, default)
-                callback = lambda e, w=w: self.presetSelected(e, w)
+
+                def callback(e, w=w):
+                    self.presetSelected(e, w)
                 cb = PysolCombo(frame, values=tuple(values),
                                 textvariable=w.variable,
                                 exportselection=False,
@@ -83,12 +88,12 @@ class WizardDialog(MfxDialog):
                 cb.grid(row=row, column=1, sticky='ew', padx=2, pady=2)
             elif w.widget == 'entry':
                 if w.variable is None:
-                    w.variable = Tkinter.StringVar()
+                    w.variable = tkinter.StringVar()
                 en = ttk.Entry(frame, textvariable=w.variable)
                 en.grid(row=row, column=1, sticky='ew', padx=2, pady=2)
             elif w.widget == 'menu':
                 if w.variable is None:
-                    w.variable = Tkinter.StringVar()
+                    w.variable = tkinter.StringVar()
                 values = [_(v) for v in w.values]
                 cb = PysolCombo(frame, values=tuple(values),
                                 textvariable=w.variable,
@@ -97,20 +102,21 @@ class WizardDialog(MfxDialog):
                 cb.grid(row=row, column=1, sticky='ew', padx=2, pady=2)
             elif w.widget == 'spin':
                 if w.variable is None:
-                    w.variable = Tkinter.IntVar()
+                    w.variable = tkinter.IntVar()
                 else:
                     # delete all trace callbacks
                     for mod, cbname in w.variable.trace_vinfo():
                         w.variable.trace_vdelete(mod, cbname)
                 from_, to = w.values
-                ##s = Spinbox(frame, textvariable=w.variable, from_=from_, to=to)
+                # s = Spinbox(
+                #   frame, textvariable=w.variable, from_=from_, to=to)
                 s = PysolScale(frame, from_=from_, to=to, resolution=1,
                                orient='horizontal',
                                variable=w.variable)
                 s.grid(row=row, column=1, sticky='ew', padx=2, pady=2)
             elif w.widget == 'check':
                 if w.variable is None:
-                    w.variable = Tkinter.BooleanVar()
+                    w.variable = tkinter.BooleanVar()
                 ch = ttk.Checkbutton(frame, variable=w.variable,
                                      takefocus=False)
                 ch.grid(row=row, column=1, sticky='ew', padx=2, pady=2)
@@ -128,7 +134,6 @@ class WizardDialog(MfxDialog):
         focus = self.createButtons(bottom_frame, kw)
         self.mainloop(focus, kw.timeout)
 
-
     def presetSelected(self, e, w):
         n = e.widget.get()
         n = w.translation_map[n]
@@ -144,7 +149,6 @@ class WizardDialog(MfxDialog):
                 v = _(v)
             w.variable.set(v)
 
-
     def initKw(self, kw):
         kw = KwStruct(kw,
                       strings=(_('&OK'), _('&Cancel')),
@@ -152,6 +156,3 @@ class WizardDialog(MfxDialog):
                       separator=False,
                       )
         return MfxDialog.initKw(self, kw)
-
-
-

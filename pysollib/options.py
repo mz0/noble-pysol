@@ -1,39 +1,44 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys, os
+import sys
+import os
 import traceback
 
 # PySol imports
-from mfxutil import print_err
-from resource import CSI
-from configobj import configobj, validate
-import settings
+from pysollib.mfxutil import print_err
+from pysollib.resource import CSI
+from pysollib.configobj import configobj, validate
+import pysollib.settings
 
 # Toolkit imports
-from pysoltk import TOOLBAR_BUTTONS
+from pysollib.pysoltk import TOOLBAR_BUTTONS
 
+from pysollib.mygettext import _
+
+if sys.version_info > (3,):
+    unicode = str
 
 # ************************************************************************
 # * Options
@@ -95,6 +100,7 @@ randomize_place = boolean
 save_cardsets = boolean
 dragcursor = boolean
 save_games_geometry = boolean
+game_geometry = int_list(min=2, max=2)
 sound = boolean
 sound_mode = integer(0, 1)
 sound_sample_volume = integer(0, 128)
@@ -104,6 +110,9 @@ recent_gameid = int_list
 favorite_gameid = int_list
 visible_buttons = string_list
 translate_game_names = boolean
+solver_presets = string_list
+solver_show_progress = boolean
+solver_max_iterations = integer
 
 [sound_samples]
 move = boolean
@@ -166,7 +175,11 @@ highlight_piles = float(0.2, 9.9)
 7 = string_list(min=2, max=2)
 8 = string_list(min=2, max=2)
 9 = string_list(min=2, max=2)
-
+scale_cards = boolean
+scale_x = float
+scale_y = float
+auto_scale = boolean
+preserve_aspect_ratio = boolean
 '''.splitlines()
 
 
@@ -232,17 +245,19 @@ class Options:
         ('sound_sample_buffer_size', 'int'),
         ('tabletile_name', 'str'),
         ('translate_game_names', 'bool'),
-        #('toolbar_vars', 'list'),
-        #('recent_gameid', 'list'),
-        #('favorite_gameid', 'list'),
+        ('solver_presets', 'list'),
+        ('solver_show_progress', 'bool'),
+        ('solver_max_iterations', 'int'),
+        # ('toolbar_vars', 'list'),
+        # ('recent_gameid', 'list'),
+        # ('favorite_gameid', 'list'),
         ]
-
 
     def __init__(self):
         self._config = None             # configobj.ConfigObj instance
         self._config_encoding = 'utf-8'
 
-        self.version_tuple = settings.VERSION_TUPLE # XXX
+        self.version_tuple = pysollib.settings.VERSION_TUPLE  # XXX
         self.saved = 0                  # XXX
         # options menu:
         self.player = _("Unknown")
@@ -261,7 +276,7 @@ class Options:
         self.highlight_samerank = True
         self.highlight_not_matching = True
         self.mahjongg_show_removed = False
-        self.mahjongg_create_solvable = 2 # 0 - none, 1 - easy, 2 - hard
+        self.mahjongg_create_solvable = 2  # 0 - none, 1 - easy, 2 - hard
         self.shisen_show_hint = True
         self.shisen_show_matching = False
         self.animations = 3             # default to Medium
@@ -277,21 +292,21 @@ class Options:
         self.tile_theme = 'default'
         self.default_tile_theme = 'default'
         self.toolbar = 1       # 0 == hide, 1,2,3,4 == top, bottom, lef, right
-        ##self.toolbar_style = 'default'
+        # self.toolbar_style = 'default'
         self.toolbar_style = 'bluecurve'
         self.toolbar_relief = 'flat'
         self.toolbar_compound = 'none'  # icons only
         self.toolbar_size = 0
         self.toolbar_vars = {}
         for w in TOOLBAR_BUTTONS:
-            self.toolbar_vars[w] = True # show all buttons
+            self.toolbar_vars[w] = True  # show all buttons
         self.statusbar = True
-        self.statusbar_game_number = False # show game number in statusbar
-        self.statusbar_stuck = False       # show stuck indicator
+        self.statusbar_game_number = False  # show game number in statusbar
+        self.statusbar_stuck = False        # show stuck indicator
         self.num_cards = False
         self.helpbar = False
         self.splashscreen = True
-        self.mouse_type = 'drag-n-drop' # or 'sticky-mouse' or 'point-n-click'
+        self.mouse_type = 'drag-n-drop'  # or 'sticky-mouse' or 'point-n-click'
         self.mouse_undo = False         # use mouse for undo/redo
         self.negative_bottom = True
         self.translate_game_names = True
@@ -300,42 +315,42 @@ class Options:
         self.sound_mode = 1
         self.sound_sample_volume = 80
         self.sound_music_volume = 100
-        self.sound_sample_buffer_size = 1 # 1 - 4 (1024 - 4096 bytes)
+        self.sound_sample_buffer_size = 1  # 1 - 4 (1024 - 4096 bytes)
         self.sound_samples = {
-            'areyousure'    : True,
-            'autodrop'      : True,
-            'autoflip'      : True,
-            'autopilotlost' : True,
-            'autopilotwon'  : True,
-            'deal'          : True,
-            'dealwaste'     : True,
-            'droppair'      : True,
-            'drop'          : True,
-            #'extra'         : True,
-            'flip'          : True,
-            'move'          : True,
-            'nomove'        : True,
-            'redo'          : True,
-            'startdrag'     : True,
-            'turnwaste'     : True,
-            'undo'          : True,
-            'gamefinished'  : False,
-            'gamelost'      : False,
-            'gameperfect'   : False,
-            'gamewon'       : False,
+            'areyousure': True,
+            'autodrop': True,
+            'autoflip': True,
+            'autopilotlost': True,
+            'autopilotwon': True,
+            'deal': True,
+            'dealwaste': True,
+            'droppair': True,
+            'drop': True,
+            # 'extra': True,
+            'flip': True,
+            'move': True,
+            'nomove': True,
+            'redo': True,
+            'startdrag': True,
+            'turnwaste': True,
+            'undo': True,
+            'gamefinished': False,
+            'gamelost': False,
+            'gameperfect': False,
+            'gamewon': False,
             }
         # fonts
         self.fonts = {
-            "default"        : None,
-            #"default"        : ("helvetica", 12),
-            "sans"           : ("times",     12), # for html
-            "fixed"          : ("courier",   12), # for html & log
-            "small"          : ("helvetica", 12),
-            "canvas_default" : ("helvetica", 12),
-            #"canvas_card"    : ("helvetica", 12),
-            "canvas_fixed"   : ("courier",   12),
-            "canvas_large"   : ("helvetica", 16),
-            "canvas_small"   : ("helvetica", 10),
+            "default": None,
+            # "default": ("helvetica", 12),
+            "sans": ("times",     12),  # for html
+            "fixed": ("courier",   12),  # for html & log
+            "small": ("helvetica", 12),
+            "canvas_default": ("helvetica", 12),
+            # "canvas_card": ("helvetica", 12),
+            "canvas_fixed": ("courier",   12),
+            "canvas_large": ("helvetica", 16),
+            "canvas_small": ("helvetica", 10),
             }
         # colors
         self.colors = {
@@ -366,16 +381,46 @@ class Options:
         self.game_holded = 0            # gameid or 0
         self.wm_maximized = 0
         self.save_games_geometry = False
-        self.games_geometry = {} # saved games geometry (gameid: (width, height))
+        # saved games geometry (gameid: (width, height))
+        self.games_geometry = {}
+        self.game_geometry = (0, 0)  # game geometry before exit
+        self.offsets = {}           # cards offsets
         #
         self.randomize_place = False
         self.save_cardsets = True
         self.dragcursor = True
+        #
+        self.scale_cards = False
+        self.scale_x = 1.0
+        self.scale_y = 1.0
+        self.auto_scale = False
+        self.preserve_aspect_ratio = True
+        # solver
+        self.solver_presets = [
+            'none',
+            'abra-kadabra',
+            'blue-yonder',
+            'conspiracy-theory',
+            'cool-jives',
+            'crooked-nose',
+            'fools-gold',
+            'good-intentions',
+            'hello-world',
+            'john-galt-line',
+            'one-big-family',
+            'rin-tin-tin',
+            'slick-rock',
+            'the-last-mohican',
+            'video-editing',
+            'yellow-brick-road',
+            ]
+        self.solver_show_progress = True
+        self.solver_max_iterations = 100000
 
     def setDefaults(self, top=None):
-        WIN_SYSTEM = settings.WIN_SYSTEM
+        WIN_SYSTEM = pysollib.settings.WIN_SYSTEM
         # toolbar
-        #if WIN_SYSTEM == 'win32':
+        # if WIN_SYSTEM == 'win32':
         #    self.toolbar_style = 'crystal'
         # fonts
         if WIN_SYSTEM == 'win32':
@@ -386,7 +431,7 @@ class Options:
         # tile theme
         if WIN_SYSTEM == 'win32':
             self.tile_theme = self.default_tile_theme = 'winnative'
-            if sys.getwindowsversion() >= (5, 1): # xp
+            if sys.getwindowsversion() >= (5, 1):  # xp
                 self.tile_theme = 'xpnative'
         elif WIN_SYSTEM == 'x11':
             self.tile_theme = 'clam'
@@ -401,14 +446,14 @@ class Options:
                           top.winfo_screendepth())
         # bg
         if sd > 8:
-            self.tabletile_name = "Nostalgy.gif" # basename
+            self.tabletile_name = "Nostalgy.gif"  # basename
         else:
             self.tabletile_name = None
         # cardsets
         c = "Standard"
         if sw < 800 or sh < 600:
             c = "2000"
-        #if sw > 1024 and sh > 768:
+        # if sw > 1024 and sh > 768:
         #    c = 'Dondorf'
         self.cardset = {
             # game_type:        (cardset_name, back_file)
@@ -419,7 +464,7 @@ class Options:
             CSI.TYPE_TAROCK:    ("Vienna 2K", ""),
             CSI.TYPE_HEXADECK:  ("Hex A Deck", ""),
             CSI.TYPE_MUGHAL_GANJIFA: ("Mughal Ganjifa", ""),
-            ##CSI.TYPE_NAVAGRAHA_GANJIFA: ("Navagraha Ganjifa", ""),
+            # CSI.TYPE_NAVAGRAHA_GANJIFA: ("Navagraha Ganjifa", ""),
             CSI.TYPE_NAVAGRAHA_GANJIFA: ("Dashavatara Ganjifa", ""),
             CSI.TYPE_DASHAVATARA_GANJIFA: ("Dashavatara Ganjifa", ""),
             CSI.TYPE_TRUMP_ONLY: ("Matrix", ""),
@@ -448,7 +493,8 @@ class Options:
         for key, t in self.GENERAL_OPTIONS:
             val = getattr(self, key)
             if isinstance(val, str):
-                val = unicode(val, 'utf-8')
+                if sys.version_info < (3,):
+                    val = unicode(val, 'utf-8')
             config['general'][key] = val
 
         config['general']['recent_gameid'] = self.recent_gameid
@@ -456,6 +502,7 @@ class Options:
         visible_buttons = [b for b in self.toolbar_vars
                            if self.toolbar_vars[b]]
         config['general']['visible_buttons'] = visible_buttons
+        config['general']['solver_presets'].remove('none')
 
         # sound_samples
         config['sound_samples'] = self.sound_samples
@@ -477,15 +524,22 @@ class Options:
         # cardsets
         for key, val in self.cardset.items():
             config['cardsets'][str(key)] = val
+        for key in ('scale_cards', 'scale_x', 'scale_y',
+                    'auto_scale', 'preserve_aspect_ratio'):
+            config['cardsets'][key] = getattr(self, key)
 
         # games_geometry
         config['games_geometry'].clear()
         for key, val in self.games_geometry.items():
             config['games_geometry'][str(key)] = val
+        config['general']['game_geometry'] = self.game_geometry
+
+        # offsets
+        for key, val in self.offsets.items():
+            config['offsets'][key] = val
 
         config.write()
-        ##config.write(sys.stdout); print
-
+        # config.write(sys.stdout); print
 
     def _getOption(self, section, key, t):
         config = self._config
@@ -502,11 +556,11 @@ class Options:
             elif t == 'list':
                 val = config[section][key]
                 assert isinstance(val, (list, tuple))
-            else: # str
+            else:  # str
                 val = config[section][key]
         except KeyError:
             val = None
-        except:
+        except Exception:
             print_err('load option error: %s: %s' % (section, key))
             traceback.print_exc()
             val = None
@@ -534,7 +588,8 @@ class Options:
             'timeouts',
             'cardsets',
             'games_geometry',
-            ):
+            'offsets',
+                ):
             if section not in config:
                 config[section] = {}
 
@@ -547,7 +602,7 @@ class Options:
         # validation
         vdt = validate.Validator()
         res = config.validate(vdt)
-        ##from pprint import pprint; pprint(res)
+        # from pprint import pprint; pprint(res)
         if res is not True:
             for section, data in res.items():
                 if data is True:
@@ -558,7 +613,6 @@ class Options:
                                   'section: "%s", key: "%s"' % (section, key))
                         config[section][key] = None
 
-
         # general
         for key, t in self.GENERAL_OPTIONS:
             val = self._getOption('general', key, t)
@@ -567,26 +621,33 @@ class Options:
             elif val is not None:
                 setattr(self, key, val)
 
-        settings.TRANSLATE_GAME_NAMES = self.translate_game_names
+        pysollib.settings.TRANSLATE_GAME_NAMES = self.translate_game_names
 
         recent_gameid = self._getOption('general', 'recent_gameid', 'list')
         if recent_gameid is not None:
             try:
                 self.recent_gameid = [int(i) for i in recent_gameid]
-            except:
+            except Exception:
                 traceback.print_exc()
 
         favorite_gameid = self._getOption('general', 'favorite_gameid', 'list')
         if favorite_gameid is not None:
             try:
                 self.favorite_gameid = [int(i) for i in favorite_gameid]
-            except:
+            except Exception:
                 traceback.print_exc()
 
         visible_buttons = self._getOption('general', 'visible_buttons', 'list')
         if visible_buttons is not None:
             for key in TOOLBAR_BUTTONS:
                 self.toolbar_vars[key] = (key in visible_buttons)
+
+        # solver
+        solver_presets = self._getOption('general', 'solver_presets', 'list')
+        if solver_presets is not None:
+            if 'none' not in solver_presets:
+                solver_presets.insert(0, 'none')
+            self.solver_presets = solver_presets
 
         # sound_samples
         for key in self.sound_samples:
@@ -602,7 +663,7 @@ class Options:
             if val is not None:
                 try:
                     val[1] = int(val[1])
-                except:
+                except Exception:
                     traceback.print_exc()
                 else:
                     val = tuple(val)
@@ -626,8 +687,16 @@ class Options:
             if val is not None:
                 try:
                     self.cardset[int(key)] = val
-                except:
+                except Exception:
                     traceback.print_exc()
+        for key, t in (('scale_cards', 'bool'),
+                       ('scale_x', 'float'),
+                       ('scale_y', 'float'),
+                       ('auto_scale', 'bool'),
+                       ('preserve_aspect_ratio', 'bool')):
+            val = self._getOption('cardsets', key, t)
+            if val is not None:
+                setattr(self, key, val)
 
         # games_geometry
         for key, val in config['games_geometry'].items():
@@ -635,7 +704,20 @@ class Options:
                 val = [int(i) for i in val]
                 assert len(val) == 2
                 self.games_geometry[int(key)] = val
-            except:
+            except Exception:
+                traceback.print_exc()
+        game_geometry = self._getOption('general', 'game_geometry', 'list')
+        if game_geometry is not None:
+            try:
+                self.game_geometry = tuple(int(i) for i in game_geometry)
+            except Exception:
                 traceback.print_exc()
 
-
+        # cards offsets
+        for key, val in config['offsets'].items():
+            try:
+                val = [int(i) for i in val]
+                assert len(val) == 2
+                self.offsets[key] = val
+            except Exception:
+                traceback.print_exc()

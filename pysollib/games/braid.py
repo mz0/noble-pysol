@@ -1,44 +1,55 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
-import sys, math
+import math
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
+from pysollib.util import ACE, NO_RANK, KING, RANKS, UNLIMITED_CARDS
+from pysollib.stack import \
+        AbstractFoundationStack, \
+        BasicRowStack, \
+        DealRowRedealTalonStack, \
+        OpenStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        WasteStack, \
+        WasteTalonStack, \
+        Stack, \
+        StackWrapper
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import DefaultHint, CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class Braid_Hint(DefaultHint):
     # FIXME: demo is not too clever in this game
@@ -47,6 +58,7 @@ class Braid_Hint(DefaultHint):
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class Braid_Foundation(AbstractFoundationStack):
     def __init__(self, x, y, game, suit, **cap):
@@ -63,7 +75,8 @@ class Braid_Foundation(AbstractFoundationStack):
             card_dir = self.getRankDir(cards=(self.cards[-1], cards[0]))
             return card_dir in (1, -1)
         else:
-            return (self.cards[-1].rank + stack_dir) % self.cap.mod == cards[0].rank
+            return ((self.cards[-1].rank + stack_dir) %
+                    self.cap.mod == cards[0].rank)
 
 
 class Braid_BraidStack(OpenStack):
@@ -79,7 +92,7 @@ class Braid_BraidStack(OpenStack):
             last_x = 0
             for i in range(n):
                 x = int(round(dx * math.sin(i + 1)))
-                ##print x, x - last_x
+                # print x, x - last_x
                 self.CARD_XOFFSET.append(x - last_x)
                 last_x = x
         else:
@@ -121,7 +134,7 @@ class Braid(Game):
     def createGame(self):
         # create layout
         l, s = Layout(self), self.s
-        font=self.app.getFont("canvas_default")
+        font = self.app.getFont("canvas_default")
 
         # set window
         # (piles up to 20 cards are playable - needed for Braid_BraidStack)
@@ -146,9 +159,9 @@ class Braid(Game):
             s.rows.append(Braid_ReserveStack(x, y + l.YS, self))
             s.rows.append(Braid_ReserveStack(x + l.XS, y + l.YS, self))
             x = x + 4 * l.XS
-        x, y = l.XM + l.XS * 5/2, l.YM
+        x, y = l.XM + l.XS * 5//2, l.YM
         s.braid = Braid_BraidStack(x, y, self)
-        x, y = l.XM + 7 * l.XS, l.YM + l.YS * 3/2
+        x, y = l.XM + 7 * l.XS, l.YM + l.YS * 3//2
         s.talon = WasteTalonStack(x, y, self, max_rounds=3)
         l.createText(s.talon, "s")
         l.createRoundText(s.talon, 'nn')
@@ -162,7 +175,7 @@ class Braid(Game):
                 s.foundations.append(cl(x, y, self, suit=i))
                 x += l.XS
             y = y + l.YS
-        x = l.XM+8*l.XS+decks*l.XS/2
+        x = l.XM+8*l.XS+decks*l.XS//2
         self.texts.info = MfxCanvasText(self.canvas,
                                         x, y, anchor="n", font=font)
 
@@ -170,7 +183,6 @@ class Braid(Game):
         self.sg.talonstacks = [s.talon] + [s.waste]
         self.sg.openstacks = s.foundations + s.rows
         self.sg.dropstacks = [s.braid] + s.rows + [s.waste]
-
 
     #
     # game overrides
@@ -219,7 +231,6 @@ class Braid(Game):
     def _saveGameHook(self, p):
         p.dump(self.base_card.id)
 
-
     #
     # game extras
     #
@@ -250,20 +261,25 @@ class LongBraid(Braid):
 class Fort(Braid):
 
     Foundation_Classes = [SS_FoundationStack,
-               StackWrapper(SS_FoundationStack, base_rank=KING, dir=-1)]
+                          StackWrapper(SS_FoundationStack, base_rank=KING,
+                                       dir=-1)]
 
     BRAID_CARDS = 21
 
     def _shuffleHook(self, cards):
         # move 4 Kings and 4 Aces to top of the Talon
         # (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards,
-            lambda c: (c.rank in (ACE, KING) and c.deck == 0, (c.suit, c.rank)))
+        return self._shuffleHookMoveToTop(
+            cards,
+            lambda c: (c.rank in (ACE, KING) and c.deck == 0,
+                       (c.suit, c.rank)))
 
     def _restoreGameHook(self, game):
         pass
+
     def _loadGameHook(self, p):
         pass
+
     def _saveGameHook(self, p):
         pass
 
@@ -298,34 +314,35 @@ class Backbone(Game):
         l, s = Layout(self), self.s
 
         # set window
-        w, h = l.XM+(rows+2)*l.XS, max(l.YM+3*l.XS+10*l.YOFFSET, l.YM+2*l.YS+11*l.YOFFSET+l.TEXT_HEIGHT)
+        w, h = l.XM+(rows+2)*l.XS, max(
+            l.YM+3*l.XS+10*l.YOFFSET, l.YM+2*l.YS+11*l.YOFFSET+l.TEXT_HEIGHT)
         self.setSize(w, h)
 
         # create stacks
         y = l.YM
         for i in range(4):
-            x = l.XM+(rows-8)*l.XS/2 +i*l.XS
+            x = l.XM+(rows-8)*l.XS//2 + i*l.XS
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
-            x = l.XM+(rows/2+2)*l.XS +i*l.XS
+            x = l.XM+(rows//2+2)*l.XS + i*l.XS
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
 
-        x, y = l.XM+rows*l.XS/2, l.YM
+        x, y = l.XM+rows*l.XS//2, l.YM
         s.reserves.append(Backbone_BraidStack(x, y, self, max_accept=0))
         x += l.XS
         s.reserves.append(Backbone_BraidStack(x, y, self, max_accept=0))
-        x, y = l.XM+(rows+1)*l.XS/2, l.YM+11*l.YOFFSET
+        x, y = l.XM+(rows+1)*l.XS//2, l.YM+11*l.YOFFSET
         s.reserves.append(BasicRowStack(x, y, self, max_accept=0))
 
         x, y = l.XM, l.YM+l.YS
-        for i in range(rows/2):
+        for i in range(rows//2):
             s.rows.append(SS_RowStack(x, y, self, max_move=1))
             x += l.XS
-        x, y = l.XM+(rows/2+2)*l.XS, l.YM+l.YS
-        for i in range(rows/2):
+        x, y = l.XM+(rows//2+2)*l.XS, l.YM+l.YS
+        for i in range(rows//2):
             s.rows.append(SS_RowStack(x, y, self, max_move=1))
             x += l.XS
 
-        x, y = l.XM+rows*l.XS/2, h-l.YS
+        x, y = l.XM+rows*l.XS//2, h-l.YS
         s.talon = WasteTalonStack(x, y, self, max_rounds=1)
         l.createText(s.talon, "n")
         x += l.XS
@@ -334,7 +351,6 @@ class Backbone(Game):
 
         # define stack-groups
         l.defaultStackGroups()
-
 
     def startGame(self):
         for i in range(10):
@@ -434,9 +450,9 @@ class Casket(Game):
 
         # Casket
         x0, y0 = l.XM+3*l.XS, l.YM+1.5*l.YS
-        for xx, yy in ((0,0),            (3,0),
-                       (0,1),            (3,1),
-                       (0,2),(1,2),(2,2),(3,2),
+        for xx, yy in ((0, 0),                 (3, 0),
+                       (0, 1),                 (3, 1),
+                       (0, 2), (1, 2), (2, 2), (3, 2),
                        ):
             x, y = x0+xx*l.XS, y0+yy*l.YS
             stack = Casket_RowStack(x, y, self, max_move=1)
@@ -477,7 +493,6 @@ class Casket(Game):
         self.sg.openstacks = s.foundations + s.rows + s.reserves
         self.sg.dropstacks = s.lid + s.rows + [s.waste] + s.reserves
 
-
     def startGame(self):
         for i in range(13):
             self.s.talon.dealRow(rows=[self.s.jewels], frames=0, flip=0)
@@ -504,7 +519,8 @@ class Casket(Game):
 class Well_TalonStack(DealRowRedealTalonStack):
 
     def canDealCards(self):
-        return DealRowRedealTalonStack.canDealCards(self, rows=self.game.s.wastes)
+        return DealRowRedealTalonStack.canDealCards(
+            self, rows=self.game.s.wastes)
 
     def dealCards(self, sound=False):
         num_cards = 0
@@ -537,10 +553,10 @@ class Well(Game):
         # foundations
         suit = 0
         x0, y0 = l.XM+1.5*l.XS, l.YM+1.5*l.YS+l.TEXT_HEIGHT
-        for xx, yy in ((3,0),
-                       (0,3),
-                       (3,3),
-                       (0,0)):
+        for xx, yy in ((3, 0),
+                       (0, 3),
+                       (3, 3),
+                       (0, 0)):
             x, y = x0+xx*l.XS, y0+yy*l.YS
             s.foundations.append(SS_FoundationStack(x, y, self, suit=suit,
                                  base_rank=KING, mod=13, max_cards=26,
@@ -549,10 +565,10 @@ class Well(Game):
 
         # rows
         x0, y0 = l.XM+l.XS, l.YM+l.YS+l.TEXT_HEIGHT
-        for xx, yy in ((0,2),
-                       (2,0),
-                       (4,2),
-                       (2,4)):
+        for xx, yy in ((0, 2),
+                       (2, 0),
+                       (4, 2),
+                       (2, 4)):
             x, y = x0+xx*l.XS, y0+yy*l.YS
             stack = SS_RowStack(x, y, self, dir=1, mod=13, max_move=1)
             stack.getBottomImage = stack._getReserveBottomImage
@@ -561,17 +577,18 @@ class Well(Game):
 
         # left stack
         x, y = l.XM, l.YM+l.YS+l.TEXT_HEIGHT
-        stack = SS_RowStack(x, y, self, base_rank=ACE, dir=1, mod=13, max_move=1)
+        stack = SS_RowStack(
+            x, y, self, base_rank=ACE, dir=1, mod=13, max_move=1)
         stack.getBottomImage = stack._getReserveBottomImage
         stack.CARD_YOFFSET = 0
         s.rows.append(stack)
 
         # reserves
         x0, y0 = l.XM+2*l.XS, l.YM+2*l.YS+l.TEXT_HEIGHT
-        for xx, yy, anchor in ((0,1,'e'),
-                               (1,0,'s'),
-                               (2,1,'w'),
-                               (1,2,'n')):
+        for xx, yy, anchor in ((0, 1, 'e'),
+                               (1, 0, 's'),
+                               (2, 1, 'w'),
+                               (1, 2, 'n')):
             x, y = x0+xx*l.XS, y0+yy*l.YS
             stack = OpenStack(x, y, self)
             l.createText(stack, anchor)
@@ -594,7 +611,6 @@ class Well(Game):
         self.sg.talonstacks = [s.talon] + s.wastes
         self.sg.openstacks = s.foundations + s.rows
         self.sg.dropstacks = s.rows + s.wastes + s.reserves
-        
 
     def startGame(self):
         for i in range(10):
@@ -602,7 +618,6 @@ class Well(Game):
         self.startDealSample()
         self.s.talon.dealRow(rows=self.s.rows[:4])
         self.s.talon.dealCards()
-
 
     def fillStack(self, stack):
         if not stack.cards and stack in self.s.rows[:4]:
@@ -616,14 +631,13 @@ class Well(Game):
     shallHighlightMatch = Game._shallHighlightMatch_SSW
 
 
-
 # register the game
 registerGame(GameInfo(12, Braid, "Braid",
                       GI.GT_NAPOLEON, 2, 2, GI.SL_BALANCED,
-                      altnames=("Der Zopf", "Plait", "Pigtail") ))
+                      altnames=("Der Zopf", "Plait", "Pigtail")))
 registerGame(GameInfo(175, LongBraid, "Long Braid",
                       GI.GT_NAPOLEON, 2, 2, GI.SL_BALANCED,
-                      altnames=("Der lange Zopf",) ))
+                      altnames=("Der lange Zopf",)))
 registerGame(GameInfo(358, Fort, "Fort",
                       GI.GT_NAPOLEON, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(376, Backbone, "Backbone",

@@ -1,44 +1,48 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
+from pysollib.util import KING, QUEEN, VARIABLE_REDEALS
+
+from pysollib.stack import \
+        Stack, \
+        WasteStack, \
+        WasteTalonStack, \
+        SS_RowStack
 
 # ************************************************************************
 # * Talon
 # ************************************************************************
+
 
 class Matriarchy_Waste(WasteStack):
     def updateText(self):
@@ -56,8 +60,8 @@ class Matriarchy_Talon(WasteTalonStack):
         self.max_rounds = 11
         rows = self.game.s.rows
         for i in (0, 2, 4, 6):
-            l1 =  len(rows[i+0].cards) + len(rows[i+8].cards)
-            l2 =  len(rows[i+1].cards) + len(rows[i+9].cards)
+            l1 = len(rows[i+0].cards) + len(rows[i+8].cards)
+            l2 = len(rows[i+1].cards) + len(rows[i+9].cards)
             assert l1 + l2 <= 26
             if l1 + l2 == 26:
                 self.max_rounds = self.max_rounds + 2
@@ -120,7 +124,7 @@ class Matriarchy_Talon(WasteTalonStack):
         if self.game.preview > 1:
             return
         WasteTalonStack.updateText(self, update_rounds=0)
-        ## t = "Round %d" % self.round
+        # t = "Round %d" % self.round
         t = _("Round %d/%d") % (self.round, self.max_rounds)
         self.texts.rounds.config(text=t)
         t = _("Deal %d") % self.DEAL[self.round-1]
@@ -167,32 +171,33 @@ class Matriarchy(Game):
 
         # set window
         # (set piles so that at least 2/3 of a card is visible with 12 cards)
-        h = max(2*l.YS, (12-1)*l.YOFFSET + l.CH*2/3)
+        h = max(2*l.YS, (12-1)*l.YOFFSET + l.CH*2//3)
         self.setSize(10*l.XS+l.XM, h + l.YM + h)
 
         # create stacks
-        ##center, c1, c2 = self.height / 2, h, self.height - h
-        center = self.height / 2
-        c1, c2 = center-l.TEXT_HEIGHT/2, center+l.TEXT_HEIGHT/2
+        # center, c1, c2 = self.height // 2, h, self.height - h
+        center = self.height // 2
+        c1, c2 = center-l.TEXT_HEIGHT//2, center+l.TEXT_HEIGHT//2
         x, y = l.XM, c1 - l.CH
         for i in range(8):
-            s.rows.append(Matriarchy_UpRowStack(x, y, self, i/2))
+            s.rows.append(Matriarchy_UpRowStack(x, y, self, i//2))
             x = x + l.XS
         x, y = l.XM, c2
         for i in range(8):
-            s.rows.append(Matriarchy_DownRowStack(x, y, self, i/2))
+            s.rows.append(Matriarchy_DownRowStack(x, y, self, i//2))
             x = x + l.XS
-        x, y = x + l.XS / 2, c1 - l.CH / 2 - l.CH
-        tx = x + l.CW / 2
+        x, y = x + l.XS // 2, c1 - l.CH // 2 - l.CH
+        tx = x + l.CW // 2
         s.waste = Matriarchy_Waste(x, y, self)
         l.createText(s.waste, "s")
-        y = c2 + l.CH / 2
+        y = c2 + l.CH // 2
         s.talon = Matriarchy_Talon(x, y, self, max_rounds=VARIABLE_REDEALS)
         l.createText(s.talon, "n")
         l.createRoundText(s.talon, 'ss')
-        s.talon.texts.misc = MfxCanvasText(self.canvas,
-                                           tx, center, anchor="center",
-                                           font=self.app.getFont("canvas_large"))
+        s.talon.texts.misc = MfxCanvasText(
+                self.canvas,
+                tx, center, anchor="center",
+                font=self.app.getFont("canvas_large"))
 
         # define stack-groups
         l.defaultStackGroups()
@@ -203,7 +208,8 @@ class Matriarchy(Game):
 
     def _shuffleHook(self, cards):
         # move Queens to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards, lambda c: (c.rank == 11, c.suit), 8)
+        return self._shuffleHookMoveToTop(
+            cards, lambda c: (c.rank == 11, c.suit), 8)
 
     def startGame(self):
         self.startDealSample()
@@ -217,10 +223,10 @@ class Matriarchy(Game):
         if card1.rank + card2.rank == QUEEN + KING:
             return False
         return (card1.suit == card2.suit and
-                ((card1.rank + 1) % 13 == card2.rank or (card2.rank + 1) % 13 == card1.rank))
+                ((card1.rank + 1) % 13 == card2.rank or
+                 (card2.rank + 1) % 13 == card1.rank))
 
 
 # register the game
 registerGame(GameInfo(17, Matriarchy, "Matriarchy",
                       GI.GT_2DECK_TYPE, 2, VARIABLE_REDEALS, GI.SL_BALANCED))
-

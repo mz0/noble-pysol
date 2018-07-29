@@ -17,112 +17,115 @@
 # Comments, suggestions and bug reports welcome.
 
 """
-    The Validator object is used to check that supplied values 
+    The Validator object is used to check that supplied values
     conform to a specification.
-    
+
     The value can be supplied as a string - e.g. from a config file.
     In this case the check will also *convert* the value to
     the required type. This allows you to add validation
     as a transparent layer to access data stored as strings.
     The validation checks that the data is correct *and*
     converts it to the expected type.
-    
+
     Some standard checks are provided for basic data types.
     Additional checks are easy to write. They can be
     provided when the ``Validator`` is instantiated or
     added afterwards.
-    
+
     The standard functions work with the following basic data types :
-    
+
     * integers
     * floats
     * booleans
     * strings
     * ip_addr
-    
+
     plus lists of these datatypes
-    
+
     Adding additional checks is done through coding simple functions.
-    
-    The full set of standard checks are : 
-    
+
+    The full set of standard checks are :
+
     * 'integer': matches integer values (including negative)
                  Takes optional 'min' and 'max' arguments : ::
-    
+
                    integer()
                    integer(3, 9)  # any value from 3 to 9
                    integer(min=0) # any positive value
                    integer(max=9)
-    
+
     * 'float': matches float values
                Has the same parameters as the integer check.
-    
+
     * 'boolean': matches boolean values - ``True`` or ``False``
                  Acceptable string values for True are :
                    true, on, yes, 1
                  Acceptable string values for False are :
                    false, off, no, 0
-    
+
                  Any other value raises an error.
-    
+
     * 'ip_addr': matches an Internet Protocol address, v.4, represented
                  by a dotted-quad string, i.e. '1.2.3.4'.
-    
+
     * 'string': matches any string.
                 Takes optional keyword args 'min' and 'max'
                 to specify min and max lengths of the string.
-    
+
     * 'list': matches any list.
               Takes optional keyword args 'min', and 'max' to specify min and
               max sizes of the list.
-    
+
     * 'int_list': Matches a list of integers.
                   Takes the same arguments as list.
-    
+
     * 'float_list': Matches a list of floats.
                     Takes the same arguments as list.
-    
+
     * 'bool_list': Matches a list of boolean values.
                    Takes the same arguments as list.
-    
+
     * 'ip_addr_list': Matches a list of IP addresses.
                      Takes the same arguments as list.
-    
+
     * 'string_list': Matches a list of strings.
                      Takes the same arguments as list.
-    
-    * 'mixed_list': Matches a list with different types in 
+
+    * 'mixed_list': Matches a list with different types in
                     specific positions. List size must match
                     the number of arguments.
-    
+
                     Each position can be one of :
                     'integer', 'float', 'ip_addr', 'string', 'boolean'
-    
+
                     So to specify a list with two strings followed
                     by two integers, you write the check as : ::
-    
+
                       mixed_list('string', 'string', 'integer', 'integer')
-    
+
     * 'pass': This check matches everything ! It never fails
               and the value is unchanged.
-    
+
               It is also the default if no check is specified.
-    
+
     * 'option': This check matches any from a list of options.
                 You specify this check with : ::
-    
+
                   option('option 1', 'option 2', 'option 3')
-    
+
     You can supply a default value (returned if no value is supplied)
     using the default keyword argument.
-    
+
     You specify a list argument for default using a list constructor syntax in
     the check : ::
-    
+
         checkname(arg1, arg2, default=list('val 1', 'val 2', 'val 3'))
-    
+
     A badly formatted set of arguments will raise a ``VdtParamError``.
 """
+
+import sys
+import re
 
 __docformat__ = "restructuredtext en"
 
@@ -161,12 +164,14 @@ __all__ = (
     '__docformat__',
 )
 
-import sys
 INTP_VER = sys.version_info[:2]
 if INTP_VER < (2, 2):
     raise RuntimeError("Python v.2.2 or later needed")
 
-import re
+if sys.version_info > (3,):
+    long = int
+    unicode = str
+
 StringTypes = (str, unicode)
 
 
@@ -258,10 +263,11 @@ except NameError:
         else:
             return 0
 
+
 def dottedQuadToNum(ip):
     """
     Convert decimal dotted quad string to long integer
-    
+
     >>> dottedQuadToNum('1 ')
     1L
     >>> dottedQuadToNum(' 1.2')
@@ -279,25 +285,27 @@ def dottedQuadToNum(ip):
     Traceback (most recent call last):
     ValueError: Not a good dotted-quad IP: 255.255.255.256
     """
-    
+
     # import here to avoid it when ip_addr values are not used
-    import socket, struct
-    
+    import socket
+    import struct
+
     try:
         return struct.unpack('!L',
-            socket.inet_aton(ip.strip()))[0]
+                             socket.inet_aton(ip.strip()))[0]
     except socket.error:
         # bug in inet_aton, corrected in Python 2.3
         if ip.strip() == '255.255.255.255':
-            return 0xFFFFFFFFL
+            return long('0xFFFFFFFF', 0)
         else:
             raise ValueError('Not a good dotted-quad IP: %s' % ip)
     return
 
+
 def numToDottedQuad(num):
     """
     Convert long int to dotted quad string
-    
+
     >>> numToDottedQuad(-1L)
     Traceback (most recent call last):
     ValueError: Not a good numeric IP: -1
@@ -315,10 +323,11 @@ def numToDottedQuad(num):
     Traceback (most recent call last):
     ValueError: Not a good numeric IP: 4294967296
     """
-    
+
     # import here to avoid it when ip_addr values are not used
-    import socket, struct
-    
+    import socket
+    import struct
+
     # no need to intercept here, 4294967295L is fine
     try:
         return socket.inet_ntoa(
@@ -326,21 +335,24 @@ def numToDottedQuad(num):
     except (socket.error, struct.error, OverflowError):
         raise ValueError('Not a good numeric IP: %s' % num)
 
+
 class ValidateError(Exception):
     """
     This error indicates that the check failed.
     It can be the base class for more specific errors.
-    
+
     Any check function that fails ought to raise this error.
     (or a subclass)
-    
+
     >>> raise ValidateError
     Traceback (most recent call last):
     ValidateError
     """
 
+
 class VdtMissingValue(ValidateError):
     """No value was supplied to a check that needed one."""
+
 
 class VdtUnknownCheckError(ValidateError):
     """An unknown check function was requested"""
@@ -354,6 +366,7 @@ class VdtUnknownCheckError(ValidateError):
         ValidateError.__init__(
             self,
             'the check "%s" is unknown.' % value)
+
 
 class VdtParamError(SyntaxError):
     """An incorrect parameter was passed"""
@@ -369,6 +382,7 @@ class VdtParamError(SyntaxError):
             'passed an incorrect value "%s" for parameter "%s".' % (
                 value, name))
 
+
 class VdtTypeError(ValidateError):
     """The value supplied was of the wrong type"""
 
@@ -381,6 +395,7 @@ class VdtTypeError(ValidateError):
         ValidateError.__init__(
             self,
             'the value "%s" is of the wrong type.' % value)
+
 
 class VdtValueError(ValidateError):
     """
@@ -397,6 +412,7 @@ class VdtValueError(ValidateError):
             self,
             'the value "%s" is unacceptable.' % value)
 
+
 class VdtValueTooSmallError(VdtValueError):
     """The value supplied was of the correct type, but was too small."""
 
@@ -409,6 +425,7 @@ class VdtValueTooSmallError(VdtValueError):
         ValidateError.__init__(
             self,
             'the value "%s" is too small.' % value)
+
 
 class VdtValueTooBigError(VdtValueError):
     """The value supplied was of the correct type, but was too big."""
@@ -423,6 +440,7 @@ class VdtValueTooBigError(VdtValueError):
             self,
             'the value "%s" is too big.' % value)
 
+
 class VdtValueTooShortError(VdtValueError):
     """The value supplied was of the correct type, but was too short."""
 
@@ -436,6 +454,7 @@ class VdtValueTooShortError(VdtValueError):
             self,
             'the value "%s" is too short.' % (value,))
 
+
 class VdtValueTooLongError(VdtValueError):
     """The value supplied was of the correct type, but was too long."""
 
@@ -447,24 +466,25 @@ class VdtValueTooLongError(VdtValueError):
         """
         ValidateError.__init__(
             self,
-            'the value "%s" is too long.' %  (value,))
+            'the value "%s" is too long.' % (value,))
+
 
 class Validator(object):
     """
         Validator is an object that allows you to register a set of 'checks'.
         These checks take input and test that it conforms to the check.
-        
+
         This can also involve converting the value from a string into
         the correct datatype.
-        
+
         The ``check`` method takes an input string which configures which
         check is to be used and applies that check to a supplied value.
-        
+
         An example input string would be:
         'int_range(param1, param2)'
-        
+
         You would then provide something like:
-        
+
         >>> def int_range_check(value, min, max):
         ...     # turn min and max from strings to integers
         ...     min = int(min)
@@ -487,7 +507,7 @@ class Validator(object):
         ...     if not value <= max:
         ...          raise VdtValueTooBigError(value)
         ...     return value
-        
+
         >>> fdict = {'int_range': int_range_check}
         >>> vtr1 = Validator(fdict)
         >>> vtr1.check('int_range(20, 40)', '30')
@@ -495,25 +515,25 @@ class Validator(object):
         >>> vtr1.check('int_range(20, 40)', '60')
         Traceback (most recent call last):
         VdtValueTooBigError: the value "60" is too big.
-        
+
         New functions can be added with : ::
-        
-        >>> vtr2 = Validator()       
+
+        >>> vtr2 = Validator()
         >>> vtr2.functions['int_range'] = int_range_check
-        
-        Or by passing in a dictionary of functions when Validator 
+
+        Or by passing in a dictionary of functions when Validator
         is instantiated.
-        
+
         Your functions *can* use keyword arguments,
         but the first argument should always be 'value'.
-        
+
         If the function doesn't take additional arguments,
         the parentheses are optional in the check.
         It can be written with either of : ::
-        
+
             keyword = function_name
             keyword = function_name()
-        
+
         The first program to utilise Validator() was Michael Foord's
         ConfigObj, an alternative to ConfigParser which supports lists and
         can validate a config file using a config schema.
@@ -527,7 +547,6 @@ class Validator(object):
     # this regex takes apart keyword arguments
     _key_arg = re.compile(r'^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$')
 
-
     # this regex finds keyword=list(....) type values
     _list_arg = _list_arg
 
@@ -538,7 +557,6 @@ class Validator(object):
     # and then pull the members out
     _paramfinder = re.compile(_paramstring, re.VERBOSE)
     _matchfinder = re.compile(_matchstring, re.VERBOSE)
-
 
     def __init__(self, functions=None):
         """
@@ -569,14 +587,14 @@ class Validator(object):
     def check(self, check, value, missing=False):
         """
         Usage: check(check, value)
-        
+
         Arguments:
             check: string representing check to apply (including arguments)
             value: object to be checked
         Returns value, converted to correct type if necessary
-        
+
         If the check fails, raises a ``ValidateError`` subclass.
-        
+
         >>> vtor.check('yoda', '')
         Traceback (most recent call last):
         VdtUnknownCheckError: the check "yoda" is unknown.
@@ -634,8 +652,6 @@ class Validator(object):
         except KeyError:
             raise VdtUnknownCheckError(fun_name)
         else:
-##            print fun_args
-##            print fun_kwargs
             return fun(value, *fun_args, **fun_kwargs)
 
     def _unquote(self, val):
@@ -656,7 +672,7 @@ class Validator(object):
     def _pass(self, value):
         """
         Dummy check that always passes
-        
+
         >>> vtor.check('', 0)
         0
         >>> vtor.check('', '0')
@@ -668,11 +684,11 @@ class Validator(object):
 def _is_num_param(names, values, to_float=False):
     """
     Return numbers from inputs or raise VdtParamError.
-    
+
     Lets ``None`` pass through.
     Pass in keyword argument ``to_float=True`` to
     use float for the conversion rather than int.
-    
+
     >>> _is_num_param(('', ''), (0, 1.0))
     [0, 1]
     >>> _is_num_param(('', ''), (0, 1.0), to_float=True)
@@ -689,7 +705,7 @@ def _is_num_param(names, values, to_float=False):
         elif isinstance(val, (int, long, float, StringTypes)):
             try:
                 out_params.append(fun(val))
-            except ValueError, e:
+            except ValueError:
                 raise VdtParamError(name, val)
         else:
             raise VdtParamError(name, val)
@@ -701,15 +717,16 @@ def _is_num_param(names, values, to_float=False):
 # note: if the params are specified wrongly in your input string,
 #       you will also raise errors.
 
+
 def is_integer(value, min=None, max=None):
     """
     A check that tests that a given value is an integer (int, or long)
     and optionally, between bounds. A negative value is accepted, while
     a float will fail.
-    
+
     If the value is a string, then the conversion is done - if possible.
     Otherwise a VdtError is raised.
-    
+
     >>> vtor.check('integer', '-1')
     -1
     >>> vtor.check('integer', '0')
@@ -757,21 +774,22 @@ def is_integer(value, min=None, max=None):
         raise VdtValueTooBigError(value)
     return value
 
+
 def is_float(value, min=None, max=None):
     """
     A check that tests that a given value is a float
     (an integer will be accepted), and optionally - that it is between bounds.
-    
+
     If the value is a string, then the conversion is done - if possible.
     Otherwise a VdtError is raised.
-    
+
     This can accept negative values.
-    
+
     >>> vtor.check('float', '2')
     2.0
-    
+
     From now on we multiply the value to avoid comparing decimals
-    
+
     >>> vtor.check('float', '-6.8') * 10
     -68.0
     >>> vtor.check('float', '12.2') * 10
@@ -808,15 +826,17 @@ def is_float(value, min=None, max=None):
         raise VdtValueTooBigError(value)
     return value
 
+
 bool_dict = {
-    True: True, 'on': True, '1': True, 'true': True, 'yes': True, 
+    True: True, 'on': True, '1': True, 'true': True, 'yes': True,
     False: False, 'off': False, '0': False, 'false': False, 'no': False,
 }
+
 
 def is_boolean(value):
     """
     Check if the value represents a boolean.
-    
+
     >>> vtor.check('boolean', 0)
     0
     >>> vtor.check('boolean', False)
@@ -855,7 +875,7 @@ def is_boolean(value):
     >>> vtor.check('boolean', 'up')
     Traceback (most recent call last):
     VdtTypeError: the value "up" is of the wrong type.
-    
+
     """
     if isinstance(value, StringTypes):
         try:
@@ -863,11 +883,11 @@ def is_boolean(value):
         except KeyError:
             raise VdtTypeError(value)
     # we do an equality test rather than an identity test
-    # this ensures Python 2.2 compatibilty
+    # this ensures Python 2.2 compatibility
     # and allows 0 and 1 to represent True and False
-    if value == False:
+    if value is False:
         return False
-    elif value == True:
+    elif value is True:
         return True
     else:
         raise VdtTypeError(value)
@@ -877,7 +897,7 @@ def is_ip_addr(value):
     """
     Check that the supplied value is an Internet Protocol address, v.4,
     represented by a dotted-quad string, i.e. '1.2.3.4'.
-    
+
     >>> vtor.check('ip_addr', '1 ')
     '1'
     >>> vtor.check('ip_addr', ' 1.2')
@@ -912,14 +932,15 @@ def is_ip_addr(value):
         raise VdtValueError(value)
     return value
 
+
 def is_list(value, min=None, max=None):
     """
     Check that the value is a list of values.
-    
+
     You can optionally specify the minimum and maximum number of members.
-    
+
     It does no check on list members.
-    
+
     >>> vtor.check('list', ())
     ()
     >>> vtor.check('list', [])
@@ -953,12 +974,13 @@ def is_list(value, min=None, max=None):
         raise VdtValueTooLongError(value)
     return value
 
+
 def is_string(value, min=None, max=None):
     """
     Check that the supplied value is a string.
-    
+
     You can optionally specify the minimum and maximum number of members.
-    
+
     >>> vtor.check('string', '0')
     '0'
     >>> vtor.check('string', 0)
@@ -988,14 +1010,15 @@ def is_string(value, min=None, max=None):
         raise VdtValueTooLongError(value)
     return value
 
+
 def is_int_list(value, min=None, max=None):
     """
     Check that the value is a list of integers.
-    
+
     You can optionally specify the minimum and maximum number of members.
-    
+
     Each list member is checked that it is an integer.
-    
+
     >>> vtor.check('int_list', ())
     []
     >>> vtor.check('int_list', [])
@@ -1010,14 +1033,15 @@ def is_int_list(value, min=None, max=None):
     """
     return [is_integer(mem) for mem in is_list(value, min, max)]
 
+
 def is_bool_list(value, min=None, max=None):
     """
     Check that the value is a list of booleans.
-    
+
     You can optionally specify the minimum and maximum number of members.
-    
+
     Each list member is checked that it is a boolean.
-    
+
     >>> vtor.check('bool_list', ())
     []
     >>> vtor.check('bool_list', [])
@@ -1034,14 +1058,15 @@ def is_bool_list(value, min=None, max=None):
     """
     return [is_boolean(mem) for mem in is_list(value, min, max)]
 
+
 def is_float_list(value, min=None, max=None):
     """
     Check that the value is a list of floats.
-    
+
     You can optionally specify the minimum and maximum number of members.
-    
+
     Each list member is checked that it is a float.
-    
+
     >>> vtor.check('float_list', ())
     []
     >>> vtor.check('float_list', [])
@@ -1056,14 +1081,15 @@ def is_float_list(value, min=None, max=None):
     """
     return [is_float(mem) for mem in is_list(value, min, max)]
 
+
 def is_string_list(value, min=None, max=None):
     """
     Check that the value is a list of strings.
-    
+
     You can optionally specify the minimum and maximum number of members.
-    
+
     Each list member is checked that it is a string.
-    
+
     >>> vtor.check('string_list', ())
     []
     >>> vtor.check('string_list', [])
@@ -1081,14 +1107,15 @@ def is_string_list(value, min=None, max=None):
         raise VdtTypeError(value)
     return [is_string(mem) for mem in is_list(value, min, max)]
 
+
 def is_ip_addr_list(value, min=None, max=None):
     """
     Check that the value is a list of IP addresses.
-    
+
     You can optionally specify the minimum and maximum number of members.
-    
+
     Each list member is checked that it is an IP address.
-    
+
     >>> vtor.check('ip_addr_list', ())
     []
     >>> vtor.check('ip_addr_list', [])
@@ -1101,6 +1128,7 @@ def is_ip_addr_list(value, min=None, max=None):
     """
     return [is_ip_addr(mem) for mem in is_list(value, min, max)]
 
+
 fun_dict = {
     'integer': is_integer,
     'float': is_float,
@@ -1109,26 +1137,28 @@ fun_dict = {
     'boolean': is_boolean,
 }
 
+
 def is_mixed_list(value, *args):
     """
     Check that the value is a list.
     Allow specifying the type of each member.
     Work on lists of specific lengths.
-    
+
     You specify each member as a positional argument specifying type
-    
+
     Each type should be one of the following strings :
       'integer', 'float', 'ip_addr', 'string', 'boolean'
-    
+
     So you can specify a list of two strings, followed by
     two integers as :
-    
+
       mixed_list('string', 'string', 'integer', 'integer')
-    
+
     The length of the list must match the number of positional
     arguments you supply.
-    
-    >>> mix_str = "mixed_list('integer', 'float', 'ip_addr', 'string', 'boolean')"
+
+    >>> mix_str = "mixed_list('integer', 'float', 'ip_addr', 'string',
+       'boolean')"
     >>> check_res = vtor.check(mix_str, (1, 2.0, '1.2.3.4', 'a', True))
     >>> check_res == [1, 2.0, '1.2.3.4', 'a', True]
     1
@@ -1143,14 +1173,15 @@ def is_mixed_list(value, *args):
     VdtValueTooShortError: the value "(1, 2.0, '1.2.3.4', 'a')" is too short.
     >>> vtor.check(mix_str, (1, 2.0, '1.2.3.4', 'a', 1, 'b'))
     Traceback (most recent call last):
-    VdtValueTooLongError: the value "(1, 2.0, '1.2.3.4', 'a', 1, 'b')" is too long.
+    VdtValueTooLongError: the value "(1, 2.0, '1.2.3.4', 'a', 1, 'b')"
+        is too long.
     >>> vtor.check(mix_str, 0)
     Traceback (most recent call last):
     VdtTypeError: the value "0" is of the wrong type.
-    
+
     This test requires an elaborate setup, because of a change in error string
     output from the interpreter between Python 2.2 and 2.3 .
-    
+
     >>> res_seq = (
     ...     'passed an incorrect value "',
     ...     'yoda',
@@ -1176,13 +1207,14 @@ def is_mixed_list(value, *args):
         raise VdtValueTooLongError(value)
     try:
         return [fun_dict[arg](val) for arg, val in zip(args, value)]
-    except KeyError, e:
+    except KeyError as e:
         raise VdtParamError('mixed_list', e)
+
 
 def is_option(value, *options):
     """
     This check matches the value to any of a set of options.
-    
+
     >>> vtor.check('option("yoda", "jedi")', 'yoda')
     'yoda'
     >>> vtor.check('option("yoda", "jedi")', 'jed')
@@ -1194,14 +1226,15 @@ def is_option(value, *options):
     """
     if not isinstance(value, StringTypes):
         raise VdtTypeError(value)
-    if not value in options:
+    if value not in options:
         raise VdtValueError(value)
     return value
+
 
 def _test(value, *args, **keywargs):
     """
     A function that exists for test purposes.
-    
+
     >>> checks = [
     ...     '3, 6, min=1, max=3, test=list(a, b, c)',
     ...     '3',
@@ -1253,221 +1286,220 @@ if __name__ == '__main__':
 """
     TODO
     ====
-    
+
     Consider which parts of the regex stuff to put back in
-    
+
     Can we implement a timestamp datatype ? (check DateUtil module)
-    
+
     ISSUES
     ======
-    
+
     If we could pull tuples out of arguments, it would be easier
     to specify arguments for 'mixed_lists'.
-    
+
     CHANGELOG
     =========
-    
+
     2006/12/17
     ----------
-    
+
     By Nicola Larosa
-    
+
     Fixed validate doc to talk of ``boolean`` instead of ``bool``, changed the
     ``is_bool`` function to ``is_boolean`` (Sourceforge bug #1531525).
-    
+
     2006/04/23
     ----------
-    
+
     Addressed bug where a string would pass the ``is_list`` test. (Thanks to
     Konrad Wojas.)
-    
+
     2005/12/16
     ----------
-    
+
     Fixed bug so we can handle keyword argument values with commas.
-    
+
     We now use a list constructor for passing list values to keyword arguments
     (including ``default``) : ::
-    
+
         default=list("val", "val", "val")
-    
+
     Added the ``_test`` test. {sm;:-)}
-    
+
     0.2.1
-    
+
     2005/12/12
     ----------
-    
+
     Moved a function call outside a try...except block.
-    
+
     2005/08/25
     ----------
-    
+
     Most errors now prefixed ``Vdt``
-    
+
     ``VdtParamError`` no longer derives from ``VdtError``
-    
+
     Finalised as version 0.2.0
-    
+
     2005/08/21
     ----------
-    
+
     By Nicola Larosa
-    
+
     Removed the "length" argument for lists and strings, and related tests
-    
+
     2005/08/16
     ----------
-    
+
     By Nicola Larosa
-    
+
     Deleted the "none" and "multiple" types and checks
-    
+
     Added the None value for all types in Validation.check
-    
+
     2005/08/14
     ----------
-    
+
     By Michael Foord
-    
+
     Removed timestamp.
-    
+
     By Nicola Larosa
-    
+
     Fixed bug in Validator.check: when a value that has a default is also
     specified in the config file, the default must be deleted from fun_kwargs
     anyway, otherwise the check function will get a spurious "default" keyword
     argument
-    
+
     Added "ip_addr_list" check
-    
+
     2005/08/13
     ----------
-    
+
     By Nicola Larosa
-    
+
     Updated comments at top
-    
+
     2005/08/11
     ----------
-    
+
     By Nicola Larosa
-    
+
     Added test for interpreter version: raises RuntimeError if earlier than
     2.2
-    
+
     Fixed last is_mixed_list test to work on Python 2.2 too
-    
+
     2005/08/10
     ----------
-    
+
     By Nicola Larosa
-    
+
     Restored Python2.2 compatibility by avoiding usage of dict.pop
-    
+
     2005/08/07
     ----------
-    
+
     By Nicola Larosa
-    
+
     Adjusted doctests for Python 2.2.3 compatibility, one test still fails
     for trivial reasons (string output delimiters)
-    
+
     2005/08/05
     ----------
-    
+
     By Michael Foord
-    
+
     Added __version__, __all__, and __docformat__
-    
+
     Replaced ``basestring`` with ``types.StringTypes``
-    
+
     2005/07/28
     ----------
-    
+
     By Nicola Larosa
-    
+
     Reformatted final docstring in ReST format, indented it for easier folding
-    
+
     2005/07/20
     ----------
-    
+
     By Nicola Larosa
-    
+
     Added an 'ip_addr' IPv4 address value check, with tests
-    
+
     Updated the tests for mixed_list to include IP addresses
-    
+
     Changed all references to value "tests" into value "checks", including
     the main Validator method, and all code tests
-    
+
     2005/07/19
     ----------
-    
+
     By Nicola Larosa
-    
+
     Added even more code tests
-    
+
     Refined the mixed_list check
-    
+
     2005/07/18
     ----------
-    
+
     By Nicola Larosa
-    
+
     Introduced more VdtValueError subclasses
-    
+
     Collapsed the ``_function_test`` and ``_function_parse`` methods into the
     ``check`` one
-    
+
     Refined the value checks, using the new VdtValueError subclasses
-    
+
     Changed "is_string" to use "is_list"
-    
+
     Added many more code tests
-    
+
     Changed the "bool" value type to "boolean"
-    
+
     Some more code cleanup
-    
+
     2005/07/17
     ----------
-    
+
     By Nicola Larosa
-    
+
     Code tests converted to doctest format and placed in the respective
     docstrings, so they are automatically checked, and easier to update
-    
+
     Changed local vars "min" and "max" to "min_len", "max_len", "min_val" and
     "max_val", to avoid shadowing the builtin functions (but left function
     parameters alone)
-    
+
     Uniformed value check function names to is_* convention
-    
+
     ``date`` type name changed to ``timestamp``
-    
+
     Avoided some code duplication in list check functions
-    
+
     Some more code cleanup
-    
+
     2005/07/09
     ----------
-    
+
     Recoded the standard functions
-    
+
     2005/07/08
     ----------
-    
+
     Improved paramfinder regex
-    
+
     Ripped out all the regex stuff, checks, and the example functions
     (to be replaced !)
-    
+
     2005/07/06
     ----------
-    
+
     By Nicola Larosa
-    
+
     Code cleanup
 """
-

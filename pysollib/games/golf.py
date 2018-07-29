@@ -1,44 +1,67 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys, types
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
+import pysollib.game
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
 from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import BlackHoleSolverWrapper
 from pysollib.pysoltk import MfxCanvasText
+from pysollib.games.pileon import FourByFour_Hint
+
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT, KING, NO_RANK, RANKS, \
+        SUITS, \
+        UNLIMITED_REDEALS
+
+from pysollib.stack import \
+        AbstractFoundationStack, \
+        BasicRowStack, \
+        DealRowTalonStack, \
+        InitialDealTalonStack, \
+        OpenStack, \
+        RK_FoundationStack, \
+        RK_RowStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        Stack, \
+        TalonStack, \
+        UD_RK_RowStack, \
+        WasteStack, \
+        WasteTalonStack, \
+        isSameSuitSequence, \
+        StackWrapper
 
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class Golf_Hint(AbstractHint):
     # FIXME: this is very simple
@@ -105,6 +128,7 @@ class Golf_Waste(WasteStack):
 class Golf_RowStack(BasicRowStack):
     def clickHandler(self, event):
         return self.doubleclickHandler(event)
+
     def getHelp(self):
         return _('Tableau. No building.')
 
@@ -133,7 +157,7 @@ class Golf(Game):
         self.setSize(w1, l.YM+3*l.YS+(playcards-1)*l.YOFFSET+l.TEXT_HEIGHT)
 
         # create stacks
-        x, y = l.XM + l.XS / 2, l.YM
+        x, y = l.XM + l.XS // 2, l.YM
         for i in range(7):
             s.rows.append(Golf_RowStack(x, y, self))
             x = x + l.XS
@@ -157,9 +181,7 @@ class Golf(Game):
     #
 
     def startGame(self):
-        for i in range(4):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(4)
         self.s.talon.dealRow()
         self.s.talon.dealCards()          # deal first card to WasteStack
 
@@ -212,8 +234,8 @@ class Elevator_RowStack(Golf_RowStack):
 
     def basicIsBlocked(self):
         r, step = self.game.s.rows, self.STEP
-        i, n, l = self.id, 1, len(step)
-        while i < l:
+        i, n, mylen = self.id, 1, len(step)
+        while i < mylen:
             i = i + step[i]
             n = n + 1
             for j in range(i, i+n):
@@ -237,8 +259,8 @@ class Elevator(RelaxedGolf):
 
         # create stacks
         for i in range(7):
-            x = l.XM + (8-i) * l.XS / 2
-            y = l.YM + i * l.YS / 2
+            x = l.XM + (8-i) * l.XS // 2
+            y = l.YM + i * l.YS // 2
             for j in range(i+1):
                 s.rows.append(Elevator_RowStack(x, y, self))
                 x = x + l.XS
@@ -266,11 +288,9 @@ class Elevator(RelaxedGolf):
         self.s.talon.dealRow(rows=self.s.rows[21:])
         self.s.talon.dealCards()          # deal first card to WasteStack
 
-class Escalator(Elevator):
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
+
+class Escalator(pysollib.game.StartDealRowAndCards, Elevator):
+    pass
 
 
 # ************************************************************************
@@ -284,8 +304,10 @@ class BlackHole_Foundation(AbstractFoundationStack):
         # check the rank
         if self.cards:
             r1, r2 = self.cards[-1].rank, cards[0].rank
-            return (r1 + 1) % self.cap.mod == r2 or (r2 + 1) % self.cap.mod == r1
+            return (r1 + 1) % self.cap.mod == r2 or \
+                (r2 + 1) % self.cap.mod == r1
         return True
+
     def getHelp(self):
         return _('Foundation. Build up or down regardless of suit.')
 
@@ -293,13 +315,16 @@ class BlackHole_Foundation(AbstractFoundationStack):
 class BlackHole_RowStack(ReserveStack):
     def clickHandler(self, event):
         return self.doubleclickHandler(event)
+
     def getHelp(self):
         return _('Tableau. No building.')
 
 
 class BlackHole(Game):
-    RowStack_Class = StackWrapper(BlackHole_RowStack, max_accept=0, max_cards=3)
+    RowStack_Class = StackWrapper(
+        BlackHole_RowStack, max_accept=0, max_cards=3)
     Hint_Class = Golf_Hint
+    Solver_Class = BlackHoleSolverWrapper(preset='black_hole')
 
     #
     # game layout
@@ -330,7 +355,7 @@ class BlackHole(Game):
         for r in s.rows:
             r.CARD_XOFFSET = l.XOFFSET
             r.CARD_YOFFSET = 0
-        x, y = l.XM + 2*w, l.YM + 3*l.YS/2
+        x, y = l.XM + 2*w, l.YM + 3*l.YS//2
         s.foundations.append(BlackHole_Foundation(x, y, self, suit=ANY_SUIT,
                              dir=0, mod=13, max_move=0, max_cards=52))
         l.createText(s.foundations[0], "s")
@@ -346,12 +371,11 @@ class BlackHole(Game):
 
     def _shuffleHook(self, cards):
         # move Ace to bottom of the Talon (i.e. last cards to be dealt)
-        return self._shuffleHookMoveToBottom(cards, lambda c: (c.id == 13, c.suit), 1)
+        return self._shuffleHookMoveToBottom(
+            cards, lambda c: (c.id == 13, c.suit), 1)
 
     def startGame(self):
-        for i in range(2):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(2)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.foundations)
 
@@ -362,7 +386,6 @@ class BlackHole(Game):
         else:
             # rightclickHandler
             return ((), self.sg.dropstacks, self.sg.dropstacks)
-
 
 
 # ************************************************************************
@@ -378,6 +401,7 @@ class FourLeafClovers_Foundation(AbstractFoundationStack):
             r1, r2 = self.cards[-1].rank, cards[0].rank
             return (r1 + 1) % self.cap.mod == r2
         return True
+
     def getHelp(self):
         return _('Foundation. Build up regardless of suit.')
 
@@ -402,11 +426,13 @@ class FourLeafClovers(Game):
         y = l.YM
         for i in range(7):
             x = l.XM + i*l.XS
-            s.rows.append(UD_RK_RowStack(x, y, self, mod=13, base_rank=NO_RANK))
+            s.rows.append(
+                UD_RK_RowStack(x, y, self, mod=13, base_rank=NO_RANK))
         y = l.YM+h
         for i in range(6):
             x = l.XM + i*l.XS
-            s.rows.append(UD_RK_RowStack(x, y, self, mod=13, base_rank=NO_RANK))
+            s.rows.append(
+                UD_RK_RowStack(x, y, self, mod=13, base_rank=NO_RANK))
         stack = FourLeafClovers_Foundation(l.XM+6*l.XS, self.height-l.YS, self,
                                            suit=ANY_SUIT, dir=0, mod=13,
                                            max_move=0, max_cards=52)
@@ -419,10 +445,7 @@ class FourLeafClovers(Game):
         l.defaultStackGroups()
 
     def startGame(self):
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(3)
 
     shallHighlightMatch = Game._shallHighlightMatch_RKW
 
@@ -432,6 +455,8 @@ class FourLeafClovers(Game):
 # ************************************************************************
 
 class AllInARow(BlackHole):
+
+    Solver_Class = BlackHoleSolverWrapper(preset='all_in_a_row')
 
     def createGame(self):
         # create layout
@@ -454,9 +479,11 @@ class AllInARow(BlackHole):
             r.CARD_XOFFSET, r.CARD_YOFFSET = 0, l.YOFFSET
 
         x, y = l.XM, self.height-l.YS
-        stack = BlackHole_Foundation(x, y, self, ANY_SUIT, dir=0, mod=13, max_move=0, max_cards=52, base_rank=ANY_RANK)
+        stack = BlackHole_Foundation(
+            x, y, self, ANY_SUIT, dir=0, mod=13, max_move=0, max_cards=52,
+            base_rank=ANY_RANK)
         s.foundations.append(stack)
-        stack.CARD_XOFFSET, stack.CARD_YOFFSET = (self.width-l.XS)/51, 0
+        stack.CARD_XOFFSET, stack.CARD_YOFFSET = (self.width-l.XS)//51, 0
         l.createText(stack, 'n')
         x = self.width-l.XS
         s.talon = InitialDealTalonStack(x, y, self)
@@ -464,12 +491,8 @@ class AllInARow(BlackHole):
         # define stack-groups
         l.defaultStackGroups()
 
-
     def startGame(self):
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(3)
 
 
 # ************************************************************************
@@ -482,7 +505,7 @@ class Robert(Game):
     def createGame(self, max_rounds=3, num_deal=1):
         l, s = Layout(self), self.s
         self.setSize(l.XM+4*l.XS, l.YM+2*l.YS)
-        x, y = l.XM+3*l.XS/2, l.YM
+        x, y = l.XM+3*l.XS//2, l.YM
         stack = BlackHole_Foundation(x, y, self, ANY_SUIT,
                                      dir=0, mod=13, max_move=0, max_cards=52)
         s.foundations.append(stack)
@@ -522,6 +545,7 @@ class Wasatch(Robert):
 
 DIAMOND = 3
 
+
 class DiamondMine_RowStack(RK_RowStack):
     def acceptsCards(self, from_stack, cards):
         if not RK_RowStack.acceptsCards(self, from_stack, cards):
@@ -553,8 +577,7 @@ class DiamondMine(Game):
     def startGame(self):
         for i in range(3):
             self.s.talon.dealRow(flip=0, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def isGameWon(self):
         if len(self.s.foundations[0].cards) != 13:
@@ -581,7 +604,7 @@ class Dolphin(Game):
         l, s = Layout(self), self.s
         self.setSize(l.XM+rows*l.XS, l.YM+3*l.YS+playcards*l.YOFFSET)
 
-        dx = (self.width-l.XM-(reserves+1)*l.XS)/3
+        dx = (self.width-l.XM-(reserves+1)*l.XS)//3
         x, y = l.XM+dx, l.YM
         for i in range(reserves):
             s.reserves.append(ReserveStack(x, y, self))
@@ -600,9 +623,7 @@ class Dolphin(Game):
         l.defaultAll()
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow()
         self.s.talon.dealRowAvail()
 
@@ -613,9 +634,7 @@ class DoubleDolphin(Dolphin):
         Dolphin.createGame(self, rows=10, reserves=5, playcards=10)
 
     def startGame(self):
-        for i in range(9):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(9)
         self.s.talon.dealRow()
         self.s.talon.dealRowAvail()
 
@@ -652,7 +671,7 @@ class Waterfall(Game):
         for i in range(rows):
             s.rows.append(RK_RowStack(x, y, self))
             x += l.XS
-        x, y = l.XM+(rows-1)*l.XS/2, self.height-l.YS
+        x, y = l.XM+(rows-1)*l.XS//2, self.height-l.YS
         s.foundations.append(Waterfall_Foundation(x, y, self, suit=ANY_SUIT,
                                                   max_cards=104))
         stack = s.foundations[0]
@@ -667,10 +686,7 @@ class Waterfall(Game):
         l.defaultStackGroups()
 
     def startGame(self):
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(3)
 
     def updateText(self):
         if self.preview > 1:
@@ -723,14 +739,13 @@ class Vague(Game):
 
         y = l.YM+l.YS
         for i in range(rows):
-            x = l.XM + (maxrows-columns)*l.XS/2
+            x = l.XM + (maxrows-columns)*l.XS//2
             for j in range(columns):
                 s.rows.append(Vague_RowStack(x, y, self))
                 x += l.XS
             y += l.YS
 
         l.defaultStackGroups()
-
 
     def startGame(self):
         self.startDealSample()
@@ -764,8 +779,7 @@ class ThirtyTwoCards(Vague):
         Vague.createGame(self, rows=4, columns=8)
 
     def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
 
 # ************************************************************************
@@ -795,8 +809,8 @@ class DevilsSolitaire(Game):
         self.setSize(l.XM+9*l.XS, l.YM+3*l.YS+7*l.YOFFSET+2*l.TEXT_HEIGHT)
 
         x, y = l.XM+4*l.XS, l.YM
-        stack = DevilsSolitaire_Foundation(x, y, self,
-                             suit=ANY_SUIT, base_rank=ANY_RANK, mod=13)
+        stack = DevilsSolitaire_Foundation(
+            x, y, self, suit=ANY_SUIT, base_rank=ANY_RANK, mod=13)
         tx, ty, ta, tf = l.getTextAttr(stack, 'nw')
         font = self.app.getFont('canvas_default')
         stack.texts.misc = MfxCanvasText(self.canvas, tx, ty,
@@ -804,9 +818,10 @@ class DevilsSolitaire(Game):
         s.foundations.append(stack)
 
         x, y = self.width-l.XS, l.YM
-        stack = AbstractFoundationStack(x, y, self,
-                             suit=ANY_SUIT, max_move=0, max_cards=104,
-                             max_accept=0, base_rank=ANY_RANK)
+        stack = AbstractFoundationStack(
+            x, y, self,
+            suit=ANY_SUIT, max_move=0, max_cards=104,
+            max_accept=0, base_rank=ANY_RANK)
         l.createText(stack, 'nw')
         s.foundations.append(stack)
 
@@ -833,7 +848,6 @@ class DevilsSolitaire(Game):
         l.createText(s.waste, 'n')
 
         l.defaultStackGroups()
-
 
     def startGame(self):
         for i in range(8):
@@ -894,20 +908,20 @@ class FirTree_GameMethods:
         rows = []
         # create stacks
         for i in range(11):
-            x = x0 + ((i+1)%2) * l.XS / 2
-            y = y0 + i * l.YS / 4
-            for j in range((i%2) + 1):
+            x = x0 + ((i+1) % 2) * l.XS // 2
+            y = y0 + i * l.YS // 4
+            for j in range((i % 2) + 1):
                 rows.append(ThreeFirTrees_RowStack(x, y, self))
                 x += l.XS
         # compute blocking
         n = 0
         for i in range(10):
-            if i%2:
+            if i % 2:
                 rows[n].blockmap = [rows[n+2]]
                 rows[n+1].blockmap = [rows[n+2]]
                 n += 2
             else:
-                rows[n].blockmap = [rows[n+1],rows[n+2]]
+                rows[n].blockmap = [rows[n+1], rows[n+2]]
                 n += 1
         return rows
 
@@ -921,7 +935,7 @@ class ThreeFirTrees(Golf, FirTree_GameMethods):
         l, s = Layout(self), self.s
         self.setSize(l.XM+max(7*l.XS, 2*l.XS+26*l.XOFFSET), l.YM+5*l.YS)
 
-        x0, y0 = (self.width-7*l.XS)/2, l.YM
+        x0, y0 = (self.width-7*l.XS)//2, l.YM
         for i in range(3):
             s.rows += self._createFirTree(l, x0, y0)
             x0 += 2.5*l.XS
@@ -931,7 +945,7 @@ class ThreeFirTrees(Golf, FirTree_GameMethods):
         l.createText(s.talon, 'n')
         x += l.XS
         s.waste = self.Waste_Class(x, y, self)
-        s.waste.CARD_XOFFSET = l.XOFFSET/4
+        s.waste.CARD_XOFFSET = l.XOFFSET//4
         l.createText(s.waste, 'n')
         # the Waste is also our only Foundation in this game
         s.foundations.append(s.waste)
@@ -967,7 +981,7 @@ class NapoleonTakesMoscow(Game, FirTree_GameMethods):
 
         x, y = l.XM+l.XS, l.YM
         for i in range(8):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i/2))
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i//2))
             x += l.XS
 
         x, y = l.XM, l.YM+l.YS
@@ -990,14 +1004,10 @@ class NapoleonTakesMoscow(Game, FirTree_GameMethods):
 
         # define stack-groups
         l.defaultStackGroups()
-        
+
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.reserves, frames=0)
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
+        self._startDealNumRowsAndDealRowAndCards(3)
 
     shallHighlightMatch = Game._shallHighlightMatch_SS
 
@@ -1008,11 +1018,7 @@ class NapoleonLeavesMoscow(NapoleonTakesMoscow):
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.reserves, frames=0)
-        for i in range(4):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()
+        self._startDealNumRowsAndDealRowAndCards(4)
 
 
 # ************************************************************************
@@ -1020,10 +1026,9 @@ class NapoleonLeavesMoscow(NapoleonTakesMoscow):
 # * Flake (2 decks)
 # ************************************************************************
 
-from pileon import FourByFour_Hint
 
 class Flake(Game):
-    Hint_Class = FourByFour_Hint #CautiousDefaultHint
+    Hint_Class = FourByFour_Hint  # CautiousDefaultHint
 
     def createGame(self, rows=6, playcards=18):
         # create layout
@@ -1038,7 +1043,7 @@ class Flake(Game):
             s.rows.append(UD_RK_RowStack(x, y, self, mod=13))
             x += l.XS
 
-        x, y = l.XM + (rows-1)*l.XS/2, l.YM
+        x, y = l.XM + (rows-1)*l.XS//2, l.YM
         stack = BlackHole_Foundation(x, y, self, max_move=0, suit=ANY_SUIT,
                                      base_rank=ANY_RANK, dir=0, mod=13,
                                      max_cards=52*self.gameinfo.decks)
@@ -1052,9 +1057,7 @@ class Flake(Game):
         l.defaultStackGroups()
 
     def startGame(self):
-        for i in range(7):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(7)
         self.s.talon.dealRow()
         self.s.talon.dealRowAvail()
 
@@ -1064,11 +1067,9 @@ class Flake(Game):
 class Flake2Decks(Flake):
     def createGame(self):
         Flake.createGame(self, rows=8, playcards=22)
+
     def startGame(self):
-        for i in range(12):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(12)
 
 
 # ************************************************************************
@@ -1086,7 +1087,7 @@ class Beacon(Game):
         self.setSize(l.XM+rows*l.XS, l.YM+3*l.YS+playcards*l.YOFFSET)
 
         # create stacks
-        x, y = l.XM + (rows-1)*l.XS/2, l.YM
+        x, y = l.XM + (rows-1)*l.XS//2, l.YM
         stack = RK_FoundationStack(x, y, self, base_rank=ANY_RANK,
                                    max_cards=52, mod=13)
         s.foundations.append(stack)
@@ -1105,10 +1106,7 @@ class Beacon(Game):
         l.defaultStackGroups()
 
     def startGame(self):
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(3)
 
     def fillStack(self, stack):
         if stack in self.s.rows and not stack.cards:
@@ -1121,7 +1119,6 @@ class Beacon(Game):
     shallHighlightMatch = Game._shallHighlightMatch_RKW
 
 
-
 # register the game
 registerGame(GameInfo(36, Golf, "Golf",
                       GI.GT_GOLF, 1, 0, GI.SL_BALANCED))
@@ -1129,10 +1126,10 @@ registerGame(GameInfo(259, DeadKingGolf, "Dead King Golf",
                       GI.GT_GOLF, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(260, RelaxedGolf, "Relaxed Golf",
                       GI.GT_GOLF | GI.GT_RELAXED, 1, 0, GI.SL_BALANCED,
-                      altnames=("Putt Putt",) ))
+                      altnames=("Putt Putt",)))
 registerGame(GameInfo(40, Elevator, "Elevator",
                       GI.GT_GOLF, 1, 0, GI.SL_BALANCED,
-                      altnames=("Egyptian Solitaire", "Pyramid Golf") ))
+                      altnames=("Egyptian Solitaire", "Pyramid Golf")))
 registerGame(GameInfo(98, BlackHole, "Black Hole",
                       GI.GT_GOLF | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(267, FourLeafClovers, "Four Leaf Clovers",
@@ -1150,12 +1147,13 @@ registerGame(GameInfo(661, Dolphin, "Dolphin",
 registerGame(GameInfo(662, DoubleDolphin, "Double Dolphin",
                       GI.GT_GOLF | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(709, Waterfall, "Waterfall",
-                      GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(720, Vague, "Vague",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(723, DevilsSolitaire, "Devil's Solitaire",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED,
-                      altnames=('Banner',) ))
+                      altnames=('Banner',)))
 registerGame(GameInfo(728, ThirtyTwoCards, "Thirty Two Cards",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_LUCK))
 registerGame(GameInfo(731, ThreeFirTrees, "Three Fir-trees",
@@ -1171,9 +1169,10 @@ registerGame(GameInfo(750, Flake2Decks, "Flake (2 decks)",
                       GI.GT_GOLF | GI.GT_OPEN | GI.GT_ORIGINAL,
                       2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(763, Wasatch, "Wasatch",
-                      GI.GT_1DECK_TYPE, 1, UNLIMITED_REDEALS, GI.SL_MOSTLY_LUCK))
+                      GI.GT_1DECK_TYPE, 1, UNLIMITED_REDEALS,
+                      GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(764, Beacon, "Beacon",
-                      GI.GT_1DECK_TYPE | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_1DECK_TYPE | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(768, RelaxedThreeFirTrees, "Relaxed Three Fir-trees",
                       GI.GT_GOLF, 2, 0, GI.SL_BALANCED))
-

@@ -1,37 +1,44 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 
 # imports
-import Tkinter, tkColorChooser
+import sys
+from six.moves import tkinter, tkinter_colorchooser
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.mfxutil import KwStruct
 
 # Toolkit imports
-from tkwidget import MfxDialog, MfxScrolledCanvas
-from selecttree import SelectDialogTreeLeaf, SelectDialogTreeNode
-from selecttree import SelectDialogTreeData, SelectDialogTreeCanvas
+from .tkwidget import MfxDialog, MfxScrolledCanvas
+from .selecttree import SelectDialogTreeLeaf, SelectDialogTreeNode
+from .selecttree import SelectDialogTreeCanvas
+from pysollib.ui.tktile.selecttree import SelectDialogTreeData
+
+
+if sys.version_info > (3,):
+    basestring = str
 
 
 # ************************************************************************
@@ -47,7 +54,8 @@ class SelectTileNode(SelectDialogTreeNode):
         contents = []
         for obj in self.tree.data.all_objects:
             if self.select_func(obj):
-                node = SelectTileLeaf(self.tree, self, text=obj.name, key=obj.index)
+                node = SelectTileLeaf(
+                    self.tree, self, text=obj.name, key=obj.index)
                 contents.append(node)
         return contents or self.tree.data.no_contents
 
@@ -61,9 +69,11 @@ class SelectTileData(SelectDialogTreeData):
         SelectDialogTreeData.__init__(self)
         self.all_objects = manager.getAllSortedByName()
         self.all_objects = [obj for obj in self.all_objects if not obj.error]
-        self.all_objects = [tile for tile in self.all_objects if tile.index > 0 and tile.filename]
-        self.no_contents = [ SelectTileLeaf(None, None, _("(no tiles)"), key=None), ]
-        e1 = isinstance(key, str) or len(self.all_objects) <=17
+        self.all_objects = [tile for tile in self.all_objects
+                            if tile.index > 0 and tile.filename]
+        self.no_contents = [SelectTileLeaf(
+            None, None, _("(no tiles)"), key=None), ]
+        e1 = isinstance(key, str) or len(self.all_objects) <= 17
         e2 = 1
         self.rootnodes = (
             SelectTileNode(None, _("Solid Colors"), (
@@ -74,7 +84,8 @@ class SelectTileData(SelectDialogTreeData):
                 SelectTileLeaf(None, None, _("Orange"), key="#f79600"),
                 SelectTileLeaf(None, None, _("Teal"), key="#008286"),
             ), expanded=e1),
-            SelectTileNode(None, _("All Backgrounds"), lambda tile: 1, expanded=e2),
+            SelectTileNode(
+                None, _("All Backgrounds"), lambda tile: 1, expanded=e2),
         )
 
 
@@ -117,7 +128,7 @@ class SelectTileDialogWithPreview(MfxDialog):
             w1, w2 = 200, 300
         font = app.getFont("default")
         padx, pady = 4, 4
-        frame = Tkinter.Frame(top_frame)
+        frame = tkinter.Frame(top_frame)
         frame.pack(fill='both', expand=True,
                    padx=kw.padx-padx, pady=kw.pady-pady)
         self.tree = self.Tree_Class(self, frame, key=key,
@@ -163,10 +174,11 @@ class SelectTileDialogWithPreview(MfxDialog):
             self.tree.n_expansions = 1  # save xyview in any case
         if button == 1:        # "Solid color..."
             try:
-                c = tkColorChooser.askcolor(master=self.top,
-                                            initialcolor=self.table_color,
-                                            title=_("Select table color"))
-            except Tkinter.TclError:
+                c = tkinter_colorchooser.askcolor(
+                    master=self.top,
+                    initialcolor=self.table_color,
+                    title=_("Select table color"))
+            except tkinter.TclError:
                 pass
             else:
                 if c and c[1]:
@@ -179,7 +191,7 @@ class SelectTileDialogWithPreview(MfxDialog):
         MfxDialog.mDone(self, button)
 
     def updatePreview(self, key):
-        ##print key
+        # print key
         if key == self.preview_key:
             return
         canvas = self.preview.canvas
@@ -198,4 +210,3 @@ class SelectTileDialogWithPreview(MfxDialog):
                 if self.preview.setTile(self.app, key):
                     return
             self.preview_key = -1
-

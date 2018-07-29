@@ -1,44 +1,47 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 
+from pysollib.util import KING
+
+from pysollib.stack import \
+        AC_RowStack, \
+        InitialDealTalonStack, \
+        OpenStack, \
+        SS_FoundationStack, \
+        SS_RowStack
 
 # ************************************************************************
 # * Heads and Tails
 # ************************************************************************
+
 
 class HeadsAndTails_Reserve(OpenStack):
     def canFlipCard(self):
@@ -103,13 +106,12 @@ class HeadsAndTails(Game):
     def startGame(self):
         for i in range(11):
             self.s.talon.dealRow(rows=self.s.reserves, frames=0, flip=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def fillStack(self, stack):
         if stack in self.s.rows and not stack.cards:
             reserves = self.s.reserves
-            si = list(self.s.rows).index(stack)%8
+            si = list(self.s.rows).index(stack) % 8
             from_stack = None
             if reserves[si].cards:
                 from_stack = reserves[si]
@@ -155,23 +157,23 @@ class Barrier(Game):
 
         s.addattr(reserves2=[])         # register extra stack variables
 
-        x, y = l.XM+(max_rows-reserves)*l.XS/2+l.XS/2, l.YM
-        for i in range(reserves/2):
+        x, y = l.XM+(max_rows-reserves)*l.XS//2+l.XS//2, l.YM
+        for i in range(reserves//2):
             stack = Barrier_ReserveStack(x, y, self)
             s.reserves2.append(stack)
             l.createText(stack, "ne")
             x += 2*l.XS
-        x, y = l.XM+(max_rows-reserves)*l.XS/2, l.YM+l.YS
+        x, y = l.XM+(max_rows-reserves)*l.XS//2, l.YM+l.YS
         for i in range(reserves):
             s.reserves.append(OpenStack(x, y, self))
             x += l.XS
-        x, y = l.XM+(max_rows-rows)*l.XS/2, l.YM+2*l.YS
+        x, y = l.XM+(max_rows-rows)*l.XS//2, l.YM+2*l.YS
         for i in range(rows):
             s.rows.append(AC_RowStack(x, y, self))
             x += l.XS
-        x, y = l.XM+(max_rows-8)*l.XS/2, self.height-l.YS
+        x, y = l.XM+(max_rows-8)*l.XS//2, self.height-l.YS
         for i in range(8):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i/2))
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i//2))
             x += l.XS
         x, y = l.XM, self.height-l.YS
         s.talon = InitialDealTalonStack(x, y, self)
@@ -181,7 +183,7 @@ class Barrier(Game):
     def startGame(self):
         rows = len(self.s.rows)
         reserves = len(self.s.reserves)
-        n = (104-reserves-2*rows)/(reserves/2)
+        n = (104-reserves-2*rows)//(reserves//2)
         for i in range(n):
             self.s.talon.dealRow(rows=self.s.reserves2, frames=0, flip=0)
         self.s.talon.dealRow(rows=self.s.reserves, frames=0)
@@ -192,7 +194,7 @@ class Barrier(Game):
     def fillStack(self, stack):
         if stack in self.s.reserves and not stack.cards:
             si = list(self.s.reserves).index(stack)
-            from_stack = self.s.reserves2[si/2]
+            from_stack = self.s.reserves2[si//2]
             if not from_stack.cards:
                 return
             old_state = self.enterState(self.S_FILL)
@@ -209,4 +211,3 @@ registerGame(GameInfo(307, HeadsAndTails, "Heads and Tails",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(708, Barrier, "Barrier",
                       GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0, GI.SL_BALANCED))
-

@@ -1,51 +1,59 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 from pysollib.hint import KlondikeType_Hint
-from pysollib.pysoltk import MfxCanvasText
 
-from spider import Spider_RowStack, Spider_SS_Foundation, Spider_Hint
+from pysollib.games.spider import Spider_RowStack, Spider_SS_Foundation, \
+        Spider_Hint
 
+from pysollib.util import ACE, KING
+
+from pysollib.stack import \
+        AC_RowStack, \
+        BO_RowStack, \
+        KingAC_RowStack, \
+        SS_FoundationStack, \
+        Spider_SS_RowStack, \
+        StackWrapper, \
+        WasteStack, \
+        WasteTalonStack, \
+        SS_RowStack
 
 # ************************************************************************
 # * Double Klondike (Klondike with 2 decks and 9 rows)
 # ************************************************************************
 
+
 class DoubleKlondike(Game):
-    Layout_Method = Layout.harpLayout
+    Layout_Method = staticmethod(Layout.harpLayout)
     Foundation_Class = SS_FoundationStack
     RowStack_Class = KingAC_RowStack
     Hint_Class = KlondikeType_Hint
@@ -61,7 +69,8 @@ class DoubleKlondike(Game):
                                   max_rounds=max_rounds, num_deal=num_deal)
         s.waste = WasteStack(l.s.waste.x, l.s.waste.y, self)
         for r in l.s.foundations:
-            s.foundations.append(self.Foundation_Class(r.x, r.y, self, suit=r.suit))
+            s.foundations.append(
+                self.Foundation_Class(r.x, r.y, self, suit=r.suit))
         for r in l.s.rows:
             s.rows.append(self.RowStack_Class(r.x, r.y, self))
         # default
@@ -77,9 +86,7 @@ class DoubleKlondike(Game):
     def startGame(self, flip=0):
         for i in range(len(self.s.rows)):
             self.s.talon.dealRow(rows=self.s.rows[i+1:], flip=flip, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
+        self._startAndDealRowAndCards()
 
     shallHighlightMatch = Game._shallHighlightMatch_AC
 
@@ -102,14 +109,17 @@ class Gargantua(DoubleKlondike):
     def createGame(self):
         DoubleKlondike.createGame(self, max_rounds=2)
 
+
 class Pantagruel(DoubleKlondike):
     RowStack_Class = AC_RowStack
+
     def createGame(self):
         DoubleKlondike.createGame(self, max_rounds=1)
 
 # ************************************************************************
 # * Harp (Double Klondike with 10 non-king rows and no redeal)
 # ************************************************************************
+
 
 class BigHarp(DoubleKlondike):
     RowStack_Class = AC_RowStack
@@ -126,9 +136,7 @@ class BigHarp(DoubleKlondike):
     def startGame(self):
         for i in range(len(self.s.rows)):
             self.s.talon.dealRow(rows=self.s.rows[:i], flip=0, frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
+        self._startAndDealRowAndCards()
 
 
 # ************************************************************************
@@ -160,6 +168,7 @@ class TripleKlondikeByThrees(DoubleKlondike):
 
 class ChineseKlondike(DoubleKlondike):
     RowStack_Class = StackWrapper(BO_RowStack, base_rank=KING)
+
     def createGame(self):
         DoubleKlondike.createGame(self, rows=12)
 
@@ -175,6 +184,7 @@ class LadyJane(DoubleKlondike):
 
     def createGame(self):
         DoubleKlondike.createGame(self, rows=10, max_rounds=2, num_deal=3)
+
     def startGame(self):
         DoubleKlondike.startGame(self, flip=1)
 
@@ -187,6 +197,7 @@ class Inquisitor(DoubleKlondike):
 
     def createGame(self):
         DoubleKlondike.createGame(self, rows=10, max_rounds=3, num_deal=3)
+
     def startGame(self):
         DoubleKlondike.startGame(self, flip=1)
     shallHighlightMatch = Game._shallHighlightMatch_SS
@@ -202,6 +213,7 @@ class Arabella(DoubleKlondike):
 
     def createGame(self):
         DoubleKlondike.createGame(self, rows=13, max_rounds=1, playcards=24)
+
     def startGame(self):
         DoubleKlondike.startGame(self, flip=1)
 
@@ -226,7 +238,8 @@ class BigDeal(DoubleKlondike):
         for i in range(2):
             y = l.YM
             for j in range(8):
-                s.foundations.append(SS_FoundationStack(x, y, self, suit=j%4))
+                s.foundations.append(
+                    SS_FoundationStack(x, y, self, suit=j % 4))
                 y += l.YS
             x += l.XS
         x, y = l.XM, self.height-l.YS
@@ -238,7 +251,7 @@ class BigDeal(DoubleKlondike):
         l.createText(s.waste, 'n')
         if max_rounds > 1:
             l.createRoundText(s.talon, 'nnn')
-        self.setRegion(s.rows, (-999, -999, l.XM+rows*l.XS-l.CW/2, 999999),
+        self.setRegion(s.rows, (-999, -999, l.XM+rows*l.XS-l.CW//2, 999999),
                        priority=1)
         l.defaultStackGroups()
 
@@ -252,15 +265,13 @@ class Delivery(BigDeal):
     RowStack_Class = StackWrapper(SS_RowStack, max_move=1)
 
     def createGame(self):
-        dx = self.app.images.CARDW/10
+        dx = self.app.images.CARDW//10
         BigDeal.createGame(self, rows=12, max_rounds=1, XOFFSET=dx)
 
     shallHighlightMatch = Game._shallHighlightMatch_SS
 
     def startGame(self):
-        for i in range(2):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(2)
         self.s.talon.dealRow()
         self.s.talon.dealCards()          # deal first card to WasteStack
 
@@ -282,7 +293,7 @@ class DoubleKingsley(DoubleKlondike):
 # ************************************************************************
 
 class ThievesOfEgypt(DoubleKlondike):
-    Layout_Method = Layout.klondikeLayout
+    Layout_Method = staticmethod(Layout.klondikeLayout)
 
     def createGame(self):
         DoubleKlondike.createGame(self, rows=10, max_rounds=2)
@@ -290,13 +301,11 @@ class ThievesOfEgypt(DoubleKlondike):
     def startGame(self):
         # rows: 1 3 5 7 9 10 8 6 4 2
         row = 0
-        for i in (0,2,4,6,8,9,7,5,3,1):
+        for i in (0, 2, 4, 6, 8, 9, 7, 5, 3, 1):
             for j in range(i):
                 self.s.talon.dealRow(rows=[self.s.rows[row]], frames=0)
             row += 1
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
+        self._startAndDealRowAndCards()
 
 
 # ************************************************************************
@@ -304,7 +313,7 @@ class ThievesOfEgypt(DoubleKlondike):
 # ************************************************************************
 
 class Brush(DoubleKlondike):
-    Layout_Method = Layout.klondikeLayout
+    Layout_Method = staticmethod(Layout.klondikeLayout)
     Foundation_Class = Spider_SS_Foundation
     RowStack_Class = Spider_RowStack
     Hint_Class = Spider_Hint
@@ -313,15 +322,12 @@ class Brush(DoubleKlondike):
         DoubleKlondike.createGame(self, rows=10, max_rounds=1)
 
     def startGame(self):
-        for i in range(3):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(3)
         self.s.talon.dealRow()
         self.s.talon.dealCards()        # deal first card to WasteStack
 
     shallHighlightMatch = Game._shallHighlightMatch_RK
     getQuickPlayScore = Game._getSpiderQuickPlayScore
-
 
 
 # register the game
@@ -348,10 +354,11 @@ registerGame(GameInfo(497, Arabella, "Arabella",
 registerGame(GameInfo(545, BigDeal, "Big Deal",
                       GI.GT_KLONDIKE | GI.GT_ORIGINAL, 4, 1, GI.SL_BALANCED))
 registerGame(GameInfo(562, Delivery, "Delivery",
-                      GI.GT_FORTY_THIEVES | GI.GT_ORIGINAL, 4, 0, GI.SL_BALANCED))
+                      GI.GT_FORTY_THIEVES | GI.GT_ORIGINAL, 4, 0,
+                      GI.SL_BALANCED))
 registerGame(GameInfo(590, ChineseKlondike, "Chinese Klondike",
                       GI.GT_KLONDIKE, 3, -1, GI.SL_BALANCED,
-                      suits=(0, 1, 2) ))
+                      suits=(0, 1, 2)))
 registerGame(GameInfo(591, Pantagruel, "Pantagruel",
                       GI.GT_KLONDIKE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(668, DoubleKingsley, "Double Kingsley",
@@ -359,5 +366,5 @@ registerGame(GameInfo(668, DoubleKingsley, "Double Kingsley",
 registerGame(GameInfo(678, ThievesOfEgypt, "Thieves of Egypt",
                       GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
 registerGame(GameInfo(689, Brush, "Brush",
-                      GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
-
+                      GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))

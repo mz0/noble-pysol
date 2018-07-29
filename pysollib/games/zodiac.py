@@ -1,41 +1,41 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
+from pysollib.util import KING, NO_RANK, UNLIMITED_REDEALS
+from pysollib.stack import \
+        OpenStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        UD_SS_RowStack, \
+        WasteStack, \
+        WasteTalonStack
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
-from pysollib.pysoltk import MfxCanvasText
-
 
 
 # ************************************************************************
@@ -114,13 +114,11 @@ class Zodiac(Game):
         # define stack-groups
         l.defaultStackGroups()
 
-
     def startGame(self):
         self.startDealSample()
         self.s.talon.dealRow(rows=self.s.reserves)
         self.s.talon.dealRow()
         self.s.talon.dealCards()
-
 
     shallHighlightMatch = Game._shallHighlightMatch_SS
 
@@ -166,7 +164,7 @@ class TwelveSleepingMaids(Game):
 
         x, y = l.XM+2*l.XS, l.YM+l.YS+3*l.YOFFSET
         for i in range(8):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i/2,
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i//2,
                                                     base_rank=KING, mod=13))
             x += l.XS
 
@@ -187,7 +185,6 @@ class TwelveSleepingMaids(Game):
         # define stack-groups
         l.defaultStackGroups()
 
-
     def startGame(self):
         for i in range(4):
             self.s.talon.dealRow(rows=self.s.reserves, flip=0, frames=0)
@@ -195,9 +192,7 @@ class TwelveSleepingMaids(Game):
         self.s.talon.dealRow()
         self.s.talon.dealCards()
 
-
     shallHighlightMatch = Game._shallHighlightMatch_SS
-
 
 
 # register the game

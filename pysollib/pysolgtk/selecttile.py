@@ -1,40 +1,41 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 
 # imports
 
-## import os, string, sys, types
-import gobject, gtk
+#  import os, string, sys, types
+import gobject
+import gtk
 from gtk import gdk
 
 # PySol imports
-## from pysollib.mfxutil import destruct, Struct, KwStruct
-from pysollib.resource import CSI
+#  from pysollib.mfxutil import destruct, Struct, KwStruct
+from pysollib.mygettext import _
 from pysollib.mfxutil import kwdefault
 
 # Toolkit imports
-## from tkutil import loadImage
+#  from tkutil import loadImage
 from tkwidget import MfxDialog
 from tkcanvas import MfxCanvas
 from tkutil import setTransient
@@ -69,7 +70,7 @@ class SelectTileDialogWithPreview(MfxDialog):
         hpaned.pack1(treeview.scrolledwindow, True, True)
         treeview.treeview.expand_all()
         #
-        self.preview = MfxCanvas(top_box) # width=w2
+        self.preview = MfxCanvas(top_box)  # width=w2
         hpaned.pack2(self.preview, True, True)
         self.preview.show()
         hpaned.set_position(240)
@@ -81,11 +82,9 @@ class SelectTileDialogWithPreview(MfxDialog):
         self.show_all()
         gtk.main()
 
-
     def rowActivated(self, w, row, col):
         # FIXME
-        print 'row-activated-event', row, col
-
+        print('row-activated-event', row, col)
 
     def getSelected(self):
         index = self.treeview.getSelected()
@@ -93,11 +92,9 @@ class SelectTileDialogWithPreview(MfxDialog):
             return None
         return self.all_keys[index]
 
-
     def showSelected(self, w):
         key = self.getSelected()
         self.updatePreview(key)
-
 
     def _createStore(self, manager, key):
         self.all_keys = []
@@ -137,20 +134,19 @@ class SelectTileDialogWithPreview(MfxDialog):
 
         return model
 
-
     def updatePreview(self, key):
-        ##print 'updatePreview:', key, type(key)
+        # print 'updatePreview:', key, type(key)
         if key is None:
             return
         if key == self.preview_key:
             return
         canvas = self.preview
-        ##canvas.deleteAllItems()
+        # canvas.deleteAllItems()
         if isinstance(key, str):
             # solid color
             canvas.setTile(self.app, 0, force=True)
             canvas.config(bg=key)
-            ##canvas.setTextColor(None)
+            # canvas.setTextColor(None)
             self.preview_key = key
             self.table_color = key
         else:
@@ -159,7 +155,6 @@ class SelectTileDialogWithPreview(MfxDialog):
                 self.preview_key = key
             else:
                 self.preview_key = -1
-
 
     def initKw(self, kw):
         kwdefault(kw,
@@ -171,21 +166,19 @@ class SelectTileDialogWithPreview(MfxDialog):
                   )
         return MfxDialog.initKw(self, kw)
 
-
     def _colorselOkClicked(self, w, d):
         c = d.colorsel.get_current_color()
-        c = '#%02x%02x%02x' % (c.red/256, c.green/256, c.blue/256)
+        c = '#%02x%02x%02x' % (c.red//256, c.green//256, c.blue//256)
         d.destroy()
         self.updatePreview(c)
         self.treeview.unselectAll()
-
 
     def createColorsel(self):
         win = gtk.ColorSelectionDialog(_('Select table color'))
         win.help_button.destroy()
         win.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
         if isinstance(self.preview_key, str):
-            color =  self.preview_key
+            color = self.preview_key
         else:
             color = self.app.opt.colors['table']
         win.colorsel.set_current_color(gdk.color_parse(color))
@@ -194,7 +187,6 @@ class SelectTileDialogWithPreview(MfxDialog):
         win.cancel_button.connect('clicked', lambda w: win.destroy())
         setTransient(win, self)
         win.show()
-
 
     def done(self, button):
         b = button.get_data('user_data')
@@ -207,8 +199,5 @@ class SelectTileDialogWithPreview(MfxDialog):
                 self.key = self.preview_key
         self.status = 0
         self.button = b
-        ##self.hide()
+        # self.hide()
         self.quit()
-
-
-

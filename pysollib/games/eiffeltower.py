@@ -1,42 +1,46 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
+import pysollib.game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+
+# from pysollib.util import ACE
+
+from pysollib.stack import \
+        OpenStack, \
+        WasteStack, \
+        WasteTalonStack, \
+        StackWrapper
 
 # ************************************************************************
 # * Eiffel Tower
 # ************************************************************************
+
 
 class EiffelTower_RowStack(OpenStack):
     def __init__(self, x, y, game):
@@ -49,7 +53,7 @@ class EiffelTower_RowStack(OpenStack):
         return self.cards[-1].rank + cards[0].rank == 12
 
 
-class EiffelTower(Game):
+class EiffelTower(pysollib.game.StartDealRowAndCards, Game):
     Talon_Class = WasteTalonStack
     Waste_Class = WasteStack
 
@@ -73,7 +77,7 @@ class EiffelTower(Game):
                 x = x + l.XS
             y = y + l.YS
         x = l.XM + 6 * l.XS
-        y = l.YM + 5 * l.YS / 2
+        y = l.YM + 5 * l.YS // 2
         s.waste = self.Waste_Class(x, y, self)
         l.createText(s.waste, "s")
         x = x + l.XS
@@ -86,11 +90,6 @@ class EiffelTower(Game):
     #
     # game overrides
     #
-
-    def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
-        self.s.talon.dealCards()          # deal first card to WasteStack
 
     def isGameWon(self):
         return len(self.s.talon.cards) == 0 and len(self.s.waste.cards) == 0
@@ -113,6 +112,5 @@ class StrictEiffelTower(EiffelTower):
 # register the game
 registerGame(GameInfo(16, EiffelTower, "Eiffel Tower",
                       GI.GT_PAIRING_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
-##registerGame(GameInfo(801, StrictEiffelTower, "Strict Eiffel Tower",
-##                      GI.GT_PAIRING_TYPE, 2, 0))
-
+# registerGame(GameInfo(801, StrictEiffelTower, "Strict Eiffel Tower",
+#                       GI.GT_PAIRING_TYPE, 2, 0))

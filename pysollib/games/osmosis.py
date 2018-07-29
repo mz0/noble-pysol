@@ -1,42 +1,50 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+
+from pysollib.util import ANY_RANK, ANY_SUIT, UNLIMITED_REDEALS
+
+from pysollib.stack import \
+        AbstractFoundationStack, \
+        BasicRowStack, \
+        FullStackWrapper, \
+        InitialDealTalonStack, \
+        OpenStack, \
+        WasteStack, \
+        WasteTalonStack, \
+        ReserveStack
 
 # ************************************************************************
 # * Osmosis
 # ************************************************************************
+
 
 class Osmosis_Foundation(AbstractFoundationStack):
     def acceptsCards(self, from_stack, cards):
@@ -48,7 +56,8 @@ class Osmosis_Foundation(AbstractFoundationStack):
         for s in self.game.s.foundations:
             if len(s.cards) > max_cards:
                 max_s, max_cards = s, len(s.cards)
-        # if we have less cards, then rank must match the card in this foundation
+        # if we have less cards, then rank must match the card in this
+        # foundation
         if len(self.cards) < max_cards:
             if cards[0].rank != max_s.cards[len(self.cards)].rank:
                 return False
@@ -160,8 +169,8 @@ class OsmosisII_Foundation(AbstractFoundationStack):
 
 
 class OsmosisII(Osmosis):
-    Foundation_Class = FullStackWrapper(OsmosisII_Foundation,
-                       base_rank=ANY_RANK, suit=ANY_SUIT, max_move=0)
+    Foundation_Class = FullStackWrapper(
+        OsmosisII_Foundation, base_rank=ANY_RANK, suit=ANY_SUIT, max_move=0)
 
     def createGame(self, max_rounds=-1, num_deal=3):
         Osmosis.createGame(self, num_deal=3)
@@ -210,7 +219,8 @@ class OpenPeek(Game):
             y += l.YS
         x, y, = 2*l.XM+l.XS+5*l.XOFFSET, l.YM
         for i in range(4):
-            stack = Osmosis_Foundation(x, y, self, i, base_rank=ANY_RANK, max_move=0)
+            stack = Osmosis_Foundation(
+                x, y, self, i, base_rank=ANY_RANK, max_move=0)
             stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
             s.foundations.append(stack)
             y += l.YS
@@ -233,9 +243,7 @@ class OpenPeek(Game):
     #
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow(rows=self.s.reserves)
 
 
@@ -254,9 +262,10 @@ class Genesis(Game):
         self.setSize(w, h)
 
         # create stacks
-        x, y, = l.XM+(rows-4)*l.XS/2, l.YM
+        x, y, = l.XM+(rows-4)*l.XS//2, l.YM
         for i in range(4):
-            stack = Osmosis_Foundation(x, y, self, i, base_rank=ANY_RANK, max_move=0)
+            stack = Osmosis_Foundation(
+                x, y, self, i, base_rank=ANY_RANK, max_move=0)
             stack.CARD_XOFFSET, stack.CARD_YOFFSET = 0, l.YOFFSET
             s.foundations.append(stack)
             x += l.XS
@@ -325,16 +334,14 @@ class Bridesmaids(Game):
         # define stack-groups
         l.defaultStackGroups()
 
-
     def startGame(self, flip=0):
         # deal first card to foundation
-        base_card = self.s.talon.getCard()
+        self.s.talon.getCard()
         to_stack = self.s.foundations[0]
         self.startDealSample()
         self.flipMove(self.s.talon)
         self.moveMove(1, self.s.talon, to_stack)
         self.s.talon.dealCards()          # deal first card to WasteStack
-
 
 
 # register the game
@@ -343,11 +350,14 @@ registerGame(GameInfo(59, Osmosis, "Osmosis",
 registerGame(GameInfo(60, Peek, "Peek",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(298, OpenPeek, "Open Peek",
-                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(370, Genesis, "Genesis",
-                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(371, GenesisPlus, "Genesis +",
-                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(409, Bridesmaids, "Bridesmaids",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(715, OsmosisII, "Treasure Trove",
@@ -355,4 +365,3 @@ registerGame(GameInfo(715, OsmosisII, "Treasure Trove",
 registerGame(GameInfo(716, PeekII, "Peek II",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK,
                       rules_filename='treasuretrove.html'))
-

@@ -1,70 +1,73 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+#  Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+#  Copyright (C) 2003 Mt. Hood Playing Card Co.
+#  Copyright (C) 2005-2009 Skomoroh
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 
 # imports
-import os, re
+import os
+import re
 import traceback
 
 # PySol imports
-from mfxutil import destruct, Struct
-from mfxutil import pickle, unpickle, UnpicklingError
-from mfxutil import getusername, getprefdir
-from mfxutil import latin1_to_ascii, print_err
-from util import CARDSET, IMAGE_EXTENSIONS
-from settings import PACKAGE, VERSION_TUPLE, WIN_SYSTEM
-from resource import CSI, CardsetConfig, Cardset, CardsetManager
-from resource import Tile, TileManager
-from resource import Sample, SampleManager
-from resource import Music, MusicManager
-from images import Images, SubsampledImages
-from pysolrandom import PysolRandom
-from gamedb import GI, GAME_DB, loadGame
-from options import Options
-from settings import TOP_SIZE, TOOLKIT
-from settings import DEBUG
-from winsystems import TkSettings
+from pysollib.mfxutil import destruct, Struct
+from pysollib.mfxutil import pickle, unpickle, UnpicklingError
+from pysollib.mfxutil import getusername, getprefdir
+from pysollib.mfxutil import latin1_to_ascii, print_err
+from pysollib.mfxutil import USE_PIL
+from pysollib.util import CARDSET, IMAGE_EXTENSIONS
+from pysollib.settings import PACKAGE, VERSION_TUPLE, WIN_SYSTEM
+from pysollib.resource import CSI, CardsetConfig, Cardset, CardsetManager
+from pysollib.resource import Tile, TileManager
+from pysollib.resource import Sample, SampleManager
+from pysollib.resource import Music, MusicManager
+from pysollib.images import Images, SubsampledImages
+from pysollib.pysolrandom import PysolRandom
+from pysollib.gamedb import GI, GAME_DB, loadGame
+from pysollib.options import Options
+from pysollib.settings import TOP_SIZE, TOOLKIT
+from pysollib.settings import DEBUG
+from pysollib.winsystems import TkSettings
 
 # Toolkit imports
-from pysoltk import wm_withdraw, loadImage
-from pysoltk import MfxDialog, MfxMessageDialog, MfxExceptionDialog
-from pysoltk import TclError, MfxScrolledCanvas
-from pysoltk import PysolProgressBar
-from pysoltk import PysolStatusbar, HelpStatusbar
-from pysoltk import SelectCardsetDialogWithPreview
-from pysoltk import SelectDialogTreeData
-from pysoltk import HTMLViewer
-from pysoltk import destroy_find_card_dialog
-from pysoltk import destroy_solver_dialog
+from pysollib.mygettext import _
+from pysollib.pysoltk import wm_withdraw, loadImage
+from pysollib.pysoltk import MfxDialog, MfxMessageDialog, MfxExceptionDialog
+from pysollib.pysoltk import TclError, MfxScrolledCanvas
+from pysollib.pysoltk import PysolProgressBar
+from pysollib.pysoltk import PysolStatusbar, HelpStatusbar
+from pysollib.pysoltk import SelectCardsetDialogWithPreview
+from pysollib.pysoltk import SelectDialogTreeData
+from pysollib.pysoltk import HTMLViewer
+from pysollib.pysoltk import destroy_find_card_dialog
+from pysollib.ui.tktile.solverdialog import destroy_solver_dialog
 
-from actions import PysolMenubar
-from actions import PysolToolbar
-from help import help_about, destroy_help_html
-
+from pysollib.actions import PysolMenubar
+from pysollib.actions import PysolToolbar
+from pysollib.help import help_about, destroy_help_html
 
 # ************************************************************************
 # * Statistics
 # ************************************************************************
+
 
 class _GameStatResult:
     def __init__(self):
@@ -72,7 +75,7 @@ class _GameStatResult:
         self.max = 0
         self.top = []
         self.num = 0
-        self.total = 0 # sum of all values
+        self.total = 0  # sum of all values
         self.average = 0
 
     def update(self, gameid, value, game_number, game_start_time):
@@ -114,7 +117,7 @@ class GameStat:
         self.gameid = id
         #
         self.num_total = 0
-        #self.num_not_won = 0
+        # self.num_not_won = 0
         self.num_lost = 0
         self.num_won = 0
         self.num_perfect = 0
@@ -142,17 +145,17 @@ class GameStat:
             return
         elif status == 1:
             self.num_won += 1
-        else: # status == 2
+        else:  # status == 2
             self.num_perfect += 1
 
         score = game.getGameScore()
-        ##print 'GameScore:', score
+        # print 'GameScore:', score
         score_p = None
         if score is not None:
             score_p = self.score_result.update(
                 game.id, score, game_number, game_start_time)
         score = game.getGameScoreCasino()
-        ##print 'GameScoreCasino:', score
+        # print 'GameScoreCasino:', score
         score_casino_p = None
         if score is not None:
             score_casino_p = self.score_casino_result.update(
@@ -201,11 +204,15 @@ class Statistics:
             return
         if gameid == 0:
             # remove all games
-            try: del self.games_stats[player]
-            except KeyError: pass
+            try:
+                del self.games_stats[player]
+            except KeyError:
+                pass
         else:
-            try: del self.games_stats[player][gameid]
-            except KeyError: pass
+            try:
+                del self.games_stats[player][gameid]
+            except KeyError:
+                pass
 
     def __resetPrevGames(self, player, games, gameid):
         if player not in games:
@@ -280,10 +287,10 @@ class Statistics:
         all_games_stat.update(game, status)
         return game_stat.update(game, status)
 
-##     def __setstate__(self, state):      # for backward compatible
-##         if 'gameid' not in state:
-##             self.gameid = None
-##         self.__dict__.update(state)
+#      def __setstate__(self, state):      # for backward compatible
+#          if 'gameid' not in state:
+#              self.gameid = None
+#          self.__dict__.update(state)
 
 
 # ************************************************************************
@@ -341,12 +348,12 @@ class Application:
         self.images = None
         self.subsampled_images = None
         self.gimages = Struct(          # global images
-            demo = [],                  # demo logos
-            pause = [],                 # pause logos
-            logos = [],
-            redeal = [],
+            demo=[],                  # demo logos
+            pause=[],                 # pause logos
+            logos=[],
+            redeal=[],
         )
-        #self.progress_bg = None
+        # self.progress_bg = None
         self.progress_images = []
         self.cardset_manager = CardsetManager()
         self.cardset = None             # current cardset
@@ -357,28 +364,28 @@ class Application:
         self.music_manager = MusicManager()
         self.music_playlist = []
         self.intro = Struct(
-            progress = None,            # progress bar
+            progress=None,            # progress bar
         )
         # directory names
         config = os.path.normpath(getprefdir(PACKAGE))
         self.dn = Struct(
-            config = config,
-            plugins = os.path.join(config, "plugins"),
-            savegames = os.path.join(config, "savegames"),
-            maint = os.path.join(config, "maint"),          # debug
+            config=config,
+            plugins=os.path.join(config, "plugins"),
+            savegames=os.path.join(config, "savegames"),
+            maint=os.path.join(config, "maint"),          # debug
         )
         for k, v in self.dn.__dict__.items():
-##            if os.name == "nt":
-##                v = os.path.normcase(v)
+            #             if os.name == "nt":
+            #                 v = os.path.normcase(v)
             v = os.path.normpath(v)
             self.dn.__dict__[k] = v
         # file names
         self.fn = Struct(
-            opt      = os.path.join(self.dn.config, "options.dat"),
-            opt_cfg  = os.path.join(self.dn.config, "options.cfg"),
-            stats    = os.path.join(self.dn.config, "statistics.dat"),
-            holdgame = os.path.join(self.dn.config, "holdgame.dat"),
-            comments = os.path.join(self.dn.config, "comments.dat"),
+            opt=os.path.join(self.dn.config, "options.dat"),
+            opt_cfg=os.path.join(self.dn.config, "options.cfg"),
+            stats=os.path.join(self.dn.config, "statistics.dat"),
+            holdgame=os.path.join(self.dn.config, "holdgame.dat"),
+            comments=os.path.join(self.dn.config, "comments.dat"),
         )
         for k, v in self.dn.__dict__.items():
             if os.name == "nt":
@@ -396,21 +403,20 @@ class Application:
         self.opt.player = player
         # misc
         self.nextgame = Struct(
-            id = 0,                     # start this game
-            random = None,              # use this random generator
-            loadedgame = None,          # data for loaded game
-            startdemo = 0,              # start demo ?
-            cardset = None,             # use this cardset
-            holdgame = 0,               # hold this game on exit ?
-            bookmark = None,            # goto this bookmark (load new cardset)
+            id=0,                     # start this game
+            random=None,              # use this random generator
+            loadedgame=None,          # data for loaded game
+            startdemo=0,              # start demo ?
+            cardset=None,             # use this cardset
+            holdgame=0,               # hold this game on exit ?
+            bookmark=None,            # goto this bookmark (load new cardset)
         )
         self.commandline = Struct(
-            loadgame = None,            # load a game ?
-            game = None,
-            gameid = None,
+            loadgame=None,            # load a game ?
+            game=None,
+            gameid=None,
         )
         self.demo_counter = 0
-
 
     # the PySol mainloop
     def mainloop(self):
@@ -419,13 +425,13 @@ class Application:
         # try to load statistics
         try:
             self.loadStatistics()
-        except:
+        except Exception:
             traceback.print_exc()
             pass
         # try to load comments
         try:
             self.loadComments()
-        except:
+        except Exception:
             traceback.print_exc()
             pass
         # startup information
@@ -438,7 +444,7 @@ class Application:
             game = None
             try:
                 game = tmpgame._loadGame(self.fn.holdgame, self)
-            except:
+            except Exception:
                 traceback.print_exc()
                 game = None
             if game:
@@ -454,9 +460,10 @@ class Application:
         if not self.nextgame.loadedgame:
             if self.commandline.loadgame:
                 try:
-                    self.nextgame.loadedgame = tmpgame._loadGame(self.commandline.loadgame, self)
+                    self.nextgame.loadedgame = tmpgame._loadGame(
+                        self.commandline.loadgame, self)
                     self.nextgame.loadedgame.gstats.holded = 0
-                except:
+                except Exception:
                     traceback.print_exc()
                     self.nextgame.loadedgame = None
             elif self.commandline.game is not None:
@@ -466,7 +473,8 @@ class Application:
                 else:
                     self.nextgame.id, self.nextgame.random = gameid, None
             elif self.commandline.gameid is not None:
-                self.nextgame.id, self.nextgame.random = self.commandline.gameid, None
+                self.nextgame.id, self.nextgame.random = \
+                    self.commandline.gameid, None
         self.opt.game_holded = 0
         tmpgame.destruct()
         destruct(tmpgame)
@@ -475,7 +483,8 @@ class Application:
         # widgets
         #
         # create the menubar
-        if self.intro.progress: self.intro.progress.update(step=1)
+        if self.intro.progress:
+            self.intro.progress.update(step=1)
         self.menubar = PysolMenubar(self, self.top,
                                     progress=self.intro.progress)
         # create the statusbar(s)
@@ -505,19 +514,20 @@ class Application:
             for w, v in self.opt.toolbar_vars.items():
                 self.toolbar.config(w, v)
         #
-        if self.intro.progress: self.intro.progress.update(step=1)
+        if self.intro.progress:
+            self.intro.progress.update(step=1)
         #
         try:
             # this is the mainloop
             while 1:
                 assert self.cardset is not None
-                id, random = self.nextgame.id, self.nextgame.random
+                id_, random = self.nextgame.id, self.nextgame.random
                 self.nextgame.id, self.nextgame.random = 0, None
                 try:
-                    self.runGame(id, random)
-                except:
+                    self.runGame(id_, random)
+                except Exception:
                     # try Klondike if current game fails
-                    if id == 2:
+                    if id_ == 2:
                         raise           # internal error?
                     if DEBUG:
                         raise
@@ -531,23 +541,24 @@ class Application:
                         self.game.gstats.holded = 1
                         self.game._saveGame(self.fn.holdgame)
                         self.opt.game_holded = self.game.id
-                    except:
+                    except Exception:
                         traceback.print_exc()
                         pass
                 self.wm_save_state()
                 # save game geometry
+                geom = (self.canvas.winfo_width(), self.canvas.winfo_height())
                 if self.opt.save_games_geometry and not self.opt.wm_maximized:
-                    w = self.canvas.winfo_width()
-                    h = self.canvas.winfo_height()
-                    geom = (w, h)
                     self.opt.games_geometry[self.game.id] = geom
+                self.opt.game_geometry = geom
                 self.freeGame()
                 #
                 if self.nextgame.id <= 0:
                     break
                 # load new cardset
                 if self.nextgame.cardset is not self.cardset:
-                    self.loadCardset(self.nextgame.cardset, id=self.nextgame.id, update=7+256)
+                    self.loadCardset(
+                        self.nextgame.cardset, id=self.nextgame.id,
+                        update=7+256)
                 else:
                     self.requestCompatibleCardsetType(self.nextgame.id)
         finally:
@@ -558,57 +569,60 @@ class Application:
             destroy_find_card_dialog()
             destroy_solver_dialog()
             # update options
-            self.opt.last_gameid = id
+            self.opt.last_gameid = id_
             # save options
-            try: self.saveOptions()
-            except:
+            try:
+                self.saveOptions()
+            except Exception:
                 traceback.print_exc()
                 pass
             # save statistics
-            try: self.saveStatistics()
-            except:
+            try:
+                self.saveStatistics()
+            except Exception:
                 traceback.print_exc()
                 pass
             # save comments
-            try: self.saveComments()
-            except:
+            try:
+                self.saveComments()
+            except Exception:
                 traceback.print_exc()
                 pass
             # shut down audio
-            try: self.audio.destroy()
-            except:
+            try:
+                self.audio.destroy()
+            except Exception:
                 traceback.print_exc()
                 pass
 
-
-    def runGame(self, id, random=None):
+    def runGame(self, id_, random=None):
         self.top.connectApp(self)
         # create game instance
-        g = self.getGameClass(id)
+        g = self.getGameClass(id_)
         if g is None:
-            id = 2          # start Klondike as default game
+            id_ = 2          # start Klondike as default game
             random = None
-            g = self.getGameClass(id)
+            g = self.getGameClass(id_)
             if g is None:
                 # start first available game
-                id = self.gdb.getGamesIdSortedByName()[0]
-                g = self.getGameClass(id)
-        gi = self.getGameInfo(id)
-        assert gi is not None and gi.id == id
-        self.game = self.constructGame(id)
-        self.gdb.setSelected(id)
+                id_ = self.gdb.getGamesIdSortedByName()[0]
+                g = self.getGameClass(id_)
+        gi = self.getGameInfo(id_)
+        assert gi is not None and gi.id == id_
+        self.game = self.constructGame(id_)
+        self.gdb.setSelected(id_)
         self.game.busy = 1
         # create stacks and layout
         self.game.create(self)
         # connect with game
         self.menubar.connectGame(self.game)
-        if self.toolbar: ##~
+        if self.toolbar:  # ~
             self.toolbar.connectGame(self.game)
         self.game.updateStatus(player=self.opt.player)
         # update "Recent games" menubar entry
-        if id in self.opt.recent_gameid:
-            self.opt.recent_gameid.remove(id)
-        self.opt.recent_gameid.insert(0, id)
+        if id_ in self.opt.recent_gameid:
+            self.opt.recent_gameid.remove(id_)
+        self.opt.recent_gameid.insert(0, id_)
         del self.opt.recent_gameid[self.opt.num_recent_games:]
         self.menubar.updateRecentGamesMenu(self.opt.recent_gameid)
         self.menubar.updateFavoriteGamesMenu()
@@ -654,7 +668,6 @@ class Application:
         self.game.busy = 0
         self.top.mainloop()
 
-
     # free game
     def freeGame(self):
         # disconnect from game
@@ -670,7 +683,6 @@ class Application:
         self.game = None
         self.top.connectApp(None)
 
-
     #
     # UI support
     #
@@ -678,8 +690,8 @@ class Application:
     def wm_save_state(self):
         if self.top:
             s = self.top.wm_state()
-            ##print "wm_save_state", s
-            if s == "zoomed": # Windows only
+            # print "wm_save_state", s
+            if s == "zoomed":  # Windows only
                 self.opt.wm_maximized = True
             elif s == "normal":
                 self.opt.wm_maximized = False
@@ -719,7 +731,7 @@ class Application:
                 (_('&OK'), 'ok'),
                 (_('&Cancel'), 'cancel'),
                 (_('&New game'), 'new'),
-                ):
+            ):
                 fn = self.dataloader.findImage(f, dir)
                 im = loadImage(fn)
                 MfxDialog.button_img[n] = im
@@ -727,7 +739,7 @@ class Application:
     def loadImages2(self):
         # load canvas images
         dir = "images"
-        ##for f in ("noredeal", "redeal",):
+        # for f in ("noredeal", "redeal",):
         for f in ("stopsign", "redeal",):
             self.gimages.redeal.append(self.dataloader.findImage(f, dir))
         dir = os.path.join("images", "demo")
@@ -736,9 +748,9 @@ class Application:
         dir = os.path.join("images", "pause")
         for f in ("pause01", "pause02", "pause03",):
             self.gimages.pause.append(self.dataloader.findImage(f, dir))
-        ##dir = os.path.join("images", "stats")
-        ##for f in ("barchart",):
-        ##    self.gimages.stats.append(self.dataloader.findImage(f, dir))
+        # dir = os.path.join("images", "stats")
+        # for f in ("barchart",):
+        #     self.gimages.stats.append(self.dataloader.findImage(f, dir))
 
     def loadImages3(self):
         # load treeview images
@@ -768,7 +780,7 @@ class Application:
     def _getImagesDir(self, *dirs, **kwargs):
         check = kwargs.get('check', True)
         dirs = [str(d) for d in dirs]   # XXX: don't use unicode
-        d =  os.path.join(self.dataloader.dir, 'images', *dirs)
+        d = os.path.join(self.dataloader.dir, 'images', *dirs)
         if check:
             if os.path.exists(d):
                 return d
@@ -805,7 +817,6 @@ class Application:
     def getFont(self, name):
         return self.opt.fonts.get(name)
 
-
     #
     # cardset
     #
@@ -836,10 +847,10 @@ class Application:
                     self.opt.cardset[gi.category] = (cs.name, cs.backname)
                 if update & 8:
                     self.opt.cardset[(1, gi.id)] = (cs.name, cs.backname)
-        #from pprint import pprint; pprint(self.opt.cardset)
+        # from pprint import pprint; pprint(self.opt.cardset)
 
     def loadCardset(self, cs, id=0, update=7, progress=None):
-        ##print 'loadCardset', cs.ident
+        # print 'loadCardset', cs.ident
         r = 0
         if cs is None or cs.error:
             return 0
@@ -852,7 +863,7 @@ class Application:
         #   value: (Cardset.ident, Images, SubsampledImages)
         c = self.cardsets_cache.get(cs.type)
         if c and c[0] == cs.ident:
-            #print 'load from cache', c
+            # print 'load from cache', c
             self.images, self.subsampled_images = c[1], c[2]
             self.updateCardset(id, update=update)
             if self.menubar is not None:
@@ -877,32 +888,35 @@ class Application:
             if self.opt.save_cardsets:
                 c = self.cardsets_cache.get(cs.type)
                 if c:
-                    ##c[1].destruct()
+                    # c[1].destruct()
                     destruct(c[1])
                 self.cardsets_cache[cs.type] = (cs.ident, images, simages)
             elif self.images is not None:
-                ##self.images.destruct()
+                # self.images.destruct()
                 destruct(self.images)
             #
-            if self.cardset and self.cardset.ident != cs.ident and \
-                   self.cardset.type == cs.type:
-                self.opt.games_geometry = {} # clear saved games geometry
+            if self.cardset:
+                if self.cardset.ident != cs.ident:
+                    if self.cardset.type == cs.type:
+                        # clear saved games geometry
+                        self.opt.games_geometry = {}
             # update
             self.images = images
             self.subsampled_images = simages
             self.updateCardset(id, update=update)
             r = 1
-        except (Exception, TclError, UnpicklingError), ex:
+        except (Exception, TclError, UnpicklingError) as ex:
             traceback.print_exc()
             cs.error = 1
             # restore settings
             self.nextgame.cardset = self.cardset
             if self.cardset:
                 self.cardset_manager.setSelected(self.cardset.index)
-            ##images.destruct()
+            # images.destruct()
             destruct(images)
-            d = MfxExceptionDialog(self.top, ex, title=CARDSET+_(" load error"),
-                                   text=_("Error while loading ")+CARDSET)
+            MfxExceptionDialog(
+                self.top, ex, title=CARDSET+_(" load error"),
+                text=_("Error while loading ")+CARDSET)
         self.intro.progress = progress
         if r and self.menubar is not None:
             self.menubar.updateBackgroundImagesMenu()
@@ -917,7 +931,7 @@ class Application:
         if gc == GI.GC_FRENCH:
             t0 = "French"
             if cs_type not in (CSI.TYPE_FRENCH,
-                               ##CSI.TYPE_TAROCK,
+                               # CSI.TYPE_TAROCK,
                                ):
                 t1 = t0
         elif gc == GI.GC_HANAFUDA:
@@ -996,34 +1010,56 @@ class Application:
             return 1
         #
         t = self.checkCompatibleCardsetType(gi, self.cardset)
-        d = MfxMessageDialog(self.top, title=_("Incompatible ")+CARDSET,
-                      bitmap="warning",
-                      text=_('''The currently selected %s %s
+        MfxMessageDialog(
+            self.top, title=_("Incompatible ")+CARDSET,
+            bitmap="warning",
+            text=_('''The currently selected %s %s
 is not compatible with the game
 %s
 
 Please select a %s type %s.
 ''') % (CARDSET, self.cardset.name, gi.name, t[0], CARDSET),
-                      strings=(_("&OK"),), default=0)
+            strings=(_("&OK"),), default=0)
         cs = self.__selectCardsetDialog(t)
         if cs is None:
             return -1
         self.loadCardset(cs, id=id)
         return 1
 
-    def __selectCardsetDialog(self, t):
-        key = self.cardset.index
+    def selectCardset(self, title, key):
         d = SelectCardsetDialogWithPreview(
-            self.top, title=_("Please select a %s type %s") % (t[0], CARDSET),
-            app=self, manager=self.cardset_manager, key=key,
-            strings=(None, _("&OK"), _("&Cancel")), default=1)
-        if d.status != 0 or d.button != 1:
-            return None
+            self.top, title=title, app=self,
+            manager=self.cardset_manager, key=key)
         cs = self.cardset_manager.get(d.key)
-        if cs is None or d.key == key:
+        if d.status != 0 or d.button != 0 or d.key < 0 or cs is None:
             return None
+        changed = False
+        if USE_PIL:
+            if (self.opt.scale_x, self.opt.scale_y,
+                self.opt.auto_scale, self.opt.preserve_aspect_ratio) != \
+                d.scale_values or \
+                    (cs.CARD_XOFFSET, cs.CARD_YOFFSET) != d.cardset_values:
+                changed = True
+        if d.key == self.cardset.index and not changed:
+            return None
+        if USE_PIL:
+            (self.opt.scale_x,
+             self.opt.scale_y,
+             self.opt.auto_scale,
+             self.opt.preserve_aspect_ratio) = d.scale_values
+            if not self.opt.auto_scale:
+                self.images.resize(self.opt.scale_x, self.opt.scale_y)
+            if d.cardset_values:
+                cs.CARD_XOFFSET, cs.CARD_YOFFSET = d.cardset_values
+                self.opt.offsets[cs.ident] = d.cardset_values
+                self.images.setOffsets()
         return cs
 
+    def __selectCardsetDialog(self, t):
+        cs = self.selectCardset(
+            _("Please select a %s type %s") % (t[0], CARDSET),
+            self.cardset.index)
+        return cs
 
     #
     # load & save options, statistics and comments
@@ -1038,7 +1074,7 @@ Please select a %s type %s.
                 self.opt.__dict__.update(opt.__dict__)
             try:
                 os.remove(self.fn.opt)
-            except:
+            except Exception:
                 pass
         self.opt.load(self.fn.opt_cfg)
         self.opt.setConstants()
@@ -1048,7 +1084,7 @@ Please select a %s type %s.
             return
         stats = unpickle(self.fn.stats)
         if stats:
-            ##print "loaded:", stats.__dict__
+            # print "loaded:", stats.__dict__
             self.stats.__dict__.update(stats.__dict__)
         # start a new session
         self.stats.session_games = {}
@@ -1060,7 +1096,7 @@ Please select a %s type %s.
             return
         comments = unpickle(self.fn.comments)
         if comments:
-            ##print "loaded:", comments.__dict__
+            # print "loaded:", comments.__dict__
             self.comments.__dict__.update(comments.__dict__)
 
     def __saveObject(self, obj, fn):
@@ -1076,7 +1112,6 @@ Please select a %s type %s.
 
     def saveComments(self):
         self.__saveObject(self.comments, self.fn.comments)
-
 
     #
     # access games database
@@ -1096,94 +1131,100 @@ Please select a %s type %s.
 
     ##
     def getGamesIdSortedByPlayed(self, player=''):
-        if player == '': player = self.opt.player
-        def _cmp(a, b):
+        if player == '':
+            player = self.opt.player
+
+        def _key(a):
             wa, la, ta, ma = self.stats.getFullStats(player, a)
-            wb, lb, tb, mb = self.stats.getFullStats(player, b)
-            return cmp(wb+lb, wa+la)  # reverse
+            return wa+la
         games = list(self.gdb.getGamesIdSortedByName())
-        games.sort(_cmp)
-        return games
+        games.sort(key=_key)
+        return games[::-1]
 
     def getGamesIdSortedByWon(self, player=''):
-        if player == '': player = self.opt.player
-        def _cmp(a, b):
+        if player == '':
+            player = self.opt.player
+
+        def _key(a):
             wa, la, ta, ma = self.stats.getFullStats(player, a)
-            wb, lb, tb, mb = self.stats.getFullStats(player, b)
-            return cmp(wb, wa)  # reverse
+            return wa
         games = list(self.gdb.getGamesIdSortedByName())
-        games.sort(_cmp)
-        return games
+        games.sort(key=_key)
+        return games[::-1]
 
     def getGamesIdSortedByLost(self, player=''):
-        if player == '': player = self.opt.player
-        def _cmp(a, b):
+        if player == '':
+            player = self.opt.player
+
+        def _key(a):
             wa, la, ta, ma = self.stats.getFullStats(player, a)
-            wb, lb, tb, mb = self.stats.getFullStats(player, b)
-            return cmp(lb, la)  # reverse
+            return la
         games = list(self.gdb.getGamesIdSortedByName())
-        games.sort(_cmp)
-        return games
+        games.sort(key=_key)
+        return games[::-1]
 
     def getGamesIdSortedByPercent(self, player=''):
-        if player == '': player = self.opt.player
-        def _cmp(a, b):
+        if player == '':
+            player = self.opt.player
+
+        def _key(a):
             wa, la, ta, ma = self.stats.getFullStats(player, a)
-            wb, lb, tb, mb = self.stats.getFullStats(player, b)
-            if wa+la == 0 or wb+lb == 0:
-                return cmp(wb+lb, wa+la)  # reverse
-            return cmp(float(wb)/(wb+lb),
-                       float(wa)/(wa+la))  # reverse
+            return float(wa)/(1 if wa+la == 0 else wa+la)
         games = list(self.gdb.getGamesIdSortedByName())
-        games.sort(_cmp)
-        return games
+        games.sort(key=_key)
+        return games[::-1]
 
     def getGamesIdSortedByPlayingTime(self, player=''):
-        if player == '': player = self.opt.player
-        def _cmp(a, b):
+        if player == '':
+            player = self.opt.player
+
+        def _key(a):
             wa, la, ta, ma = self.stats.getFullStats(player, a)
-            wb, lb, tb, mb = self.stats.getFullStats(player, b)
-            return cmp(tb, ta)  # reverse
+            return ta
         games = list(self.gdb.getGamesIdSortedByName())
-        games.sort(_cmp)
-        return games
+        games.sort(key=_key)
+        return games[::-1]
 
     def getGamesIdSortedByMoves(self, player=''):
-        if player == '': player = self.opt.player
-        def _cmp(a, b):
-            wa, la, ta, ma = self.stats.getFullStats(player, a)
-            wb, lb, tb, mb = self.stats.getFullStats(player, b)
-            return cmp(mb, ma)  # reverse
-        games = list(self.gdb.getGamesIdSortedByName())
-        games.sort(_cmp)
-        return games
+        if player == '':
+            player = self.opt.player
 
+        def _key(a):
+            wa, la, ta, ma = self.stats.getFullStats(player, a)
+            return ma
+        games = list(self.gdb.getGamesIdSortedByName())
+        games.sort(key=_key)
+        return games[::-1]
 
     def getGameInfo(self, id):
         return self.gdb.get(id)
 
     def getGameClass(self, id):
         gi = self.gdb.get(id)
-        if gi is None: return None
+        if gi is None:
+            return None
         return gi.gameclass
 
     def getGameTitleName(self, id):
         gi = self.gdb.get(id)
-        if gi is None: return None
+        if gi is None:
+            return None
         return gi.name
 
     def getGameMenuitemName(self, id):
         gi = self.gdb.get(id)
-        if gi is None: return None
+        if gi is None:
+            return None
         return gi.short_name
 
     def getGameRulesFilename(self, id):
         gi = self.gdb.get(id)
-        if gi is None: return None
+        if gi is None:
+            return None
         if gi.rules_filename is not None:
             return gi.rules_filename
         n = gi.en_name                  # english name
-        ##n = re.sub(r"[\[\(].*$", "", n)
+        # n = re.sub(r"[\[\(].*$", "", n)
         n = latin1_to_ascii(n)
         n = re.sub(r"[^\w]", "", n)
         n = n.lower() + ".html"
@@ -1194,14 +1235,15 @@ Please select a %s type %s.
         return n
 
     def getGameSaveName(self, id):
-        if os.path.supports_unicode_filenames: # new in python 2.3
+        if os.path.supports_unicode_filenames:  # new in python 2.3
             return self.getGameTitleName(id)
         gi = self.gdb.get(id)
         n = gi.en_name                  # english name
-        if not n: return None
-##         m = re.search(r"^(.*)([\[\(](\w+).*[\]\)])\s*$", n)
-##         if m:
-##             n = m.group(1) + "_" + m.group(2).lower()
+        if not n:
+            return None
+        #         m = re.search(r"^(.*)([\[\(](\w+).*[\]\)])\s*$", n)
+        #          if m:
+        #              n = m.group(1) + "_" + m.group(2).lower()
         n = latin1_to_ascii(n)
         n = n.lower()
         n = re.sub(r"[\s]", "_", n)
@@ -1233,22 +1275,16 @@ Please select a %s type %s.
     #
 
     def loadPlugins(self, dir):
-        if not dir or not os.path.isdir(dir):
-            return
-        names = os.listdir(dir)
-        names = map(os.path.normcase, names)
-        names.sort()
-        for name in names:
+        for name in self._my_list_dir(dir):
             m = re.search(r"^(.+)\.py$", name)
             n = os.path.join(dir, name)
             if m and os.path.isfile(n):
                 try:
                     loadGame(m.group(1), n)
-                except Exception, ex:
+                except Exception as ex:
                     if DEBUG:
                         traceback.print_exc()
                     print_err(_("error loading plugin %s: %s") % (n, ex))
-
 
     #
     # init cardsets
@@ -1261,13 +1297,14 @@ Please select a %s type %s.
             f = open(filename, "r")
             lines = f.readlines()
         finally:
-            if f: f.close()
+            if f:
+                f.close()
         lines = [l.strip() for l in lines]
         if not lines[0].startswith("PySol"):
             return None
         config = CardsetConfig()
         if not self._parseCardsetConfig(config, lines):
-            ##print filename, 'invalid config'
+            # print filename, 'invalid config'
             return None
         if config.CARDD > self.top.winfo_screendepth():
             return None
@@ -1293,7 +1330,8 @@ Please select a %s type %s.
         fields = [f.strip() for f in line[0].split(';')]
         if len(fields) >= 2:
             m = re.search(r"^(\d+)$", fields[1])
-            if m: cs.version = int(m.group(1))
+            if m:
+                cs.version = int(m.group(1))
         if cs.version >= 3:
             if len(fields) < 5:
                 perr(1, msg='number of fields')
@@ -1349,8 +1387,10 @@ Please select a %s type %s.
         if not m:
             perr(3, msg='invalid format')
             return 0
-        cs.CARDW, cs.CARDH, cs.CARDD = int(m.group(1)), int(m.group(2)), int(m.group(3))
-        # line[3]: CARD_UP_YOFFSET, CARD_DOWN_YOFFSET, SHADOW_XOFFSET, SHADOW_YOFFSET
+        cs.CARDW, cs.CARDH, cs.CARDD = \
+            int(m.group(1)), int(m.group(2)), int(m.group(3))
+        # line[3]: CARD_UP_YOFFSET, CARD_DOWN_YOFFSET,
+        # SHADOW_XOFFSET, SHADOW_YOFFSET
         m = re.search(r"^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)", line[3])
         if not m:
             perr(4, msg='invalid format')
@@ -1371,7 +1411,10 @@ Please select a %s type %s.
         else:
             cs.backnames.insert(0, back)
             cs.backindex = 0
-        ##if cs.type != 1: print cs.type, cs.name
+        # set offsets from options.cfg
+        if cs.ident in self.opt.offsets:
+            cs.CARD_XOFFSET, cs.CARD_YOFFSET = self.opt.offsets[cs.ident]
+        # if cs.type != 1: print cs.type, cs.name
         return 1
 
     def initCardsets(self):
@@ -1380,7 +1423,7 @@ Please select a %s type %s.
         dirs = manager.getSearchDirs(self, ("cardsets", ""), "PYSOL_CARDSETS")
         if DEBUG:
             dirs = dirs + manager.getSearchDirs(self, "cardsets-*")
-        ##print dirs
+        # print dirs
         found, t = [], {}
         for dir in dirs:
             dir = dir.strip()
@@ -1391,40 +1434,42 @@ Please select a %s type %s.
                     names = os.listdir(dir)
                     names.sort()
                 for name in names:
-                    if not name.startswith('cardset-'): continue
+                    if not name.startswith('cardset-'):
+                        continue
                     d = os.path.join(dir, name)
-                    if not os.path.isdir(d): continue
+                    if not os.path.isdir(d):
+                        continue
                     f1 = os.path.join(d, "config.txt")
                     f2 = os.path.join(d, "COPYRIGHT")
                     if os.path.isfile(f1) and os.path.isfile(f2):
                         try:
                             cs = self._readCardsetConfig(d, f1)
                             if cs:
-                                ##from pprint import pprint
-                                ##print cs.name
-                                ##pprint(cs.__dict__)
+                                # from pprint import pprint
+                                # print cs.name
+                                # pprint(cs.__dict__)
                                 back = cs.backnames[cs.backindex]
                                 f1 = os.path.join(d, back)
                                 f2 = os.path.join(d, "shade" + cs.ext)
                                 if (cs.ext in IMAGE_EXTENSIONS and
-                                    os.path.isfile(f1) and os.path.isfile(f2)):
+                                        os.path.isfile(f1) and
+                                        os.path.isfile(f2)):
                                     found.append(cs)
-                                    #print '+', cs.name
+                                    # print '+', cs.name
                             else:
                                 print_err('fail _readCardsetConfig: %s %s'
                                           % (d, f1))
                                 pass
-                        except Exception, err:
-                            ##traceback.print_exc()
+                        except Exception:
+                            # traceback.print_exc()
                             pass
-            except EnvironmentError, ex:
+            except EnvironmentError:
                 pass
         # register cardsets
         for obj in found:
             if not manager.getByName(obj.name):
                 manager.register(obj)
-                ##print obj.index, obj.name
-
+                # print obj.index, obj.name
 
     #
     # init tiles
@@ -1433,12 +1478,13 @@ Please select a %s type %s.
     def initTiles(self):
         manager = self.tabletile_manager
         # find all available tiles
-        dirs = manager.getSearchDirs(self,
-                           ("tiles-*",
-                            os.path.join("tiles", "stretch"),
-                            os.path.join("tiles", "save-aspect")),
-                           "PYSOL_TILES")
-        ##print dirs
+        dirs = manager.getSearchDirs(
+            self,
+            ("tiles-*",
+                os.path.join("tiles", "stretch"),
+                os.path.join("tiles", "save-aspect")),
+            "PYSOL_TILES")
+        # print dirs
         s = "((\\" + ")|(\\".join(IMAGE_EXTENSIONS) + "))$"
         ext_re = re.compile(s, re.I | re.U)
         found, t = [], {}
@@ -1461,14 +1507,14 @@ Please select a %s type %s.
                     if os.path.split(dir)[-1] == 'save-aspect':
                         tile.stretch = 1
                         tile.save_aspect = 1
-                    #n = re.sub("[-_]", " ", n)
+                    # n = re.sub("[-_]", " ", n)
                     n = n.replace('_', ' ')
                     tile.name = n
                     key = n.lower()
                     if key not in t:
                         t[key] = 1
                         found.append((n, tile))
-            except EnvironmentError, ex:
+            except EnvironmentError:
                 pass
         # register tiles
         found.sort()
@@ -1477,6 +1523,15 @@ Please select a %s type %s.
             if not manager.getByName(obj.name):
                 manager.register(obj)
 
+    def _my_list_dir(self, dir):
+        """docstring for _my_list_dir"""
+        if dir and os.path.isdir(dir):
+            names = os.listdir(dir)
+            names = list(map(os.path.normcase, names))
+            names.sort()
+            return names
+        else:
+            return []
 
     #
     # init samples / music
@@ -1489,12 +1544,7 @@ Please select a %s type %s.
             if dir:
                 dir = os.path.normpath(dir)
             try:
-                names = []
-                if dir and os.path.isdir(dir):
-                    names = os.listdir(dir)
-                    names = map(os.path.normcase, names)
-                    names.sort()
-                for name in names:
+                for name in self._my_list_dir(dir):
                     if not name or not ext_re.search(name):
                         continue
                     f = os.path.join(dir, name)
@@ -1509,7 +1559,7 @@ Please select a %s type %s.
                     if key not in t:
                         t[key] = 1
                         found.append((n, obj))
-            except EnvironmentError, ex:
+            except EnvironmentError:
                 pass
         # register songs
         found.sort()
@@ -1520,22 +1570,19 @@ Please select a %s type %s.
                     manager.register(obj)
         return found
 
-
     def initSamples(self):
         manager = self.sample_manager
         # find all available samples
-        dirs = manager.getSearchDirs(self, ("sound", os.path.join("sound", "extra")))
-        ##print dirs
+        dirs = manager.getSearchDirs(
+            self, ("sound", os.path.join("sound", "extra")))
+        # print dirs
         ext_re = re.compile(r"\.((wav))$", re.I)
         self.initResource(manager, dirs, ext_re, Sample)
-
 
     def initMusic(self):
         manager = self.music_manager
         # find all available music songs
         dirs = manager.getSearchDirs(self, "music-*", "PYSOL_MUSIC")
-        ##print dirs
+        # print dirs
         ext_re = re.compile(self.audio.EXTENSIONS)
         self.initResource(manager, dirs, ext_re, Music)
-
-

@@ -1,57 +1,35 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = ['SUITS',
-           'COLORS',
-           'RANKS',
-           'ACE',
-           'JACK',
-           'QUEEN',
-           'KING',
-           'ANY_SUIT',
-           'ANY_COLOR',
-           'ANY_RANK',
-           'NO_SUIT',
-           'NO_COLOR',
-           'NO_RANK',
-           'UNLIMITED_MOVES',
-           'UNLIMITED_ACCEPTS',
-           'UNLIMITED_CARDS',
-           'NO_REDEAL',
-           'UNLIMITED_REDEALS',
-           'VARIABLE_REDEALS',
-           'CARDSET',
-           'IMAGE_EXTENSIONS',
-           'DataLoader',
-           ]
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys, os
+import sys
+import os
 
 # PySol imports
-from settings import DATA_DIRS, TOOLKIT
-from mfxutil import Image
+from pysollib.settings import DATA_DIRS
+from pysollib.mfxutil import Image
 
+from pysollib.mygettext import _
 
 # ************************************************************************
 # * constants
@@ -105,7 +83,7 @@ class DataLoader:
         if isinstance(filenames, str):
             filenames = (filenames,)
         assert isinstance(filenames, (tuple, list))
-        #$ init path
+        # init path
         path = path[:]
         head, tail = os.path.split(argv0)
         if not head:
@@ -122,7 +100,8 @@ class DataLoader:
         # check path for valid directories
         self.path = []
         for p in path:
-            if not p: continue
+            if not p:
+                continue
             np = os.path.abspath(p)
             if np and (np not in self.path) and os.path.isdir(np):
                 self.path.append(np)
@@ -139,9 +118,9 @@ class DataLoader:
                 self.dir = p
                 break
         else:
-            raise OSError(str(argv0)+": DataLoader could not find "+str(filenames))
-        ##print path, self.path, self.dir
-
+            raise OSError(str(argv0)+": DataLoader could not find " +
+                          str(filenames))
+        # print path, self.path, self.dir
 
     def __findFile(self, func, filename, subdirs=None, do_raise=1):
         if subdirs is None:
@@ -154,7 +133,8 @@ class DataLoader:
             if func(f):
                 return f
         if do_raise:
-            raise OSError("DataLoader could not find "+filename+" in "+self.dir+" "+str(subdirs))
+            raise OSError("DataLoader could not find "+filename+" in " +
+                          self.dir+" "+str(subdirs))
         return None
 
     def findFile(self, filename, subdirs=None):
@@ -165,11 +145,12 @@ class DataLoader:
             f = self.__findFile(os.path.isfile, filename+ext, subdirs, 0)
             if f:
                 return f
-        raise OSError("DataLoader could not find image "+filename+" in "+self.dir+" "+str(subdirs))
+        raise OSError("DataLoader could not find image "+filename +
+                      " in "+self.dir+" "+str(subdirs))
 
     def findIcon(self, filename=None, subdirs=None):
         if not filename:
-            ##filename = PACKAGE.lower()
+            # filename = PACKAGE.lower()
             filename = 'pysol'
         root, ext = os.path.splitext(filename)
         if not ext:
@@ -181,4 +162,3 @@ class DataLoader:
 
     def findDir(self, filename, subdirs=None):
         return self.__findFile(os.path.isdir, filename, subdirs)
-

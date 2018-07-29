@@ -1,44 +1,46 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
+from pysollib.stack import \
+        InitialDealTalonStack, \
+        InvisibleStack, \
+        OpenTalonStack, \
+        ReserveStack, \
+        StackWrapper
 
 # ************************************************************************
 # * Poker Square
 # ************************************************************************
+
 
 class PokerSquare_RowStack(ReserveStack):
     def clickHandler(self, event):
@@ -81,6 +83,7 @@ Straight
 Three of a Kind
 Two Pair
 One Pair'''))
+            self.texts.list.append(t)
             bb = t.bbox()
             x = bb[1][0] + 16
             h = bb[1][1] - bb[0][1]
@@ -91,10 +94,12 @@ One Pair'''))
             t = MfxCanvasText(self.canvas, x, y, anchor="nw",
                               font=self.app.getFont("canvas_default"),
                               text="100\n75\n50\n25\n20\n15\n10\n5\n2")
+            self.texts.list.append(t)
             x = t.bbox()[1][0] + 16
-            self.texts.misc = MfxCanvasText(self.canvas, x, y, anchor="nw",
-                                            font=self.app.getFont("canvas_default"),
-                                            text="0\n"*8+"0")
+            self.texts.misc = MfxCanvasText(
+                self.canvas, x, y, anchor="nw",
+                font=self.app.getFont("canvas_default"),
+                text="0\n"*8+"0")
             x = self.texts.misc.bbox()[1][0] + 32
 
         # set window
@@ -113,20 +118,20 @@ One Pair'''))
 
         # create texts 2)
         if self.preview <= 1:
-            self.texts.addattr(hands=[])
             for i in (4, 9, 14, 19, 24):
                 tx, ty, ta, tf = l.getTextAttr(s.rows[i], anchor="e")
                 t = MfxCanvasText(self.canvas, tx+8, ty,
                                   anchor=ta,
                                   font=self.app.getFont("canvas_default"))
-                self.texts.hands.append(t)
+                self.texts.list.append(t)
             for i in range(20, 25):
                 tx, ty, ta, tf = l.getTextAttr(s.rows[i], anchor="ss")
                 t = MfxCanvasText(self.canvas, tx, ty, anchor=ta,
                                   font=self.app.getFont("canvas_default"))
-                self.texts.hands.append(t)
-            self.texts.score = MfxCanvasText(self.canvas, l.XM, 5*l.YS, anchor="sw",
-                                             font=self.app.getFont("canvas_large"))
+                self.texts.list.append(t)
+            self.texts.score = MfxCanvasText(
+                self.canvas, l.XM, 5*l.YS, anchor="sw",
+                font=self.app.getFont("canvas_large"))
 
         # define hands for scoring
         r = s.rows
@@ -138,7 +143,7 @@ One Pair'''))
             (r[3], r[3+5], r[3+10], r[3+15], r[3+20]),
             (r[4], r[4+5], r[4+10], r[4+15], r[4+20]),
         ]
-        self.poker_hands = map(tuple, self.poker_hands)
+        self.poker_hands = list(map(tuple, self.poker_hands))
 
         # define stack-groups
         l.defaultStackGroups()
@@ -153,7 +158,8 @@ One Pair'''))
         self.s.talon.fillStack()
 
     def isGameWon(self):
-        return len(self.s.talon.cards) == 0 and self.getGameScore() >= self.WIN_SCORE
+        return len(self.s.talon.cards) == 0 and \
+            self.getGameScore() >= self.WIN_SCORE
 
     def getAutoStacks(self, event=None):
         return ((), (), ())
@@ -171,7 +177,7 @@ One Pair'''))
             type, value = self.getHandScore(self.poker_hands[i])
             if 0 <= type <= 8:
                 count[type] = count[type] + 1
-            self.texts.hands[i].config(text=str(value))
+            self.texts.list[i+2].config(text=str(value))
             score = score + value
         t = '\n'.join(map(str, count))
         self.texts.misc.config(text=t)
@@ -258,19 +264,19 @@ class PokerShuffle_RowStack(ReserveStack):
 
 class PokerShuffle(PokerSquare):
     Talon_Class = InitialDealTalonStack
-    RowStack_Class = StackWrapper(PokerShuffle_RowStack, max_accept=1, max_cards=2)
+    RowStack_Class = StackWrapper(
+        PokerShuffle_RowStack, max_accept=1, max_cards=2)
 
     WIN_SCORE = 200
 
     def createGame(self):
-        l = PokerSquare.createGame(self)
+        PokerSquare.createGame(self)
         if self.s.talon.texts.ncards:
-            self.s.talon.texts.ncards.text_format="%D"
+            self.s.talon.texts.ncards.text_format = "%D"
 
     def startGame(self):
         self.moveMove(27, self.s.talon, self.s.internals[0], frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def checkForWin(self):
         return 0
@@ -281,6 +287,6 @@ registerGame(GameInfo(139, PokerSquare, "Poker Square",
                       GI.GT_POKER_TYPE | GI.GT_SCORE, 1, 0, GI.SL_MOSTLY_SKILL,
                       si={"ncards": 25}))
 registerGame(GameInfo(140, PokerShuffle, "Poker Shuffle",
-                      GI.GT_POKER_TYPE | GI.GT_SCORE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
+                      GI.GT_POKER_TYPE | GI.GT_SCORE | GI.GT_OPEN, 1, 0,
+                      GI.SL_MOSTLY_SKILL,
                       si={"ncards": 25}))
-

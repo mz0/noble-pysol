@@ -1,39 +1,47 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
-import sys
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+
+from pysollib.util import ANY_RANK, ANY_SUIT, JACK, KING, QUEEN
+
+from pysollib.stack import \
+        AC_RowStack, \
+        AbstractFoundationStack, \
+        BasicRowStack, \
+        InitialDealTalonStack, \
+        OpenStack, \
+        Stack, \
+        UD_RK_RowStack, \
+        isAlternateColorSequence, \
+        StackWrapper
+
 
 # ************************************************************************
 # * Take Away
@@ -95,9 +103,7 @@ class TakeAway(Game):
     #
 
     def startGame(self):
-        for i in range(10):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(10)
         for i in range(3):
             self.s.talon.dealRow()
 
@@ -107,7 +113,8 @@ class TakeAway(Game):
 # ************************************************************************
 
 class FourStacks_RowStack(AC_RowStack):
-    getBottomImage = Stack._getReserveBottomImage    
+    getBottomImage = Stack._getReserveBottomImage
+
 
 class FourStacks(Game):
     def createGame(self):
@@ -158,7 +165,7 @@ class Striptease_RowStack(UD_RK_RowStack):
             return True
         r1, r2 = self.cards[-1].rank, cards[0].rank
         if ((r1 == JACK and r2 == KING) or
-            (r2 == JACK and r1 == KING)):
+                (r2 == JACK and r1 == KING)):
             return True
         return ((r1+1) % 13 == r2 or (r2+1) % 13 == r1)
 
@@ -223,7 +230,7 @@ class Striptease(TakeAway):
         if r1 == QUEEN or r2 == QUEEN:
             return False
         if ((r1 == JACK and r2 == KING) or
-            (r2 == JACK and r1 == KING)):
+                (r2 == JACK and r1 == KING)):
             return True
         return ((r1+1) % 13 == r2 or (r2+1) % 13 == r1)
 
@@ -235,4 +242,3 @@ registerGame(GameInfo(335, FourStacks, "Four Stacks",
                       GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(654, Striptease, "Striptease",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_SKILL))
-

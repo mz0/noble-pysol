@@ -1,44 +1,44 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
-from pysollib.pysoltk import MfxCanvasText
+from pysollib.hint import AbstractHint
 
+from pysollib.stack import \
+        InvisibleStack, \
+        ReserveStack, \
+        WasteStack, \
+        WasteTalonStack
 
 # ************************************************************************
 # *
 # ************************************************************************
+
 
 class PasDeDeux_Hint(AbstractHint):
     # FIXME: this is very simple
@@ -47,7 +47,7 @@ class PasDeDeux_Hint(AbstractHint):
         d = 0
         if card.rank != stack.id % 13:
             d = d + 1
-        if card.suit != stack.id / 13:
+        if card.suit != stack.id // 13:
             d = d + 1
         return d
 
@@ -61,8 +61,9 @@ class PasDeDeux_Hint(AbstractHint):
         # for each stack
         for r in rows:
             r1_d = self.getDistance(r, r.cards[-1])
-            column, row = r.id % 13, r.id / 13
-            stack_ids = range(column, 52, 13) + range(13*row, 13*row+13)
+            column, row = r.id % 13, r.id // 13
+            stack_ids = list(range(column, 52, 13)) + \
+                list(range(13*row, 13*row+13))
             for i in stack_ids:
                 t = self.game.s.rows[i]
                 if t is r:
@@ -101,7 +102,8 @@ class PasDeDeux_RowStack(ReserveStack):
         if not self.game.s.waste.cards:
             return False
         c = self.game.s.waste.cards[-1]
-        return c.face_up and cards[0].suit == c.suit and cards[0].rank == c.rank
+        return c.face_up and cards[0].suit == c.suit and \
+            cards[0].rank == c.rank
 
     def acceptsCards(self, from_stack, cards):
         if not ReserveStack.acceptsCards(self, from_stack, cards):
@@ -130,7 +132,7 @@ class PasDeDeux_RowStack(ReserveStack):
         game.leaveState(old_state)
 
     def getBottomImage(self):
-        suit = self.id / 13
+        suit = self.id // 13
         return self.game.app.images.getSuitBottom(suit)
 
     def quickPlayHandler(self, event, from_stacks=None, to_stacks=None):
@@ -162,7 +164,8 @@ class PasDeDeux(Game):
         for i in range(4):
             for j in range(13):
                 x, y, = l.XM + j*l.XS, l.YM + i*l.YS
-                s.rows.append(PasDeDeux_RowStack(x, y, self, max_accept=1, max_cards=2))
+                s.rows.append(
+                    PasDeDeux_RowStack(x, y, self, max_accept=1, max_cards=2))
         x, y = self.width - 2*l.XS, self.height - l.YS
         s.talon = WasteTalonStack(x, y, self, max_rounds=2)
         l.createText(s.talon, "se")
@@ -195,7 +198,7 @@ class PasDeDeux(Game):
             if len(r.cards) != 1:
                 return False
             c = r.cards[-1]
-            if c.suit != r.id / 13 or c.rank != r.id % 13:
+            if c.suit != r.id // 13 or c.rank != r.id % 13:
                 return False
         return True
 
@@ -204,8 +207,8 @@ class PasDeDeux(Game):
     #
 
     def isNeighbour(self, stack1, stack2):
-        column1, row1 = stack1.id % 13, stack1.id / 13
-        column2, row2 = stack2.id % 13, stack2.id / 13
+        column1, row1 = stack1.id % 13, stack1.id // 13
+        column2, row2 = stack2.id % 13, stack2.id // 13
         return column1 == column2 or row1 == row2
 
     def getHighlightPilesStacks(self):
@@ -215,5 +218,5 @@ class PasDeDeux(Game):
 
 # register the game
 registerGame(GameInfo(153, PasDeDeux, "Pas de Deux",
-                      GI.GT_MONTANA | GI.GT_SEPARATE_DECKS, 2, 1, GI.SL_MOSTLY_SKILL))
-
+                      GI.GT_MONTANA | GI.GT_SEPARATE_DECKS, 2, 1,
+                      GI.SL_MOSTLY_SKILL))

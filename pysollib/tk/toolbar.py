@@ -1,43 +1,41 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = ['PysolToolbarTk']
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
 import os
-import Tkinter
+from six.moves import tkinter
 
 # PySol imports
-from pysollib.mfxutil import destruct
+from pysollib.mygettext import _, n_
 from pysollib.mfxutil import Image, ImageTk
 from pysollib.util import IMAGE_EXTENSIONS
 from pysollib.settings import TITLE
 from pysollib.winsystems import TkSettings
 
 # Toolkit imports
-from tkconst import EVENT_HANDLED
-from tkwidget import MfxTooltip
-from menubar import createToolbarMenu, MfxMenu
+from pysollib.ui.tktile.tkconst import EVENT_HANDLED
+from .tkwidget import MfxTooltip
+from pysollib.ui.tktile.menubar import createToolbarMenu, MfxMenu
 
 
 # ************************************************************************
@@ -68,29 +66,33 @@ class AbstractToolbarButton:
                       sticky='nsew')
 
     def hide(self):
-        if not self.visible: return
+        if not self.visible:
+            return
         self.visible = False
         self.grid_forget()
 
 
-class ToolbarCheckbutton(AbstractToolbarButton, Tkinter.Checkbutton):
+class ToolbarCheckbutton(AbstractToolbarButton, tkinter.Checkbutton):
     def __init__(self, parent, toolbar, toolbar_name, position, **kwargs):
-        Tkinter.Checkbutton.__init__(self, parent, kwargs)
-        AbstractToolbarButton.__init__(self, parent, toolbar, toolbar_name, position)
+        tkinter.Checkbutton.__init__(self, parent, kwargs)
+        AbstractToolbarButton.__init__(
+            self, parent, toolbar, toolbar_name, position)
 
 
-class ToolbarButton(AbstractToolbarButton, Tkinter.Button):
+class ToolbarButton(AbstractToolbarButton, tkinter.Button):
     def __init__(self, parent, toolbar, toolbar_name, position, **kwargs):
-        Tkinter.Button.__init__(self, parent, kwargs)
-        AbstractToolbarButton.__init__(self, parent, toolbar, toolbar_name, position)
+        tkinter.Button.__init__(self, parent, kwargs)
+        AbstractToolbarButton.__init__(
+            self, parent, toolbar, toolbar_name, position)
 
 
-class ToolbarSeparator(Tkinter.Frame):
+class ToolbarSeparator(tkinter.Frame):
     def __init__(self, parent, toolbar, position, **kwargs):
-        Tkinter.Frame.__init__(self, parent, kwargs)
+        tkinter.Frame.__init__(self, parent, kwargs)
         self.toolbar = toolbar
         self.position = position
         self.visible = False
+
     def show(self, orient, force=False):
         if self.visible and not force:
             return
@@ -111,21 +113,26 @@ class ToolbarSeparator(Tkinter.Frame):
                       column=0,
                       padx=pady, pady=padx,
                       sticky='ew')
+
     def hide(self):
-        if not self.visible: return
+        if not self.visible:
+            return
         self.visible = False
         self.grid_forget()
+
 
 class ToolbarFlatSeparator(ToolbarSeparator):
     pass
 
-class ToolbarLabel(Tkinter.Message):
+
+class ToolbarLabel(tkinter.Message):
     def __init__(self, parent, toolbar, toolbar_name, position, **kwargs):
-        Tkinter.Message.__init__(self, parent, kwargs)
+        tkinter.Message.__init__(self, parent, kwargs)
         self.toolbar = toolbar
         self.toolbar_name = toolbar_name
         self.position = position
         self.visible = False
+
     def show(self, orient, force=False):
         if self.visible and not force:
             return
@@ -141,8 +148,10 @@ class ToolbarLabel(Tkinter.Message):
                       column=0,
                       padx=padx, pady=pady,
                       sticky='nsew')
+
     def hide(self):
-        if not self.visible: return
+        if not self.visible:
+            return
         self.visible = False
         self.grid_forget()
 
@@ -157,7 +166,7 @@ class PysolToolbarTk:
                  size=0, relief='flat', compound='none'):
         self.top = top
         self.menubar = menubar
-        #self._setRelief(relief)
+        # self._setRelief(relief)
         self.side = -1
         self._tooltips = []
         self._widgets = []
@@ -167,10 +176,10 @@ class PysolToolbarTk:
         self.orient = 'horizontal'
         self.button_pad = 2
         #
-        self.frame = Tkinter.Frame(top, relief=TkSettings.toolbar_relief,
+        self.frame = tkinter.Frame(top, relief=TkSettings.toolbar_relief,
                                    bd=TkSettings.toolbar_borderwidth)
         #
-        for l, f, t in (
+        for label, f, t in (
             (n_("New"),      self.mNewGame,   _("New game")),
             (n_("Restart"),  self.mRestart,   _("Restart the\ncurrent game")),
             (None,           None,            None),
@@ -187,15 +196,15 @@ class PysolToolbarTk:
             (n_("Rules"),    self.mHelpRules, _("Rules for this game")),
             (None,           None,            None),
             (n_("Quit"),     self.mQuit,      _("Quit ")+TITLE),
-            ):
-            if l is None:
+                ):
+            if label is None:
                 sep = self._createSeparator()
                 sep.bind("<1>", self.clickHandler)
                 sep.bind("<3>", self.rightclickHandler)
-            elif l == 'Pause':
-                self._createButton(l, f, check=True, tooltip=t)
+            elif label == 'Pause':
+                self._createButton(label, f, check=True, tooltip=t)
             else:
-                self._createButton(l, f, tooltip=t)
+                self._createButton(label, f, tooltip=t)
         self.pause_button.config(variable=menubar.tkopt.pause)
 
         sep = self._createFlatSeparator()
@@ -204,8 +213,8 @@ class PysolToolbarTk:
         self._createLabel("player", label=n_('Player'),
                           tooltip=_("Player options"))
         #
-        self.player_label.bind("<1>",self.mOptPlayerOptions)
-        ##self.player_label.bind("<3>",self.mOptPlayerOptions)
+        self.player_label.bind("<1>", self.mOptPlayerOptions)
+        # self.player_label.bind("<3>",self.mOptPlayerOptions)
         self.popup = MfxMenu(master=None, label=n_('Toolbar'), tearoff=0)
         createToolbarMenu(menubar, self.popup)
         self.frame.bind("<1>", self.clickHandler)
@@ -223,7 +232,6 @@ class PysolToolbarTk:
         else:
             # button
             widget = getattr(self, w+'_button')
-            position = widget.position
             if v:
                 widget.show(orient=self.orient)
             else:
@@ -233,7 +241,8 @@ class PysolToolbarTk:
         last_visible = None
         for w in self._widgets:
             if w.__class__ is ToolbarSeparator:
-                if prev_visible is None or prev_visible.__class__ is ToolbarSeparator:
+                if prev_visible is None or \
+                        prev_visible.__class__ is ToolbarSeparator:
                     w.hide()
                 else:
                     w.show(orient=self.orient)
@@ -257,12 +266,12 @@ class PysolToolbarTk:
                 if Image:
                     image = ImageTk.PhotoImage(Image.open(file))
                 else:
-                    image = Tkinter.PhotoImage(file=file)
+                    image = tkinter.PhotoImage(file=file)
                 break
         return image
 
     def _createSeparator(self):
-        position=len(self._widgets)
+        position = len(self._widgets)
         sep = ToolbarSeparator(self.frame,
                                position=position,
                                toolbar=self,
@@ -276,7 +285,7 @@ class PysolToolbarTk:
         return sep
 
     def _createFlatSeparator(self):
-        position=len(self._widgets)
+        position = len(self._widgets)
         sep = ToolbarFlatSeparator(self.frame,
                                    position=position,
                                    toolbar=self,
@@ -299,17 +308,17 @@ class PysolToolbarTk:
         bd = TkSettings.toolbar_button_borderwidth
         padx, pady = TkSettings.toolbar_button_padding
         kw = {
-            'position'     : position,
-            'toolbar'      : self,
-            'toolbar_name' : name,
-            'command'      : command,
-            'takefocus'    : 0,
-            'text'         : _(label),
-            'bd'           : bd,
-            'relief'       : button_relief,
-            'padx'         : padx,
-            'pady'         : pady,
-            'overrelief'   : 'raised',
+            'position': position,
+            'toolbar': self,
+            'toolbar_name': name,
+            'command': command,
+            'takefocus': 0,
+            'text': _(label),
+            'bd': bd,
+            'relief': button_relief,
+            'padx': padx,
+            'pady': pady,
+            'overrelief': 'raised',
             }
         if image:
             kw['image'] = image
@@ -331,7 +340,7 @@ class PysolToolbarTk:
         return button
 
     def _createLabel(self, name, label=None, tooltip=None):
-        aspect = (400, 300) [self.getSize() != 0]
+        aspect = (400, 300)[self.getSize() != 0]
         position = len(self._widgets)
         label = ToolbarLabel(self.frame,
                              position=position,
@@ -355,7 +364,6 @@ class PysolToolbarTk:
         self.game.stopDemo()
         self.game.interruptSleep()
         return self.game.busy
-
 
     #
     # public methods
@@ -396,10 +404,12 @@ class PysolToolbarTk:
 
     def destroy(self):
         for w in self._tooltips:
-            if w: w.destroy()
+            if w:
+                w.destroy()
         self._tooltips = []
         for w in self._widgets:
-            if w: w.destroy()
+            if w:
+                w.destroy()
         self._widgets = []
 
     def setCursor(self, cursor):
@@ -408,7 +418,7 @@ class PysolToolbarTk:
             self.frame.update_idletasks()
 
     def updateText(self, **kw):
-        for name in kw.keys():
+        for name in list(kw.keys()):
             label = getattr(self, name + "_label")
             label["text"] = kw[name]
 
@@ -427,12 +437,12 @@ class PysolToolbarTk:
                 name = w.toolbar_name
                 image = self._loadImage(name)
                 data.append((name, w, image))
-        except:
+        except Exception:
             self.dir, self.size = old_dir, old_size
             return 0
-        l = self.player_label
-        aspect = (400, 300) [size != 0]
-        l.config(aspect=aspect)
+        label = self.player_label
+        aspect = (400, 300)[size != 0]
+        label.config(aspect=aspect)
         for name, w, image in data:
             w.config(image=image)
             setattr(self, name + "_image", image)
@@ -467,18 +477,22 @@ class PysolToolbarTk:
     #
 
     def clickHandler(self, event):
-        if self._busy(): return EVENT_HANDLED
+        if self._busy():
+            return EVENT_HANDLED
         return EVENT_HANDLED
 
     def rightclickHandler(self, event):
-        if self._busy(): return EVENT_HANDLED
+        if self._busy():
+            return EVENT_HANDLED
         if self.popup:
-            ##print event.x, event.y, event.x_root, event.y_root, event.__dict__
+            # print event.x, event.y, event.x_root, \
+            #       event.y_root, event.__dict__
             self.popup.tk_popup(event.x_root, event.y_root)
         return EVENT_HANDLED
 
     def middleclickHandler(self, event):
-        if self._busy(): return EVENT_HANDLED
+        if self._busy():
+            return EVENT_HANDLED
         if 1 <= self.side <= 2:
             self.menubar.setToolbarSide(3 - self.side)
         return EVENT_HANDLED
@@ -489,4 +503,3 @@ class PysolToolbarTk:
         size = self.size
         comp = int(self.compound in ('top', 'bottom'))
         return int((size+comp) != 0)
-

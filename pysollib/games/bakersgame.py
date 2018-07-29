@@ -1,87 +1,57 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
+from pysollib.util import KING
+from pysollib.stack import \
+        AC_RowStack, \
+        FreeCell_SS_RowStack, \
+        InitialDealTalonStack, \
+        KingSS_RowStack, \
+        OpenStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        SS_RowStack, \
+        SuperMoveSS_RowStack, \
+        StackWrapper
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import DefaultHint
 from pysollib.hint import FreeCellType_Hint, FreeCellSolverWrapper
 
+from pysollib.games.freecell import FreeCell
 
 # ************************************************************************
 # * Baker's Game
 # ************************************************************************
 
-class BakersGame(Game):
-    Layout_Method = Layout.freeCellLayout
-    Foundation_Class = SS_FoundationStack
+
+class BakersGame(FreeCell):
     RowStack_Class = SuperMoveSS_RowStack
-    Hint_Class = FreeCellType_Hint
     Solver_Class = FreeCellSolverWrapper(sbb='suit')
-
-    #
-    # game layout
-    #
-
-    def createGame(self, **layout):
-        # create layout
-        l, s = Layout(self), self.s
-        kwdefault(layout, rows=8, reserves=4, texts=0)
-        self.Layout_Method(l, **layout)
-        self.setSize(l.size[0], l.size[1])
-        # create stacks
-        s.talon = InitialDealTalonStack(l.s.talon.x, l.s.talon.y, self)
-        for r in l.s.foundations:
-            self.s.foundations.append(self.Foundation_Class(r.x, r.y, self, suit=r.suit))
-        for r in l.s.rows:
-            s.rows.append(self.RowStack_Class(r.x, r.y, self))
-        for r in l.s.reserves:
-            self.s.reserves.append(ReserveStack(r.x, r.y, self))
-        # default
-        l.defaultAll()
-
-    #
-    # game overrides
-    #
-
-    def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
-        r = self.s.rows
-        ##self.s.talon.dealRow(rows=(r[0], r[1], r[6], r[7]))
-        self.s.talon.dealRow(rows=r[:4])
-
     shallHighlightMatch = Game._shallHighlightMatch_SS
 
 
@@ -109,25 +79,26 @@ class EightOff(KingOnlyBakersGame):
         l, s = Layout(self), self.s
 
         # set window
-        # (piles up to 16 cards are playable without overlap in default window size)
+        # (piles up to 16 cards are playable without
+        # overlap in default window size)
         h = max(2*l.YS, l.YS+(16-1)*l.YOFFSET)
         maxrows = max(rows, reserves)
         self.setSize(l.XM + maxrows*l.XS, l.YM + l.YS + h + l.YS)
 
         # create stacks
-        x, y = l.XM + (maxrows-4)*l.XS/2, l.YM
+        x, y = l.XM + (maxrows-4)*l.XS//2, l.YM
         for i in range(4):
             s.foundations.append(SS_FoundationStack(x, y, self, i))
             x = x + l.XS
-        x, y = l.XM + (maxrows-rows)*l.XS/2, y + l.YS
+        x, y = l.XM + (maxrows-rows)*l.XS//2, y + l.YS
         for i in range(rows):
             s.rows.append(self.RowStack_Class(x, y, self))
             x = x + l.XS
-        x, y = l.XM + (maxrows-reserves)*l.XS/2, self.height - l.YS
+        x, y = l.XM + (maxrows-reserves)*l.XS//2, self.height - l.YS
         for i in range(reserves):
             s.reserves.append(ReserveStack(x, y, self))
             x = x + l.XS
-        self.setRegion(s.reserves, (-999, y - l.CH / 2, 999999, 999999))
+        self.setRegion(s.reserves, (-999, y - l.CH // 2, 999999, 999999))
         s.talon = InitialDealTalonStack(l.XM, l.YM, self)
 
         # define stack-groups
@@ -138,12 +109,10 @@ class EightOff(KingOnlyBakersGame):
     #
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow()
         r = self.s.reserves
-        self.s.talon.dealRow(rows=[r[0],r[2],r[4],r[6]])
+        self.s.talon.dealRow(rows=[r[0], r[2], r[4], r[6]])
 
 
 # ************************************************************************
@@ -176,7 +145,7 @@ class SeahavenTowers(KingOnlyBakersGame):
         for i in range(10):
             s.rows.append(self.RowStack_Class(x, y, self))
             x = x + l.XS
-        self.setRegion(s.rows, (-999, y - l.CH / 2, 999999, 999999))
+        self.setRegion(s.rows, (-999, y - l.CH // 2, 999999, 999999))
         s.talon = InitialDealTalonStack(l.XM, self.height-l.YS, self)
 
         # define stack-groups
@@ -190,9 +159,7 @@ class SeahavenTowers(KingOnlyBakersGame):
     #
 
     def startGame(self):
-        for i in range(4):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(4)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=(self.s.reserves[1:3]))
 
@@ -203,7 +170,8 @@ class SeahavenTowers(KingOnlyBakersGame):
 
 class RelaxedSeahavenTowers(SeahavenTowers):
     RowStack_Class = KingSS_RowStack
-    Solver_Class = FreeCellSolverWrapper(sbb='suit', esf='kings', sm='unlimited')
+    Solver_Class = FreeCellSolverWrapper(
+        sbb='suit', esf='kings', sm='unlimited')
 
 
 # ************************************************************************
@@ -225,7 +193,8 @@ class Tuxedo(Game):
         l, s = Layout(self), self.s
 
         # set window
-        # (piles up to 16 cards are playable without overlap in default window size)
+        # (piles up to 16 cards are playable without
+        #  overlap in default window size)
         h = max(3*l.YS, l.YS+(16-1)*l.YOFFSET)
         maxrows = max(rows, reserves)
         self.setSize(l.XM + (maxrows+1)*l.XS, l.YM + h + l.YS)
@@ -238,25 +207,23 @@ class Tuxedo(Game):
         for i in range(4):
             s.foundations.append(self.Foundation_Class(x, y, self, suit=i))
             y = y + l.YS
-        self.setRegion(s.foundations, (x - l.CW/2, -999, 999999, 999999))
-        x, y = l.XM + (maxrows-rows)*l.XS/2, l.YM
+        self.setRegion(s.foundations, (x - l.CW//2, -999, 999999, 999999))
+        x, y = l.XM + (maxrows-rows)*l.XS//2, l.YM
         for i in range(rows):
             s.rows.append(self.RowStack_Class(x, y, self))
             x = x + l.XS
-        x, y = l.XM + (maxrows-reserves)*l.XS/2, self.height - l.YS
+        x, y = l.XM + (maxrows-reserves)*l.XS//2, self.height - l.YS
         for i in range(reserves):
             s.reserves.append(self.ReserveStack_Class(x, y, self))
             x = x + l.XS
-        self.setRegion(s.reserves, (-999, y - l.CH / 2, 999999, 999999))
+        self.setRegion(s.reserves, (-999, y - l.CH // 2, 999999, 999999))
         s.talon = InitialDealTalonStack(l.XM+1, y, self)
 
         # define stack-groups
         l.defaultStackGroups()
 
     def startGame(self):
-        for i in range(6):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(6)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.rows[::3])
 
@@ -265,12 +232,14 @@ class Tuxedo(Game):
 
 class Penguin(Tuxedo):
     GAME_VERSION = 2
-    Solver_Class = FreeCellSolverWrapper(sbb='suit', esf='kings', sm='unlimited')
+    Solver_Class = FreeCellSolverWrapper(
+        sbb='suit', esf='kings', sm='unlimited')
 
     def _shuffleHook(self, cards):
         # move base cards to top of the Talon (i.e. first cards to be dealt)
-        return self._shuffleHookMoveToTop(cards,
-                   lambda c, rank=cards[-1].rank: (c.rank == rank, 0))
+        return self._shuffleHookMoveToTop(
+            cards,
+            lambda c, rank=cards[-1].rank: (c.rank == rank, 0))
 
     def _updateStacks(self):
         for s in self.s.foundations:
@@ -289,10 +258,7 @@ class Penguin(Tuxedo):
             self.flipMove(self.s.talon)
             self.moveMove(1, self.s.talon, to_stack, frames=0)
         # deal rows
-        for i in range(6):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(6)
 
     def _restoreGameHook(self, game):
         self.base_card = self.cards[game.loadinfo.base_card_id]
@@ -309,7 +275,6 @@ class Penguin(Tuxedo):
 class Opus(Penguin):
     def createGame(self):
         Tuxedo.createGame(self, reserves=5)
-
 
 
 # ************************************************************************
@@ -337,12 +302,11 @@ class Flipper(Tuxedo):
             r = self.s.rows[i]
             if r.cards:
                 if ((s.cards and r.cards[-1].face_up) or
-                    (not s.cards and not r.cards[-1].face_up)):
+                        (not s.cards and not r.cards[-1].face_up)):
                     r.flipMove(animation=True)
             i += 1
 
     shallHighlightMatch = Game._shallHighlightMatch_AC
-
 
 
 # register the game
@@ -354,15 +318,17 @@ registerGame(GameInfo(258, EightOff, "Eight Off",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(9, SeahavenTowers, "Seahaven Towers",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL,
-                      altnames=("Sea Towers", "Towers") ))
+                      altnames=("Sea Towers", "Towers")))
 registerGame(GameInfo(6, RelaxedSeahavenTowers, "Relaxed Seahaven Towers",
-                      GI.GT_FREECELL | GI.GT_RELAXED | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
+                      GI.GT_FREECELL | GI.GT_RELAXED | GI.GT_OPEN, 1, 0,
+                      GI.SL_SKILL))
 registerGame(GameInfo(64, Penguin, "Penguin",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("Beak and Flipper",) ))
+                      altnames=("Beak and Flipper",)))
 registerGame(GameInfo(427, Opus, "Opus",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(629, Tuxedo, "Tuxedo",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(713, Flipper, "Flipper",
-                      GI.GT_FREECELL | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FREECELL | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))

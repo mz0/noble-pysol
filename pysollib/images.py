@@ -1,39 +1,37 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
+# ---------------------------------------------------------------------------##
+#
+#  Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+#  Copyright (C) 2003 Mt. Hood Playing Card Co.
+#  Copyright (C) 2005-2009 Skomoroh
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 
 # imports
 import os
-import traceback
 
 # PySol imports
-from resource import CSI
-from settings import TOOLKIT
-from mfxutil import Image, ImageTk
+from pysollib.resource import CSI
+from pysollib.mfxutil import Image, ImageTk, USE_PIL
 
 # Toolkit imports
-from pysoltk import loadImage, copyImage, createImage, shadowImage, createBottom
-
+from pysollib.pysoltk import loadImage, copyImage, createImage, \
+        shadowImage, createBottom
 
 # ************************************************************************
 # * Images
@@ -42,7 +40,8 @@ from pysoltk import loadImage, copyImage, createImage, shadowImage, createBottom
 
 class ImagesCardback:
     def __init__(self, index, name, image, menu_image=None):
-        if menu_image is None: menu_image = image
+        if menu_image is None:
+            menu_image = image
         self.index = index
         self.name = name
         self.image = image
@@ -54,56 +53,47 @@ class Images:
         self.d = dataloader
         self.cs = cs
         self.reduced = r
+        self._xfactor = 1.0
+        self._yfactor = 1.0
         if cs is None:
             return
-        self.use_pil = False
-        if TOOLKIT == 'tk' and Image and Image.VERSION >= '1.1.7':
-            self.use_pil = True
-        # copy from cardset
-        self.CARDW, self.CARDH, self.CARDD = cs.CARDW/r, cs.CARDH/r, cs.CARDD/r
-        self.CARD_XOFFSET = cs.CARD_XOFFSET
-        self.CARD_YOFFSET = cs.CARD_YOFFSET
-        if r > 1:
-            self.CARD_XOFFSET = max(10, cs.CARD_XOFFSET)/r
-            self.CARD_YOFFSET = max(10, cs.CARD_YOFFSET)/r
-        self.SHADOW_XOFFSET, self.SHADOW_YOFFSET = cs.SHADOW_XOFFSET/r, cs.SHADOW_YOFFSET/r
-        self.CARD_DX, self.CARD_DY = cs.CARD_DX/r, cs.CARD_DY/r
-        # other
-        self._shade_index = 0
+        self._setSize()
         self._card = []
         self._back = []
+        # bottom of stack (link to _bottom_negative/_bottom_positive)
         self._bottom = []
-        self._bottom_negative = []
-        self._bottom_positive = []
-        self._blank_bottom = None
-        self._letter = []
+        self._bottom_negative = []      # negative bottom of stack (white)
+        self._bottom_positive = []      # positive bottom of stack (black)
+        self._blank_bottom = None       # blank (transparent) bottom of stack
+        self._letter = []               # images of letter
         self._letter_negative = []
         self._letter_positive = []
+        # vertical shadow of card (used when we drag a card)
         self._shadow = []
-        self._xshadow = []
-        self._shade = []
-        self._shadow_cards = {}         # key: (suit, rank)
+        self._xshadow = []              # horizontal shadow of card
         self._pil_shadow = {}           # key: (width, height)
-        self._pil_shadow_image = None
+        self._highlight = []            # highlight of card (tip)
+        self._highlight_index = 0       #
+        self._highlighted_images = {}   # key: (suit, rank)
 
     def destruct(self):
         pass
 
     def __loadCard(self, filename, check_w=1, check_h=1):
-        ##print '__loadCard:', filename
+        # print '__loadCard:', filename
         f = os.path.join(self.cs.dir, filename)
         if not os.path.exists(f):
             return None
         try:
             img = loadImage(file=f)
-        except:
+        except Exception:
             return None
         w, h = img.width(), img.height()
         if self.CARDW < 0:
             self.CARDW, self.CARDH = w, h
         else:
             if ((check_w and w != self.CARDW) or
-                (check_h and h != self.CARDH)):
+                    (check_h and h != self.CARDH)):
                 raise ValueError("Invalid size %dx%d of image %s" % (w, h, f))
         return img
 
@@ -113,16 +103,21 @@ class Images:
         d = os.path.join('images', 'cards', 'bottoms')
         try:
             imagedir = self.d.findDir(cs_type, d)
-        except:
+        except Exception:
             pass
-        if not self.use_pil or imagedir is None:
+        if not USE_PIL or imagedir is None:
             # load image
-            return self.__loadCard(filename+self.cs.ext, check_w, check_h)
+            img = self.__loadCard(filename+self.cs.ext, check_w, check_h)
+            if USE_PIL:
+                # we have no bottom images
+                # (data/images/cards/bottoms/<cs_type>)
+                img = img.resize(self._xfactor, self._yfactor)
+            return img
         # create image
         d = os.path.join('images', 'cards', 'bottoms', cs_type)
         try:
             fn = self.d.findImage(filename, d)
-        except:
+        except Exception:
             fn = None
         img = createBottom(self._card[0], color, fn)
         return img
@@ -134,9 +129,10 @@ class Images:
         self._back.append(ImagesCardback(len(self._back), name, im1, im2))
 
     def _createMissingImages(self):
+        cw, ch = self.getSize()
         # back
         if not self._back:
-            im = createImage(self.CARDW, self.CARDH, fill="#a0a0a0", outline="#000000")
+            im = createImage(cw, ch, fill="#a0a0a0", outline="#000000")
             name = ""
             self.__addBack(im, name)
             self.cs.backnames = tuple(self.cs.backnames) + (name,)
@@ -145,76 +141,90 @@ class Images:
         neg_bottom = None
         while len(self._bottom_positive) < 7:
             if bottom is None:
-                bottom = createImage(self.CARDW, self.CARDH, fill=None, outline="#000000")
+                bottom = createImage(cw, ch, fill=None, outline="#000000")
             self._bottom_positive.append(bottom)
         while len(self._bottom_negative) < 7:
             if neg_bottom is None:
-                neg_bottom = createImage(self.CARDW, self.CARDH, fill=None, outline="#ffffff")
+                neg_bottom = createImage(cw, ch, fill=None, outline="#ffffff")
             self._bottom_negative.append(neg_bottom)
         while len(self._letter_positive) < 4:
             if bottom is None:
-                bottom = createImage(self.CARDW, self.CARDH, fill=None, outline="#000000")
+                bottom = createImage(cw, ch, fill=None, outline="#000000")
             self._letter_positive.append(bottom)
         while len(self._letter_negative) < 4:
             if neg_bottom is None:
-                neg_bottom = createImage(self.CARDW, self.CARDH, fill=None, outline="#ffffff")
+                neg_bottom = createImage(cw, ch, fill=None, outline="#ffffff")
             self._letter_negative.append(neg_bottom)
-        self._blank_bottom = createImage(self.CARDW, self.CARDH, fill=None, outline=None)
+        self._blank_bottom = createImage(cw, ch, fill=None, outline=None)
 
     def load(self, app, progress=None):
         ext = self.cs.ext[1:]
         pstep = 0
         if progress:
-            pstep = self.cs.ncards + len(self.cs.backnames) + self.cs.nbottoms + self.cs.nletters
-            pstep += self.cs.nshadows + 1 # shadows & shade
+            pstep = self.cs.ncards + len(self.cs.backnames) + \
+                    self.cs.nbottoms + self.cs.nletters
+            pstep += self.cs.nshadows + 1  # shadows & shade
             pstep = max(0, (80.0 - progress.percent) / pstep)
         # load face cards
         for n in self.cs.getFaceCardNames():
             self._card.append(self.__loadCard(n + self.cs.ext))
             self._card[-1].filename = n
-            if progress: progress.update(step=pstep)
+            if progress:
+                progress.update(step=pstep)
         assert len(self._card) == self.cs.ncards
         # load backgrounds
         for name in self.cs.backnames:
             if name:
                 im = self.__loadCard(name)
                 self.__addBack(im, name)
-        if progress: progress.update(step=1)
+        if progress:
+            progress.update(step=1)
         # load bottoms
         for i in range(self.cs.nbottoms):
             name = "bottom%02d" % (i + 1)
-            self._bottom_positive.append(self.__loadBottom(name, color='black'))
-            if progress: progress.update(step=pstep)
+            self._bottom_positive.append(
+                self.__loadBottom(name, color='black'))
+            if progress:
+                progress.update(step=pstep)
             # load negative bottoms
             name = "bottom%02d-n" % (i + 1)
-            self._bottom_negative.append(self.__loadBottom(name, color='white'))
-            if progress: progress.update(step=pstep)
+            self._bottom_negative.append(
+                self.__loadBottom(name, color='white'))
+            if progress:
+                progress.update(step=pstep)
         # load letters
         for rank in range(self.cs.nletters):
             name = "l%02d" % (rank + 1)
-            self._letter_positive.append(self.__loadBottom(name, color='black'))
-            if progress: progress.update(step=pstep)
+            self._letter_positive.append(
+                self.__loadBottom(name, color='black'))
+            if progress:
+                progress.update(step=pstep)
             # load negative letters
             name = "l%02d-n" % (rank + 1)
-            self._letter_negative.append(self.__loadBottom(name, color='white'))
-            if progress: progress.update(step=pstep)
+            self._letter_negative.append(
+                self.__loadBottom(name, color='white'))
+            if progress:
+                progress.update(step=pstep)
         # shadow
-        if not self.use_pil:
+        if not USE_PIL:
             for i in range(self.cs.nshadows):
                 name = "shadow%02d.%s" % (i, ext)
                 im = self.__loadCard(name, check_w=0, check_h=0)
                 self._shadow.append(im)
-                if i > 0: # skip 0
+                if i > 0:  # skip 0
                     name = "xshadow%02d.%s" % (i, ext)
                     im = self.__loadCard(name, check_w=0, check_h=0)
                     self._xshadow.append(im)
-                if progress: progress.update(step=pstep)
+                if progress:
+                    progress.update(step=pstep)
         # shade
-        if self.use_pil:
-            self._shade.append(self._getShadow(self._card[0], None, '#3896f8'))
+        if USE_PIL:
+            self._highlight.append(
+                self._getHighlight(self._card[0], None, '#3896f8'))
         else:
-            self._shade.append(self.__loadCard("shade." + ext))
-        if progress: progress.update(step=pstep)
+            self._highlight.append(self.__loadCard("shade." + ext))
+        if progress:
+            progress.update(step=pstep)
         # create missing
         self._createMissingImages()
         #
@@ -225,7 +235,7 @@ class Images:
 
     def getFace(self, deck, suit, rank):
         index = suit * len(self.cs.ranks) + rank
-        ##print "getFace:", suit, rank, index
+        # print "getFace:", suit, rank, index
         return self._card[index % self.cs.ncards]
 
     def getBack(self, update=False):
@@ -245,7 +255,8 @@ class Images:
 
     def getSuitBottom(self, suit=-1):
         assert isinstance(suit, int)
-        if suit == -1: return self._bottom[1]   # any suit
+        if suit == -1:
+            return self._bottom[1]   # any suit
         i = 3 + suit
         if i >= len(self._bottom):
             # Trump (for Tarock type games)
@@ -264,7 +275,7 @@ class Images:
     def getShadow(self, ncards):
         if ncards >= 0:
             if ncards >= len(self._shadow):
-                ##ncards = len(self._shadow) - 1
+                # ncards = len(self._shadow) - 1
                 return None
             return self._shadow[ncards]
         else:
@@ -278,11 +289,12 @@ class Images:
         x1, y1 = stack.getPositionFor(cards[-1])
         x0, x1 = min(x1, x0), max(x1, x0)
         y0, y1 = min(y1, y0), max(y1, y0)
-        x1 += self.CARDW
-        y1 += self.CARDH
+        cw, ch = self.getSize()
+        x1 += cw
+        y1 += ch
         w, h = x1-x0, y1-y0
-        if (w,h) in self._pil_shadow:
-            return self._pil_shadow[(w,h)]
+        if (w, h) in self._pil_shadow:
+            return self._pil_shadow[(w, h)]
         # create mask
         mask = Image.new('RGBA', (w, h))
         for c in cards:
@@ -291,50 +303,50 @@ class Images:
             im = c._active_image._pil_image
             mask.paste(im, (x, y), im)
         # create shadow
-        sh_color = (0x00,0x00,0x00,0x50)
+        sh_color = (0x00, 0x00, 0x00, 0x50)
         shadow = Image.new('RGBA', (w, h))
         shadow.paste(sh_color, (0, 0, w, h), mask)
         sx, sy = self.SHADOW_XOFFSET, self.SHADOW_YOFFSET
-        mask = mask.crop((sx,sy,w,h))
-        tmp = Image.new('RGBA', (w-sx,h-sy))
-        shadow.paste(tmp, (0,0), mask)
-        #
+        mask = mask.crop((sx, sy, w, h))
+        tmp = Image.new('RGBA', (w-sx, h-sy))
+        shadow.paste(tmp, (0, 0), mask)
         shadow = ImageTk.PhotoImage(shadow)
-        self._pil_shadow[(w,h)] = shadow
+        self._pil_shadow[(w, h)] = shadow
         return shadow
 
     def getShade(self):
-        return self._shade[self._shade_index]
+        # highlight
+        return self._highlight[self._highlight_index]
 
-    def _getShadow(self, image, card, color='#3896f8', factor=0.3):
-        if self.use_pil:
-            # use alpha image; one for each color
-            if color in self._shadow_cards:
-                shade = self._shadow_cards[color]
+    def _getHighlight(self, image, card, color='#3896f8', factor=0.3):
+        if USE_PIL:
+            # use semitransparent image; one for each color (PIL >= 1.1.7)
+            if color in self._highlighted_images:
+                shade = self._highlighted_images[color]
             else:
                 shade = shadowImage(image, color, factor)
-                self._shadow_cards[color] = shade
+                self._highlighted_images[color] = shade
         else:
-            if card in self._shadow_cards:
-                shade = self._shadow_cards[card]
+            # use alpha blending (PIL <= 1.1.6)
+            if card in self._highlighted_images:
+                shade = self._highlighted_images[card]
             else:
                 shade = shadowImage(image, color, factor)
-                self._shadow_cards[card] = shade
+                self._highlighted_images[card] = shade
         if not shade:
+            # we have not PIL
             return self.getShade()
         return shade
 
-    def getShadowCard(self, deck, suit, rank):
+    def getHighlightedCard(self, deck, suit, rank, color=None):
         image = self.getFace(deck, suit, rank)
-        return self._getShadow(image, (suit, rank))
+        if color:
+            return self._getHighlight(image, (suit, rank, color), color)
+        return self._getHighlight(image, (suit, rank))
 
-    def getHighlightCard(self, deck, suit, rank):
-        image = self.getFace(deck, suit, rank)
-        return self._getShadow(image, (suit, rank, 'black'), 'black')
-
-    def getShadowBack(self):
+    def getHighlightedBack(self):
         image = self.getBack()
-        return self._getShadow(image, 'back')
+        return self._getHighlight(image, 'back')
 
     def getCardbacks(self):
         return self._back
@@ -346,6 +358,99 @@ class Images:
         else:
             self._bottom = self._bottom_positive
             self._letter = self._letter_positive
+
+    def setOffsets(self):
+        cs = self.cs
+        if cs is None:
+            return
+        r = self.reduced
+        if r > 1:
+            self.CARD_XOFFSET = max(10//r, cs.CARD_XOFFSET)
+            self.CARD_YOFFSET = max(10//r, cs.CARD_YOFFSET)
+        else:
+            self.CARD_XOFFSET = cs.CARD_XOFFSET
+            self.CARD_YOFFSET = cs.CARD_YOFFSET
+        self.SHADOW_XOFFSET = cs.SHADOW_XOFFSET
+        self.SHADOW_YOFFSET = cs.SHADOW_YOFFSET
+        self.CARD_DX, self.CARD_DY = cs.CARD_DX, cs.CARD_DY
+
+    def _setSize(self, xf=1, yf=1):
+        # print 'image._setSize', xf, yf
+        self._xfactor = xf
+        self._yfactor = yf
+        cs = self.cs
+        if cs is None:
+            return
+        r = self.reduced
+        xf = float(xf)/r
+        yf = float(yf)/r
+        # from cardset
+        self.CARDW, self.CARDH = int(cs.CARDW*xf), int(cs.CARDH*yf)
+        self.setOffsets()
+
+    def getSize(self):
+        return (int(self.CARDW * self._xfactor),
+                int(self.CARDH * self._yfactor))
+
+    def getOffsets(self):
+        return (int(self.CARD_XOFFSET * self._xfactor),
+                int(self.CARD_YOFFSET * self._yfactor))
+
+    def getDelta(self):
+        return (int(self.CARD_DX * self._xfactor),
+                int(self.CARD_DY * self._yfactor))
+
+    def resize(self, xf, yf):
+        # print 'Images.resize:', xf, yf, self._card[0].width(), self.CARDW
+        if self._xfactor == xf and self._yfactor == yf:
+            # print 'no resize'
+            return
+        self._xfactor = xf
+        self._yfactor = yf
+        # ???self._setSize(xf, yf)
+        self.setOffsets()
+        # cards
+        cards = []
+        for c in self._card:
+            c = c.resize(xf, yf)
+            cards.append(c)
+        self._card = cards
+        # back
+        for b in self._back:
+            b.image = b.image.resize(xf, yf)
+        # stack bottom image
+        neg = self._bottom is self._bottom_negative
+        self._bottom_negative = []
+        self._bottom_positive = []
+        for i in range(self.cs.nbottoms):
+            name = "bottom%02d" % (i + 1)
+            self._bottom_positive.append(
+                self.__loadBottom(name, color='black'))
+            name = "bottom%02d-n" % (i + 1)
+            self._bottom_negative.append(
+                self.__loadBottom(name, color='white'))
+        # letters
+        self._letter_positive = []
+        self._letter_negative = []
+        for rank in range(self.cs.nletters):
+            name = "l%02d" % (rank + 1)
+            self._letter_positive.append(
+                self.__loadBottom(name, color='black'))
+            name = "l%02d-n" % (rank + 1)
+            self._letter_negative.append(
+                self.__loadBottom(name, color='white'))
+        self._createMissingImages()
+        self.setNegative(neg)
+        #
+        self._highlighted_images = {}
+        self._highlight = []
+        self._highlight.append(
+            self._getHighlight(self._card[0], None, '#3896f8'))
+        self._pil_shadow = {}
+
+    def reset(self):
+        print('Image.reset')
+        self.resize(1, 1)
 
 
 # ************************************************************************
@@ -368,12 +473,13 @@ class SubsampledImages(Images):
                 self._back.append(None)
             else:
                 im = _back.image.subsample(r)
-                self._back.append(ImagesCardback(len(self._back), _back.name, im, im))
+                self._back.append(
+                    ImagesCardback(len(self._back), _back.name, im, im))
         #
         CW, CH = self.CARDW, self.CARDH
-        for im in images._shade:
-            ##self._shade.append(None)
-            self._shade.append(copyImage(im, 0, 0, CW, CH))
+        for im in images._highlight:
+            # self._highlight.append(None)
+            self._highlight.append(copyImage(im, 0, 0, CW, CH))
 
     def getShadow(self, ncards):
         return None
@@ -386,4 +492,3 @@ class SubsampledImages(Images):
             else:
                 s.append(im.subsample(r))
         return s
-

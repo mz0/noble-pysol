@@ -1,40 +1,49 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
-import sys
 
 # PySol imports
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
-from pysollib.stack import *
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT, NO_RANK, \
+        UNLIMITED_ACCEPTS, \
+        UNLIMITED_MOVES
+from pysollib.stack import \
+        AbstractFoundationStack, \
+        BasicRowStack, \
+        DealRowTalonStack, \
+        isRankSequence, \
+        OpenStack, \
+        ReserveStack, \
+        RK_RowStack, \
+        TalonStack, \
+        Spider_RK_Foundation, \
+        Stack, \
+        StackWrapper
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
 
-from montecarlo import MonteCarlo_RowStack
+from pysollib.games.montecarlo import MonteCarlo_RowStack
 
 
 # ************************************************************************
@@ -86,11 +95,11 @@ class AcesUp(Game):
             l.createText(s.talon, "ne")
         else:
             l.createText(s.talon, "s")
-        x = x + 3*l.XS/2
+        x = x + 3*l.XS//2
         for i in range(rows):
             s.rows.append(self.RowStack_Class(x, y, self))
             x = x + l.XS
-        x = x + l.XS/2
+        x = x + l.XS//2
         stack = self.Foundation_Class(x, y, self, suit=ANY_SUIT, max_move=0,
                                       dir=0, base_rank=ANY_RANK, max_cards=48)
         l.createText(stack, "s")
@@ -108,8 +117,7 @@ class AcesUp(Game):
     #
 
     def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def isGameWon(self):
         if len(self.s.foundations[0].cards) != 48:
@@ -133,7 +141,9 @@ class AcesUp(Game):
 # ************************************************************************
 
 class Fortunes(AcesUp):
-    RowStack_Class = StackWrapper(AcesUp_RowStack, max_move=UNLIMITED_MOVES, max_accept=UNLIMITED_ACCEPTS)
+    RowStack_Class = StackWrapper(
+        AcesUp_RowStack, max_move=UNLIMITED_MOVES,
+        max_accept=UNLIMITED_ACCEPTS)
 
 
 # ************************************************************************
@@ -158,7 +168,7 @@ class RussianAces(AcesUp):
 
 class PerpetualMotion_Talon(DealRowTalonStack):
     def canDealCards(self):
-        ## FIXME: this is to avoid loops in the demo
+        # FIXME: this is to avoid loops in the demo
         if self.game.demo and self.game.moves.index >= 500:
             return False
         return not self.game.isGameWon()
@@ -219,9 +229,10 @@ class PerpetualMotion(Game):
         x, y, = l.XM, l.YM
         s.talon = PerpetualMotion_Talon(x, y, self, max_rounds=-1)
         l.createText(s.talon, "s")
-        x = x + 3*l.XS/2
+        x = x + 3*l.XS//2
         for i in range(4):
-            s.rows.append(PerpetualMotion_RowStack(x, y, self, dir=0, base_rank=NO_RANK))
+            s.rows.append(
+                PerpetualMotion_RowStack(x, y, self, dir=0, base_rank=NO_RANK))
             x = x + l.XS
         x = l.XM + 6*l.XS
         stack = PerpetualMotion_Foundation(x, y, self, ANY_SUIT,
@@ -239,8 +250,7 @@ class PerpetualMotion(Game):
     #
 
     def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
         return card1.rank == card2.rank
@@ -290,7 +300,6 @@ class Cover(AcesUp):
                 self.moveMove(1, self.s.talon, r)
         self.stopSamples()
 
-
     def isGameWon(self):
         if self.s.talon.cards:
             return False
@@ -299,6 +308,7 @@ class Cover(AcesUp):
 
 class Deck(Cover):
     Talon_Class = DealRowTalonStack
+
     def fillStack(self, stack):
         pass
 
@@ -313,9 +323,11 @@ class FiringSquad_Foundation(AcesUp_Foundation):
             return False
         return from_stack in self.game.s.rows
 
+
 class FiringSquad(AcesUp):
     Foundation_Class = FiringSquad_Foundation
     ReserveStack_Class = ReserveStack
+
     def createGame(self):
         AcesUp.createGame(self, reserve=True)
 
@@ -328,10 +340,10 @@ class FiringSquad(AcesUp):
 
 class TabbyCatStack(RK_RowStack):
     def acceptsCards(self, from_stack, cards):
-        if not RK_RowStack.acceptsCards( self, from_stack, cards):
+        if not RK_RowStack.acceptsCards(self, from_stack, cards):
             return False
         # Only allow a sequence if pile is empty
-        if len( self.cards) > 0:
+        if len(self.cards) > 0:
             return False
         return True
 
@@ -372,20 +384,19 @@ class TabbyCat(Game):
             s.rows.append(stack)
             stack.canDropCards = stack.spiderCanDropCards
             x += l.XS
-        x += l.XS/2
+        x += l.XS//2
         s.reserves.append(self.ReserveStack_Class(x, y, self))
         x += 1.5*l.XS
         s.talon = self.Talon_Class(x, y, self)
         l.createText(s.talon, "s")
 
-        self.setRegion(s.foundations, (-999, -999, l.YS*decks-l.CH/2, 999999))
+        self.setRegion(s.foundations, (-999, -999, l.YS*decks-l.CH//2, 999999))
 
         # define stack-groups
         l.defaultStackGroups()
 
     def startGame(self):
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startAndDealRow()
 
     shallHighlightMatch = Game._shallHighlightMatch_RKW
 
@@ -402,7 +413,7 @@ class MaineCoon(TabbyCat):
 # register the game
 registerGame(GameInfo(903, AcesUp, "Aces Up",                   # was: 52
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_LUCK,
-                      altnames=("Aces High", "Drivel") ))
+                      altnames=("Aces High", "Drivel")))
 registerGame(GameInfo(206, Fortunes, "Fortunes",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_LUCK))
 registerGame(GameInfo(213, RussianAces, "Russian Aces",

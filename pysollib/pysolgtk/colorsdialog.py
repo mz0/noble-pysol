@@ -1,31 +1,30 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = ['ColorsDialog']
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-## import os, sys
-import gtk, gobject, pango
+from pysollib.mygettext import _
+#  import os, sys
+import gtk
 import gtk.glade
 from gtk import gdk
 
@@ -76,14 +75,12 @@ class ColorsDialog:
 
         dialog.destroy()
 
-
     def _setColor(self, name, color):
         label = self.widgets_tree.get_widget(name+'_label')
         eventbox = self.widgets_tree.get_widget(name+'_eventbox')
         eventbox.modify_bg(gtk.STATE_NORMAL, gdk.color_parse(color))
         label.set_data('user_data', color)
         label.set_text(color)
-
 
     def _changeColor(self, w, name):
         label = self.widgets_tree.get_widget(name+'_label')
@@ -99,7 +96,6 @@ class ColorsDialog:
             c = '#%02x%02x%02x' % (c.red/256, c.green/256, c.blue/256)
             self._setColor(name, c)
         dialog.destroy()
-
 
     def _translateLabels(self):
         for n in (
@@ -119,7 +115,6 @@ class ColorsDialog:
             'label52',
             'label53',
             'label79',
-            ):
+               ):
             w = self.widgets_tree.get_widget(n)
             w.set_text(_(w.get_text()))
-

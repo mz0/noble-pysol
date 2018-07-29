@@ -122,7 +122,7 @@ The toolkit layer
   ship with every Python installation, but a very experimental version
   for Gnome (using the pygnome and pygtk bindings) exists as well.
 
-  A more exicting idea is to use JPython to make PySol run under a
+  A more exciting idea is to use JPython to make PySol run under a
   Java VM using Swing as the toolkit.
 
   Because Tkinter is the "main" interface other toolkit layers have
@@ -138,13 +138,13 @@ The toolkit layer
 
   Important modules of the Tkinter implementation:
 
-    tk/tkconst.py, tk/tkutil.py, tk/tkwidget.py, tk/edittextdialog:
+    tk/tkconst.py, ui/tktile/tkutil.py, tk/tkwidget.py, tk/edittextdialog:
       Toolkit constants, utils and generic widgets.
 
     tk/tkcanvas.py:
       Wrapper for canvas widgets.
 
-    tk/tkwrap.py:
+    pysollib/ui/tktile/tkwrap.py:
       Wrapper for other widgets.
 
     tk/card.py:
@@ -223,7 +223,7 @@ Contributing
 ------------
 Apart from contributing new games you can also help by improving the
 interface - e.g. some fancy statistics dialogs would be very nice.
-See the main README for more ideas.
+See the main README.md for more ideas.
 
 
 Have fun,

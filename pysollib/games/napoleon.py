@@ -1,43 +1,49 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = []
+# ---------------------------------------------------------------------------
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------
 
 # imports
-import sys
 
 # PySol imports
+from pysollib.mygettext import _
 from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.util import *
 from pysollib.mfxutil import kwdefault
-from pysollib.stack import *
 from pysollib.game import Game
 from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
+from pysollib.hint import CautiousDefaultHint
 from pysollib.pysoltk import MfxCanvasText
 
-from braid import Braid_Foundation
+from pysollib.games.braid import Braid_Foundation
 
+from pysollib.util import ACE, KING, RANKS, UNLIMITED_CARDS
+
+from pysollib.stack import \
+        BasicRowStack, \
+        InitialDealTalonStack, \
+        ReserveStack, \
+        SS_FoundationStack, \
+        Stack, \
+        UD_SS_RowStack, \
+        StackWrapper
 
 # ************************************************************************
 # * stacks
@@ -56,9 +62,9 @@ class Napoleon_ReserveStack(BasicRowStack):
 
 class Napoleon_SingleFreeCell(ReserveStack):
     def acceptsCards(self, from_stack, cards):
-##        if from_stack.id >= 8:
-##            # from_stack must be a Napoleon_RowStack
-##            return False
+        #         if from_stack.id >= 8:
+        #             # from_stack must be a Napoleon_RowStack
+        #             return False
         return ReserveStack.acceptsCards(self, from_stack, cards)
 
     def canMoveCards(self, cards):
@@ -121,7 +127,7 @@ class DerKleineNapoleon(Game):
             y = y + l.YS
         # talon
         if cells == 1:
-            ##x, y = l.XM, self.height - l.YS
+            # x, y = l.XM, self.height - l.YS
             y = self.height + l.YS
         else:
             y = self.height - l.YS
@@ -143,9 +149,11 @@ class DerKleineNapoleon(Game):
     #
 
     def _shuffleHook(self, cards):
-        # move 4 cards of the same rank to bottom of the Talon (i.e. last cards to be dealt)
+        # move 4 cards of the same rank to bottom of the Talon (i.e.
+        #   last cards to be dealt)
         rank = cards[-1].rank
-        return self._shuffleHookMoveToBottom(cards, lambda c, rank=rank: (c.rank == rank, c.suit))
+        return self._shuffleHookMoveToBottom(
+            cards, lambda c, rank=rank: (c.rank == rank, c.suit))
 
     def startGame(self):
         for i in range(4):
@@ -199,7 +207,7 @@ class DerFreieNapoleon(DerKleineNapoleon):
 
         # set window
         # set size so that at least 2/3 of a card is visible with 15 cards
-        h = l.CH*2/3 + (15-1)*l.YOFFSET
+        h = l.CH*2//3 + (15-1)*l.YOFFSET
         h = l.YS + max(h, 3*l.YS)
         max_rows = 8+max(cells, reserves)
         self.setSize(l.XM + 2*l.XM + max_rows*l.XS, l.YM + h)
@@ -213,9 +221,9 @@ class DerFreieNapoleon(DerKleineNapoleon):
         for j in range(reserves):
             x = x1 + j*l.XS
             s.rows.append(self.ReserveStack_Class(x, y, self))
-        self.setRegion(s.rows, (-999, y - l.CH/2, 999999, 999999))
+        self.setRegion(s.rows, (-999, y - l.CH//2, 999999, 999999))
         y = l.YM
-        x = x1+(max(cells, reserves)-cells)*l.XS/2
+        x = x1+(max(cells, reserves)-cells)*l.XS//2
         for i in range(cells):
             s.reserves.append(self.FreeCell_Class(x, y, self))
             x += l.XS
@@ -248,6 +256,7 @@ class Napoleon(DerKleineNapoleon):
 
 class FreeNapoleon(DerFreieNapoleon):
     FreeCell_Class = Napoleon_FreeCell
+
     def createGame(self):
         DerFreieNapoleon.createGame(self, cells=2)
 
@@ -287,7 +296,7 @@ class TheLittleCorporal(DerFreieNapoleon):
     def createGame(self, rows=10):
         l, s = Layout(self), self.s
         # set size so that at least 2/3 of a card is visible with 15 cards
-        h = l.CH*2/3 + (15-1)*l.YOFFSET
+        h = l.CH*2//3 + (15-1)*l.YOFFSET
         h = l.YS + max(h, 3*l.YS)
         self.setSize(l.XM+rows*l.XS, l.YM + h)
 
@@ -297,7 +306,8 @@ class TheLittleCorporal(DerFreieNapoleon):
             x += l.XS
         tx, ty, ta, tf = l.getTextAttr(s.foundations[-1], "se")
         font = self.app.getFont("canvas_default")
-        self.texts.info = MfxCanvasText(self.canvas, tx, ty, anchor=ta, font=font)
+        self.texts.info = MfxCanvasText(
+            self.canvas, tx, ty, anchor=ta, font=font)
         x += 2*l.XS
         stack = ReserveStack(x, y, self, max_cards=UNLIMITED_CARDS)
         s.reserves.append(stack)
@@ -333,9 +343,7 @@ class Bonaparte(TheLittleCorporal):
         TheLittleCorporal.createGame(self, rows=8)
 
     def startGame(self):
-        for i in range(5):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
+        self._startDealNumRows(5)
         self.s.talon.dealRow()
         self.s.talon.dealBaseCards(ncards=4)
 
@@ -359,12 +367,12 @@ class BusyCards(Game):
     Hint_Class = CautiousDefaultHint
 
     def createGame(self):
-        rows=12
+        rows = 12
 
         l, s = Layout(self), self.s
         self.setSize(l.XM+rows*l.XS, l.YM + 3*l.YS+16*l.YOFFSET)
 
-        x, y = l.XM+(rows-8)*l.XS/2, l.YM
+        x, y = l.XM+(rows-8)*l.XS//2, l.YM
         for i in range(4):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
             x += l.XS
@@ -373,8 +381,8 @@ class BusyCards(Game):
                                  base_rank=KING, dir=-1))
             x += l.XS
 
-        x, y = l.XM+l.XS/2, l.YM+l.YS
-        for i in range(rows/2):
+        x, y = l.XM+l.XS//2, l.YM+l.YS
+        for i in range(rows//2):
             s.reserves.append(BusyCards_FreeCell(x, y, self))
             x += 2*l.XS
 
@@ -389,18 +397,16 @@ class BusyCards(Game):
         l.defaultStackGroups()
 
     def _shuffleHook(self, cards):
-        return self._shuffleHookMoveToTop(cards,
-            lambda c: ((c.rank in (ACE,KING) and c.deck == 0), (c.rank, c.suit)))
+        return self._shuffleHookMoveToTop(
+            cards,
+            lambda c: ((c.rank in (ACE, KING) and c.deck == 0),
+                       (c.rank, c.suit)))
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
-        for i in range(7):
-            self.s.talon.dealRow(frames=0)
-        self.startDealSample()
-        self.s.talon.dealRow()
+        self._startDealNumRowsAndDealSingleRow(7)
 
     shallHighlightMatch = Game._shallHighlightMatch_SS
-
 
 
 # register the game
@@ -417,7 +423,8 @@ registerGame(GameInfo(536, Master, "Master",
 registerGame(GameInfo(537, TheLittleCorporal, "The Little Corporal",
                       GI.GT_NAPOLEON | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(538, Bonaparte, "Bonaparte",
-                      GI.GT_NAPOLEON | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_NAPOLEON | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(705, BusyCards, "Busy Cards",
-                      GI.GT_NAPOLEON | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
-
+                      GI.GT_NAPOLEON | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_MOSTLY_SKILL))

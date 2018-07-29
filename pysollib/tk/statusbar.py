@@ -1,43 +1,43 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
-##---------------------------------------------------------------------------##
-##
-## Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
-## Copyright (C) 2003 Mt. Hood Playing Card Co.
-## Copyright (C) 2005-2009 Skomoroh
-##
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
-##---------------------------------------------------------------------------##
-
-__all__ = ['PysolStatusbar',
-           'HelpStatusbar']
+# ---------------------------------------------------------------------------##
+#
+# Copyright (C) 1998-2003 Markus Franz Xaver Johannes Oberhumer
+# Copyright (C) 2003 Mt. Hood Playing Card Co.
+# Copyright (C) 2005-2009 Skomoroh
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ---------------------------------------------------------------------------##
 
 # imports
-import os, sys, Tkinter
+import os
+import sys
+from six.moves import tkinter
+from pysollib.mygettext import _
+from .tkwidget import MfxTooltip
+from pysollib.settings import WIN_SYSTEM
+
+if sys.version_info > (3,):
+    unicode = str
+
 
 if __name__ == '__main__':
     d = os.path.abspath(os.path.join(sys.path[0], os.pardir, os.pardir))
     sys.path.append(d)
     import gettext
     gettext.install('pysol', d, unicode=True)
-
-# PySol imports
-
-# Toolkit imports
-from tkwidget import MfxTooltip
-from pysollib.settings import WIN_SYSTEM
 
 
 # ************************************************************************
@@ -58,7 +58,7 @@ class MfxStatusbar:
         #
         self.padx = 1
         self.label_relief = 'sunken'
-        self.frame = Tkinter.Frame(self.top, bd=1)
+        self.frame = tkinter.Frame(self.top, bd=1)
         self.frame.grid(row=self._row, column=self._column,
                         columnspan=self._columnspan, sticky='ew',
                         padx=1, pady=1)
@@ -72,7 +72,7 @@ class MfxStatusbar:
 
     # util
     def _createLabel(self, name, expand=False, width=0, tooltip=None):
-        label = Tkinter.Label(self.frame, width=width,
+        label = tkinter.Label(self.frame, width=width,
                               relief=self.label_relief, bd=1,
                               highlightbackground='black'
                               )
@@ -89,7 +89,6 @@ class MfxStatusbar:
             self._tooltips.append(b)
             b.setText(tooltip)
         return label
-
 
     #
     # public methods
@@ -135,16 +134,18 @@ class MfxStatusbar:
 
     def destroy(self):
         for w in self._tooltips:
-            if w: w.destroy()
+            if w:
+                w.destroy()
         self._tooltips = []
         for w in self._widgets:
-            if w: w.destroy()
+            if w:
+                w.destroy()
         self._widgets = []
 
 
 class PysolStatusbar(MfxStatusbar):
     def __init__(self, top):
-        MfxStatusbar.__init__(self, top, row=3, column=0, columnspan=3)
+        MfxStatusbar.__init__(self, top, row=4, column=0, columnspan=3)
         #
         for n, t, w in (
             ('stuck',       _("'You Are Stuck' indicator"), 3),
@@ -152,26 +153,26 @@ class PysolStatusbar(MfxStatusbar):
             ('moves',       _('Moves/Total moves'),       10),
             ('gamenumber',  _('Game number'),             26),
             ('stats',       _('Games played: won/lost'),  12),
-            ):
+                ):
             self._createLabel(n, tooltip=t, width=w)
         #
-        l = self._createLabel('info', expand=True)
-        ##l.config(text='', justify='left', anchor='w')
-        l.config(padx=8)
+        label = self._createLabel('info', expand=True)
+        label.config(padding=(8, 0))
 
 
 class HelpStatusbar(MfxStatusbar):
     def __init__(self, top):
         MfxStatusbar.__init__(self, top, row=4, column=0, columnspan=3)
-        l = self._createLabel('info', expand=True)
-        l.config(justify='left', anchor='w', padx=8)
+        label = self._createLabel('info', expand=True)
+        label.config(justify='left', anchor='w', padx=8)
 
 
 class HtmlStatusbar(MfxStatusbar):
     def __init__(self, top, row, column, columnspan):
-        MfxStatusbar.__init__(self, top, row=row, column=column, columnspan=columnspan)
-        l = self._createLabel('url', expand=True)
-        l.config(justify='left', anchor='w', padx=8)
+        MfxStatusbar.__init__(
+            self, top, row=row, column=column, columnspan=columnspan)
+        label = self._createLabel('url', expand=True)
+        label.config(justify='left', anchor='w', padx=8)
 
 
 # ************************************************************************
@@ -186,13 +187,13 @@ class TestStatusbar(PysolStatusbar):
         self.updateText(moves=999, gamenumber='#0123456789ABCDEF0123')
         self.updateText(info='Some info text.')
 
+
 def statusbar_main(args):
-    tk = Tkinter.Tk()
-    statusbar = TestStatusbar(tk, args)
+    tk = tkinter.Tk()
+    TestStatusbar(tk, args)
     tk.mainloop()
     return 0
 
+
 if __name__ == '__main__':
     sys.exit(statusbar_main(sys.argv))
-
-
