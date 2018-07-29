@@ -230,7 +230,7 @@ Comment: This cardset was adapted from kdegames 1.0 (KPoker).
 
 Files: debian/*
 Copyright: 2010 Bernhard Reiter <ockham@raz.or.at>
-           2016 Hugo Lefeuvre <hle@debian.org>
+           2016-2018 Hugo Lefeuvre <hle@debian.org>
 License: GPL-3+
 
 License: GPL-3+
