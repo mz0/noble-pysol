@@ -8,6 +8,8 @@ pysolfc (2.1.2-1) unstable; urgency=medium
     - Update debhelper dependency to match new compat level.
   * debian/copyright:
     - Update copyright years.
+  * Remove pillow and montana patches (both merged upstream).
+  * Refresh patches for new upstream release.
 
  -- Hugo Lefeuvre <hle@debian.org>  Sun, 29 Jul 2018 15:38:04 +0800
 

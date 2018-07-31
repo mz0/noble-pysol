@@ -3,14 +3,12 @@ Description: Remove checks for individual cardsets' COPYRIGHT files
 Author: Bernhard Reiter <ockham@raz.or.at>
 Forwarded: not-needed
 
-Index: pysolfc/pysollib/app.py
-===================================================================
---- pysolfc.orig/pysollib/app.py	2011-12-13 23:11:09.611745235 +0100
-+++ pysolfc/pysollib/app.py	2011-12-13 23:19:33.306242924 +0100
-@@ -1394,11 +1394,10 @@
-                     if not name.startswith('cardset-'): continue
+--- a/pysollib/app.py	2018-07-31 11:44:58.127291946 +0800
++++ b/pysollib/app.py	2018-07-31 11:46:17.375162990 +0800
+@@ -1439,11 +1439,10 @@
                      d = os.path.join(dir, name)
-                     if not os.path.isdir(d): continue
+                     if not os.path.isdir(d):
+                         continue
 -                    f1 = os.path.join(d, "config.txt")
 -                    f2 = os.path.join(d, "COPYRIGHT")
 -                    if os.path.isfile(f1) and os.path.isfile(f2):
@@ -20,22 +18,20 @@ Index: pysolfc/pysollib/app.py
 -                            cs = self._readCardsetConfig(d, f1)
 +                            cs = self._readCardsetConfig(d, f)
                              if cs:
-                                 ##from pprint import pprint
-                                 ##print cs.name
-@@ -1412,7 +1411,7 @@
-                                     #print '+', cs.name
+                                 # from pprint import pprint
+                                 # print cs.name
+@@ -1458,7 +1457,7 @@
+                                     # print '+', cs.name
                              else:
                                  print_err('fail _readCardsetConfig: %s %s'
 -                                          % (d, f1))
 +                                          % (d, f))
                                  pass
-                         except Exception, err:
-                             ##traceback.print_exc()
-Index: pysolfc/pysollib/tile/selectcardset.py
-===================================================================
---- pysolfc.orig/pysollib/tile/selectcardset.py	2011-12-13 23:11:09.619745274 +0100
-+++ pysolfc/pysollib/tile/selectcardset.py	2011-12-13 23:19:33.306242924 +0100
-@@ -357,15 +357,12 @@
+                         except Exception:
+                             # traceback.print_exc()
+--- a/pysollib/tile/selectcardset.py	2018-07-31 11:44:58.127291946 +0800
++++ b/pysollib/tile/selectcardset.py	2018-07-31 12:08:12.030780247 +0800
+@@ -525,15 +525,12 @@
          frame.columnconfigure(0, weight=1)
          frame.rowconfigure(1, weight=1)
          #
@@ -43,7 +39,7 @@ Index: pysolfc/pysollib/tile/selectcardset.py
 -        f = os.path.join(cardset.dir, "COPYRIGHT")
 -        try:
 -            text = open(f).read()
--        except:
+-        except Exception:
 -            pass
 -        if text:
 -            text_w.config(state="normal")
@@ -57,11 +53,9 @@ Index: pysolfc/pysollib/tile/selectcardset.py
          text_w.config(state="disabled")
          #
          focus = self.createButtons(bottom_frame, kw)
-Index: pysolfc/pysollib/tk/selectcardset.py
-===================================================================
---- pysolfc.orig/pysollib/tk/selectcardset.py	2011-12-13 23:19:45.874305245 +0100
-+++ pysolfc/pysollib/tk/selectcardset.py	2011-12-13 23:23:03.583285630 +0100
-@@ -357,15 +357,12 @@
+--- a/pysollib/tk/selectcardset.py	2018-07-31 11:44:58.127291946 +0800
++++ b/pysollib/tk/selectcardset.py	2018-07-31 12:08:56.859500724 +0800
+@@ -488,15 +488,12 @@
          frame.columnconfigure(0, weight=1)
          frame.rowconfigure(1, weight=1)
          #
@@ -69,7 +63,7 @@ Index: pysolfc/pysollib/tk/selectcardset.py
 -        f = os.path.join(cardset.dir, "COPYRIGHT")
 -        try:
 -            text = open(f).read()
--        except:
+-        except Exception:
 -            pass
 -        if text:
 -            text_w.config(state="normal")
