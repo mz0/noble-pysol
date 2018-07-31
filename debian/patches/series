@@ -1,3 +1,4 @@
+fix-python-interpreter-path.patch
 remove_checks_for_copyright_files
 configobj
 desktop

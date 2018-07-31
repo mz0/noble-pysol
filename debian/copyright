@@ -1,11 +1,11 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: PySol Fan Club Edition
 Source: http://pysolfc.sourceforge.net/
 
 Files: *
-Copyright: 1998-2003 Markus Franz Xaver Johannes Oberhumer
+Copyright: 1998-2003 Markus Franz Xaver Johannes Oberhumer <markus@oberhumer.com>
            2003 Mt. Hood Playing Card Co.
-           2005-2009 Skomoroh
+           2005-2009 Skomoroh <skomoroh@users.sourceforge.net>
 License: GPL-3+
 
 Files: pysollib/configobj/*
@@ -87,7 +87,8 @@ Copyright: 1998, 2000 John Stoneham <obijohn99@aol.com>
            2005-2009 Skomoroh
 License: GPL-3+
 
-Files: html-src/rules/sanibel.html
+Files: html-src/all.htm
+       html-src/rules/sanibel.html
        data/html/rules/sanibel.html
 Copyright: 1998 John Stoneham <obijohn99@aol.com>
 License: GPL-2+
@@ -174,59 +175,6 @@ License: TILE
  shall the AUTHORS of THIS SOFTWARE be LIABLE to ANY PARTY for
  DIRECT, INDIRECT, SPECIAL, INCIDENTAL, or CONSEQUENTIAL DAMAGES
  arising out of the USE of THIS SOFTWARE and its DOCUMENTATION.
-
-Files: data/cardset-dashavatara-ganjifa/*
-       data/cardset-hexadeck/*
-       data/cardset-kintengu/*
-       data/cardset-matrix/*
-       data/cardset-mughal-ganjifa/*
-       data/cardset-tuxedo/*
-       data/cardset-vienna-2k/*
-Copyright: 1999-2000 T. Kirk <grania@mailcity.com>
-License: GPL-2+
-
-Files: data/cardset-2000/*
-Copyright: 1999-2000 T. Kirk <grania@mailcity.com>
-License: GPL-2+
-Comment: The courts in this card set are taken from a deck published
- in France around the mid 16th century.  The originals were
- full length figures.  They have been cropped to exclude all
- but the faces.  The pips were created from scratch.
-
-Files: data/cardset-crystal-mahjongg/*
-Copyright: 1999-2000 T. Kirk <grania@mailcity.com>
-License: GPL-2+
-Comment: This Mahjongg tile set uses classic Chinese pips on a background
- of what may be porcelain or perhaps crystal.
-
-Files: data/cardset-dondorf/*
-Copyright: Richard Hoelscher
-           2007 Skomoroh
-License: GPL-2+
-Comment: This cardset was adapted from the SVG cards by Richard Hoelscher.
- http://rahga.com/svg/
-
-Files: data/cardset-gnome-mahjongg-1/*
-Copyright: Jonathan Buzzard and Max Watson
-           2007 Skomoroh
-License: GPL-2+
-Comment: This is an adapted version of a set of Mahjongg tiles found
- in Gnome Mahjongg.
-
-Files: data/cardset-oxymoron/*
-Copyright: 1998 Oliver Xymoron <oxymoron@waste.org>
-           1999 Markus F.X.J. Oberhumer <markus.oberhumer@jk.uni-linz.ac.at>
-License: GPL-2+
-Comment: This cardset was adapted from cards-2.0.tar.gz.
- http://www.waste.org/~oxymoron/cards/
-
-Files: data/cardset-standard/*
-Copyright: 1997 John Fitzgibbon
-           1997 Jochen Tuchbreiter <whynot@mabi.de>
-           1998 Markus F.X.J. Oberhumer <markus.oberhumer@jk.uni-linz.ac.at>
-License: GPL-2+
-Comment: This cardset was adapted from kdegames 1.0 (KPoker).
- http://www.kde.org
 
 Files: debian/*
 Copyright: 2010 Bernhard Reiter <ockham@raz.or.at>

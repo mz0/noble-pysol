@@ -8,8 +8,13 @@ pysolfc (2.1.2-1) unstable; urgency=medium
     - Update debhelper dependency to match new compat level.
   * debian/copyright:
     - Update copyright years.
-  * Remove all_games, pillow and montana patches (merged upstream).
-  * Refresh patches for new upstream release.
+    - Remove some entries which have disappeared in new release.
+  * debian/patches:
+    - Refresh patches for new upstream release.
+    - Remove all_games, pillow and montana patches (merged upstream).
+    - Add patch fixing interpreter path in hint.py.
+  * Update docs list to match new upstream release.
+  * Bump watch file version to 4.
 
  -- Hugo Lefeuvre <hle@debian.org>  Sun, 29 Jul 2018 15:38:04 +0800
 
