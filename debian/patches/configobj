@@ -2,24 +2,24 @@ Description: Remove configobj from package;
  use python-configobj package instead
 Author: Bernhard Reiter <ockham@raz.or.at>
 
---- a/setup.py
-+++ b/setup.py
+--- a/setup.py	2018-07-31 12:11:50.860404817 +0800
++++ b/setup.py	2018-07-31 12:12:07.796171593 +0800
 @@ -72,7 +72,6 @@
-     'license'      : 'GPL',
-     'scripts'      : ['pysol.py'],
-     'packages'     : ['pysollib',
--                      'pysollib.configobj',
-                       'pysollib.macosx',
-                       'pysollib.winsystems',
-                       'pysollib.tk',
---- a/pysollib/options.py
-+++ b/pysollib/options.py
-@@ -28,7 +28,7 @@
+     'license': 'GPL',
+     'scripts': ['pysol.py'],
+     'packages': ['pysollib',
+-                 'pysollib.configobj',
+                  'pysollib.macosx',
+                  'pysollib.winsystems',
+                  'pysollib.tk',
+--- a/pysollib/options.py	2018-07-31 12:11:50.860404817 +0800
++++ b/pysollib/options.py	2018-07-31 12:12:39.095810855 +0800
+@@ -29,7 +29,7 @@
  # PySol imports
- from mfxutil import print_err
- from resource import CSI
--from configobj import configobj, validate
+ from pysollib.mfxutil import print_err
+ from pysollib.resource import CSI
+-from pysollib.configobj import configobj, validate
 +import configobj, validate
- import settings
+ import pysollib.settings
  
  # Toolkit imports
