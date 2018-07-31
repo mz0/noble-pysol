@@ -1,4 +1,4 @@
-pysolfc (2.1.2-1) unstable; urgency=medium
+pysolfc (2.1.2-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * Bump compat level.
