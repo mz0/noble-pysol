@@ -1,3 +1,6 @@
+Subject: Fix Python interpreter name typo
+Author: Hugo Lefeuvre <hle@debian.org>
+Forwarded: https://github.com/shlomif/PySolFC/pull/87
 --- a/pysollib/hint.py	2018-07-29 15:37:51.418440289 +0800
 +++ b/pysollib/hint.py	2018-07-31 13:43:43.549025521 +0800
 @@ -1,4 +1,4 @@
