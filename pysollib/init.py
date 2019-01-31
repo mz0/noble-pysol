@@ -82,6 +82,12 @@ def init():
         pysollib.settings.TOOLKIT = 'tk'
         pysollib.settings.USE_TILE = True
         sys.argv.remove('--tile')
+    elif '--kivy' in sys.argv:
+        pysollib.settings.TOOLKIT = 'kivy'
+        pysollib.settings.USE_TILE = False
+        pysollib.settings.SELECT_GAME_MENU = False
+        sys.argv.remove('--kivy')
+
     if pysollib.settings.TOOLKIT == 'tk':
         from six.moves import tkinter
         root = tkinter.Tk(className=pysollib.settings.TITLE)
@@ -131,7 +137,10 @@ def init():
                 kw['close_fds'] = True
             p = subprocess.Popen(pysollib.settings.FCS_COMMAND+' --help', **kw)
             p.stdin.close()
-            if p.stdout.readline().startswith('fc-solve'):
+            line = p.stdout.readline()
+            if sys.version_info >= (3,):
+                line = line.decode("utf-8")
+            if line.startswith('fc-solve'):
                 pysollib.settings.USE_FREECELL_SOLVER = True
             if os.name == 'posix':
                 os.wait()               # kill zombi

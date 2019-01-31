@@ -24,9 +24,9 @@
 
 # imports
 import os
-import sys
 import glob
 import traceback
+import six
 
 # PySol imports
 from pysollib.mfxutil import Struct, KwStruct
@@ -37,9 +37,6 @@ from pysollib.mygettext import _
 # ************************************************************************
 # * Abstract
 # ************************************************************************
-
-if sys.version_info > (3,):
-    basestring = str
 
 
 class Resource(Struct):
@@ -58,7 +55,6 @@ class Resource(Struct):
 
     def getSortKey(self):
         return self.name.lower()
-        # return latin1_to_ascii(self.name).lower()
 
 
 class ResourceManager:
@@ -387,7 +383,7 @@ class Cardset(Resource):
 
     def updateCardback(self, backname=None, backindex=None):
         # update default back
-        if isinstance(backname, basestring):
+        if isinstance(backname, six.string_types):
             if backname in self.backnames:
                 backindex = self.backnames.index(backname)
         if isinstance(backindex, int):

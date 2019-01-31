@@ -1,15 +1,16 @@
 # PySol Fan Club edition
 
 This is an open source and portable (Windows, Linux and Mac OS X) collection
-of Card Solitaire/Patience games written in Python. It is based on
+of Card Solitaire/Patience games written in Python. Its homepage is
 http://pysolfc.sourceforge.net/ .
 
-This is a maintenance branch of PySol FC by [Shlomi
+The maintenance branch of PySol FC on GitHub by [Shlomi
 Fish](http://www.shlomifish.org/) and by some other
-people, aiming to clean up the code, add features, fix bugs, port to Python
-3, and implement other enhancements.
+people, has gained official status, ported the code to Python 3,
+and implemented some other enhancements.
 
-[![Build Status](https://travis-ci.org/shlomif/PySolFC.svg)](https://travis-ci.org/shlomif/PySolFC)
+- [![Build Status](https://travis-ci.org/shlomif/PySolFC.svg)](https://travis-ci.org/shlomif/PySolFC)
+[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/04re7umgl3yuukmh?svg=true)](https://ci.appveyor.com/project/shlomif/pysolfc)
 
 # Screenshots
 
@@ -17,13 +18,12 @@ people, aiming to clean up the code, add features, fix bugs, port to Python
 
 ## Requirements.
 
-- Python (2.4 or later) (NB: CPython 2.6.0 has a bug, use 2.6.1 instead)
+- Python (2.7 or 3.x)
 - Tkinter (Tcl/Tk 8.4 or later)
 
 - For sound support (optional)
-  - PySol-Sound-Server: http://www.pysol.org/ (mp3, wav, tracker music)
-  or
-  - PyGame: http://www.pygame.org/ (mp3, ogg, wav, midi, tracker music)
+  - PySol-Sound-Server fork: https://github.com/shlomif/pysol-sound-server (mp3, wav, tracker music)
+  - (or: ) PyGame: http://www.pygame.org/ (mp3, ogg, wav, midi, tracker music)
 
 - Other packages (optional):
   - Tile (ttk): http://tktable.sourceforge.net/tile/ (0.8.0 or later)
@@ -33,49 +33,51 @@ people, aiming to clean up the code, add features, fix bugs, port to Python
 
 ## Installation.
 
-See: http://www.python.org/doc/current/inst/
+We provide an [installer for Windows](https://sourceforge.net/projects/pysolfc/files/PySolFC/)
+as well as an Android package on F-droid.
+
+For installation from source, see: http://www.python.org/doc/current/inst/
 
 ### Running from source without installation.
 
 You can run from the source directory:
 
-$ python pysol.py
+```
+python pysol.py
+```
 
 After following steps similar to these (on
 [Mageia Linux](http://www.mageia.org/) ):
+
 
 #### Step 1 - install the dependencies
 
 On Mageia you can do:
 
 ```
-$ sudo urpmi git make pygtk2 pygtk2.0-libglade gnome-python-canvas tkinter
+sudo urpmi git make pygtk2 pygtk2.0-libglade gnome-python-canvas tkinter
 ```
 
 On Debian / Ubuntu / etc. you can do:
 
 ```
-$ sudo apt-get install -y ack-grep cpanminus libperl-dev make perl python-glade2 python-gnome2 python-gnome2-dev python-gtk2 python-setuptools python-tk
-
+sudo apt-get install -y ack-grep cpanminus libperl-dev make perl python-glade2 python-gnome2 python-gnome2-dev python-gtk2 python-setuptools python-tk
 ```
 
 #### Step 2 - build PySol.
 
 ```
-$ git clone https://github.com/shlomif/PySolFC.git
-$ cd PySolFC
-$ sudo urpmi tkinter
-$ sudo urpmi pygtk2
-$ sudo urpmi pygtk2.0-libglade
-$ sudo urpmi gnome-python-canvas
-$ gmake test
-$ ln -s html-src html
-$ ln -s data/images images
-$ tar -xvf PySolFC-Cardsets-2.0.tar.bz2 # Need to be downloaded from sourceforge
-$ mkdir -p ~/.PySolFC
-$ rmdir ~/.PySolFC/cardsets
-$ ln -s "`pwd`/PySolFC-Cardsets-2.0" ~/.PySolFC/cardsets
-$ python pysol.py
+git clone https://github.com/shlomif/PySolFC.git
+cd PySolFC
+# Now make sure you have installed the dependencies.
+gmake test
+gmake rules
+ln -s data/images images
+tar -xvf PySolFC-Cardsets-2.0.tar.bz2 # Need to be downloaded from sourceforge
+mkdir -p ~/.PySolFC
+rmdir ~/.PySolFC/cardsets
+ln -s "`pwd`/PySolFC-Cardsets-2.0" ~/.PySolFC/cardsets
+python pysol.py
 ```
 
 <b>Note!</b> If you are using a Debian derivative (e.g: Debian, Ubuntu, or
@@ -87,6 +89,72 @@ that are needed by pysol from source (without the debian modifications).
 Please uninstall that package and use the cardsets archive from sourceforge.net
 per the instructions above.
 
+### Installing from source and running in a python venv (virtual environment)
+
+At the moment, this only works on POSIX (Linux, FreeBSD and similar) systems.
+Windows and Mac users - you'll need to chip in with a script for your system.
+
+#### 1 - Install build prerequisites: six and random2
+
+This is kind of stupid and maybe it can be fixed in the future, but for now:
+
+```
+pip install six
+pip install random2
+```
+
+You may want to use your OS distribution package system instead, for example:
+
+```
+sudo apt-get install python-six
+sudo apt-get install python-random2
+```
+
+#### 2 - Clone the source from version control
+
+```
+git clone git://github.com/shlomif/PySolFC.git
+cd PySolFC
+```
+
+#### 3 - Create your virtual environment.
+
+```
+PKGDIR=/usr/local/packages/PySolFC # or whatever
+export PKGDIR
+mkdir -p "$PKGDIR"
+( cd "$PKGDIR" && python -m venv ./env )
+```
+
+#### 4 - Run the install script
+
+```
+./contrib/install-pysolfc.sh
+```
+
+#### 5 - Put cardsets into place as above.
+
+#### 6 - Enjoy playing
+
+```
+"$PKGDIR"/env/bin/pysol.py
+```
+
+## Alternate toolkit.
+
+- Python2 (2.7 or later)
+- Kivy (10.0 or later)
+
+- Features:
+  - Sound support integrated.
+  - Android apk build support.
+
+- Running from source without installation:
+
+```
+python2 pysol.py --kivy
+```
+
 ### Configuring Freecell Solver
 
 If you want to use the solver, you should configure freecell-solver
@@ -97,16 +165,41 @@ to its CMake-based build-system:
 ## Install Extras.
 
 - Music
- - Copy some music files (mp3 for example) to ~/.PySolFC/music/
+ - Copy some music files (in mp3 format for example) to ~/.PySolFC/music/
 
  - Original PySol music can be downloaded from:
-   ftp://ibiblio.org/pub/linux/games/solitaires/pysol-music-4.40.tar.gz
+     https://sourceforge.net/projects/pysolfc/files/PySol-Music/
 
 - Cardsets
  - Copy cardsets to ~/.PySolFC/cardsets
 
  - Additional cardsets can be downloaded from the PySolFC project page:
-   http://sourceforge.net/project/showfiles.php?group_id=150718
+     https://sourceforge.net/projects/pysolfc/files/
+
+## Related repositories and links
+
+- [PySol-Sound-Server fork](https://github.com/shlomif/pysol-sound-server)
+- [Sources for the PySolFC web site](https://github.com/shlomif/pysolfc-website)
+- [PySolFC Announcements Drafts](https://github.com/shlomif/pysolfc-announcements)
+- [Extra mahjongg cardsets for PySolFC - originally for flowersol](https://github.com/shlomif/PySol-Extra-Mahjongg-Cardsets)
+- [The old "pysol-music" distribution](https://github.com/shlomif/pysol-music)
+
+Related:
+
+- [Freecell Solver](https://github.com/shlomif/fc-solve)
+- [Black Hole Solver](https://github.com/shlomif/black-hole-solitaire)
+
+Other open source solitaires:
+
+- [solitaire.gg](https://github.com/KyleU/solitaire.gg) - web-based and written in Scala
+- [Solitairey](https://github.com/shlomif/Solitairey/branches) - web-based written in JavaScript
+- [KPat](https://games.kde.org/game.php?game=kpat) - desktop-based for KDE.
+- [Aisleriot](https://wiki.gnome.org/Apps/Aisleriot) - desktop-based by the GNOME project with relatively limited functionality.
+
+Screencasts:
+
+- [Black Hole solving](https://github.com/shlomif/pysolfc-black-hole-solver--screencast)
+- [Freecell solving using the qualified-seed-improved preset](https://bitbucket.org/shlomif/pysolfc-qualified-seed-improved-screencast)
 
 ## Chat
 
@@ -114,7 +207,7 @@ To facilitate coordination about contributing to PySol, please join us for a
 real time Internet chat on
 the <a href="irc://irc.freenode.net/##pysol">##pysol</a> chat room on
 [Freenode](http://freenode.net/) (note the double
-octhothorpe/hash-sign/pound-sign) .  We may set up
+octothorpe/hash-sign/pound-sign) .  We may set up
 chat rooms on different services in the future.
 
 In addition, we set up a

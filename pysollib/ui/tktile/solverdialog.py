@@ -9,8 +9,18 @@ class BaseSolverDialog:
     def _ToggleShowProgressButton(self, *args):
         self.app.opt.solver_show_progress = self.progress_var.get()
 
+    def _getMaxIters(self):
+        try:
+            i = self.max_iters_var.get()
+        except Exception:
+            i = 100000
+        return i
+
     def _OnAssignToMaxIters(self, *args):
-        self.app.opt.solver_max_iterations = self.max_iters_var.get()
+        self.app.opt.solver_max_iterations = self._getMaxIters()
+
+    def _OnAssignToPreset(self, *args):
+        self.app.opt.solver_preset = self.preset_var.get()
 
     def __init__(self, parent, app, **kw):
         self.parent = parent
@@ -51,6 +61,7 @@ class BaseSolverDialog:
         presets = app.opt.solver_presets
         self.presets = presets
         self.preset_var = self._createPresetVar(frame, row)
+        self.preset_var.set(self.app.opt.solver_preset)
 
         #
         row += 1
@@ -158,15 +169,27 @@ class BaseSolverDialog:
         solver = game.Solver_Class(game, self)  # create solver instance
         game.solver = solver
         preset = self.preset_var.get()
-        max_iters = self.max_iters_var.get()
+        max_iters = self._getMaxIters()
         progress = self.app.opt.solver_show_progress
-        solver.config(preset=preset, max_iters=max_iters, progress=progress)
-        solver.computeHints()
+        iters_step = self.app.opt.solver_iterations_output_step
+        solver.config(preset=preset, max_iters=max_iters, progress=progress,
+                      iters_step=iters_step)
+        try:
+            solver.computeHints()
+        except RuntimeError:
+            self.result_label['text'] = _('Solver not found in the PATH')
+            return
         hints_len = len(solver.hints)-1
         if hints_len > 0:
-            t = ungettext('This game is solveable in %d move.',
-                          'This game is solveable in %d moves.',
-                          hints_len) % hints_len
+            if solver.solver_state == 'intractable':
+                t = ungettext('This game can be hinted in %d move.',
+                              'This game can be hinted in %d moves.',
+                              hints_len)
+            else:
+                t = ungettext('This game is solvable in %d move.',
+                              'This game is solvable in %d moves.',
+                              hints_len)
+            t = t % hints_len
             self.result_label['text'] = t
             self.play_button.config(state='normal')
         else:

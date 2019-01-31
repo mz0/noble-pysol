@@ -13,6 +13,7 @@ from pysollib.settings import TITLE, WIN_SYSTEM
 from pysollib.settings import SELECT_GAME_MENU
 from pysollib.gamedb import GI
 from pysollib.settings import USE_FREECELL_SOLVER
+from pysollib.hint import PySolHintLayoutImportError
 
 from pysollib.ui.tktile.tkconst import EVENT_HANDLED, EVENT_PROPAGATE, \
         CURSOR_WATCH, COMPOUNDS
@@ -334,6 +335,9 @@ class PysolMenubarTkCommon:
         menu.add_command(
             label=n_("E&xport current layout..."),
             command=self.mExportCurrentLayout)
+        menu.add_command(
+            label=n_("&Import starting layout..."),
+            command=self.mImportStartingLayout)
         menu.add_separator()
         menu.add_command(
             label=n_("&Hold and quit"),
@@ -679,6 +683,7 @@ class PysolMenubarTkCommon:
         self._bindKey(ctrl, "s", self.mSave)
         self._bindKey(ctrl, "x", self.mHoldAndQuit)
         self._bindKey(ctrl, "q", self.mQuit)
+        self._bindKey(ctrl, "z", self.mUndo)
         self._bindKey("",   "z", self.mUndo)
         self._bindKey("",   "BackSpace", self.mUndo)    # undocumented
         self._bindKey("",   "KP_Enter", self.mUndo)     # undocumented
@@ -1200,6 +1205,54 @@ Unsupported game for export.
                 game = self.game
                 fh.write(game.Solver_Class(game, self).calcBoardString())
             self.updateMenus()
+
+    def mImportStartingLayout(self, *event):
+        if self._cancelDrag(break_pause=False):
+            return
+        game = self.game
+        if not game.Solver_Class:
+            d = self._calc_MfxMessageDialog()(
+                self.top, title=_('Import game error'),
+                text=_('''
+Unsupported game for import.
+'''),
+                bitmap='error')
+            return
+
+        filename = self.game.filename
+        if filename:
+            idir, ifile = os.path.split(os.path.normpath(filename))
+        else:
+            idir, ifile = "", ""
+        if not idir:
+            idir = self.app.dn.savegames
+        d = tkinter_tkfiledialog.Open()
+        key = 'PYSOL_DEBUG_IMPORT'
+        if key not in os.environ:
+            filename = d.show(filetypes=self.FILETYPES,
+                              defaultextension=self.DEFAULTEXTENSION,
+                              initialdir=idir, initialfile=ifile)
+        else:
+            filename = os.environ[key]
+        if filename:
+            filename = os.path.normpath(filename)
+            # filename = os.path.normcase(filename)
+            if os.path.isfile(filename):
+                with open(filename, 'r+b') as fh:
+                    game = self.game
+                    try:
+                        game.Solver_Class(game, self).importFile(
+                            fh, game, self)
+                    except PySolHintLayoutImportError as err:
+                        self._calc_MfxMessageDialog()(
+                            self.top,
+                            title=_('Import game error'),
+                            text=err.format(),
+                            bitmap='error'
+                        )
+                        game.busy = False
+                        game.endGame()
+                        game.newGame()
 
     def mSaveAs(self, *event):
         if self._cancelDrag(break_pause=False):

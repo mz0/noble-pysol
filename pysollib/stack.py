@@ -130,20 +130,14 @@ def getNumberOfFreeStacks(stacks):
 
 
 # collect the top cards of several stacks into a pile
-def getPileFromStacks(stacks, reverse=0):
+def getPileFromStacks(stacks, reverse=False):
     cards = []
     for s in stacks:
         if not s.cards or not s.cards[-1].face_up:
             return None
         cards.append(s.cards[-1])
-    if reverse:
-        cards.reverse()
-    return cards
+    return (reversed(cards) if reverse else cards)
 
-
-# ************************************************************************
-# *
-# ************************************************************************
 
 class Stack:
     # A generic stack of cards.
@@ -229,6 +223,11 @@ class Stack:
         view.INIT_CARD_OFFSETS = (0, 0)
         view.INIT_CARD_YOFFSET = 0      # for reallocateCards
         view.group = MfxCanvasGroup(view.canvas)
+
+        if (TOOLKIT == 'kivy'):
+            if hasattr(view.group, 'stack'):
+                view.group.stack = self
+
         view.shrink_face_down = 1
         # image items
         view.images = Struct(
@@ -526,32 +525,24 @@ class Stack:
         mylen = len(cards)
         if mylen < cap.min_accept or mylen > cap.max_accept:
             return False
-        mylen = mylen + len(self.cards)
+        mylen += len(self.cards)
         # note: we don't check cap.min_cards here
         if mylen > cap.max_cards:
             return False
+
+        def _check(c, suit, color, rank):
+            return ((suit >= 0 and c.suit != suit) or
+                    (color >= 0 and c.color != color) or
+                    (rank >= 0 and c.rank != rank))
         for c in cards:
-            if not c.face_up:
-                return False
-            if cap.suit >= 0 and c.suit != cap.suit:
-                return False
-            if cap.color >= 0 and c.color != cap.color:
-                return False
-            if cap.rank >= 0 and c.rank != cap.rank:
+            if not c.face_up or _check(c, cap.suit, cap.color, cap.rank):
                 return False
         if self.cards:
             # top card of our stack must be face up
             return self.cards[-1].face_up
-        else:
-            # check required base
-            c = cards[0]
-            if cap.base_suit >= 0 and c.suit != cap.base_suit:
-                return False
-            if cap.base_color >= 0 and c.color != cap.base_color:
-                return False
-            if cap.base_rank >= 0 and c.rank != cap.base_rank:
-                return False
-            return True
+        # check required base
+        return not _check(cards[0], cap.base_suit, cap.base_color,
+                          cap.base_rank)
 
     def basicCanMoveCards(self, cards):
         # Check that the limits are ok and the cards are face up
@@ -1123,6 +1114,10 @@ class Stack:
             handler(event)
         return EVENT_HANDLED
 
+    if (TOOLKIT == 'kivy'):
+        def _motionEventHandler(self, event):
+            return self.__motionEventHandler(event)
+
     def __clickEventHandler(self, event):
         if self.game.app.opt.mouse_type == 'drag-n-drop':
             cancel_drag = 1
@@ -1191,6 +1186,14 @@ class Stack:
         if self.game.busy:
             return EVENT_HANDLED
         if self.game.app.opt.mouse_type == 'drag-n-drop':
+
+            if TOOLKIT == 'kivy':
+                drag = self.game.drag
+                if drag and drag.stack:
+                    drag.stack.keepDrag(event)
+                    drag.stack.finishDrag(event)
+                return EVENT_HANDLED
+
             self.keepDrag(event)
             self.finishDrag(event)
         return EVENT_HANDLED
@@ -1369,7 +1372,13 @@ class Stack:
             return ()
         if img0 and img1:
             cx, cy = c0.x + cw + dx, c0.y + ch + dy
-            s1 = MfxCanvasImage(self.canvas, cx, cy - img0.height(),
+
+            if TOOLKIT == 'kivy':
+                height0 = img0.getHeight()
+            else:
+                height0 = img0.height()
+
+            s1 = MfxCanvasImage(self.game.canvas, cx, cy - height0,
                                 image=img1, anchor=ANCHOR_SE)
             s2 = MfxCanvasImage(self.canvas, cx, cy,
                                 image=img0, anchor=ANCHOR_SE)
@@ -1468,6 +1477,8 @@ class Stack:
         if img is None:
             return
         # self.canvas.update_idletasks()
+        if TOOLKIT is 'kivy':
+            self.game.top.waitAnimation()
         item = MfxCanvasImage(self.canvas, card.x, card.y,
                               image=img, anchor=ANCHOR_NW, group=self.group)
         # item.tkraise()
@@ -1647,6 +1658,8 @@ class DealRow_StackMethods:
                 self.game.flipMove(self)
             self.game.moveMove(1, self, r, frames=frames)
         self.game.leaveState(old_state)
+        if TOOLKIT is 'kivy':
+            self.game.top.waitAnimation()
         return len(stacks)
 
     # all Aces go to the Foundations
@@ -1664,7 +1677,7 @@ class DealRow_StackMethods:
         for r in stacks:
             assert r is not self
             while self.cards:
-                n = n + 1
+                n += 1
                 if flip:
                     self.game.flipMove(self)
                 if flip and self.cards[-1].rank == rank:
@@ -1677,6 +1690,8 @@ class DealRow_StackMethods:
                     self.game.moveMove(1, self, r, frames=frames)
                     break
         self.game.leaveState(old_state)
+        if TOOLKIT is 'kivy':
+            self.game.top.waitAnimation()
         return n
 
 
@@ -1711,7 +1726,7 @@ class DealBaseCard_StackMethods:
             if not c.face_up:
                 self.game.flipMove(self)
             self.game.moveMove(1, self, s, frames=frames)
-            ncards = ncards - 1
+            ncards -= 1
 
 
 class RedealCards_StackMethods:
@@ -1865,6 +1880,8 @@ class TalonStack(Stack,
                                                     group=self.group)
                 if TOOLKIT == 'tk':
                     self.images.redeal.tkraise(self.top_bottom)
+                elif TOOLKIT == 'kivy':
+                    self.images.redeal.tkraise(self.top_bottom)
                 elif TOOLKIT == 'gtk':
                     # FIXME
                     pass
@@ -1888,6 +1905,8 @@ class TalonStack(Stack,
                                                   group=self.group)
                 if TOOLKIT == 'tk':
                     self.texts.redeal.tkraise(self.top_bottom)
+                elif TOOLKIT == 'kivy':
+                    self.texts.redeal.tkraise(self.top_bottom)
                 elif TOOLKIT == 'gtk':
                     # FIXME
                     pass
@@ -1908,6 +1927,10 @@ class TalonStack(Stack,
         ty = self.y + images.CARDH - 4
         self.init_redeal.img_coord = cx, cy
         self.init_redeal.txt_coord = cx, ty
+
+        # At least display a redealImage at start, if USE_PIL is not set.
+        if USE_PIL is False:
+            self._addRedealImage()
 
     getBottomImage = Stack._getTalonBottomImage
 
@@ -2400,6 +2423,7 @@ class SequenceStack_StackMethods:
         return self._isSequence(cards)
 
     def _isMoveableSequence(self, cards):
+        # import pdb; pdb.set_trace()
         return self._isSequence(cards)
 
     def acceptsCards(self, from_stack, cards):
@@ -2756,9 +2780,8 @@ class SuperMoveStack_StackMethods:
             return max_move
         n = getNumberOfFreeStacks(self.game.s.rows)
         if to_stack_ncards == 0:
-            n = n - 1
-        max_move = max_move * (2 ** n)
-        return max_move
+            n -= 1
+        return max_move << max(n, 0)
 
     def _getNumSSSeq(self, cards):
         # num of same-suit sequences (for SuperMoveSpider_RowStack)
@@ -2777,70 +2800,60 @@ class SuperMoveSS_RowStack(SuperMoveStack_StackMethods, SS_RowStack):
     def canMoveCards(self, cards):
         if not SS_RowStack.canMoveCards(self, cards):
             return False
-        max_move = self._getMaxMove(1)
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(1)
 
     def acceptsCards(self, from_stack, cards):
         if not SS_RowStack.acceptsCards(self, from_stack, cards):
             return False
-        max_move = self._getMaxMove(len(self.cards))
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(len(self.cards))
 
 
 class SuperMoveAC_RowStack(SuperMoveStack_StackMethods, AC_RowStack):
     def canMoveCards(self, cards):
         if not AC_RowStack.canMoveCards(self, cards):
             return False
-        max_move = self._getMaxMove(1)
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(1)
 
     def acceptsCards(self, from_stack, cards):
         if not AC_RowStack.acceptsCards(self, from_stack, cards):
             return False
-        max_move = self._getMaxMove(len(self.cards))
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(len(self.cards))
 
 
 class SuperMoveRK_RowStack(SuperMoveStack_StackMethods, RK_RowStack):
     def canMoveCards(self, cards):
         if not RK_RowStack.canMoveCards(self, cards):
             return False
-        max_move = self._getMaxMove(1)
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(1)
 
     def acceptsCards(self, from_stack, cards):
         if not RK_RowStack.acceptsCards(self, from_stack, cards):
             return False
-        max_move = self._getMaxMove(len(self.cards))
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(len(self.cards))
 
 
 class SuperMoveSC_RowStack(SuperMoveStack_StackMethods, SC_RowStack):
     def canMoveCards(self, cards):
         if not SC_RowStack.canMoveCards(self, cards):
             return False
-        max_move = self._getMaxMove(1)
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(1)
 
     def acceptsCards(self, from_stack, cards):
         if not SC_RowStack.acceptsCards(self, from_stack, cards):
             return False
-        max_move = self._getMaxMove(len(self.cards))
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(len(self.cards))
 
 
 class SuperMoveBO_RowStack(SuperMoveStack_StackMethods, BO_RowStack):
     def canMoveCards(self, cards):
         if not BO_RowStack.canMoveCards(self, cards):
             return False
-        max_move = self._getMaxMove(1)
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(1)
 
     def acceptsCards(self, from_stack, cards):
         if not BO_RowStack.acceptsCards(self, from_stack, cards):
             return False
-        max_move = self._getMaxMove(len(self.cards))
-        return len(cards) <= max_move
+        return len(cards) <= self._getMaxMove(len(self.cards))
 
 
 # ************************************************************************
@@ -2893,6 +2906,8 @@ class WasteTalonStack(TalonStack):
                 else:
                     self.game.moveMove(1, self, waste, frames=4, shadow=0)
                 self.fillStack()
+                if TOOLKIT is 'kivy':
+                    self.game.top.waitAnimation()
         elif waste.cards and self.round != self.max_rounds:
             if sound:
                 self.game.playSample("turnwaste", priority=20)

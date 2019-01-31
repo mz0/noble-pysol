@@ -23,6 +23,7 @@
 
 # imports
 import sys
+import six
 import os
 import traceback
 
@@ -33,12 +34,9 @@ from pysollib.configobj import configobj, validate
 import pysollib.settings
 
 # Toolkit imports
-from pysollib.pysoltk import TOOLBAR_BUTTONS
+from pysollib.pysoltk import TOOLBAR_BUTTONS, TOOLKIT
 
 from pysollib.mygettext import _
-
-if sys.version_info > (3,):
-    unicode = str
 
 # ************************************************************************
 # * Options
@@ -113,6 +111,9 @@ translate_game_names = boolean
 solver_presets = string_list
 solver_show_progress = boolean
 solver_max_iterations = integer
+solver_iterations_output_step = integer
+solver_preset = string
+display_win_message = boolean
 
 [sound_samples]
 move = boolean
@@ -248,9 +249,12 @@ class Options:
         ('solver_presets', 'list'),
         ('solver_show_progress', 'bool'),
         ('solver_max_iterations', 'int'),
+        ('solver_iterations_output_step', 'int'),
+        ('solver_preset', 'string'),
         # ('toolbar_vars', 'list'),
         # ('recent_gameid', 'list'),
         # ('favorite_gameid', 'list'),
+        ('display_win_message', 'bool'),
         ]
 
     def __init__(self):
@@ -277,11 +281,16 @@ class Options:
         self.highlight_not_matching = True
         self.mahjongg_show_removed = False
         self.mahjongg_create_solvable = 2  # 0 - none, 1 - easy, 2 - hard
+        if TOOLKIT == 'kivy':
+            self.mahjongg_create_solvable = 1  # 0 - none, 1 - easy, 2 - hard
         self.shisen_show_hint = True
         self.shisen_show_matching = False
         self.animations = 3             # default to Medium
         self.redeal_animation = True
         self.win_animation = True
+        if TOOLKIT == 'kivy':
+            self.redeal_animation = False
+            self.win_animation = False
         self.flip_animation = True
         self.compact_stacks = True
         self.shadow = True
@@ -293,6 +302,8 @@ class Options:
         self.default_tile_theme = 'default'
         self.toolbar = 1       # 0 == hide, 1,2,3,4 == top, bottom, lef, right
         # self.toolbar_style = 'default'
+        if TOOLKIT == 'kivy':
+            self.toolbar = 4  # 0 == hide, 1,2,3,4 == top, bottom, lef, right
         self.toolbar_style = 'bluecurve'
         self.toolbar_relief = 'flat'
         self.toolbar_compound = 'none'  # icons only
@@ -310,10 +321,11 @@ class Options:
         self.mouse_undo = False         # use mouse for undo/redo
         self.negative_bottom = True
         self.translate_game_names = True
+        self.display_win_message = True
         # sound
         self.sound = True
         self.sound_mode = 1
-        self.sound_sample_volume = 80
+        self.sound_sample_volume = 75
         self.sound_music_volume = 100
         self.sound_sample_buffer_size = 1  # 1 - 4 (1024 - 4096 bytes)
         self.sound_samples = {
@@ -377,6 +389,10 @@ class Options:
         self.num_recent_games = 15
         self.recent_gameid = []
         self.favorite_gameid = []
+        if TOOLKIT == 'kivy':
+            self.favorite_gameid = [2, 7, 8, 19, 140, 116, 152, 176, 181,
+                                    194, 207, 706, 721, 756, 903, 5034,
+                                    11004, 14405, 14410, 15411, 22225]
         self.last_gameid = 0            # last game played
         self.game_holded = 0            # gameid or 0
         self.wm_maximized = 0
@@ -401,12 +417,14 @@ class Options:
             'abra-kadabra',
             'blue-yonder',
             'conspiracy-theory',
+            'cookie-monster',
             'cool-jives',
             'crooked-nose',
             'fools-gold',
             'good-intentions',
             'hello-world',
             'john-galt-line',
+            'looking-glass',
             'one-big-family',
             'rin-tin-tin',
             'slick-rock',
@@ -416,6 +434,8 @@ class Options:
             ]
         self.solver_show_progress = True
         self.solver_max_iterations = 100000
+        self.solver_iterations_output_step = 100
+        self.solver_preset = 'video-editing'
 
     def setDefaults(self, top=None):
         WIN_SYSTEM = pysollib.settings.WIN_SYSTEM
@@ -453,6 +473,9 @@ class Options:
         c = "Standard"
         if sw < 800 or sh < 600:
             c = "2000"
+        if TOOLKIT == 'kivy':
+            c = "Standard"
+
         # if sw > 1024 and sh > 768:
         #    c = 'Dondorf'
         self.cardset = {
@@ -494,7 +517,7 @@ class Options:
             val = getattr(self, key)
             if isinstance(val, str):
                 if sys.version_info < (3,):
-                    val = unicode(val, 'utf-8')
+                    val = six.text_type(val, 'utf-8')
             config['general'][key] = val
 
         config['general']['recent_gameid'] = self.recent_gameid
@@ -502,7 +525,8 @@ class Options:
         visible_buttons = [b for b in self.toolbar_vars
                            if self.toolbar_vars[b]]
         config['general']['visible_buttons'] = visible_buttons
-        config['general']['solver_presets'].remove('none')
+        if 'none' in config['general']['solver_presets']:
+            config['general']['solver_presets'].remove('none')
 
         # sound_samples
         config['sound_samples'] = self.sound_samples

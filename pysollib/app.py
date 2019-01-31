@@ -26,12 +26,13 @@
 import os
 import re
 import traceback
+from pickle import UnpicklingError
 
 # PySol imports
 from pysollib.mfxutil import destruct, Struct
-from pysollib.mfxutil import pickle, unpickle, UnpicklingError
+from pysollib.mfxutil import pickle, unpickle
 from pysollib.mfxutil import getusername, getprefdir
-from pysollib.mfxutil import latin1_to_ascii, print_err
+from pysollib.mfxutil import latin1_normalize, print_err
 from pysollib.mfxutil import USE_PIL
 from pysollib.util import CARDSET, IMAGE_EXTENSIONS
 from pysollib.settings import PACKAGE, VERSION_TUPLE, WIN_SYSTEM
@@ -58,11 +59,16 @@ from pysollib.pysoltk import SelectCardsetDialogWithPreview
 from pysollib.pysoltk import SelectDialogTreeData
 from pysollib.pysoltk import HTMLViewer
 from pysollib.pysoltk import destroy_find_card_dialog
-from pysollib.ui.tktile.solverdialog import destroy_solver_dialog
-
-from pysollib.actions import PysolMenubar
-from pysollib.actions import PysolToolbar
-from pysollib.help import help_about, destroy_help_html
+if TOOLKIT == 'tk':
+    from pysollib.ui.tktile.solverdialog import destroy_solver_dialog
+else:
+    from pysollib.pysoltk import destroy_solver_dialog
+if TOOLKIT == 'kivy':
+    import logging
+if True:  # This prevents from travis 'error' E402.
+    from pysollib.actions import PysolMenubar
+    from pysollib.actions import PysolToolbar
+    from pysollib.help import help_about, destroy_help_html
 
 # ************************************************************************
 # * Statistics
@@ -420,6 +426,20 @@ class Application:
 
     # the PySol mainloop
     def mainloop(self):
+        try:
+            approc = self.mainproc()  # setup process
+            approc.send(None)				# and go
+        except Exception:
+            pass
+
+    def gameproc(self):
+        while True:
+            logging.info('App: gameproc waiting for game to start')
+            (id, random) = yield
+            logging.info('App: game started %s,%s' % (str(id), str(random)))
+            self.runGame(id, random)
+
+    def mainproc(self):
         # copy startup options
         self.startup_opt = self.opt.copy()
         # try to load statistics
@@ -517,6 +537,11 @@ class Application:
         if self.intro.progress:
             self.intro.progress.update(step=1)
         #
+
+        if TOOLKIT == 'kivy':
+            self.gproc = self.gameproc()
+            self.gproc.send(None)
+
         try:
             # this is the mainloop
             while 1:
@@ -524,7 +549,13 @@ class Application:
                 id_, random = self.nextgame.id, self.nextgame.random
                 self.nextgame.id, self.nextgame.random = 0, None
                 try:
-                    self.runGame(id_, random)
+                    if TOOLKIT == 'kivy':
+                        self.gproc.send((id_, random))
+                        logging.info('App: sent for game to start')
+                        yield
+                        logging.info('App: game proc stopped')
+                    else:
+                        self.runGame(id_, random)
                 except Exception:
                     # try Klondike if current game fails
                     if id_ == 2:
@@ -561,6 +592,11 @@ class Application:
                         update=7+256)
                 else:
                     self.requestCompatibleCardsetType(self.nextgame.id)
+
+        except Exception:
+            traceback.print_exc()
+            pass
+
         finally:
             # hide main window
             self.wm_withdraw()
@@ -594,6 +630,11 @@ class Application:
             except Exception:
                 traceback.print_exc()
                 pass
+            if TOOLKIT == 'kivy':
+                self.top.quit()
+                while True:
+                    logging.info('App: mainloop end position')
+                    yield
 
     def runGame(self, id_, random=None):
         self.top.connectApp(self)
@@ -796,6 +837,9 @@ class Application:
         else:
             size = 'small'
         style = self.opt.toolbar_style
+        if TOOLKIT == 'kivy':
+            size = 'xlarge'
+            style = 'bluecurve'
         d = self._getImagesDir('toolbar', style, size)
         if d:
             return d
@@ -1223,11 +1267,7 @@ Please select a %s type %s.
             return None
         if gi.rules_filename is not None:
             return gi.rules_filename
-        n = gi.en_name                  # english name
-        # n = re.sub(r"[\[\(].*$", "", n)
-        n = latin1_to_ascii(n)
-        n = re.sub(r"[^\w]", "", n)
-        n = n.lower() + ".html"
+        n = latin1_normalize(gi.en_name) + '.html'        # english name
         f = os.path.join(self.dataloader.dir, "html", "rules", n)
         if not os.path.exists(f):
             n = ''
@@ -1237,18 +1277,10 @@ Please select a %s type %s.
     def getGameSaveName(self, id):
         if os.path.supports_unicode_filenames:  # new in python 2.3
             return self.getGameTitleName(id)
-        gi = self.gdb.get(id)
-        n = gi.en_name                  # english name
+        n = self.gdb.get(id).en_name                  # english name
         if not n:
             return None
-        #         m = re.search(r"^(.*)([\[\(](\w+).*[\]\)])\s*$", n)
-        #          if m:
-        #              n = m.group(1) + "_" + m.group(2).lower()
-        n = latin1_to_ascii(n)
-        n = n.lower()
-        n = re.sub(r"[\s]", "_", n)
-        n = re.sub(r"[^\w]", "", n)
-        return n
+        return re.sub(r"[\s]", "_", latin1_normalize(n))
 
     def getRandomGameId(self, games=None):
         if games is None:
@@ -1422,9 +1454,10 @@ Please select a %s type %s.
         # find all available cardsets
         dirs = manager.getSearchDirs(self, ("cardsets", ""), "PYSOL_CARDSETS")
         if DEBUG:
-            dirs = dirs + manager.getSearchDirs(self, "cardsets-*")
+            dirs += manager.getSearchDirs(self, "cardsets-*")
         # print dirs
         found, t = [], {}
+        fnames = {}  # (to check for duplicates)
         for dir in dirs:
             dir = dir.strip()
             try:
@@ -1452,10 +1485,12 @@ Please select a %s type %s.
                                 f1 = os.path.join(d, back)
                                 f2 = os.path.join(d, "shade" + cs.ext)
                                 if (cs.ext in IMAGE_EXTENSIONS and
+                                        cs.name not in fnames and
                                         os.path.isfile(f1) and
                                         os.path.isfile(f2)):
                                     found.append(cs)
                                     # print '+', cs.name
+                                    fnames[cs.name] = 1
                             else:
                                 print_err('fail _readCardsetConfig: %s %s'
                                           % (d, f1))

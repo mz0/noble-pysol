@@ -1,8 +1,6 @@
 import gettext
 import sys
-
-if sys.version_info > (3,):
-    unicode = str
+import six
 
 
 def n_(x):
@@ -12,23 +10,27 @@ def n_(x):
 def fix_gettext():
     def ugettext(message):
         # unicoded gettext
-        if not isinstance(message, unicode):
-            message = unicode(message, 'utf-8')
+        if not isinstance(message, six.text_type):
+            message = six.text_type(message, 'utf-8')
         domain = gettext._current_domain
         try:
             t = gettext.translation(domain,
                                     gettext._localedirs.get(domain, None))
         except IOError:
             return message
-        return t.ugettext(message)
+        if sys.version_info >= (3, 0):
+            return t.gettext(message)
+        else:
+            return t.ugettext(message)
+
     gettext.ugettext = ugettext
 
     def ungettext(msgid1, msgid2, n):
         # unicoded ngettext
-        if not isinstance(msgid1, unicode):
-            msgid1 = unicode(msgid1, 'utf-8')
-        if not isinstance(msgid2, unicode):
-            msgid2 = unicode(msgid2, 'utf-8')
+        if not isinstance(msgid1, six.text_type):
+            msgid1 = six.text_type(msgid1, 'utf-8')
+        if not isinstance(msgid2, six.text_type):
+            msgid2 = six.text_type(msgid2, 'utf-8')
         domain = gettext._current_domain
         try:
             t = gettext.translation(domain,
@@ -38,7 +40,10 @@ def fix_gettext():
                 return msgid1
             else:
                 return msgid2
-        return t.ungettext(msgid1, msgid2, n)
+        if sys.version_info >= (3, 0):
+            return t.ngettext(msgid1, msgid2, n)
+        else:
+            return t.ungettext(msgid1, msgid2, n)
     gettext.ungettext = ungettext
 
 
