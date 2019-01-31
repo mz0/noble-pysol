@@ -1,4 +1,4 @@
-#!/usr/bin/env pytho
+#!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
 # ---------------------------------------------------------------------------##
 #
@@ -27,15 +27,16 @@ import os
 import time
 import subprocess
 import re
-import sys
+import six
+from io import BytesIO
 
 # PySol imports
 from pysollib.settings import DEBUG, FCS_COMMAND
+from pysollib.pysolrandom import constructRandom
 from pysollib.mfxutil import destruct
 from pysollib.util import KING
 
-if sys.version_info > (3,):
-    unicode = str
+FCS_VERSION = None
 
 # ************************************************************************
 # * HintInterface is an abstract class that defines the public
@@ -418,7 +419,7 @@ class DefaultHint(AbstractHint):
         else:
             d = (c.rank - t.cap.base_rank) % t.cap.mod
             if d > t.cap.mod // 2:
-                d = d - t.cap.mod
+                d -= t.cap.mod
         if abs(d) <= 1:
             # drop Ace and 2 immediately
             score = 92000
@@ -550,7 +551,7 @@ class DefaultHint(AbstractHint):
                     if stack and stack is not r:
                         assert ncards == 1
                         drop_info.append((c, stack, ncards, i))
-                    i = i + 1
+                    i += 1
                 # now try to make a move so that the drop-card will get free
                 for di in drop_info:
                     c = di[0]
@@ -564,7 +565,7 @@ class DefaultHint(AbstractHint):
                             continue
                         # print "drop move", r, t, sub_pile
                         score = 40000
-                        score = score + 1000 + (self.K - r.getCard().rank)
+                        score += 1000 + (self.K - r.getCard().rank)
                         # force the drop (to avoid loops)
                         force = (999999, 0, di[2], r, di[1], self.BLUE, None)
                         self.addHint(
@@ -715,6 +716,18 @@ class SpiderType_Hint(DefaultHint):
     pass
 
 
+class PySolHintLayoutImportError(Exception):
+
+    def __init__(self, msg, cards, line_num):
+        """docstring for __init__"""
+        self.msg = msg
+        self.cards = cards
+        self.line_num = line_num
+
+    def format(self):
+        return self.msg + ":\n\n" + ', '.join(self.cards)
+
+
 # ************************************************************************
 # * FreeCell-Solver
 # ************************************************************************
@@ -725,6 +738,7 @@ class Base_Solver_Hint:
         self.dialog = dialog
         self.game_type = game_type
         self.options = {
+            'iters_step': 100,
             'max_iters': 10000,
             'progress': False,
             'preset': None,
@@ -743,15 +757,21 @@ class Base_Solver_Hint:
     def config(self, **kw):
         self.options.update(kw)
 
-    def card2str1(self, card):
+    def _card2str_format(self, fmt, rank, suit):
         # row and reserves
-        rank = (card.rank-self.base_rank) % 13
-        return "A23456789TJQK"[rank] + "CSHD"[card.suit]
+        rank = (rank-self.base_rank) % 13
+        return fmt % {'R': "A23456789TJQK"[rank], 'S': "CSHD"[suit]}
+
+    def card2str1_(self, rank, suit):
+        # row and reserves
+        return self._card2str_format('%(R)s%(S)s', rank, suit)
+
+    def card2str1(self, card):
+        return self.card2str1_(card.rank, card.suit)
 
     def card2str2(self, card):
         # foundations
-        rank = (card.rank-self.base_rank) % 13
-        return "CSHD"[card.suit] + "-" + "A23456789TJQK"[rank]
+        return self._card2str_format('%(S)s-%(R)s', card.rank, card.suit)
 
 # hard solvable: Freecell #47038300998351211829 (65539 iters)
 
@@ -780,13 +800,30 @@ class Base_Solver_Hint:
         return [hint]
 
     def colonPrefixMatch(self, prefix, s):
-        m = re.match(prefix + ': (\d+)', s)
+        m = re.match(prefix + ': ([0-9]+)', s)
         if m:
             self._v = int(m.group(1))
             return True
         else:
             self._v = None
             return False
+
+    def run_solver(self, command, board):
+        if DEBUG:
+            print(command)
+        kw = {'shell': True,
+              'stdin': subprocess.PIPE,
+              'stdout': subprocess.PIPE,
+              'stderr': subprocess.PIPE}
+        if os.name != 'nt':
+            kw['close_fds'] = True
+        p = subprocess.Popen(command, **kw)
+        bytes_board = six.binary_type(board, 'utf-8')
+        pout, perr = p.communicate(bytes_board)
+        if p.returncode in (127, 1):
+            # Linux and Windows return codes for "command not found" error
+            raise RuntimeError('Solver exited with {}'.format(p.returncode))
+        return BytesIO(pout), BytesIO(perr)
 
 
 class FreeCellSolver_Hint(Base_Solver_Hint):
@@ -813,6 +850,114 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
         if b:
             self._addBoardLine(prefix + b)
         return
+
+    def importFile(solver, fh, s_game, self):
+        s_game.endGame()
+        s_game.random = constructRandom('Custom')
+        s_game.newGame(
+            shuffle=True,
+            random=constructRandom('Custom'),
+            dealer=lambda: solver.importFileHelper(fh, s_game))
+        s_game.random = constructRandom('Custom')
+
+    def importFileHelper(solver, fh, s_game):
+        game = s_game.s
+        stack_idx = 0
+
+        RANKS_S = "A23456789TJQK"
+        RANKS0_S = '0' + RANKS_S
+        RANKS_RE = '(?:' + '[' + RANKS_S + ']' + '|10)'
+        SUITS_S = "CSHD"
+        SUITS_RE = '[' + SUITS_S + ']'
+        CARD_RE = r'(?:' + RANKS_RE + SUITS_RE + ')'
+        line_num = 0
+
+        def cards():
+            return game.talon.cards
+
+        def put(target, suit, rank):
+            ret = [i for i, c in enumerate(cards())
+                   if c.suit == suit and c.rank == rank]
+            if len(ret) < 1:
+                raise PySolHintLayoutImportError(
+                    "Duplicate cards in input",
+                    [solver.card2str1_(rank, suit)],
+                    line_num
+                )
+
+            ret = ret[0]
+            game.talon.cards = \
+                cards()[0:ret] + cards()[(ret+1):] + [cards()[ret]]
+            s_game.flipMove(game.talon)
+            s_game.moveMove(1, game.talon, target, frames=0)
+
+        def put_str(target, str_):
+            put(target, SUITS_S.index(str_[-1]),
+                (RANKS_S.index(str_[0]) if len(str_) == 2 else 9))
+
+        def my_find_re(RE, m, msg):
+            s = m.group(1)
+            if not re.match(r'^\s*(?:' + RE + r')?(?:\s+' + RE + r')*\s*$', s):
+                raise PySolHintLayoutImportError(
+                    msg,
+                    [],
+                    line_num
+                )
+            return re.findall(r'\b' + RE + r'\b', s)
+
+        # Based on https://stackoverflow.com/questions/8898294 - thanks!
+        def mydecode(s):
+            for encoding in "utf-8-sig", "utf-8":
+                try:
+                    return s.decode(encoding)
+                except UnicodeDecodeError:
+                    continue
+            return s.decode("latin-1")  # will always work
+
+        mytext = mydecode(fh.read())
+        for line_p in mytext.splitlines():
+            line_num += 1
+            line = line_p.rstrip('\r\n')
+            m = re.match(r'^(?:Foundations:|Founds?:)\s*(.*)', line)
+            if m:
+                for gm in my_find_re(
+                        r'(' + SUITS_RE + r')-([' + RANKS0_S + r'])', m,
+                        "Invalid Foundations line"):
+                    for foundat in game.foundations:
+                        suit = foundat.cap.suit
+                        if SUITS_S[suit] == gm[0]:
+                            rank = gm[1]
+                            if len(rank) == 1:
+                                lim = RANKS0_S.index(rank)
+                            else:
+                                lim = 10
+                            for r in range(lim):
+                                put(foundat, suit, r)
+                            break
+                continue
+            m = re.match(r'^(?:FC:|Freecells:)\s*(.*)', line)
+            if m:
+                g = my_find_re(r'(' + CARD_RE + r'|\-)', m,
+                               "Invalid Freecells line")
+                while len(g) < len(game.reserves):
+                    g.append('-')
+                for i, gm in enumerate(g):
+                    str_ = gm
+                    if str_ != '-':
+                        put_str(game.reserves[i], str_)
+                continue
+            m = re.match(r'^:?\s*(.*)', line)
+            for str_ in my_find_re(r'(' + CARD_RE + r')', m,
+                                   "Invalid column text"):
+                put_str(game.rows[stack_idx], str_)
+
+            stack_idx += 1
+        if len(cards()) > 0:
+            raise PySolHintLayoutImportError(
+                "Missing cards in input",
+                [solver.card2str1(c) for c in cards()],
+                -1
+            )
 
     def calcBoardString(self):
         game = self.game
@@ -846,6 +991,17 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
     def computeHints(self):
         game = self.game
         game_type = self.game_type
+        global FCS_VERSION
+        if FCS_VERSION is None:
+            pout, _ = self.run_solver(FCS_COMMAND + ' --version', '')
+            s = six.text_type(pout.read(), encoding='utf-8')
+            m = re.search(r'version ([0-9]+)\.([0-9]+)\.([0-9]+)', s)
+            if m:
+                FCS_VERSION = (int(m.group(1)), int(m.group(2)),
+                               int(m.group(3)))
+            else:
+                FCS_VERSION = (0, 0, 0)
+
         progress = self.options['progress']
 
         board = self.calcBoardString()
@@ -856,8 +1012,15 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
         args = []
         # args += ['-sam', '-p', '-opt', '--display-10-as-t']
         args += ['-m', '-p', '-opt', '-sel']
+        if FCS_VERSION >= (4, 20, 0):
+            args += ['-hoi']
         if progress:
             args += ['--iter-output']
+            fcs_iter_output_step = None
+            if FCS_VERSION >= (4, 20, 0):
+                # fcs_iter_output_step = 10000
+                fcs_iter_output_step = self.options['iters_step']
+                args += ['--iter-output-step', str(fcs_iter_output_step)]
             if DEBUG:
                 args += ['-s']
         if self.options['preset'] and self.options['preset'] != 'none':
@@ -878,21 +1041,8 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
             args += ['--empty-stacks-filled-by', game_type['esf']]
 
         command = FCS_COMMAND+' '+' '.join([str(i) for i in args])
-        if DEBUG:
-            print(command)
-        kw = {'shell': True,
-              'stdin': subprocess.PIPE,
-              'stdout': subprocess.PIPE,
-              'stderr': subprocess.PIPE}
-        if os.name != 'nt':
-            kw['close_fds'] = True
-        p = subprocess.Popen(command, **kw)
-        pin, pout, perr = p.stdin, p.stdout, p.stderr
-        bytes_board = board
-        if sys.version_info > (3,):
-            bytes_board = bytes(board, 'utf-8')
-        pin.write(bytes_board)
-        pin.close()
+        pout, perr = self.run_solver(command, board)
+        self.solver_state = 'unknown'
         #
         stack_types = {
             'the': game.s.foundations,
@@ -908,7 +1058,7 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
             states = 0
 
             for sbytes in pout:
-                s = unicode(sbytes, encoding='utf-8')
+                s = six.text_type(sbytes, encoding='utf-8')
                 if DEBUG >= 5:
                     print(s)
 
@@ -918,7 +1068,7 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
                     depth = self._v
                 elif self.colonPrefixMatch('Stored-States', s):
                     states = self._v
-                    if iter_ % 100 == 0:
+                    if iter_ % 100 == 0 or fcs_iter_output_step:
                         self.dialog.setText(iter=iter_, depth=depth,
                                             states=states)
                 elif re.search('^(?:-=-=)', s):
@@ -929,17 +1079,17 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
 
         hints = []
         for sbytes in pout:
-            s = unicode(sbytes, encoding='utf-8')
+            s = six.text_type(sbytes, encoding='utf-8')
             if DEBUG:
                 print(s)
             if self._determineIfSolverState(s):
                 next
-            m = re.match('Total number of states checked is (\d+)\.', s)
+            m = re.match('Total number of states checked is ([0-9]+)\\.', s)
             if m:
                 iter_ = int(m.group(1))
                 self.dialog.setText(iter=iter_)
 
-            m = re.match('This scan generated (\d+) states\.', s)
+            m = re.match('This scan generated ([0-9]+) states\\.', s)
 
             if m:
                 states = int(m.group(1))
@@ -952,7 +1102,7 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
             move_s = m.group(1)
 
             m = re.match(
-                'the sequence on top of Stack (\d+) to the foundations',
+                'the sequence on top of Stack ([0-9]+) to the foundations',
                 move_s)
 
             if m:
@@ -963,11 +1113,11 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
                 dest = None
             else:
                 m = re.match(
-                    '(?P<ncards>a card|(?P<count>\d+) cards) '
+                    '(?P<ncards>a card|(?P<count>[0-9]+) cards) '
                     'from (?P<source_type>stack|freecell) '
-                    '(?P<source_idx>\d+) to '
+                    '(?P<source_idx>[0-9]+) to '
                     '(?P<dest>the foundations|(?P<dest_type>freecell|stack) '
-                    '(?P<dest_idx>\d+))\s*', move_s)
+                    '(?P<dest_idx>[0-9]+))\\s*', move_s)
 
                 if not m:
                     continue
@@ -1002,15 +1152,14 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
 
         self.hints = hints
         if len(hints) > 0:
-            self.solver_state = 'solved'
+            if self.solver_state != 'intractable':
+                self.solver_state = 'solved'
         self.hints.append(None)         # XXX
 
         # print self.hints
 
         pout.close()
         perr.close()
-        if os.name == 'posix':
-            os.wait()
 
 
 class BlackHoleSolver_Hint(Base_Solver_Hint):
@@ -1052,21 +1201,7 @@ class BlackHoleSolver_Hint(Base_Solver_Hint):
 
         command = self.BLACK_HOLE_SOLVER_COMMAND + ' ' + \
             ' '.join([str(i) for i in args])
-        if DEBUG:
-            print(command)
-        kw = {'shell': True,
-              'stdin': subprocess.PIPE,
-              'stdout': subprocess.PIPE,
-              'stderr': subprocess.PIPE}
-        if os.name != 'nt':
-            kw['close_fds'] = True
-        p = subprocess.Popen(command, **kw)
-        pin, pout, perr = p.stdin, p.stdout, p.stderr
-        bytes_board = board
-        if sys.version_info > (3,):
-            bytes_board = bytes(board, 'utf-8')
-        pin.write(bytes_board)
-        pin.close()
+        pout, perr = self.run_solver(command, board)
         #
         if DEBUG:
             start_time = time.time()
@@ -1078,37 +1213,30 @@ class BlackHoleSolver_Hint(Base_Solver_Hint):
         states = 0
 
         for sbytes in pout:
-            s = unicode(sbytes, encoding='utf-8')
+            s = six.text_type(sbytes, encoding='utf-8')
             if DEBUG >= 5:
                 print(s)
 
-            m = re.search('^(Intractable!|Unsolved!|Solved!)\n', s)
+            m = re.search('^(Intractable|Unsolved|Solved)!', s.rstrip())
             if m:
                 result = m.group(1)
                 break
+
         self.dialog.setText(iter=iter_, depth=depth, states=states)
-
-        if (result == 'Intractable!'):
-            self.solver_state = 'intractable'
-            return
-        if (result == 'Unsolved!'):
-            self.solver_state = 'unsolved'
-            return
-
-        self.solver_state = 'solved'
+        self.solver_state = result.lower()
 
         hints = []
         for sbytes in pout:
-            s = unicode(sbytes, encoding='utf-8')
+            s = six.text_type(sbytes, encoding='utf-8')
             if DEBUG:
                 print(s)
-            m = re.match('Total number of states checked is (\d+)\.', s)
+            m = re.match('Total number of states checked is ([0-9]+)\\.', s)
             if m:
                 iter_ = int(m.group(1))
                 self.dialog.setText(iter=iter_)
                 continue
 
-            m = re.match('This scan generated (\d+) states\.', s)
+            m = re.match('This scan generated ([0-9]+) states\\.', s)
 
             if m:
                 states = int(m.group(1))
@@ -1142,8 +1270,6 @@ class BlackHoleSolver_Hint(Base_Solver_Hint):
 
         pout.close()
         perr.close()
-        if os.name == 'posix':
-            os.wait()
 
 
 class FreeCellSolverWrapper:

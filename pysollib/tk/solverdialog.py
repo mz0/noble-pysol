@@ -22,8 +22,7 @@
 # ---------------------------------------------------------------------------##
 
 # imports
-import sys
-from six.moves import tkinter
+from six.moves import range, tkinter
 
 # PySol imports
 from pysollib.mygettext import _
@@ -32,11 +31,6 @@ from pysollib.mfxutil import KwStruct
 # Toolkit imports
 from pysollib.tk.basetkmfxdialog import BaseTkMfxDialog
 from pysollib.ui.tktile.solverdialog import BaseSolverDialog, solver_dialog
-
-
-if sys.version_info > (3,):
-    xrange = range
-
 
 # ************************************************************************
 # *
@@ -54,7 +48,7 @@ class SolverDialog(BaseSolverDialog, BaseTkMfxDialog):
         n = len(self.gamenames)
         cb_max = int(self.top.winfo_screenheight()//23)
         cb_max = n // (n//cb_max+1)
-        for i in xrange(cb_max, n, cb_max):
+        for i in range(cb_max, n, cb_max):
             om['menu'].entryconfig(i, columnbreak=True)
         return var
 
@@ -63,6 +57,7 @@ class SolverDialog(BaseSolverDialog, BaseTkMfxDialog):
         var.set('none')
         om = tkinter.OptionMenu(frame, var, *(self.presets))
         om.grid(row=row, column=1, sticky='ew', padx=2, pady=2)
+        var.trace('w', self._OnAssignToPreset)
         return var
 
     def _createShowProgressButton(self, frame):

@@ -6,7 +6,7 @@ from distutils.core import setup
 from pysollib.settings import VERSION
 from pysollib.settings import PACKAGE_URL
 if os.name == 'nt':
-    eval('import py2exe')
+    import py2exe  # noqa: F401
 
 if os.name == 'posix':
     data_dir = 'share/PySolFC'
@@ -80,6 +80,7 @@ kw = {
                  'pysollib.pysolgtk',
                  'pysollib.ui',
                  'pysollib.ui.tktile',
+                 'pysollib.kivy',
                  'pysollib.games',
                  'pysollib.games.special',
                  'pysollib.games.ultra',

@@ -259,6 +259,79 @@ class PysolSoundServerModuleClient(AbstractAudioClient):
 
 
 # ************************************************************************
+# * Kivy audio
+# ************************************************************************
+
+class KivyAudioClient(AbstractAudioClient):
+
+    CAN_PLAY_SOUND = True
+    CAN_PLAY_MUSIC = False
+
+    def __init__(self):
+        AbstractAudioClient.__init__(self)
+        from pysollib.kivy.LApp import LSoundLoader
+        self.audiodev = LSoundLoader
+        self.sound = None
+        self.queue = []
+        self.sounds = {}
+
+    def startServer(self):
+        pass
+
+    def _condPlaySample(self):
+        # print("_condPlaySample: queue = %s" % self.sounds)
+        for k in self.sounds:
+            # print("%s" % (k))
+            pass
+
+        if self.sound:
+            sound = self.sound
+            sound.stop()
+            return
+
+        if self.sound is None:
+            if len(self.queue) > 0:
+                # print("Sound play start")
+                filename = self.queue[0]
+                self.queue = self.queue[1:]
+                self.sound = self.sounds[filename]
+                if self.sound:
+                    vol = float(self.app.opt.sound_sample_volume)/100.0
+                    self.sound.volume = vol
+                    self.sound.play()
+                    print("Sound plays %s" % self.sound.source)
+                    # print("Sound is %.3f seconds" % self.sound.length)
+                    # print("Sound volume is %s" % self.sound.volume)
+            else:
+                # print("Sound queue is empty")
+                pass
+        else:
+            # print("Sound play start deferred")
+            pass
+
+    def _playSample(self, filename, priority, loop, volume):
+        self.queue.append(filename)
+        if filename not in self.sounds:
+            sound = self.audiodev.load(filename)
+            sound.bind(on_stop=self._endSample)
+            self.sounds[filename] = sound
+            # print("Sound found at %s" % sound.source)
+        self._condPlaySample()
+
+    def _endSample(self, a):
+        print('Sound: stopped, %s' % self.sound)
+        self.sound = None
+        self._condPlaySample()
+
+    def _stopSamples(self):
+        print("Sound play stop")
+        self.queue = []
+        if self.sound:
+            self.sound.stop()
+            self.sound = None
+
+
+# ************************************************************************
 # * Win32 winsound audio
 # ************************************************************************
 
@@ -312,13 +385,13 @@ class OSSAudioServer:
     def mainLoop(self):
         while True:
             s = os.read(self.pipe, 256)
-            ss = s.split('\0')
+            ss = s.split(b'\0')
             if not ss[0]:
                 os._exit(0)
-            if ss[0] == 'break':
+            if ss[0] == b'break':
                 self._play_loop = False
                 continue
-            filename, priority, loop = ss[0], int(ss[1]), int(ss[2])
+            filename, priority, loop = ss[0].decode(), int(ss[1]), int(ss[2])
             if loop:
                 self._play_loop = True
                 th = Thread(target=self.playLoop, args=(filename,))
@@ -388,6 +461,8 @@ class OSSAudioClient(AbstractAudioClient):
     def __init__(self):
         AbstractAudioClient.__init__(self)
         import ossaudiodev
+        if not os.path.exists('/dev/dsp'):
+            raise RuntimeError('OSS interface not available')
         self.audiodev = ossaudiodev
 
     def startServer(self):
@@ -400,14 +475,17 @@ class OSSAudioClient(AbstractAudioClient):
 
     def _playSample(self, filename, priority, loop, volume):
         # print '_playSample:', filename, loop
-        os.write(self.pout, '%s\0%s\0%s\0' % (filename, priority, loop))
+        os.write(self.pout, b'%s\0%s\0%s\0' %
+                 (filename.encode(),
+                  str(priority).encode(),
+                  str(loop).encode()))
         return 1
 
     def _stopSamples(self):
-        os.write(self.pout, 'break\0\0\0')
+        os.write(self.pout, b'break\0\0\0')
 
     def _destroy(self):
-        os.write(self.pout, '\0\0\0')
+        os.write(self.pout, b'\0\0\0')
 
 
 # ************************************************************************

@@ -22,8 +22,10 @@
 # ---------------------------------------------------------------------------
 
 # Imports
-import sys
 from gettext import ungettext
+from six.moves import range
+
+from pysollib.settings import TOOLKIT
 
 # PySol imports
 from pysollib.mygettext import _
@@ -41,9 +43,6 @@ from pysollib.util import ANY_SUIT
 from pysollib.stack import \
         AbstractFoundationStack, \
         InitialDealTalonStack
-
-if sys.version_info > (3,):
-    xrange = range
 
 # ************************************************************************
 # *
@@ -118,7 +117,7 @@ class Shisen_RowStack(Mahjongg_RowStack):
         dx, dy = x2 - x1, y2 - y1
 
         a = []
-        for i in xrange(cols+2):
+        for i in range(cols+2):
             a.append([5]*(rows+2))
 
         def can_move(x, y, nx, ny, direct, d, direct_chng_cnt):
@@ -295,6 +294,9 @@ class Shisen_RowStack(Mahjongg_RowStack):
                                }
                               )
         game.canvas.update_idletasks()
+        if TOOLKIT == "kivy":
+            arrow.delete_deferred(sleep)
+            return
         game.sleep(sleep)
         if arrow is not None:
             arrow.delete()
@@ -349,12 +351,12 @@ class AbstractShisenGame(AbstractMahjonggGame):
         self.check_dist = l.CW*l.CW + l.CH*l.CH     # see _getClosestStack()
 
         #
-        self.cols = [[] for i in xrange(cols)]
+        self.cols = [[] for i in range(cols)]
         cl = range(cols)
         if dx > 0:
-            cl.reverse()
+            cl = reversed(cl)
         for col in cl:
-            for row in xrange(rows):
+            for row in range(rows):
                 x = l.XM + dxx + col * cardw
                 y = l.YM + dyy + row * cardh
                 stack = self.RowStack_Class(x, y, self)
@@ -368,8 +370,10 @@ class AbstractShisenGame(AbstractMahjonggGame):
 
         # create other stacks
         y = l.YM + dyy
-        s.foundations.append(Shisen_Foundation(-l.XS-self.canvas.xmargin,
-                                               y, self))
+        ivx = -l.XS-self.canvas.xmargin
+        if TOOLKIT == 'kivy':
+            ivx = -1000
+        s.foundations.append(Shisen_Foundation(ivx, y, self))
         self.texts.info = MfxCanvasText(self.canvas,
                                         self.width - l.XM - ti_width, y,
                                         anchor="nw", font=font)

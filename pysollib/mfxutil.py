@@ -22,14 +22,16 @@
 # ---------------------------------------------------------------------------##
 
 # imports
+import re
 import sys
+import six
 import os
 import time
 import locale
 import webbrowser
 from six import print_
 
-from pickle import Pickler, Unpickler, UnpicklingError
+from pickle import Pickler, Unpickler
 
 from pysollib.settings import PACKAGE, TOOLKIT
 
@@ -37,24 +39,22 @@ Image = ImageTk = ImageOps = None
 if TOOLKIT == 'tk':
     try:  # PIL
         from PIL import Image
-        from PIL import ImageTk
-        from PIL import ImageOps
+        from PIL import ImageTk  # noqa: F401
+        from PIL import ImageOps  # noqa: F401
     except ImportError:
         Image = None
     else:
         # for py2exe
-        from PIL import GifImagePlugin
-        from PIL import PngImagePlugin
-        from PIL import JpegImagePlugin
-        from PIL import BmpImagePlugin
-        from PIL import PpmImagePlugin
+        from PIL import GifImagePlugin  # noqa: F401
+        from PIL import PngImagePlugin  # noqa: F401
+        from PIL import JpegImagePlugin  # noqa: F401
+        from PIL import BmpImagePlugin  # noqa: F401
+        from PIL import PpmImagePlugin  # noqa: F401
         Image._initialized = 2
 USE_PIL = False
 if TOOLKIT == 'tk' and Image and Image.VERSION >= '1.1.7':
     USE_PIL = True
 
-if sys.version_info > (3,):
-    unicode = str
 # debug
 # Image = None
 # USE_PIL = False
@@ -79,13 +79,16 @@ def latin1_to_ascii(n):
     # return n
     n = n.encode('iso8859-1', 'replace')
     # FIXME: rewrite this for better speed
-    n = (n.replace("\xc4", "Ae")
-         .replace("\xd6", "Oe")
-         .replace("\xdc", "Ue")
-         .replace("\xe4", "ae")
-         .replace("\xf6", "oe")
-         .replace("\xfc", "ue"))
-    return n
+    return (n.replace("\xc4", "Ae")
+             .replace("\xd6", "Oe")
+             .replace("\xdc", "Ue")
+             .replace("\xe4", "ae")
+             .replace("\xf6", "oe")
+             .replace("\xfc", "ue"))
+
+
+def latin1_normalize(n):
+    return re.sub(r"[^\w]", "", latin1_to_ascii(n).lower())
 
 
 def format_time(t):
@@ -104,7 +107,10 @@ def print_err(s, level=1):
         ss = PACKAGE+': WARNING:'
     elif level == 2:
         ss = PACKAGE+': DEBUG WARNING:'
-    print_(ss, s.encode(locale.getpreferredencoding()), file=sys.stderr)
+    try:
+        print_(ss, s.encode(locale.getpreferredencoding()), file=sys.stderr)
+    except Exception:
+        print_(ss, s, file=sys.stderr)
     sys.stderr.flush()
 
 
@@ -122,6 +128,13 @@ def getusername():
 
 
 def getprefdir(package):
+
+    if (TOOLKIT == 'kivy'):
+        from pysollib.kivy.LApp import get_platform
+        plat = get_platform()
+        if plat == 'android':
+            os.environ['HOME'] = '/sdcard'
+
     if os.name == "nt":
         return win32_getprefdir(package)
     home = os.environ.get("HOME", "").strip()
@@ -144,7 +157,7 @@ if os.name == "posix":
 def win32_getusername():
     user = os.environ.get('USERNAME', '').strip()
     try:
-        user = unicode(user, locale.getpreferredencoding())
+        user = six.text_type(user, locale.getpreferredencoding())
     except Exception:
         user = ''
     return user
@@ -170,6 +183,9 @@ def win32_getprefdir(package):
 # ************************************************************************
 
 def destruct(obj):
+    if TOOLKIT == 'kivy':
+        return
+
     # assist in breaking circular references
     if obj is not None:
         for k in obj.__dict__.keys():
@@ -269,8 +285,7 @@ def pickle(obj, filename, protocol=0):
     f = None
     try:
         f = open(filename, "wb")
-        p = Pickler(f, protocol)
-        p.dump(obj)
+        Pickler(f, protocol).dump(obj)
         f.close()
         f = None
         # print "Pickled", filename
@@ -283,8 +298,7 @@ def unpickle(filename):
     f, obj = None, None
     try:
         f = open(filename, "rb")
-        p = Unpickler(f)
-        x = p.load()
+        x = Unpickler(f).load()
         f.close()
         f = None
         obj = x
@@ -305,5 +319,5 @@ def openURL(url):
     except OSError:                  # raised on windows if link is unreadable
         pass
     except Exception:
-        return 0
-    return 1
+        return False
+    return True

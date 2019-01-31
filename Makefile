@@ -5,7 +5,8 @@ override PYSOL_DEBUG=1
 
 PYSOLLIB_FILES=pysollib/tk/*.py pysollib/tile/*.py pysollib/*.py \
 	pysollib/games/*.py pysollib/games/special/*.py \
-	pysollib/games/ultra/*.py pysollib/games/mahjongg/*.py
+	pysollib/games/ultra/*.py pysollib/games/mahjongg/*.py \
+	pysollib/kivy/*.py
 
 .PHONY : all install dist all_games_html rules pot mo
 
@@ -16,13 +17,13 @@ install:
 	python setup.py install
 
 dist: all_games_html rules mo
-	python setup.py sdist
+	python3 setup.py sdist
 
 rpm: all_games_html rules mo
 	python setup.py bdist_rpm
 
 all_games_html:
-	PYTHONPATH=`pwd` ./scripts/all_games.py > docs/all_games.html
+	PYTHONPATH=`pwd` ./scripts/all_games.py html id doc/rules bare > docs/all_games.html
 
 rules:
 	export PYTHONPATH=`pwd`; (cd html-src && ./gen-html.py)
@@ -66,8 +67,9 @@ pretest:
 	@rm -f tests/individually-importing/*.py # To avoid stray files
 	python scripts/gen_individual_importing_tests.py
 
-TEST_ENV = PYTHONPATH="`pwd`:`pwd`/tests/lib"
-TEST_FILES = tests/style/*.t tests/board_gen/*.py tests/individually-importing/*.py
+TEST_ENV_PATH = "`pwd`:`pwd`/tests/lib"
+TEST_ENV = PYTHONPATH=$(TEST_ENV_PATH) PERL5LIB=$(TEST_ENV_PATH)
+TEST_FILES = tests/style/*.t tests/unit-generated/*.py tests/individually-importing/*.py
 
 define RUN_TESTS
 $(TEST_ENV) $1 $(TEST_FILES)

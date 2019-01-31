@@ -1,32 +1,32 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- mode: python; coding: koi8-r; -*-
 #
 
 import sys
 import os
-import re
 import time
 # from pprint import pprint
-import __builtin__
+from six.moves import builtins
 from pysollib.mygettext import fix_gettext
 import pysollib.games
 import pysollib.games.special
 import pysollib.games.ultra
-import pysollib.games.mahjongg
+import pysollib.games.mahjongg  # noqa: F401
 
 from pysollib.gamedb import GAME_DB
 from pysollib.gamedb import GI
-from pysollib.mfxutil import latin1_to_ascii
+from pysollib.mfxutil import latin1_normalize
 from pysollib.resource import CSI
 os.environ['LANG'] = 'C'
-__builtin__.__dict__['_'] = lambda x: x
-__builtin__.__dict__['n_'] = lambda x: x
+builtins.__dict__['_'] = lambda x: x
+builtins.__dict__['n_'] = lambda x: x
 
 pysollib_path = os.path.join(sys.path[0], '..')
 sys.path[0] = os.path.normpath(pysollib_path)
 rules_dir = os.path.normpath(os.path.join(pysollib_path, 'data/html/rules'))
 # pprint(sys.path)
 # print rules_dir
+html_mode = None
 
 fix_gettext()
 
@@ -34,11 +34,7 @@ fix_gettext()
 def getGameRulesFilename(n):
     if n.startswith('Mahjongg'):
         return 'mahjongg.html'
-    # n = re.sub(r"[\[\(].*$", "", n)
-    n = latin1_to_ascii(n)
-    n = re.sub(r"[^\w]", "", n)
-    n = n.lower() + ".html"
-    return n
+    return latin1_normalize(n) + '.html'
 
 
 GAME_BY_TYPE = {
@@ -117,7 +113,7 @@ def by_type():
             games_by_type[gt] += 1
         else:
             games_by_type[gt] = 1
-    games_by_type_list = games_by_type.items()
+    games_by_type_list = list(games_by_type.items())
     games_by_type_list.sort(key=lambda x: x[0])
     #  print '<table border="2"><tr><th>Name</th><th>Number</th></tr>'
     #  for i in games_by_type_list:
@@ -132,8 +128,10 @@ def by_type():
 
 def all_games(sort_by='id'):
     # rules_dir = 'rules'
-    print('''<table border="2">
+    print('''<table><thead>
 <tr><th>ID</th><th>Name</th><th>Alternate names</th><th>Type</th></tr>
+</thead>
+<tbody>
 ''')
 
     if sort_by == 'id':
@@ -150,36 +148,54 @@ def all_games(sort_by='id'):
         gt = CSI.TYPE_NAME[gi.category]
         if gt == 'French':
             gt = 'French (%s)' % GAME_BY_TYPE[gi.si.game_type]
-        name = gi.name.encode('utf-8')
-        altnames = '<br>'.join(gi.altnames).encode('utf-8')
+        name = gi.name
+        altnames = '<br>'.join(gi.altnames)
         fn = os.path.join(rules_dir, rules_fn)
         if 1 and os.path.exists(fn):
-            print('''<tr><td>%s</td><td>
-<a href="%s" title="Rules for this game">%s</a>
-</td><td>%s</td><td>%s</td></tr>
+            print('''<tr>
+<td>%s</td>
+<td> <a href="%s" title="Rules for this game">%s</a> </td>
+<td>%s</td>
+<td>%s</td>
+</tr>
 ''' % (id, fn, name, altnames, gt))
         else:
-            print('''<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
+            print('''<tr>
+<td>%s</td>
+<td>%s</td>
+<td>%s</td>
+<td>%s</td>
+</tr>
 ''' % (id, name, altnames, gt))
-    print('</table>')
+    print('</tbody></table>')
 
 
 def create_html(sort_by):
-    print('''<html>
+    if html_mode != 'bare':
+        print('''<!DOCTYPE html><html lang="en-US">
 <head>
   <title>PySolFC - List of solitaire games</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 </head>
 <body>
 ''')
-    print('<b>Total games: %d</b>' % len(GAME_DB.getGamesIdSortedById()))
+    print('<strong>Total games: %d</strong>' %
+          len(GAME_DB.getGamesIdSortedById()))
+    print('<section>')
     print('<h2>Categories</h2>')
     by_category()
+    print('</section>')
+    print('<section>')
     print('<h2>Types</h2>')
     by_type()
+    print('</section>')
     # print '<h2>All games</h2>'
+    print('<section>')
+    print('<h2>The games</h2>')
     all_games(sort_by)
-    print('</body></html>')
+    print('</section>')
+    if html_mode != 'bare':
+        print('</body></html>')
 
 
 def get_text():
@@ -194,7 +210,7 @@ def get_text():
             games_list[gi.short_name] = ''
         for n in gi.altnames:
             games_list[n] = ''
-    games_list = games_list.keys()
+    games_list = list(games_list.keys())
     games_list.sort()
     print('''\
 # SOME DESCRIPTIVE TITLE.
@@ -215,7 +231,7 @@ msgstr ""
 
 ''' % (time.asctime(), sys.argv[0]))
     for g in games_list:
-        print('msgid "%s"\nmsgstr ""\n' % g.encode('utf-8'))
+        print('msgid "%s"\nmsgstr ""\n' % g)
 
 
 def old_plain_text():
@@ -232,7 +248,7 @@ def old_plain_text():
     games_list = games_list.keys()
     games_list.sort()
     for g in games_list:
-        print(g.encode('utf-8'))
+        print(g)
 
 
 def plain_text():
@@ -244,9 +260,9 @@ def plain_text():
             # gc = gi.gameclass
             # h = gc.Hint_Class is None and 'None' or gc.Hint_Class.__name__
             # print gi.name.encode('utf-8'), h
-            print(gi.name.encode('utf-8'))
+            print(gi.name)
             for n in gi.altnames:
-                print(n.encode('utf-8'))
+                print(n)
             # name = gi.name.lower()
             # name = re.sub('\W', '', name)
             # print id, name #, gi.si.game_type,
@@ -259,6 +275,8 @@ if len(sys.argv) < 2 or sys.argv[1] == 'html':
         sort_by = sys.argv[2]
     if len(sys.argv) > 3:
         rules_dir = sys.argv[3]
+    if len(sys.argv) > 4:
+        html_mode = sys.argv[4]
     create_html(sort_by)
 elif sys.argv[1] == 'gettext':
     get_text()

@@ -25,6 +25,9 @@
 # imports
 import os
 
+# settings
+from pysollib.settings import TOOLKIT
+
 # PySol imports
 from pysollib.resource import CSI
 from pysollib.mfxutil import Image, ImageTk, USE_PIL
@@ -83,12 +86,19 @@ class Images:
         # print '__loadCard:', filename
         f = os.path.join(self.cs.dir, filename)
         if not os.path.exists(f):
+            print('card image path %s does not exist' % (f))
             return None
         try:
             img = loadImage(file=f)
         except Exception:
             return None
-        w, h = img.width(), img.height()
+
+        if TOOLKIT == 'kivy':
+            w = img.texture.size[0]
+            h = img.texture.size[1]
+        else:
+            w, h = img.width(), img.height()
+
         if self.CARDW < 0:
             self.CARDW, self.CARDH = w, h
         else:
@@ -105,10 +115,10 @@ class Images:
             imagedir = self.d.findDir(cs_type, d)
         except Exception:
             pass
-        if not USE_PIL or imagedir is None:
+        if (not USE_PIL and TOOLKIT is not 'kivy') or imagedir is None:
             # load image
             img = self.__loadCard(filename+self.cs.ext, check_w, check_h)
-            if USE_PIL:
+            if USE_PIL and img is not None:
                 # we have no bottom images
                 # (data/images/cards/bottoms/<cs_type>)
                 img = img.resize(self._xfactor, self._yfactor)
@@ -139,11 +149,11 @@ class Images:
         # bottoms / letters
         bottom = None
         neg_bottom = None
-        while len(self._bottom_positive) < 7:
+        while len(self._bottom_positive) < max(7, self.cs.nbottoms):
             if bottom is None:
                 bottom = createImage(cw, ch, fill=None, outline="#000000")
             self._bottom_positive.append(bottom)
-        while len(self._bottom_negative) < 7:
+        while len(self._bottom_negative) < max(7, self.cs.nbottoms):
             if neg_bottom is None:
                 neg_bottom = createImage(cw, ch, fill=None, outline="#ffffff")
             self._bottom_negative.append(neg_bottom)
@@ -182,14 +192,16 @@ class Images:
         # load bottoms
         for i in range(self.cs.nbottoms):
             name = "bottom%02d" % (i + 1)
-            self._bottom_positive.append(
-                self.__loadBottom(name, color='black'))
+            bottom = self.__loadBottom(name, color='black')
+            if bottom is not None:
+                self._bottom_positive.append(bottom)
             if progress:
                 progress.update(step=pstep)
             # load negative bottoms
             name = "bottom%02d-n" % (i + 1)
-            self._bottom_negative.append(
-                self.__loadBottom(name, color='white'))
+            bottom = self.__loadBottom(name, color='white')
+            if bottom is not None:
+                self._bottom_negative.append(bottom)
             if progress:
                 progress.update(step=pstep)
         # load letters
@@ -251,6 +263,8 @@ class Images:
         return self._bottom[0]
 
     def getBlankBottom(self):
+        if TOOLKIT is 'kivy':
+            return self._bottom[0]
         return self._blank_bottom
 
     def getSuitBottom(self, suit=-1):
@@ -424,11 +438,13 @@ class Images:
         self._bottom_positive = []
         for i in range(self.cs.nbottoms):
             name = "bottom%02d" % (i + 1)
-            self._bottom_positive.append(
-                self.__loadBottom(name, color='black'))
+            bottom = self.__loadBottom(name, color='black')
+            if bottom is not None:
+                self._bottom_positive.append(bottom)
             name = "bottom%02d-n" % (i + 1)
-            self._bottom_negative.append(
-                self.__loadBottom(name, color='white'))
+            bottom = self.__loadBottom(name, color='white')
+            if bottom is not None:
+                self._bottom_negative.append(bottom)
         # letters
         self._letter_positive = []
         self._letter_negative = []

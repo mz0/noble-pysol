@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import pysollib.settings
@@ -22,7 +22,7 @@ prog_version = pysollib.settings.VERSION
 
 out = open('setup.iss', 'w')
 
-print >> out, '''
+print('''
 [Setup]
 AppName=%(prog_name)s
 AppVerName=%(prog_name)s v.%(prog_version)s
@@ -34,20 +34,47 @@ SolidCompression=yes
 SourceDir=dist
 OutputDir=.
 OutputBaseFilename=PySolFC_%(prog_version)s_setup
+DisableWelcomePage=no
+DisableDirPage=no
+DisableProgramGroupPage=no
 
 [Icons]
 Name: "{group}\\%(prog_name)s"; Filename: "{app}\\pysol.exe"
 Name: "{group}\\Uninstall %(prog_name)s"; Filename: "{uninstallexe}"
 Name: "{userdesktop}\\%(prog_name)s"; Filename: "{app}\\pysol.exe"
-''' % vars()
+''' % vars(), file=out)
 
-print >> out, '[Dirs]'
+print('[Dirs]', file=out)
 for d in dirs_list[1:]:
-    print >> out, 'Name: "{app}%s"' % d.replace('dist', '')
+    print('Name: "{app}%s"' % d.replace('dist', ''), file=out)
 
-print >> out
-print >> out, '[Files]'
-print >> out, 'Source: "*"; DestDir: "{app}"'
+print(file=out)
+print('[Files]', file=out)
+print('Source: "*"; DestDir: "{app}"', file=out)
 for d in files_list[1:]:
     d = d.replace('dist\\', '')
-    print >> out, 'Source: "%s\\*"; DestDir: "{app}\\%s"' % (d, d)
+    print('Source: "%s\\*"; DestDir: "{app}\\%s"' % (d, d), file=out)
+
+print('Source: "..\\vcredist_x86.exe"; DestDir: {tmp}; \
+Flags: deleteafterinstall', file=out)
+print('[Run]\n\
+Filename: {tmp}\\vcredist_x86.exe; \
+Parameters: "/passive /promptrestart /showfinalerror"; \
+StatusMsg: "Installing MS Visual C++ 2010 SP1 Redistributable Package (x86)"; \
+Check: not isVCInstalled', file=out)
+print('''
+[Code]
+function isVCInstalled: Boolean;
+var
+  find: TFindRec;
+begin
+  if FindFirst(ExpandConstant('{sys}\\msvcr100.dll'), find) then begin
+    Result := True;
+    FindClose(find);
+  end else begin
+    Result := False;
+  end;
+ end;
+''', file=out)
+
+out.close()

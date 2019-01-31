@@ -23,18 +23,18 @@
 
 
 # imports
-import sys
 import time
 import math
 import traceback
+import six
 
 from pysollib.mygettext import _
-
 from gettext import ungettext
 from six import BytesIO
+from six.moves import range
+from pickle import Pickler, Unpickler, UnpicklingError
 
 # PySol imports
-from pysollib.mfxutil import Pickler, Unpickler, UnpicklingError
 from pysollib.mfxutil import Image, ImageTk, USE_PIL
 from pysollib.mfxutil import destruct, Struct, SubclassResponsibility
 from pysollib.mfxutil import uclock, usleep
@@ -52,19 +52,19 @@ from pysollib.pysoltk import after, after_idle, after_cancel
 from pysollib.pysoltk import MfxMessageDialog, MfxExceptionDialog
 from pysollib.pysoltk import MfxCanvasText, MfxCanvasLine, MfxCanvasRectangle
 from pysollib.pysoltk import Card
-from pysollib.ui.tktile.solverdialog import reset_solver_dialog
-from pysollib.move import AMoveMove, AFlipMove, AFlipAndMoveMove
-from pysollib.move import ASingleFlipMove, ATurnStackMove
-from pysollib.move import ANextRoundMove, ASaveSeedMove, AShuffleStackMove
-from pysollib.move import AUpdateStackMove, AFlipAllMove, ASaveStateMove
-from pysollib.move import ASingleCardMove
-from pysollib.hint import DefaultHint
-from pysollib.help import help_about
+if TOOLKIT == 'tk':
+    from pysollib.ui.tktile.solverdialog import reset_solver_dialog
+else:
+    from pysollib.pysoltk import reset_solver_dialog
 
-if sys.version_info > (3,):
-    basestring = str
-    long = int
-    xrange = range
+if True:  # This prevents from travis 'error' E402.
+    from pysollib.move import AMoveMove, AFlipMove, AFlipAndMoveMove
+    from pysollib.move import ASingleFlipMove, ATurnStackMove
+    from pysollib.move import ANextRoundMove, ASaveSeedMove, AShuffleStackMove
+    from pysollib.move import AUpdateStackMove, AFlipAllMove, ASaveStateMove
+    from pysollib.move import ASingleCardMove
+    from pysollib.hint import DefaultHint
+    from pysollib.help import help_about
 
 PLAY_TIME_TIMEOUT = 200
 
@@ -484,20 +484,23 @@ class Game(object):
     #
 
     # start a new name
-    def newGame(self, random=None, restart=0, autoplay=1):
+    def newGame(self, random=None, restart=0, autoplay=1, shuffle=True,
+                dealer=None):
         # print 'Game.newGame'
         self.finished = False
         old_busy, self.busy = self.busy, 1
         self.setCursor(cursor=CURSOR_WATCH)
         self.stopWinAnimation()
         self.disableMenus()
-        self.redealAnimation()
+        if shuffle:
+            self.redealAnimation()
         self.reset(restart=restart)
         self.resetGame()
         self.createRandom(random)
         # print self.random, self.random.__dict__
-        self.shuffle()
-        assert len(self.s.talon.cards) == self.gameinfo.ncards
+        if shuffle:
+            self.shuffle()
+            assert len(self.s.talon.cards) == self.gameinfo.ncards
         for stack in self.allstacks:
             stack.updateText()
         self.updateText()
@@ -523,7 +526,10 @@ class Game(object):
         self.stopSamples()
         # let's go
         self.moves.state = self.S_INIT
-        self.startGame()
+        if dealer:
+            dealer()
+        else:
+            self.startGame()
         self.startMoves()
         for stack in self.allstacks:
             stack.updateText()
@@ -638,14 +644,13 @@ class Game(object):
     def nextGameFlags(self, id, random=None):
         f = 0
         if id != self.id:
-            f = f | 1
+            f |= 1
         if self.app.nextgame.cardset is not self.app.cardset:
-            f = f | 2
+            f |= 2
         if random is not None:
-            if random.__class__ is not self.random.__class__:
-                f = f | 16
-            elif random.initial_seed != self.random.initial_seed:
-                f = f | 16
+            if ((random.__class__ is not self.random.__class__) or
+                    random.initial_seed != self.random.initial_seed):
+                f |= 16
         return f
 
     # quit to outer mainloop in class App, possibly restarting
@@ -655,10 +660,9 @@ class Game(object):
         self.updateTime()
         if bookmark:
             id, random = self.id, self.random
-            file = BytesIO()
-            p = Pickler(file, 1)
-            self._dumpGame(p, bookmark=1)
-            self.app.nextgame.bookmark = file.getvalue()
+            f = BytesIO()
+            self._dumpGame(Pickler(f, 1), bookmark=1)
+            self.app.nextgame.bookmark = f.getvalue()
         if id > 0:
             self.setCursor(cursor=CURSOR_WATCH)
         self.app.nextgame.id = id
@@ -779,7 +783,7 @@ class Game(object):
                 self.app.gamerandom.setstate(state)
             # we want at least 17 digits
             seed = self.app.gamerandom.randrange(
-                long('10000000000000000'),
+                int('10000000000000000'),
                 PysolRandom.MAX_SEED
             )
             self.random = PysolRandom(seed)
@@ -849,27 +853,21 @@ class Game(object):
         if progress:
             pstep = (100.0 - progress.percent) / gi.ncards
         cards = []
-        id = 0
+        id = [0]
         x, y = self.s.talon.x, self.s.talon.y
         for deck in range(gi.decks):
-            for suit in gi.suits:
-                for rank in gi.ranks:
-                    card = self._createCard(id, deck, suit, rank, x=x, y=y)
+            def _iter_ranks(ranks, suit):
+                for rank in ranks:
+                    card = self._createCard(id[0], deck, suit, rank, x=x, y=y)
                     if card is None:
                         continue
                     cards.append(card)
-                    id = id + 1
+                    id[0] += 1
                     if progress:
                         progress.update(step=pstep)
-            trump_suit = len(gi.suits)
-            for rank in gi.trumps:
-                card = self._createCard(id, deck, trump_suit, rank, x=x, y=y)
-                if card is None:
-                    continue
-                cards.append(card)
-                id = id + 1
-                if progress:
-                    progress.update(step=pstep)
+            for suit in gi.suits:
+                _iter_ranks(gi.ranks, suit)
+            _iter_ranks(gi.trumps, len(gi.suits))
         if progress:
             progress.update(percent=100)
         assert len(cards) == gi.ncards
@@ -930,22 +928,19 @@ class Game(object):
         cards, scards = self._shuffleHookMoveSorter(cards, func, ncards)
         return scards + cards
 
-    def _shuffleHookMoveSorter(self, cards, func, ncards):
-        # note that we reverse the cards, so that smaller sort_orders
-        # will be nearer to the top of the Talon
-        sitems, i = [], len(cards)
-        for c in cards[:]:
-            select, sort_order = func(c)
+    def _shuffleHookMoveSorter(self, cards, cb, ncards):
+        extracted, i, new = [], len(cards), []
+        for c in cards:
+            select, ord_ = cb(c)
             if select:
-                cards.remove(c)
-                sitems.append((sort_order, i, c))
-                if len(sitems) >= ncards:
+                extracted.append((ord_, i, c))
+                if len(extracted) >= ncards:
+                    new += cards[(len(cards)-i+1):]
                     break
-            i = i - 1
-        sitems.sort()
-        sitems.reverse()
-        scards = [item[2] for item in sitems]
-        return cards, scards
+            else:
+                new.append(c)
+            i -= 1
+        return new, [x[2] for x in reversed(sorted(extracted))]
 
     #
     # menu support
@@ -1041,7 +1036,7 @@ class Game(object):
                     # self.top.wm_title("%s - %s"
                     # % (TITLE, self.getTitleName()))
                     continue
-                if isinstance(v, basestring):
+                if isinstance(v, six.string_types):
                     if sb:
                         sb.updateText(gamenumber=v)
                     # self.top.wm_title("%s - %s %s" % (TITLE,
@@ -1083,7 +1078,7 @@ class Game(object):
                     if tb:
                         tb.updateText(player=_("Player\n"))
                     continue
-                if isinstance(v, basestring):
+                if isinstance(v, six.string_types):
                     if tb:
                         # if self.app.opt.toolbar_size:
                         if self.app.toolbar.getSize():
@@ -1105,7 +1100,7 @@ class Game(object):
                 if v is None:
                     if sb:
                         sb.updateText(time='')
-                if isinstance(v, basestring):
+                if isinstance(v, six.string_types):
                     if sb:
                         sb.updateText(time=v)
                 continue
@@ -1185,6 +1180,10 @@ class Game(object):
     #
 
     def areYouSure(self, title=None, text=None, confirm=-1, default=0):
+
+        if TOOLKIT == 'kivy':
+            return True
+
         if self.preview:
             return True
         if confirm < 0:
@@ -1230,14 +1229,14 @@ class Game(object):
             frames = 8
         assert frames >= 2
         if self.app.opt.animations == 3:        # medium
-            frames = frames * 3
-            SPF = SPF / 2
+            frames *= 3
+            SPF /= 2
         elif self.app.opt.animations == 4:      # slow
-            frames = frames * 8
-            SPF = SPF / 2
+            frames *= 8
+            SPF /= 2
         elif self.app.opt.animations == 5:      # very slow
-            frames = frames * 16
-            SPF = SPF / 2
+            frames *= 16
+            SPF /= 2
         elif self.app.opt.animations == 10:
             # this is used internally in game preview to speed up
             # the initial dealing
@@ -1247,6 +1246,15 @@ class Game(object):
             shadow = self.app.opt.shadow
         shadows = ()
         # start animation
+        if TOOLKIT == 'kivy':
+            c0 = cards[0]
+            dx, dy = (x - c0.x), (y - c0.y)
+            for card in cards:
+                base = float(self.app.opt.animations)
+                duration = base*0.1
+                card.animatedMove(dx, dy, duration)
+            return
+
         if tkraise:
             for card in cards:
                 card.tkraise()
@@ -1478,12 +1486,8 @@ class Game(object):
             xpos = x0 + int(xmid + r * math.cos(ang) - iw / 2.0)
             ypos = y0 + int(ymid + r * math.sin(ang) - ih / 2.0)
 
-            if img_index & 1:
-                k = math.sin(f * 2.0 * math.pi)
-            else:
-                k = math.cos(f * 2.0 * math.pi)
-            k = k * k
-            k = max(0.4, k)
+            k = (math.sin if img_index & 1 else math.cos)(f * 2.0 * math.pi)
+            k = max(0.4, k ** 2)
             round_k = int(round(k*100))
             if img_index not in saved_images:
                 saved_images[img_index] = {}
@@ -1549,7 +1553,7 @@ class Game(object):
         cards = self.cards[:]
         scards = []
         ncards = min(10, len(cards))
-        for i in xrange(ncards):
+        for i in range(ncards):
             c = self.app.miscrandom.choice(cards)
             scards.append(c)
             cards.remove(c)
@@ -1885,6 +1889,10 @@ You have reached
             return 1
         if self.demo:
             return status
+        if TOOLKIT == 'kivy':
+            if not self.app.opt.display_win_message:
+                return 1
+            self.top.waitAnimation()
         if status == 2:
             top_msg = self.updateStats()
             time = self.getTime()
@@ -1939,6 +1947,8 @@ Congratulations, you did it !
                 text=_("\nGame finished, but not without my help...\n"),
                 strings=(_("&New game"), _("&Restart"), _("&Cancel")))
         self.updateMenus()
+        if TOOLKIT == 'kivy':
+            return 1
         if d.status == 0 and d.button == 0:
             # new game
             self.endGame()
@@ -2161,6 +2171,11 @@ Congratulations, you did it !
                                        width=4, fill=None, outline=color)
                 if tkraise:
                     r.tkraise(c2.item)
+            elif TOOLKIT == 'kivy':
+                r = MfxCanvasRectangle(self.canvas, x1, y1, x2, y2,
+                                       width=4, fill=None, outline=color)
+                if tkraise:
+                    r.tkraise(c2.item)
             elif TOOLKIT == 'gtk':
                 r = MfxCanvasRectangle(self.canvas, x1, y1, x2, y2,
                                        width=4, fill=None, outline=color,
@@ -2204,6 +2219,12 @@ Congratulations, you did it !
         x1, y1 = x+w-width//2-xmargin, y+h-width//2-ymargin
         r = MfxCanvasRectangle(self.canvas, x0, y0, x1, y1,
                                width=width, fill=None, outline=color)
+
+        if TOOLKIT == "kivy":
+            r.canvas.canvas.ask_update()
+            r.delete_deferred(self.app.opt.timeouts['highlight_cards'])
+            return
+
         self.canvas.update_idletasks()
         self.sleep(self.app.opt.timeouts['highlight_cards'])
         r.delete()
@@ -2412,7 +2433,7 @@ Congratulations, you did it !
             info = 0
         self.drawHintArrow(from_stack, to_stack, ncards, sleep)
         if info:
-            self.app.statusbar.configLabel("info", text="", fg="# 000000")
+            self.app.statusbar.configLabel("info", text="", fg="#000000")
         return h
 
     def drawHintArrow(self, from_stack, to_stack, ncards, sleep):
@@ -2440,6 +2461,10 @@ Congratulations, you did it !
                               fill=self.app.opt.colors['hintarrow'],
                               arrow="last", arrowshape=(30, 30, 10))
         self.canvas.update_idletasks()
+        # wait
+        if TOOLKIT == "kivy":
+            arrow.delete_deferred(sleep)
+            return
         # wait
         self.sleep(sleep)
         # delete the hint
@@ -2950,11 +2975,8 @@ Congratulations, you did it !
         if self.moves.index == 0:
             return
         self.moves.index -= 1
-        m = self.moves.history[self.moves.index]
-        m = m[:]
-        m.reverse()
         self.moves.state = self.S_UNDO
-        for atomic_move in m:
+        for atomic_move in reversed(self.moves.history[self.moves.index]):
             atomic_move.undo(self)
         self.moves.state = self.S_PLAY
         self.stats.undo_moves += 1
@@ -3017,11 +3039,10 @@ Congratulations, you did it !
                     _("Set bookmark"),
                     _("Replace existing bookmark %d ?") % (n+1)):
                 return 0
-        file = BytesIO()
-        p = Pickler(file, 1)
+        f = BytesIO()
         try:
-            self._dumpGame(p, bookmark=2)
-            bm = (file.getvalue(), self.moves.index)
+            self._dumpGame(Pickler(f, 1), bookmark=2)
+            bm = (f.getvalue(), self.moves.index)
         except Exception:
             pass
         else:
@@ -3077,7 +3098,7 @@ Congratulations, you did it !
         try:
             game = self._loadGame(filename, self.app)
             game.gstats.holded = 0
-        except AssertionError as ex:
+        except AssertionError:
             self.updateMenus()
             self.setCursor(cursor=self.app.top_cursor)
             MfxMessageDialog(
@@ -3140,8 +3161,7 @@ Please report this bug."""))
         f = None
         try:
             f = open(filename, "rb")
-            p = Unpickler(f)
-            game = self._undumpGame(p, app)
+            game = self._undumpGame(Unpickler(f), app)
             game.gstats.loaded = game.gstats.loaded + 1
         finally:
             if f:
@@ -3193,7 +3213,7 @@ in the current implementation.''') % version)
         game.version = version
         game.version_tuple = version_tuple
         #
-        initial_seed = random__long2str(pload(long))
+        initial_seed = random__long2str(pload(int))
         game.random = constructRandom(initial_seed)
         state = pload()
         game.random.setstate(state)
@@ -3247,8 +3267,7 @@ in the current implementation.''') % version)
             if not self.canSaveGame():
                 raise Exception("Cannot save this game.")
             f = open(filename, "wb")
-            p = Pickler(f, protocol)
-            self._dumpGame(p)
+            self._dumpGame(Pickler(f, protocol))
         finally:
             if f:
                 f.close()

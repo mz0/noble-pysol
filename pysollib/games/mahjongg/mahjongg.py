@@ -22,7 +22,7 @@
 # ---------------------------------------------------------------------------
 
 # Imports
-import sys
+from six.moves import range
 import re
 import time
 from gettext import ungettext
@@ -45,15 +45,12 @@ from pysollib.stack import \
         InitialDealTalonStack, \
         OpenStack
 
-if sys.version_info > (3,):
-    xrange = range
-
 
 def factorial(x):
     if x <= 1:
         return 1
     a = 1
-    for i in xrange(x):
+    for i in range(x):
         a *= (i+1)
     return a
 
@@ -214,6 +211,15 @@ class Mahjongg_RowStack(OpenStack):
             if rows:
                 self.group.lower(rows[0].group)
                 return
+        elif TOOLKIT == 'kivy':
+            rows = [s for s in self.game.s.rows[:self.id] if s.cards]
+            if rows:
+                # self.group.tkraise(rows[-1].group)
+                return
+            rows = [s for s in self.game.s.rows[self.id+1:] if s.cards]
+            if rows:
+                # self.group.lower(rows[0].group)
+                return
         elif TOOLKIT == 'gtk':
             # FIXME (this is very slow)
             for s in self.game.s.rows[self.id+1:]:
@@ -273,6 +279,12 @@ class Mahjongg_RowStack(OpenStack):
                 self._stopDrag()
                 # this code actually moves the tiles
                 from_stack.playMoveMove(1, self, frames=0, sound=True)
+                if TOOLKIT == 'kivy':
+                    if drag.shade_img:
+                        # drag.shade_img.dtag(drag.shade_stack.group)
+                        drag.shade_img.delete()
+                        # game.canvas.delete(drag.shade_img)
+                        drag.shade_img = None
                 return 1
         drag.stack = self
         self.game.playSample("startdrag")
@@ -331,7 +343,7 @@ class AbstractMahjonggGame(Game):
         t = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
         for i in range(1, len(L), 3):
             n = t.find(L[i])
-            level, height = n / 7, n % 7 + 1
+            level, height = n // 7, n % 7 + 1
             tx = t.find(L[i+1])
             ty = t.find(L[i+2])
             assert n >= 0 and tx >= 0 and ty >= 0
@@ -517,6 +529,9 @@ class AbstractMahjonggGame(Game):
                     if TOOLKIT == 'tk':
                         x = -l.XS-self.canvas.xmargin
                         y = l.YM+dyy
+                    elif TOOLKIT == 'kivy':
+                        x = -1000
+                        y = l.YM+dyy
                     elif TOOLKIT == 'gtk':
                         # FIXME
                         x = self.width - l.XS
@@ -584,7 +599,7 @@ class AbstractMahjonggGame(Game):
             c1 = cards[0]
             del cards[0]
             c2 = None
-            for i in xrange(len(cards)):
+            for i in range(len(cards)):
                 if self.cardsMatch(c1, cards[i]):
                     c2 = cards[i]
                     del cards[i]
@@ -599,7 +614,7 @@ class AbstractMahjonggGame(Game):
             #
             i = factorial(len(free_stacks))//2//factorial(len(free_stacks)-2)
             old_pairs = []
-            for j in xrange(i):
+            for j in range(i):
                 nc = new_cards[:]
                 while True:
                     # create uniq pair
@@ -682,7 +697,7 @@ class AbstractMahjonggGame(Game):
             c1 = cards[0]
             del cards[0]
             c2 = None
-            for i in xrange(len(cards)):
+            for i in range(len(cards)):
                 if self.cardsMatch(c1, cards[i]):
                     c2 = cards[i]
                     del cards[i]
@@ -699,7 +714,7 @@ class AbstractMahjonggGame(Game):
             old_pairs = []
             i = factorial(len(suitable_stacks))//2 \
                 // factorial(len(suitable_stacks)-2)
-            for j in xrange(i):
+            for j in range(i):
                 if iters[0] > max_iters:
                     return None
                 if time.time() - start_time > max_time:
@@ -785,11 +800,13 @@ class AbstractMahjonggGame(Game):
 
         new_cards = self._shuffleHook2(rows, cards)
         if new_cards is None:
-            MfxMessageDialog(self.top, title=_('Warning'),
-                             text=_('''\
+            if TOOLKIT != 'kivy':
+                MfxMessageDialog(self.top, title=_('Warning'),
+                                 text=_('''\
 Sorry, I can\'t find
 a solvable configuration.'''),
-                             bitmap='warning')
+                                 bitmap='warning')
+
             self.leaveState(old_state)
             # self.finishMove()
             # hack
@@ -862,7 +879,7 @@ a solvable configuration.'''),
             f = ungettext('%d Free\nMatching\nPair',
                           '%d Free\nMatching\nPairs',
                           f) % f
-        t = sum([len(i.cards) for i in self.s.foundations])
+        t = sum([len(ii.cards) for ii in self.s.foundations])
         r1 = ungettext('%d\nTile\nRemoved\n\n',
                        '%d\nTiles\nRemoved\n\n',
                        t) % t
@@ -1006,7 +1023,7 @@ def r(id, short_name, name=None, ncards=144, layout=None):
     assert layout
     if not name:
         name = "Mahjongg " + short_name
-    classname = re.sub('\W', '', name)
+    classname = re.sub('\\W', '', name)
     # create class
     gameclass = type(classname, (AbstractMahjonggGame,), {})
     gameclass.L = layout

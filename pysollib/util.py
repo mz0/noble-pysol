@@ -24,9 +24,10 @@
 # imports
 import sys
 import os
+import site
 
 # PySol imports
-from pysollib.settings import DATA_DIRS
+from pysollib.settings import DATA_DIRS, TOOLKIT
 from pysollib.mfxutil import Image
 
 from pysollib.mygettext import _
@@ -64,7 +65,7 @@ VARIABLE_REDEALS = -2
 
 CARDSET = _("cardset")
 
-IMAGE_EXTENSIONS = (".gif", ".ppm",)
+IMAGE_EXTENSIONS = (".gif", ".ppm", ".png")
 if 1 and os.name == "nt":
     IMAGE_EXTENSIONS = (".png", ".gif", ".ppm", ".jpg",)
     pass
@@ -72,10 +73,13 @@ if 1 and os.name == "nt":
 if Image:
     IMAGE_EXTENSIONS = (".png", ".gif", ".jpg", ".ppm", ".bmp")
 
+if TOOLKIT == 'kivy':
+    IMAGE_EXTENSIONS = (".png", ".bmp", ".ppm", ".jpg", ".tiff")
 
 # ************************************************************************
 # * DataLoader
 # ************************************************************************
+
 
 class DataLoader:
     def __init__(self, argv0, filenames, path=[]):
@@ -97,6 +101,11 @@ class DataLoader:
         path.append(os.path.join(sys.path[0], "pysollib", "data"))
         # from settings.py
         path.extend(DATA_DIRS)
+        # itz 2018-10-21 in case of venv installation
+        # (or even homedir installation), path[0] will be quite wrong.
+        # Just directly use the location where setup.py puts the data.
+        for pref in site.PREFIXES:
+            path.append(os.path.join(pref, 'share', 'PySolFC'))
         # check path for valid directories
         self.path = []
         for p in path:
@@ -107,20 +116,12 @@ class DataLoader:
                 self.path.append(np)
         # now try to find all filenames along path
         for p in self.path:
-            n = 0
-            for filename in filenames:
-                f = os.path.join(p, filename)
-                if os.path.isfile(f):
-                    n = n + 1
-                else:
-                    break
-            if n == len(filenames):
+            if all(os.path.isfile(os.path.join(p, fn)) for fn in filenames):
                 self.dir = p
                 break
         else:
             raise OSError(str(argv0)+": DataLoader could not find " +
                           str(filenames))
-        # print path, self.path, self.dir
 
     def __findFile(self, func, filename, subdirs=None, do_raise=1):
         if subdirs is None:
@@ -148,16 +149,10 @@ class DataLoader:
         raise OSError("DataLoader could not find image "+filename +
                       " in "+self.dir+" "+str(subdirs))
 
-    def findIcon(self, filename=None, subdirs=None):
-        if not filename:
-            # filename = PACKAGE.lower()
-            filename = 'pysol'
+    def findIcon(self, filename='pysol', subdirs=None):
         root, ext = os.path.splitext(filename)
         if not ext:
-            if os.name == 'nt':
-                filename = filename + ".ico"
-            else:
-                filename = filename + ".xbm"
+            filename += ('.ico' if os.name == 'nt' else '.xbm')
         return self.findFile(filename, subdirs)
 
     def findDir(self, filename, subdirs=None):

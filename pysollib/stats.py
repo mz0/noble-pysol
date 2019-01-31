@@ -21,19 +21,14 @@
 #
 # ---------------------------------------------------------------------------##
 
-
 # imports
-import sys
+from six.moves import range
 import time
 
 # PySol imports
 from pysollib.mfxutil import format_time
 from pysollib.gamedb import GI
 from pysollib.mygettext import _
-
-
-if sys.version_info > (3,):
-    xrange = range
 
 # ************************************************************************
 # *
@@ -68,15 +63,13 @@ class PysolStatsFormatter:
         t_won, tlost, tgames, ttime, tmoves = 0, 0, 0, 0, 0
         for id in g:
             won, lost, time, moves = app.stats.getFullStats(player, id)
-            if won > 0 or lost > 0 or id == app.game.id:
+            tot = won + lost
+            if tot > 0 or id == app.game.id:
                 # yield only played games
                 name = app.getGameTitleName(id)
                 t_won, tlost = t_won + won, tlost + lost
                 ttime, tmoves = ttime+time, tmoves+moves
-                if won + lost > 0:
-                    perc = "%.1f" % (100.0 * won / (won + lost))
-                else:
-                    perc = "0.0"
+                perc = "%.1f" % (100.0 * won / tot) if tot > 0 else '0.0'
                 t = format_time(time)
                 m = str(round(moves, 1))
                 yield [name, won+lost, won, lost, t, m, perc, id]
@@ -287,7 +280,7 @@ class ProgressionFormatter:
     def norm_time(self, t):
         if len(t) == 3:
             t = list(t)+[0, 0, 0, -1, -1, -1]
-        return list(time.localtime(time.mktime((t))))
+        return list(time.localtime(time.mktime(tuple(t))))
 
     def getResults(self, interval, all_games=True):
         if all_games:
@@ -317,7 +310,7 @@ class ProgressionFormatter:
             t[0] -= 1
             lt = self.norm_time(t)
             marks = [lt[:3], tt[:3]]
-            for i in xrange(5):
+            for i in range(5):
                 tt[1] -= 2
                 marks.append(self.norm_time(tt)[:3])
             delta = 7
@@ -331,7 +324,7 @@ class ProgressionFormatter:
                 lt = min(lt, tt)        # min 1 month
             else:
                 lt = tt
-            dt = time.time()-time.mktime(lt)
+            dt = time.time()-time.mktime(tuple(lt))
             if dt > 63072000:           # 2 years
                 d = 6
             elif dt > 31536000:         # 1 year
@@ -355,12 +348,9 @@ class ProgressionFormatter:
             played = 0
             won = 0
             text = None
-            for i in xrange(delta):
-                if marks:
-                    if ct[:3] in marks:
-                        text = time.strftime(format, ct)
-                else:
-                    text = time.strftime(format, ct)
+            for i in range(delta):
+                if (not marks) or ct[:3] in marks:
+                    text = time.strftime(format, tuple(ct))
                 t = tuple(ct[:3])
                 if t in results:
                     played += results[t][0]
