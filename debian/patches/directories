@@ -1,10 +1,10 @@
 Description: Change some data and doc locations
 Author: Bernhard Reiter <ockham@raz.or.at>
 
---- a/setup.py	2018-07-31 12:15:02.798935537 +0800
-+++ b/setup.py	2018-07-31 12:15:02.794935550 +0800
+--- a/setup.py	2019-01-31 08:56:47.030292137 +0100
++++ b/setup.py	2019-01-31 08:57:42.000000000 +0100
 @@ -9,14 +9,13 @@
-     eval('import py2exe')
+     import py2exe  # noqa: F401
  
  if os.name == 'posix':
 -    data_dir = 'share/PySolFC'
@@ -19,8 +19,8 @@ Author: Bernhard Reiter <ockham@raz.or.at>
      'images',
      'sound',
      'tiles',
---- a/pysollib/settings.py	2018-07-31 12:15:02.798935537 +0800
-+++ b/pysollib/settings.py	2018-07-31 12:15:02.794935550 +0800
+--- a/pysollib/settings.py	2019-01-31 08:56:47.030292137 +0100
++++ b/pysollib/settings.py	2019-01-31 08:56:47.030292137 +0100
 @@ -61,10 +61,7 @@
  # you can add your extra directories here
  if os.name == 'posix':
@@ -33,9 +33,9 @@ Author: Bernhard Reiter <ockham@raz.or.at>
          ]
  if os.name == 'nt':
      pass
---- a/pysollib/mfxutil.py	2018-07-31 12:15:02.798935537 +0800
-+++ b/pysollib/mfxutil.py	2018-07-31 12:15:02.794935550 +0800
-@@ -127,7 +127,7 @@
+--- a/pysollib/mfxutil.py	2019-01-31 08:56:47.030292137 +0100
++++ b/pysollib/mfxutil.py	2019-01-31 08:56:47.030292137 +0100
+@@ -140,7 +140,7 @@
      home = os.environ.get("HOME", "").strip()
      if not home or not os.path.isdir(home):
          home = os.curdir

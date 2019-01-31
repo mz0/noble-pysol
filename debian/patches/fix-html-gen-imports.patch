@@ -1,0 +1,35 @@
+--- a/html-src/gen-html.py	2019-01-31 15:21:07.395372950 +0100
++++ b/html-src/gen-html.py	2019-01-31 15:39:40.336381157 +0100
+@@ -3,14 +3,19 @@
+ import sys
+ import os
+ import builtins
++
++pysollib_dir = '../'
++pysollib_path = os.path.join(sys.path[0], pysollib_dir)
++sys.path[0] = os.path.normpath(pysollib_path)
++
++# print sys.path
++
+ from pysollib.mygettext import fix_gettext
+ 
+ from pysollib.gamedb import GAME_DB
+ from pysollib.gamedb import GI
+ from pysollib.mfxutil import latin1_normalize
+ # outdir = '../html'
+-pysollib_dir = '../'
+-
+ 
+ builtins._ = lambda x: x
+ builtins.n_ = lambda x: x
+@@ -30,10 +35,6 @@
+ except Exception:
+     pass
+ 
+-pysollib_path = os.path.join(sys.path[0], pysollib_dir)
+-sys.path[0] = os.path.normpath(pysollib_path)
+-# print sys.path
+-
+ fix_gettext()
+ 
+ files = [

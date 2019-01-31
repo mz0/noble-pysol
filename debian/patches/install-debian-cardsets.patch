@@ -1,0 +1,78 @@
+Description: default cardssets under cardsets/, not data/
+ Following 2.0, the minimal cardssets are no longer distributed as part of the
+ main tarball and users have to download them using a script when installing
+ pysolfc. This is something we can't do in the Debian package, so add a new
+ tarball component "cardsets" containing these files. This component is unpacked
+ under cardsets/, not data/ (data/ is not empty so we can't unpack the component
+ there), so make sure setup.py and MANIFEST.in are aware of this.
+Author: Hugo Lefeuvre <hle@debian.org>
+Bug: https://github.com/shlomif/PySolFC/issues/89
+Forwarded: not-needed
+--- a/MANIFEST.in	2019-01-31 17:13:16.571718870 +0100
++++ b/MANIFEST.in	2019-01-31 17:13:16.567718897 +0100
+@@ -66,19 +66,19 @@
+ ##
+ ## data - cardsets
+ ##
+-graft data/cardset-2000
+-graft data/cardset-crystal-mahjongg
+-graft data/cardset-dashavatara-ganjifa
+-graft data/cardset-hexadeck
+-graft data/cardset-kintengu
+-graft data/cardset-gnome-mahjongg-1
+-graft data/cardset-matrix
+-graft data/cardset-mughal-ganjifa
+-graft data/cardset-oxymoron
+-graft data/cardset-standard
+-graft data/cardset-tuxedo
+-graft data/cardset-vienna-2k
+-graft data/cardset-dondorf
++graft cardsets/cardset-2000
++graft cardsets/cardset-crystal-mahjongg
++graft cardsets/cardset-dashavatara-ganjifa
++graft cardsets/cardset-hexadeck
++graft cardsets/cardset-kintengu
++graft cardsets/cardset-gnome-mahjongg-1
++graft cardsets/cardset-matrix
++graft cardsets/cardset-mughal-ganjifa
++graft cardsets/cardset-oxymoron
++graft cardsets/cardset-standard
++graft cardsets/cardset-tuxedo
++graft cardsets/cardset-vienna-2k
++graft cardsets/cardset-dondorf
+ ##
+ ## exclude dirs
+ ##
+--- a/setup.py	2019-01-31 17:13:16.571718870 +0100
++++ b/setup.py	2019-01-31 17:19:06.433347256 +0100
+@@ -23,20 +23,24 @@
+     'themes',
+     'tcl',
+     ]
+-for s in open('MANIFEST.in'):
+-    if s.startswith('graft data/cardset-'):
+-        ddirs.append(s[11:].strip())
+ 
+ data_files = []
+ 
+-for d in ddirs:
+-    for root, dirs, files in os.walk(os.path.join('data', d)):
++def recursive_install(path, directory):
++    for root, dirs, files in os.walk(os.path.join(path, directory)):
+         if root.find('.svn') >= 0:
+             continue
+         if files:
+             # files = map(lambda f: os.path.join(root, f), files)
+             files = [os.path.join(root, f) for f in files]
+-            data_files.append((os.path.join(data_dir, root[5:]), files))
++            data_files.append((os.path.join(data_dir, root[len(path):]), files))
++
++for d in ddirs:
++    recursive_install('data/', d)
++
++for s in open('MANIFEST.in'):
++    if s.startswith('graft cardsets/cardset-'):
++        recursive_install("cardsets/", s[15:].strip())
+ 
+ if os.name == 'posix':
+     data_files.append(('share/pixmaps', ['data/pysol.xbm', 'data/pysol.xpm']))

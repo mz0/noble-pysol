@@ -1,22 +1,31 @@
-pysolfc (2.1.2-1) UNRELEASED; urgency=medium
+pysolfc (2.5.5-1) unstable; urgency=medium
 
-  * New upstream release.
+  * New upstream release (Closes: #919923).
+  * Migrate to Python 3 (Closes: #912508).
   * Bump compat level.
   * debian/control:
-    - Bump Standards-Version to 4.1.5.
+    - Bump Standards-Version to 4.3.0.
     - Update Vcs-Git and Vcs-Browser fields (Salsa migration).
     - Update debhelper dependency to match new compat level.
+    - Multiple build-dependency changes due to the migration to Python 3 and
+      documentation generation which requires several binary dependencies to
+      be build dependencies as well.
   * debian/copyright:
     - Update copyright years.
-    - Remove some entries which have disappeared in new release.
+    - Refresh files list and copyrights to match new upstream release.
   * debian/patches:
-    - Refresh patches for new upstream release.
-    - Remove all_games, pillow and montana patches (merged upstream).
-    - Add patch fixing interpreter path in hint.py.
-  * Update docs list to match new upstream release.
-  * Bump watch file version to 4.
+    - Refresh patches for new upstream release, remove merged patches.
+    - Add debian-specific patch which allows installation of cardsets from
+      cardsets/ instead of data/.
+    - Add patch fixing import of pysollib submodules.
+  * Update docs list.
+  * debian/rules:
+    - Build translations from po.
+    - Build html documentation from source.
+    - Migrate to pybuild.
+  * Bump watch file version to 4 and update url to point to GitHub.
 
- -- Hugo Lefeuvre <hle@debian.org>  Sun, 29 Jul 2018 15:38:04 +0800
+ -- Hugo Lefeuvre <hle@debian.org>  Wed, 30 Jan 2019 21:18:09 +0100
 
 pysolfc (2.0-4) unstable; urgency=low
 
