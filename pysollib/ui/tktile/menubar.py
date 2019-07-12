@@ -3,22 +3,21 @@ import os
 import re
 import sys
 
+from pysollib.gamedb import GI
+from pysollib.hint import PySolHintLayoutImportError
+from pysollib.mfxutil import Image, USE_PIL
+from pysollib.mfxutil import Struct, kwdefault
+from pysollib.mygettext import _, n_
+from pysollib.settings import SELECT_GAME_MENU
+from pysollib.settings import TITLE, WIN_SYSTEM
+from pysollib.settings import USE_FREECELL_SOLVER
+from pysollib.ui.tktile.tkconst import COMPOUNDS, CURSOR_WATCH, EVENT_HANDLED
+from pysollib.ui.tktile.tkconst import EVENT_PROPAGATE
+from pysollib.ui.tktile.tkconst import TOOLBAR_BUTTONS
+from pysollib.ui.tktile.tkutil import after_idle, bind
+
 from six.moves import tkinter
 from six.moves import tkinter_tkfiledialog
-
-from pysollib.mfxutil import Struct, kwdefault
-from pysollib.mfxutil import Image, USE_PIL
-from pysollib.mygettext import _, n_
-from pysollib.settings import TITLE, WIN_SYSTEM
-from pysollib.settings import SELECT_GAME_MENU
-from pysollib.gamedb import GI
-from pysollib.settings import USE_FREECELL_SOLVER
-from pysollib.hint import PySolHintLayoutImportError
-
-from pysollib.ui.tktile.tkconst import EVENT_HANDLED, EVENT_PROPAGATE, \
-        CURSOR_WATCH, COMPOUNDS
-from pysollib.ui.tktile.tkconst import TOOLBAR_BUTTONS
-from pysollib.ui.tktile.tkutil import bind, after_idle
 
 
 def createToolbarMenu(menubar, menu):
@@ -629,11 +628,11 @@ class PysolMenubarTkCommon:
         submenu.add_checkbutton(
             label=n_("Show &help bar"), variable=self.tkopt.helpbar,
             command=self.mOptHelpbar)
-        if not USE_PIL:
-            menu.add_checkbutton(
-                label=n_("Save games &geometry"),
-                variable=self.tkopt.save_games_geometry,
-                command=self.mOptSaveGamesGeometry)
+        # if not USE_PIL:
+        menu.add_checkbutton(
+            label=n_("Save games &geometry"),
+            variable=self.tkopt.save_games_geometry,
+            command=self.mOptSaveGamesGeometry)
         menu.add_checkbutton(
             label=n_("&Demo logo"), variable=self.tkopt.demo_logo,
             command=self.mOptDemoLogo)
@@ -1671,7 +1670,7 @@ Unsupported game for import.
                     gameid = write_game(self.app)
             except Exception as err:
                 # if False:
-                    # traceback.print_exc()
+                #    traceback.print_exc()
                 self._calc_MfxMessageDialog()(
                     self.top, title=_('Save game error'),
                     text=_('''

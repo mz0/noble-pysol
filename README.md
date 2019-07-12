@@ -1,3 +1,5 @@
+<p align="center"><img src="html-src/images/high_res/logo_horizontal.png" alt="StretchView" height="180px"></p>
+
 # PySol Fan Club edition
 
 This is an open source and portable (Windows, Linux and Mac OS X) collection
@@ -61,7 +63,7 @@ sudo urpmi git make pygtk2 pygtk2.0-libglade gnome-python-canvas tkinter
 On Debian / Ubuntu / etc. you can do:
 
 ```
-sudo apt-get install -y ack-grep cpanminus libperl-dev make perl python-glade2 python-gnome2 python-gnome2-dev python-gtk2 python-setuptools python-tk
+sudo apt-get install -y cpanminus libperl-dev make perl python-glade2 python-gnome2 python-gnome2-dev python-gtk2 python-setuptools python-tk
 ```
 
 #### Step 2 - build PySol.

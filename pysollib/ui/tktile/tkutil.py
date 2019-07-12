@@ -21,14 +21,13 @@
 #
 # ---------------------------------------------------------------------------
 
-# imports
 import re
+
+from pysollib.mfxutil import Image, ImageOps, ImageTk
+from pysollib.settings import TITLE, WIN_SYSTEM
+
 from six.moves import tkinter
 from six.moves import tkinter_font
-
-# PySol imports
-from pysollib.mfxutil import Image, ImageTk, ImageOps
-from pysollib.settings import TITLE, WIN_SYSTEM
 
 
 # ************************************************************************
@@ -354,15 +353,10 @@ def shadowImage(image, color='#3896f8', factor=0.3):
     if not hasattr(image, '_pil_image'):
         return None
     im = image._pil_image
-    if Image.VERSION >= '1.1.7':
-        # use an alpha image
-        sh = Image.new('RGBA', im.size, color)
-        sh.putalpha(100)
-        out = Image.composite(sh, im, im)
-        return PIL_Image(image=out)
+    # use an alpha image
     sh = Image.new('RGBA', im.size, color)
-    tmp = Image.blend(im, sh, factor)
-    out = Image.composite(tmp, im, im)
+    sh.putalpha(100)
+    out = Image.composite(sh, im, im)
     return PIL_Image(image=out)
 
 

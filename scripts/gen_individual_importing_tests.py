@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 # Written by Shlomi Fish, under the MIT Expat License.
 
+import os
 import os.path
+import re
 from sys import platform
 
 IS_MAC = (platform == "darwin")
+PY_VERS = ([] if re.search("\\bSKIP_PY2\\b",
+                           os.getenv('TEST_TAGS', '')) else [2])+[3]
 for module_name in \
         [
          'pysollib.acard',
@@ -204,7 +208,7 @@ for module_name in \
          'pysollib.wizardutil',
         ]:
     is_gtk = ("gtk" in module_name)
-    for ver in [2, 3]:
+    for ver in PY_VERS:
         if ((not is_gtk) or (ver == 2 and (not IS_MAC))):
             def fmt(s):
                 return s % {'module_name': module_name, 'ver': ver}
@@ -216,7 +220,7 @@ import %(module_name)s
 print('ok 1 - imported')
 '''))
 
-for ver in [2, 3]:
+for ver in PY_VERS:
     for mod in [
             'pysol_tests.acard_unit',
             'pysol_tests.hint',
@@ -229,8 +233,11 @@ for ver in [2, 3]:
                           'test__%s__v%d.py' % (mod, ver)
                           ), 'w').write('''#!/usr/bin/env python%(ver)d
 import unittest
-from %(mod)s import MyTests
+
 from pycotap import TAPTestRunner
+
+from %(mod)s import MyTests
+
 suite = unittest.TestLoader().loadTestsFromTestCase(MyTests)
 TAPTestRunner().run(suite)
 ''' % {'mod': mod, 'ver': ver})

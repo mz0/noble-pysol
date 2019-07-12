@@ -21,19 +21,18 @@
 #
 # ---------------------------------------------------------------------------##
 
-# imports
+import locale
+import os
 import re
 import sys
-import six
-import os
 import time
-import locale
 import webbrowser
-from six import print_
-
 from pickle import Pickler, Unpickler
 
 from pysollib.settings import PACKAGE, TOOLKIT
+
+import six
+from six import print_
 
 Image = ImageTk = ImageOps = None
 if TOOLKIT == 'tk':
@@ -52,7 +51,7 @@ if TOOLKIT == 'tk':
         from PIL import PpmImagePlugin  # noqa: F401
         Image._initialized = 2
 USE_PIL = False
-if TOOLKIT == 'tk' and Image and Image.VERSION >= '1.1.7':
+if TOOLKIT == 'tk' and Image:
     USE_PIL = True
 
 # debug
