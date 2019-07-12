@@ -1,18 +1,22 @@
 Description: Point to pysolfc instead of pysol.py, and remove Encoding=UTF-8
- -- see http://standards.freedesktop.org/desktop-entry-spec/1.0/apc.html
+ -- see https://specifications.freedesktop.org/desktop-entry-spec/1.0/apc.html
+ Add Comment, Keywords and StartupWMClass for better desktop integration.
 Author: Bernhard Reiter <ockham@raz.or.at>
+Author: Juhani Numminen <juhaninumminen0@gmail.com>
 Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2946832&group_id=150718&atid=778745
 
 --- a/data/pysol.desktop
 +++ b/data/pysol.desktop
-@@ -1,8 +1,8 @@
+@@ -1,8 +1,10 @@
  [Desktop Entry]
 -Encoding=UTF-8
  Name=PySol Fan Club Edition
 -Exec=pysol.py
++Comment=More than 1000 solitaire card games
 +Exec=pysolfc
++StartupWMClass=Pysol
  Terminal=false
  Type=Application
  Categories=Game;CardGame;
-+Keywords=Game;CardGame;
++Keywords=solitaire;patience;cards;pysolfc;klondike;
  Icon=/usr/share/icons/pysol01.png
