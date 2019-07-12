@@ -1,6 +1,0 @@
-?package(pysolfc):needs="X11" \
-  section="Games/Card" \
-  title="PySolFC Solitaire Games" \
-  longtitle="PySOLFC - collection of more than 1000 solitaire card games" \
-  icon="/usr/share/pixmaps/pysol.xpm" \
-  command="/usr/games/pysolfc"
