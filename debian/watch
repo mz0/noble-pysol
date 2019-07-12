@@ -1,3 +1,8 @@
 version=4
-opts=filenamemangle=s/.+\/v?(\d\S+)\.tar\.gz/<project>-$1\.tar\.gz/ \
-  https://github.com/shlomif/PySolFC/tags .*/pysolfc-?(\d\S+)\.tar\.gz
+https://sf.net/pysolfc/ \
+    PySolFC-@ANY_VERSION@@ARCHIVE_EXT@
+
+# 'ignore' means that the version number of this tarball is ignored
+opts="component=cardsets" \
+https://sf.net/pysolfc/ \
+    PySolFC-Cardsets--Minimal-@ANY_VERSION@@ARCHIVE_EXT@ ignore
