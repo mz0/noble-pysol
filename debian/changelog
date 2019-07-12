@@ -29,7 +29,7 @@ pysolfc (2.6.4-1) unstable; urgency=medium
     - Compatible with the current version of Python Imaging Library
       (Closes: #931851).
   * debian/watch: Download a separate orig tarball for the minimal cardsets.
-  * debian/gbp.conf: Remove compression=bzip2, the defaults should be good enough.
+  * debian/gbp.conf: Remove compression=bzip2, the defaults are good enough.
   * debian/clean: Clean up after localization build process and html generation.
   * debian/control:
     - Bump Standards-Version to 4.4.0.
@@ -37,11 +37,14 @@ pysolfc (2.6.4-1) unstable; urgency=medium
     - Add python3-random2 dependency.
     - Declare Rules-Requires-Root: no.
   * debian/docs: AUTHORS is no longer in the tarball.
-  * debian/patches: Add Comment, Keywords and StartupWMClass in the .desktop
-    file for better DE integration.
+  * debian/patches:
+    - desktop: Add Comment, Keywords and StartupWMClass for better DE integration.
+    - manpage: Drop the patch, changes are incorporated upstream.
+  * debian/rules: It is no longer necessary to rename the manpage either.
   * Remove debian/menu because it's redundant with .desktop (Policy §9.6).
+  * Add myself to debian/copyright.
 
- -- Juhani Numminen <juhaninumminen0@gmail.com>  Sat, 13 Jul 2019 00:41:20 +0300
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Sat, 13 Jul 2019 16:20:38 +0300
 
 pysolfc (2.0-4) unstable; urgency=low
 
