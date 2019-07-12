@@ -5,3 +5,6 @@ locale/*/LC_MESSAGES/*.mo
 po/ru.po
 po/pl.po
 po/it.po
+
+# Generated html
+html-src/html/
