@@ -12,7 +12,7 @@ Build-Depends: debhelper-compat (= 12),
                python3-six,
                python3-tk
 Rules-Requires-Root: no
-Standards-Version: 4.3.0
+Standards-Version: 4.4.0
 Testsuite: autopkgtest-pkg-python
 Homepage: http://pysolfc.sourceforge.net/
 Vcs-Browser: https://salsa.debian.org/games-team/pysolfc
