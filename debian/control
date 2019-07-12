@@ -8,6 +8,7 @@ Build-Depends: debhelper (>= 11),
                python3-all,
                python3-configobj,
                python3-pygame,
+               python3-random2,
                python3-six,
                python3-tk
 Standards-Version: 4.3.0
@@ -20,6 +21,7 @@ Package: pysolfc
 Architecture: all
 Depends: python3-configobj,
          python3-pygame,
+         python3-random2,
          python3-six,
          python3-tk,
          ${misc:Depends},
