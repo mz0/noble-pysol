@@ -1,0 +1,7 @@
+locale/*/LC_MESSAGES/*.mo
+
+# For some reason, these three are generated while po/de.po is actually
+# a source file.
+po/ru.po
+po/pl.po
+po/it.po
