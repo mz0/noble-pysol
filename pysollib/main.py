@@ -22,31 +22,28 @@
 # ---------------------------------------------------------------------------##
 
 # imports
+import getopt
 import os
 import sys
 import traceback
-import getopt
 
-# PySol imports
-from pysollib.mygettext import _
-from pysollib.util import DataLoader
-from pysollib.mfxutil import print_err
-from pysollib.resource import Tile
 from pysollib.app import Application
 from pysollib.gamedb import GAME_DB
-from pysollib.pysolaudio import AbstractAudioClient, \
-        PysolSoundServerModuleClient
-from pysollib.pysolaudio import Win32AudioClient, OSSAudioClient, \
-        PyGameAudioClient, KivyAudioClient
+from pysollib.mfxutil import print_err
+from pysollib.mygettext import _
+from pysollib.pysolaudio import AbstractAudioClient
+from pysollib.pysolaudio import KivyAudioClient, OSSAudioClient
+from pysollib.pysolaudio import PyGameAudioClient, Win32AudioClient
+from pysollib.pysolaudio import PysolSoundServerModuleClient
 from pysollib.pysolaudio import pysolsoundserver
-from pysollib.settings import TITLE, SOUND_MOD, TOOLKIT
-from pysollib.winsystems import init_root_window
-
-# Toolkit imports
-from pysollib.pysoltk import loadImage
 from pysollib.pysoltk import MfxMessageDialog
 from pysollib.pysoltk import MfxRoot
 from pysollib.pysoltk import PysolProgressBar
+from pysollib.pysoltk import loadImage
+from pysollib.resource import Tile
+from pysollib.settings import SOUND_MOD, TITLE, TOOLKIT
+from pysollib.util import DataLoader
+from pysollib.winsystems import init_root_window
 
 # ************************************************************************
 # *
@@ -387,27 +384,27 @@ Please check your %s installation.
 
 
 if TOOLKIT == 'kivy':
-        from pysollib.kivy.LApp import LApp
-        import logging
+    from pysollib.kivy.LApp import LApp
+    import logging
 
-        class KivyApp(LApp):
-            def __init__(self, args):
-                super(KivyApp, self).__init__()
-                self.args = args
+    class KivyApp(LApp):
+        def __init__(self, args):
+            super(KivyApp, self).__init__()
+            self.args = args
 
-            def build(self):
-                logging.info("KivyApp: build")
+        def build(self):
+            logging.info("KivyApp: build")
 
-                self.app = app = Application()
-                app.top = self.mainWindow
-                self.startCode = pysol_init(app, self.args)
+            self.app = app = Application()
+            app.top = self.mainWindow
+            self.startCode = pysol_init(app, self.args)
 
-                logging.info('Main: App Initialised - starting main loop')
-                return self.mainWindow
+            logging.info('Main: App Initialised - starting main loop')
+            return self.mainWindow
 
-        def main(args=None):
-            logging.basicConfig(level=logging.INFO)
-            KivyApp(args).run()
+    def main(args=None):
+        logging.basicConfig(level=logging.INFO)
+        KivyApp(args).run()
 
 else:
 

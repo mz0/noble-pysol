@@ -21,24 +21,15 @@
 #
 # ---------------------------------------------------------------------------##
 
-# Imports
-
-# PySol imports
-from pysollib.mygettext import _
-from pysollib.gamedb import registerGame, GameInfo, GI
-from pysollib.mfxutil import kwdefault
 from pysollib.game import Game
+from pysollib.gamedb import GI, GameInfo, registerGame
+from pysollib.games.golf import Golf_Hint, Golf_Waste
 from pysollib.layout import Layout
+from pysollib.mfxutil import kwdefault
+from pysollib.mygettext import _
 from pysollib.pysoltk import MfxCanvasText
-
-from pysollib.games.golf import Golf_Waste, Golf_Hint
-
+from pysollib.stack import OpenStack, StackWrapper, WasteTalonStack
 from pysollib.util import ANY_RANK
-
-from pysollib.stack import \
-        OpenStack, \
-        StackWrapper, \
-        WasteTalonStack
 
 # ************************************************************************
 # * Three Peaks Row Stack
@@ -91,7 +82,15 @@ class ThreePeaks_RowStack(OpenStack):
                     return True
         return False
 
-    clickHandler = OpenStack.doubleclickHandler
+    def clickHandler(self, event):
+        result = OpenStack.doubleclickHandler(self, event)
+        if result == 1 and not self.game.score_counted:
+            self.game.sequence += 1
+            self.game.computeHandScore()
+            self.game.updateText()
+        elif self.game.score_counted:
+            self.game.score_counted = False
+        return result
 
 
 # ************************************************************************
@@ -124,8 +123,9 @@ class ThreePeaks(Game):
         self.setSize(w, h)
 
         # Extra settings
-        self.game_score = 52
+        self.game_score = 0
         self.hand_score = self.sequence = 0
+        self.score_counted = False
         self.peaks = [0] * 3
 
         # Create rows
@@ -175,7 +175,7 @@ class ThreePeaks(Game):
 
     def startGame(self):
         assert len(self.s.talon.cards) == self.gameinfo.ncards
-        self.game_score = self.game_score + self.hand_score - 52
+        self.game_score = self.game_score + self.hand_score
         self.hand_score = -52
         self.peaks = [0] * 3
         self.startDealSample()
@@ -189,6 +189,8 @@ class ThreePeaks(Game):
                 return False
         if self.sequence:
             self.hand_score = self.hand_score + len(self.s.talon.cards) * 10
+        self.computeHandScore()
+        self.score_counted = True
         self.updateText()
         self.sequence = 0
         return True
@@ -196,7 +198,7 @@ class ThreePeaks(Game):
     def updateText(self):
         if self.preview > 1 or not self.texts.info or not self.SCORING:
             return
-        t = _('Score:\011This hand:  ') + str(self.getHandScore())
+        t = _('Score:\011This hand:  ') + str(self.hand_score)
         t = t + _('\011This game:  ') + str(self.game_score)
         self.texts.info.config(text=t)
 
@@ -206,11 +208,8 @@ class ThreePeaks(Game):
                     (card1.rank - 1) % 13 == card2.rank)
         return False
 
-    def getHandScore(self):
-        # FIXME: bug #2937253
+    def computeHandScore(self):
         score, i = self.hand_score, 1
-        if 0:  # self.busy:
-            return score
         # First count the empty peaks
         for r in self.s.rows[:3]:
             if not r.cards:
@@ -224,7 +223,6 @@ class ThreePeaks(Game):
             score = score + i * 2 ** int((self.sequence - 1) / 4)
         self.hand_score = score
         # print 'getHandScore: score:', score
-        return score
 
     def canUndo(self):
         return False

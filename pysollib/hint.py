@@ -24,17 +24,18 @@
 
 # imports
 import os
-import time
-import subprocess
 import re
-import six
+import subprocess
+import time
 from io import BytesIO
 
 # PySol imports
-from pysollib.settings import DEBUG, FCS_COMMAND
-from pysollib.pysolrandom import constructRandom
 from pysollib.mfxutil import destruct
+from pysollib.pysolrandom import constructRandom
+from pysollib.settings import DEBUG, FCS_COMMAND
 from pysollib.util import KING
+
+import six
 
 FCS_VERSION = None
 
@@ -787,15 +788,26 @@ class Base_Solver_Hint:
         if len(src.cards) > ncards and not src.cards[-ncards-1].face_up:
             # flip card
             thint = (999999, 0, 1, src, src, None, None)
+        skip = False
         if dest is None:                 # foundation
-            cards = src.cards[-ncards:]
-            for f in self.game.s.foundations:
-                if f.acceptsCards(src, cards):
-                    dest = f
-                    break
+            if src is self.game.s.talon:
+                if not src.cards[-1].face_up:
+                    self.game.flipMove(src)
+                # src.prepareStack()
+                # src.dealCards()
+                dest = self.game.s.foundations[0]
+                # skip = True
+            else:
+                cards = src.cards[-ncards:]
+                for f in self.game.s.foundations:
+                    if f.acceptsCards(src, cards):
+                        dest = f
+                        break
         assert dest
-        hint = (999999, 0, ncards, src, dest, None, thint)
         self.hints_index += 1
+        if skip:
+            return []
+        hint = (999999, 0, ncards, src, dest, None, thint)
         # print hint
         return [hint]
 
@@ -1167,6 +1179,11 @@ class BlackHoleSolver_Hint(Base_Solver_Hint):
 
     def calcBoardString(self):
         board = ''
+        cards = self.game.s.talon.cards
+        if (len(cards) > 0):
+            board += ' '.join(['Talon:'] +
+                              [self.card2str1(x) for x in reversed(cards)])
+            board += '\n'
         cards = self.game.s.foundations[0].cards
         s = '-'
         if (len(cards) > 0):
@@ -1197,6 +1214,10 @@ class BlackHoleSolver_Hint(Base_Solver_Hint):
         # args += ['-sam', '-p', '-opt', '--display-10-as-t']
         args += ['--game', game_type['preset'], '--rank-reach-prune']
         args += ['--max-iters', self.options['max_iters']]
+        if 'queens_on_kings' in game_type:
+            args += ['--queens-on-kings']
+        if 'wrap_ranks' in game_type:
+            args += ['--wrap-ranks']
         #
 
         command = self.BLACK_HOLE_SOLVER_COMMAND + ' ' + \
@@ -1230,6 +1251,11 @@ class BlackHoleSolver_Hint(Base_Solver_Hint):
             s = six.text_type(sbytes, encoding='utf-8')
             if DEBUG:
                 print(s)
+
+            if s.strip() == 'Deal talon':
+                hints.append([1, game.s.talon, None])
+                continue
+
             m = re.match('Total number of states checked is ([0-9]+)\\.', s)
             if m:
                 iter_ = int(m.group(1))

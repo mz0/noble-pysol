@@ -21,24 +21,16 @@
 #
 # ---------------------------------------------------------------------------##
 
-# imports
-
-# PySol imports
-from pysollib.mygettext import _
-from pysollib.gamedb import registerGame, GameInfo, GI
 import pysollib.game
-from pysollib.mfxutil import kwdefault
 from pysollib.game import Game
-from pysollib.layout import Layout
-from pysollib.hint import AbstractHint, DefaultHint, CautiousDefaultHint
-from pysollib.hint import BlackHoleSolverWrapper
-from pysollib.pysoltk import MfxCanvasText
+from pysollib.gamedb import GI, GameInfo, registerGame
 from pysollib.games.pileon import FourByFour_Hint
-
-from pysollib.util import ACE, ANY_RANK, ANY_SUIT, KING, NO_RANK, RANKS, \
-        SUITS, \
-        UNLIMITED_REDEALS
-
+from pysollib.hint import AbstractHint, CautiousDefaultHint, DefaultHint
+from pysollib.hint import BlackHoleSolverWrapper
+from pysollib.layout import Layout
+from pysollib.mfxutil import kwdefault
+from pysollib.mygettext import _
+from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import \
         AbstractFoundationStack, \
         BasicRowStack, \
@@ -51,16 +43,15 @@ from pysollib.stack import \
         SS_FoundationStack, \
         SS_RowStack, \
         Stack, \
+        StackWrapper, \
         TalonStack, \
         UD_RK_RowStack, \
         WasteStack, \
         WasteTalonStack, \
-        isSameSuitSequence, \
-        StackWrapper
-
-# ************************************************************************
-# *
-# ************************************************************************
+        isSameSuitSequence
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT, KING, NO_RANK, RANKS, \
+        SUITS, \
+        UNLIMITED_REDEALS
 
 
 class Golf_Hint(AbstractHint):
@@ -111,6 +102,8 @@ class Golf_Waste(WasteStack):
         WasteStack.__init__(self, x, y, game, **cap)
 
     def acceptsCards(self, from_stack, cards):
+        if from_stack is self.game.s.talon:
+            return True
         if not WasteStack.acceptsCards(self, from_stack, cards):
             return False
         # check cards
@@ -138,6 +131,8 @@ class Golf_RowStack(BasicRowStack):
 # ************************************************************************
 
 class Golf(Game):
+    Solver_Class = BlackHoleSolverWrapper(preset='golf', base_rank=0,
+                                          queens_on_kings=True)
     Waste_Class = Golf_Waste
     Hint_Class = Golf_Hint
 
@@ -210,6 +205,8 @@ class Golf(Game):
 # ************************************************************************
 
 class DeadKingGolf(Golf):
+    Solver_Class = BlackHoleSolverWrapper(preset='golf', base_rank=0)
+
     def getStrictness(self):
         return 1
 
@@ -220,6 +217,8 @@ class DeadKingGolf(Golf):
 
 
 class RelaxedGolf(Golf):
+    Solver_Class = BlackHoleSolverWrapper(preset='golf', base_rank=0,
+                                          wrap_ranks=True)
     Waste_Class = StackWrapper(Golf_Waste, mod=13)
 
     shallHighlightMatch = Game._shallHighlightMatch_RKW

@@ -21,28 +21,22 @@
 #
 # ---------------------------------------------------------------------------##
 
-# imports
 import os
-from six.moves import tkinter
-from . import ttk
 
-# PySol imports
+from pysollib.mfxutil import Image, ImageOps, ImageTk
 from pysollib.mygettext import _, n_
-from pysollib.mfxutil import Image, ImageTk, ImageOps
-from pysollib.util import IMAGE_EXTENSIONS
 from pysollib.settings import TITLE
+from pysollib.ui.tktile.menubar import MfxMenu, createToolbarMenu
+from pysollib.ui.tktile.tkconst import EVENT_HANDLED
+from pysollib.ui.tktile.tkutil import loadImage
+from pysollib.util import IMAGE_EXTENSIONS
 from pysollib.winsystems import TkSettings
 
-# Toolkit imports
-from pysollib.ui.tktile.tkconst import EVENT_HANDLED
+from six.moves import tkinter
+
+from . import ttk
 from .tkwidget import MfxTooltip
-from pysollib.ui.tktile.menubar import createToolbarMenu, MfxMenu
-from pysollib.ui.tktile.tkutil import loadImage
 
-
-# ************************************************************************
-# *
-# ************************************************************************
 
 class AbstractToolbarButton:
     def __init__(self, parent, toolbar, toolbar_name, position):
@@ -79,16 +73,16 @@ class ToolbarCheckbutton(AbstractToolbarButton, ttk.Checkbutton):
     def __init__(self, parent, toolbar, toolbar_name, position, **kwargs):
         kwargs['style'] = 'Toolbutton'
         ttk.Checkbutton.__init__(self, parent, **kwargs)
-        AbstractToolbarButton.__init__(self, parent, toolbar,
-                                       toolbar_name, position)
+        AbstractToolbarButton.__init__(
+            self, parent, toolbar, toolbar_name, position)
 
 
 class ToolbarButton(AbstractToolbarButton, ttk.Button):
     def __init__(self, parent, toolbar, toolbar_name, position, **kwargs):
         kwargs['style'] = 'Toolbutton'
         ttk.Button.__init__(self, parent, **kwargs)
-        AbstractToolbarButton.__init__(self, parent, toolbar,
-                                       toolbar_name, position)
+        AbstractToolbarButton.__init__(
+            self, parent, toolbar, toolbar_name, position)
 
 
 class ToolbarSeparator(ttk.Separator):
@@ -459,8 +453,6 @@ class PysolToolbarTk:
         if self._busy():
             return EVENT_HANDLED
         if self.popup:
-            # print event.x, event.y, \
-            #       event.x_root, event.y_root, event.__dict__
             self.popup.tk_popup(event.x_root, event.y_root)
         return EVENT_HANDLED
 

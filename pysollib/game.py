@@ -23,35 +23,35 @@
 
 
 # imports
-import time
 import math
+import time
 import traceback
-import six
-
-from pysollib.mygettext import _
-from gettext import ungettext
-from six import BytesIO
-from six.moves import range
 from pickle import Pickler, Unpickler, UnpicklingError
 
-# PySol imports
+from pysollib.gamedb import GI
 from pysollib.mfxutil import Image, ImageTk, USE_PIL
-from pysollib.mfxutil import destruct, Struct, SubclassResponsibility
-from pysollib.mfxutil import uclock, usleep
+from pysollib.mfxutil import Struct, SubclassResponsibility, destruct
 from pysollib.mfxutil import format_time, print_err
+from pysollib.mfxutil import uclock, usleep
+from pysollib.mygettext import _
+from pysollib.mygettext import ungettext
+from pysollib.pysolrandom import LCRandom31, PysolRandom, constructRandom, \
+        random__long2str, random__str2long
+from pysollib.pysoltk import CURSOR_WATCH
+from pysollib.pysoltk import Card
+from pysollib.pysoltk import EVENT_HANDLED, EVENT_PROPAGATE
+from pysollib.pysoltk import MfxCanvasLine, MfxCanvasRectangle, MfxCanvasText
+from pysollib.pysoltk import MfxExceptionDialog, MfxMessageDialog
+from pysollib.pysoltk import after, after_cancel, after_idle
+from pysollib.pysoltk import bind, wm_map
+from pysollib.settings import DEBUG
 from pysollib.settings import PACKAGE, TITLE, TOOLKIT, TOP_TITLE
 from pysollib.settings import VERSION, VERSION_TUPLE
-from pysollib.settings import DEBUG
-from pysollib.gamedb import GI
-from pysollib.pysolrandom import PysolRandom, LCRandom31, constructRandom, \
-        random__long2str, random__str2long
-from pysollib.pysoltk import EVENT_HANDLED, EVENT_PROPAGATE
-from pysollib.pysoltk import CURSOR_WATCH
-from pysollib.pysoltk import bind, wm_map
-from pysollib.pysoltk import after, after_idle, after_cancel
-from pysollib.pysoltk import MfxMessageDialog, MfxExceptionDialog
-from pysollib.pysoltk import MfxCanvasText, MfxCanvasLine, MfxCanvasRectangle
-from pysollib.pysoltk import Card
+
+import six
+from six import BytesIO
+from six.moves import range
+
 if TOOLKIT == 'tk':
     from pysollib.ui.tktile.solverdialog import reset_solver_dialog
 else:
@@ -202,13 +202,13 @@ class Game(object):
         # update display properties
         self.canvas.busy = True
         # geometry
-        mycond = (not USE_PIL and self.app.opt.save_games_geometry and
+        mycond = (self.app.opt.save_games_geometry and
                   self.id in self.app.opt.games_geometry)
         if mycond:
             # restore game geometry
             w, h = self.app.opt.games_geometry[self.id]
             self.canvas.config(width=w, height=h)
-        if USE_PIL:
+        if True and USE_PIL:
             if self.app.opt.auto_scale:
                 w, h = self.app.opt.game_geometry
                 self.canvas.setInitialSize(w, h, margins=False,
@@ -217,9 +217,10 @@ class Game(object):
                 # dx, dy = self.canvas.xmargin, self.canvas.ymargin
                 # self.canvas.config(scrollregion=(-dx, -dy, dx, dy))
             else:
-                w = int(round(self.width * self.app.opt.scale_x))
-                h = int(round(self.height * self.app.opt.scale_y))
-                self.canvas.setInitialSize(w, h)
+                if not mycond:
+                    w = int(round(self.width * self.app.opt.scale_x))
+                    h = int(round(self.height * self.app.opt.scale_y))
+                    self.canvas.setInitialSize(w, h)
                 self.top.wm_geometry("")    # cancel user-specified geometry
             # preserve texts positions
             for t in ('info', 'help', 'misc', 'score', 'base_rank'):
@@ -1124,7 +1125,7 @@ class Game(object):
 
     def _configureHandler(self, event=None):
         # print 'configureHandler'
-        if not USE_PIL:
+        if False:  # if not USE_PIL:
             return
         if not self.app:
             return
