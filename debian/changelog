@@ -1,12 +1,11 @@
-pysolfc (2.5.5-1) UNRELEASED; urgency=medium
+pysolfc (2.6.4-1) unstable; urgency=medium
 
-  * New upstream release (Closes: #919923).
+  * Team upload.
+
+  [ Hugo Lefeuvre ]
   * Migrate to Python 3 (Closes: #912508).
-  * Bump compat level.
   * debian/control:
-    - Bump Standards-Version to 4.3.0.
     - Update Vcs-Git and Vcs-Browser fields (Salsa migration).
-    - Update debhelper dependency to match new compat level.
     - Multiple build-dependency changes due to the migration to Python 3 and
       documentation generation which requires several binary dependencies to
       be build dependencies as well.
@@ -23,9 +22,26 @@ pysolfc (2.5.5-1) UNRELEASED; urgency=medium
     - Build translations from po.
     - Build html documentation from source.
     - Migrate to pybuild.
-  * Bump watch file version to 4 and update url to point to GitHub.
+  * Bump watch file version to 4.
 
- -- Hugo Lefeuvre <hle@debian.org>  Wed, 30 Jan 2019 21:18:09 +0100
+  [ Juhani Numminen ]
+  * New upstream release (Closes: #919923).
+    - Compatible with the current version of Python Imaging Library
+      (Closes: #931851).
+  * debian/watch: Download a separate orig tarball for the minimal cardsets.
+  * debian/gbp.conf: Remove compression=bzip2, the defaults should be good enough.
+  * debian/clean: Clean up after localization build process and html generation.
+  * debian/control:
+    - Bump Standards-Version to 4.4.0.
+    - Bump compat level by depending on debhelper-compat (= 12).
+    - Add python3-random2 dependency.
+    - Declare Rules-Requires-Root: no.
+  * debian/docs: AUTHORS is no longer in the tarball.
+  * debian/patches: Add Comment, Keywords and StartupWMClass in the .desktop
+    file for better DE integration.
+  * Remove debian/menu because it's redundant with .desktop (Policy §9.6).
+
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Sat, 13 Jul 2019 00:41:20 +0300
 
 pysolfc (2.0-4) unstable; urgency=low
 
