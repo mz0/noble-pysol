@@ -1,9 +1,9 @@
 Description: Change some data and doc locations
 Author: Bernhard Reiter <ockham@raz.or.at>
 
---- a/setup.py	2019-01-31 08:56:47.030292137 +0100
-+++ b/setup.py	2019-01-31 08:57:42.000000000 +0100
-@@ -9,14 +9,13 @@
+--- a/setup.py
++++ b/setup.py
+@@ -10,14 +10,13 @@
      import py2exe  # noqa: F401
  
  if os.name == 'posix':
@@ -19,8 +19,8 @@ Author: Bernhard Reiter <ockham@raz.or.at>
      'images',
      'sound',
      'tiles',
---- a/pysollib/settings.py	2019-01-31 08:56:47.030292137 +0100
-+++ b/pysollib/settings.py	2019-01-31 08:56:47.030292137 +0100
+--- a/pysollib/settings.py
++++ b/pysollib/settings.py
 @@ -61,10 +61,7 @@
  # you can add your extra directories here
  if os.name == 'posix':
@@ -33,9 +33,9 @@ Author: Bernhard Reiter <ockham@raz.or.at>
          ]
  if os.name == 'nt':
      pass
---- a/pysollib/mfxutil.py	2019-01-31 08:56:47.030292137 +0100
-+++ b/pysollib/mfxutil.py	2019-01-31 08:56:47.030292137 +0100
-@@ -140,7 +140,7 @@
+--- a/pysollib/mfxutil.py
++++ b/pysollib/mfxutil.py
+@@ -139,7 +139,7 @@
      home = os.environ.get("HOME", "").strip()
      if not home or not os.path.isdir(home):
          home = os.curdir

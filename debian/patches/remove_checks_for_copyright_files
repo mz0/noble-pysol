@@ -3,9 +3,9 @@ Description: Remove checks for individual cardsets' COPYRIGHT files
 Author: Bernhard Reiter <ockham@raz.or.at>
 Forwarded: not-needed
 
---- a/pysollib/app.py	2019-01-31 08:56:35.234380486 +0100
-+++ b/pysollib/app.py	2019-01-31 08:56:35.230380516 +0100
-@@ -1472,11 +1472,10 @@
+--- a/pysollib/app.py
++++ b/pysollib/app.py
+@@ -1469,11 +1469,10 @@
                      d = os.path.join(dir, name)
                      if not os.path.isdir(d):
                          continue
@@ -20,7 +20,7 @@ Forwarded: not-needed
                              if cs:
                                  # from pprint import pprint
                                  # print cs.name
-@@ -1493,7 +1492,7 @@
+@@ -1490,7 +1489,7 @@
                                      fnames[cs.name] = 1
                              else:
                                  print_err('fail _readCardsetConfig: %s %s'
@@ -29,9 +29,9 @@ Forwarded: not-needed
                                  pass
                          except Exception:
                              # traceback.print_exc()
---- a/pysollib/tile/selectcardset.py	2019-01-31 08:56:35.234380486 +0100
-+++ b/pysollib/tile/selectcardset.py	2019-01-31 08:56:35.234380486 +0100
-@@ -525,15 +525,12 @@
+--- a/pysollib/tile/selectcardset.py
++++ b/pysollib/tile/selectcardset.py
+@@ -523,15 +523,12 @@
          frame.columnconfigure(0, weight=1)
          frame.rowconfigure(1, weight=1)
          #
@@ -53,9 +53,9 @@ Forwarded: not-needed
          text_w.config(state="disabled")
          #
          focus = self.createButtons(bottom_frame, kw)
---- a/pysollib/tk/selectcardset.py	2019-01-31 08:56:35.234380486 +0100
-+++ b/pysollib/tk/selectcardset.py	2019-01-31 08:56:35.234380486 +0100
-@@ -488,15 +488,12 @@
+--- a/pysollib/tk/selectcardset.py
++++ b/pysollib/tk/selectcardset.py
+@@ -486,15 +486,12 @@
          frame.columnconfigure(0, weight=1)
          frame.rowconfigure(1, weight=1)
          #

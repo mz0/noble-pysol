@@ -2,8 +2,8 @@ Description: Update project name and some details in manpage
 Author: Bernhard Reiter <ockham@raz.or.at>
 Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2946830&group_id=150718&atid=778745
 
---- a/docs/pysol.6	2019-01-31 08:56:44.442311480 +0100
-+++ b/docs/pysol.6	2019-01-31 08:58:18.261623575 +0100
+--- a/docs/pysol.6
++++ b/docs/pysol.6
 @@ -128,55 +128,64 @@
  .rm #[ #] #H #V #F C
  .\" ========================================================================

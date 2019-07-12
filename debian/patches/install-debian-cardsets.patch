@@ -8,8 +8,8 @@ Description: default cardssets under cardsets/, not data/
 Author: Hugo Lefeuvre <hle@debian.org>
 Bug: https://github.com/shlomif/PySolFC/issues/89
 Forwarded: not-needed
---- a/MANIFEST.in	2019-01-31 17:13:16.571718870 +0100
-+++ b/MANIFEST.in	2019-01-31 17:13:16.567718897 +0100
+--- a/MANIFEST.in
++++ b/MANIFEST.in
 @@ -66,19 +66,19 @@
  ##
  ## data - cardsets
@@ -43,9 +43,9 @@ Forwarded: not-needed
  ##
  ## exclude dirs
  ##
---- a/setup.py	2019-01-31 17:13:16.571718870 +0100
-+++ b/setup.py	2019-01-31 17:19:06.433347256 +0100
-@@ -23,20 +23,24 @@
+--- a/setup.py
++++ b/setup.py
+@@ -24,20 +24,24 @@
      'themes',
      'tcl',
      ]

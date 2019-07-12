@@ -2,9 +2,9 @@ Description: Remove configobj from package;
  use python-configobj package instead
 Author: Bernhard Reiter <ockham@raz.or.at>
 
---- a/setup.py	2019-01-31 08:56:39.114351375 +0100
-+++ b/setup.py	2019-01-31 08:57:49.000000000 +0100
-@@ -72,7 +72,6 @@
+--- a/setup.py
++++ b/setup.py
+@@ -73,7 +73,6 @@
      'license': 'GPL',
      'scripts': ['pysol.py'],
      'packages': ['pysollib',
@@ -12,14 +12,14 @@ Author: Bernhard Reiter <ockham@raz.or.at>
                   'pysollib.macosx',
                   'pysollib.winsystems',
                   'pysollib.tk',
---- a/pysollib/options.py	2019-01-31 08:56:39.114351375 +0100
-+++ b/pysollib/options.py	2019-01-31 08:56:39.110351406 +0100
-@@ -30,7 +30,7 @@
- # PySol imports
- from pysollib.mfxutil import print_err
- from pysollib.resource import CSI
+--- a/pysollib/options.py
++++ b/pysollib/options.py
+@@ -27,7 +27,7 @@
+ 
+ 
+ import pysollib.settings
 -from pysollib.configobj import configobj, validate
 +import configobj, validate
- import pysollib.settings
- 
- # Toolkit imports
+ from pysollib.mfxutil import print_err
+ from pysollib.mygettext import _
+ from pysollib.pysoltk import TOOLBAR_BUTTONS, TOOLKIT

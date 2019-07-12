@@ -3,8 +3,8 @@ Description: Point to pysolfc instead of pysol.py, and remove Encoding=UTF-8
 Author: Bernhard Reiter <ockham@raz.or.at>
 Forwarded: https://sourceforge.net/tracker/?func=detail&aid=2946832&group_id=150718&atid=778745
 
---- a/data/pysol.desktop	2019-01-31 08:56:41.914330397 +0100
-+++ b/data/pysol.desktop	2019-01-31 08:56:41.910330427 +0100
+--- a/data/pysol.desktop
++++ b/data/pysol.desktop
 @@ -1,8 +1,8 @@
  [Desktop Entry]
 -Encoding=UTF-8
