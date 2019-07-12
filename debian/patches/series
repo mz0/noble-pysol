@@ -5,4 +5,3 @@ manpage
 directories
 install-debian-cardsets.patch
 fix-html-gen-imports.patch
-remove-random2-tmp.patch
