@@ -11,6 +11,7 @@ Build-Depends: debhelper (>= 11),
                python3-random2,
                python3-six,
                python3-tk
+Rules-Requires-Root: no
 Standards-Version: 4.3.0
 Testsuite: autopkgtest-pkg-python
 Homepage: http://pysolfc.sourceforge.net/
