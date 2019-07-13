@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: PySol Fan Club Edition
-Source: http://pysolfc.sourceforge.net/
+Source: https://pysolfc.sourceforge.io/
 
 Files: *
 Copyright: 1998-2003 Markus Franz Xaver Johannes Oberhumer <markus@oberhumer.com>
