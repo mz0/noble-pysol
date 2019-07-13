@@ -16,8 +16,3 @@ override_dh_installdocs:
 	# We install the docs to /usr/share/doc, so we need to remove the
 	# original directory, and later on create a symlink using dh_link.
 	rm -r debian/pysolfc/usr/share/games/pysolfc/html/
-
-override_dh_installman:
-	dh_installman
-	mv debian/pysolfc/usr/share/man/man6/pysol.6 \
-	   debian/pysolfc/usr/share/man/man6/pysolfc.6
