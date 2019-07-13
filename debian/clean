@@ -7,4 +7,4 @@ po/pl.po
 po/it.po
 
 # Generated html
-html-src/html/
+data/html/

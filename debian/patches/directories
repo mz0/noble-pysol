@@ -3,7 +3,7 @@ Author: Bernhard Reiter <ockham@raz.or.at>
 
 --- a/setup.py
 +++ b/setup.py
-@@ -10,14 +10,13 @@
+@@ -10,7 +10,7 @@
      import py2exe  # noqa: F401
  
  if os.name == 'posix':
@@ -12,13 +12,6 @@ Author: Bernhard Reiter <ockham@raz.or.at>
  elif os.name == 'nt':
      data_dir = 'data'
  else:
-     data_dir = 'data'
- 
- ddirs = [
--    'html',
-     'images',
-     'sound',
-     'tiles',
 --- a/pysollib/settings.py
 +++ b/pysollib/settings.py
 @@ -61,10 +61,7 @@

@@ -5,13 +5,17 @@ export PYBUILD_INSTALL_ARGS=--install-scripts=/usr/share/games/pysolfc --install
 %:
 	dh $@ --with python3 --buildsystem=pybuild
 
+# 'make rules' generates html docs, and 'make mo' builds l10n.
+# The rest is handled by pybuild.
 override_dh_auto_build:
-	make mo
+	$(MAKE) rules mo
 	dh_auto_build
 
 override_dh_installdocs:
-	cd html-src/ && ./gen-html.py
 	dh_installdocs
+	# We install the docs to /usr/share/doc, so we need to remove the
+	# original directory, and later on create a symlink using dh_link.
+	rm -r debian/pysolfc/usr/share/games/pysolfc/html/
 
 override_dh_installman:
 	dh_installman

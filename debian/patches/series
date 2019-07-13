@@ -4,4 +4,3 @@ desktop
 manpage
 directories
 install-debian-cardsets.patch
-fix-html-gen-imports.patch
