@@ -1,6 +1,7 @@
 Description: Remove configobj from package; 
  use python-configobj package instead
 Author: Bernhard Reiter <ockham@raz.or.at>
+Forwarded: https://github.com/shlomif/PySolFC/issues/122
 
 --- a/setup.py
 +++ b/setup.py
