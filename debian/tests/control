@@ -1,0 +1,2 @@
+Tests: importing
+Restrictions: superficial, allow-stderr, rw-build-tree
