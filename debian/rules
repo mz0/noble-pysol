@@ -6,10 +6,13 @@ export PYBUILD_INSTALL_ARGS = --install-scripts /usr/share/games/pysolfc \
 %:
 	dh $@ --with python3 --buildsystem=pybuild
 
-# 'make rules' generates html docs, and 'make mo' builds l10n.
-# The rest is handled by pybuild.
+# In this context, 'rules' are solitaire game rules in html form.
+# 'all_games_html' does require the rules to be built first.
+# 'make mo' builds localization and the rest is handled by pybuild.
 override_dh_auto_build:
-	$(MAKE) rules mo
+	make rules
+	make all_games_html
+	make mo
 	dh_auto_build
 
 # We install the docs to /usr/share/doc using dh_installdocs, so we need to

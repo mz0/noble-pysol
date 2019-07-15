@@ -8,6 +8,7 @@ po/it.po
 
 # Generated html
 data/html/
+docs/all_games.html
 
 # Generated tests
 tests/individually-importing/*.py
