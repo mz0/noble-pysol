@@ -8,3 +8,7 @@ po/it.po
 
 # Generated html
 data/html/
+
+# Generated tests
+tests/individually-importing/*.py
+tests/unit-generated/*.py

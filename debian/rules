@@ -17,3 +17,10 @@ override_dh_installdocs:
 	# We install the docs to /usr/share/doc, so we need to remove the
 	# original directory, and later on create a symlink using dh_link.
 	rm -r debian/pysolfc/usr/share/games/pysolfc/html/
+
+# Only run import tests for now. Missing deps for running the full suite:
+# python3-pycotap, python3-flake8-import-order, libtest-trailingspace-perl,
+# libcode-tidyall-plugin-flake8-perl
+override_dh_auto_test:
+	TEST_TAGS=SKIP_PY2 python3 scripts/gen_individual_importing_tests.py
+	PYTHONPATH=. prove tests/individually-importing/*.py
