@@ -25,5 +25,7 @@ override_dh_installdocs:
 # python3-pycotap, python3-flake8-import-order, libtest-trailingspace-perl,
 # libcode-tidyall-plugin-flake8-perl
 override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	TEST_TAGS=SKIP_PY2 python3 scripts/gen_individual_importing_tests.py
 	PYTHONPATH=. prove tests/individually-importing/*.py
+endif
