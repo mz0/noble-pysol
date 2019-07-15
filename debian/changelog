@@ -33,7 +33,8 @@ pysolfc (2.6.4-1) unstable; urgency=medium
   * debian/gbp.conf:
     - Add component=cardsets to tell gbp about the new additional tarball.
     - Remove compression=bzip2, the defaults are good enough.
-  * debian/clean: Clean up after localization build process and html generation.
+  * debian/clean: Clean up after localization build process, html generation,
+    and test suite.
   * debian/control:
     - Update home page URL.
     - Bump Standards-Version to 4.4.0.
@@ -42,15 +43,20 @@ pysolfc (2.6.4-1) unstable; urgency=medium
     - Declare Rules-Requires-Root: no.
   * debian/docs: AUTHORS is no longer in the tarball.
   * debian/patches:
-    - desktop: Add Comment, Keywords and StartupWMClass for better DE integration.
+    - desktop: Add Comment, Keywords, StartupWMClass for better DE integration.
     - manpage: Drop the patch, changes are incorporated upstream.
-  * debian/rules: It is no longer necessary to rename the manpage either.
+  * debian/rules:
+    - It is no longer necessary to rename the manpage either.
+    - Build docs/all_games.html from source.
+    - Run a part of the test suite. All tests can't be run as some dependencies
+      are not in Debian.
+  * debian/tests/: Run the same subset of tests also for the installed package.
   * Remove debian/menu because it's redundant with .desktop (Policy §9.6).
   * debian/copyright:
     - Update home page URL.
     - Add myself to the debian/ paragraph.
 
- -- Juhani Numminen <juhaninumminen0@gmail.com>  Sat, 13 Jul 2019 22:14:51 +0300
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Mon, 15 Jul 2019 21:34:52 +0300
 
 pysolfc (2.0-4) unstable; urgency=low
 
