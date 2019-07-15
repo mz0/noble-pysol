@@ -12,10 +12,10 @@ override_dh_auto_build:
 	$(MAKE) rules mo
 	dh_auto_build
 
+# We install the docs to /usr/share/doc using dh_installdocs, so we need to
+# remove the original directory, and later on dh_link will create a symlink.
 override_dh_installdocs:
 	dh_installdocs
-	# We install the docs to /usr/share/doc, so we need to remove the
-	# original directory, and later on create a symlink using dh_link.
 	rm -r debian/pysolfc/usr/share/games/pysolfc/html/
 
 # Only run import tests for now. Missing deps for running the full suite:
