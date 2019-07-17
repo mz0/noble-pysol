@@ -15,15 +15,12 @@ override_dh_auto_build:
 	make mo
 	dh_auto_build
 
-# Avoid conflicting with the separate package pysolfc-cardsets.
 override_dh_install:
 	dh_install
+	# Avoid conflicting with the separate package pysolfc-cardsets.
 	rm -r debian/pysolfc/usr/share/games/pysolfc/cardset-hanafuda-200-years/
-
-# We install the docs to /usr/share/doc using dh_installdocs, so we need to
-# remove the original directory, and later on dh_link will create a symlink.
-override_dh_installdocs:
-	dh_installdocs
+	# We install the docs to /usr/share/doc using dh_install, so we need to
+	# rm the original directory, and later on dh_link will create a symlink.
 	rm -r debian/pysolfc/usr/share/games/pysolfc/html/
 
 # Only run import tests for now. Missing deps for running the full suite:
