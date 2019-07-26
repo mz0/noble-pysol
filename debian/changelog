@@ -1,3 +1,9 @@
+pysolfc (2.6.4-2) unstable; urgency=medium
+
+  * Source-only upload.
+
+ -- Hugo Lefeuvre <hle@debian.org>  Fri, 26 Jul 2019 14:30:10 -0300
+
 pysolfc (2.6.4-1) unstable; urgency=medium
 
   * Team upload.
