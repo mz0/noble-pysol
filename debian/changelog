@@ -1,3 +1,12 @@
+pysolfc (2.6.4-3) unstable; urgency=medium
+
+  * Team upload.
+  * debian/patches/python3.8: Don't use the removed time.clock() anymore.
+    Thanks to Matthias Klose. (Closes: #950208).
+  * debian/control: Bump Standards-Version to 4.5.0.
+
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Mon, 03 Feb 2020 15:19:11 +0200
+
 pysolfc (2.6.4-2) unstable; urgency=medium
 
   * Source-only upload.
