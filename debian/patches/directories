@@ -1,31 +1,6 @@
 Description: Change some data and doc locations
 Author: Bernhard Reiter <ockham@raz.or.at>
 
---- a/setup.py
-+++ b/setup.py
-@@ -10,7 +10,7 @@
-     import py2exe  # noqa: F401
- 
- if os.name == 'posix':
--    data_dir = 'share/PySolFC'
-+    data_dir = 'share/games/pysolfc'
- elif os.name == 'nt':
-     data_dir = 'data'
- else:
---- a/pysollib/settings.py
-+++ b/pysollib/settings.py
-@@ -61,10 +61,7 @@
- # you can add your extra directories here
- if os.name == 'posix':
-     DATA_DIRS = [
--        '/usr/share/PySolFC',
--        '/usr/local/share/PySolFC',
--        '/usr/games/PySolFC',
--        '/usr/local/games/PySolFC',
-+        '/usr/share/games/pysolfc',
-         ]
- if os.name == 'nt':
-     pass
 --- a/pysollib/mfxutil.py
 +++ b/pysollib/mfxutil.py
 @@ -139,7 +139,7 @@
@@ -37,3 +12,28 @@ Author: Bernhard Reiter <ockham@raz.or.at>
  
  
  # high resolution clock() and sleep()
+--- a/setup.py
++++ b/setup.py
+@@ -22,7 +22,7 @@
+ 
+ 
+ if os.name == 'posix':
+-    data_dir = 'share/PySolFC'
++    data_dir = 'share/games/pysolfc'
+     locale_dir = 'share/locale'
+ else:
+     data_dir = 'data'
+--- a/pysollib/settings.py
++++ b/pysollib/settings.py
+@@ -61,10 +61,7 @@
+ # you can add your extra directories here
+ if os.name == 'posix':
+     DATA_DIRS = [
+-        '/usr/share/PySolFC',
+-        '/usr/local/share/PySolFC',
+-        '/usr/share/games/PySolFC',
+-        '/usr/local/share/games/PySolFC',
++        '/usr/share/games/pysolfc',
+         ]
+ if os.name == 'nt':
+     pass
