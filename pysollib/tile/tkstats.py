@@ -33,8 +33,8 @@ from pysollib.ui.tktile.tkutil import bind, loadImage
 
 from six.moves import tkinter
 from six.moves import tkinter_font
+from six.moves import tkinter_ttk as ttk
 
-from . import ttk
 from .tkwidget import MfxDialog, MfxMessageDialog
 
 
@@ -368,7 +368,8 @@ class TreeFormatter(PysolStatsFormatter):
             self.parent_window.games[id] = t8
 
         total, played, won, lost, time_, moves, perc = self.getStatSummary()
-        text = _("Total (%d out of %d games)") % (played, total)
+        text = _("Total (%(played)d out of %(total)d games)") % {
+            'played': played, 'total': total}
         id = self.tree.insert("", "end", text=text,
                               values=(won+lost, won, lost, time_, moves, perc))
         self.parent_window.tree_items.append(id)
@@ -808,8 +809,8 @@ class TopFrame(ttk.Frame):
         #                 s.score_casino_result.min,
         #                 s.score_casino_result.max,
         #                 round(s.score_casino_result.average, 2), ))
-        for l, min, max, avr, tot, top in ll:
-            ttk.Label(frame, text=l
+        for label, min, max, avr, tot, top in ll:
+            ttk.Label(frame, text=label
                       ).grid(row=row, column=0, padx=5, pady=5)
             ttk.Label(frame, text=str(min)
                       ).grid(row=row, column=1, padx=5, pady=5)

@@ -33,8 +33,8 @@ from pysollib.util import IMAGE_EXTENSIONS
 from pysollib.winsystems import TkSettings
 
 from six.moves import tkinter
+from six.moves import tkinter_ttk as ttk
 
-from . import ttk
 from .tkwidget import MfxTooltip
 
 
@@ -188,7 +188,7 @@ class PysolToolbarTk:
             (n_("Statistics"), self.mPlayerStats, _("View statistics")),
             (n_("Rules"),    self.mHelpRules, _("Rules for this game")),
             (None,           None,            None),
-            (n_("Quit"),     self.mQuit,      _("Quit ")+TITLE),
+            (n_("Quit"),     self.mQuit,      _("Quit %s") % TITLE),
                 ):
             if label is None:
                 sep = self._createSeparator()

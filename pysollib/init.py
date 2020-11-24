@@ -27,6 +27,11 @@ import os
 import subprocess
 import sys
 
+try:
+    import jnius
+except ImportError:
+    jnius = None
+
 import pysollib.settings
 
 # ************************************************************************
@@ -36,27 +41,31 @@ import pysollib.settings
 
 def init():
 
-    if os.name == 'nt' and 'LANG' not in os.environ:
-        try:
-            loc = locale.getdefaultlocale()
-            os.environ['LANG'] = loc[0]
-        except Exception:
-            pass
-    # locale.setlocale(locale.LC_ALL, '')
+    if 'LANG' not in os.environ:
+        if os.name == 'nt':
+            lang, enc = locale.getdefaultlocale()
+            os.environ['LANG'] = lang
+        elif jnius:  # android
+            Locale = jnius.autoclass('java.util.Locale')
+            os.environ['LANG'] = Locale.getDefault().getLanguage()
+    locale.setlocale(locale.LC_ALL, '')
 
     # install gettext
-    # locale_dir = 'locale'
-    locale_dir = None
-    if os.path.isdir(sys.path[0]):
-        d = os.path.join(sys.path[0], 'locale')
-    else:
-        # i.e. library.zip
-        d = os.path.join(os.path.dirname(sys.path[0]), 'locale')
-    if os.path.exists(d) and os.path.isdir(d):
-        locale_dir = d
-    # if locale_dir: locale_dir = os.path.normpath(locale_dir)
-    # gettext.install('pysol', locale_dir, unicode=True) # ngettext don't work
-    gettext.bindtextdomain('pysol', locale_dir)
+    locale_locations = (
+        # locale/ next to the pysol.py script
+        sys.path[0],
+        # locale/ next to library.zip (py2exe)
+        os.path.dirname(sys.path[0]),
+        # locale/ in curdir (works for e.g. py2app)
+        os.curdir)
+    # leaving the domain unbound means sys.prefix+'/share/locale'
+
+    for par in locale_locations:
+        locale_dir = os.path.join(par, 'locale')
+        if os.path.isdir(locale_dir):
+            gettext.bindtextdomain('pysol', locale_dir)
+            break
+
     gettext.textdomain('pysol')
 
     # debug
@@ -129,21 +138,30 @@ def init():
             os.environ['FREECELL_SOLVER_PRESETRC'] = f
     if os.name in ('posix', 'nt'):
         try:
-            kw = {'shell': True,
-                  'stdout': subprocess.PIPE,
-                  'stderr': subprocess.PIPE,
-                  'stdin': subprocess.PIPE, }
-            if os.name != 'nt':
-                kw['close_fds'] = True
-            p = subprocess.Popen(pysollib.settings.FCS_COMMAND+' --help', **kw)
-            p.stdin.close()
-            line = p.stdout.readline()
-            if sys.version_info >= (3,):
-                line = line.decode("utf-8")
-            if line.startswith('fc-solve'):
+            try:
+                import freecell_solver
+                fc_solve_lib_obj = freecell_solver.FreecellSolver()
+                assert fc_solve_lib_obj
                 pysollib.settings.USE_FREECELL_SOLVER = True
-            if os.name == 'posix':
-                os.wait()               # kill zombi
+            except Exception:
+                pass
+            if not pysollib.settings.USE_FREECELL_SOLVER:
+                kw = {'shell': True,
+                      'stdout': subprocess.PIPE,
+                      'stderr': subprocess.PIPE,
+                      'stdin': subprocess.PIPE, }
+                if os.name != 'nt':
+                    kw['close_fds'] = True
+                p = subprocess.Popen(
+                    pysollib.settings.FCS_COMMAND+' --help', **kw)
+                p.stdin.close()
+                line = p.stdout.readline()
+                if sys.version_info >= (3,):
+                    line = line.decode("utf-8")
+                if line.startswith('fc-solve'):
+                    pysollib.settings.USE_FREECELL_SOLVER = True
+                if os.name == 'posix':
+                    os.wait()               # kill zombi
         except Exception:
             # traceback.print_exc()
             pass

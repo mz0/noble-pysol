@@ -1,0 +1,6 @@
+attrs
+configobj
+pycotap
+pysol_cards
+random2
+six

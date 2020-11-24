@@ -165,7 +165,7 @@ class SelectGameData(SelectDialogTreeData):
             if name is None or not list(filter(
                     select_func, self.all_games_gi)):
                 continue
-            name = _("New games in v. ") + name
+            name = _("New games in v. %(version)s") % {'version': name}
             gg.append(SelectGameNode(None, name, select_func))
         if 1 and gg:
             s_by_pysol_version = SelectGameNode(None, _("by PySol version"),
@@ -444,10 +444,10 @@ class SelectGameDialog(object):
                 nodes = n.getContents()
                 if type(nodes) is list:
                     # Blaetter
-                    for l in nodes:
-                        # print ('**game=%s' % l.text)
+                    for node in nodes:
+                        # print ('**game=%s' % node.text)
                         yield LGameNode(
-                            l, v, text=l.text,
+                            node, v, text=node.text,
                             is_leaf=True,
                             command=self.selectCmd)
 

@@ -35,7 +35,7 @@ and implemented some other enhancements.
 
 ## Installation.
 
-We provide an [installer for Windows](https://sourceforge.net/projects/pysolfc/files/PySolFC/)
+We provide an [installer for Windows](https://sourceforge.net/projects/pysolfc/files/PySolFC/) (requires Windows XP SP3 or higher)
 as well as an Android package on F-droid.
 
 For installation from source, see: http://www.python.org/doc/current/inst/
@@ -96,13 +96,14 @@ per the instructions above.
 At the moment, this only works on POSIX (Linux, FreeBSD and similar) systems.
 Windows and Mac users - you'll need to chip in with a script for your system.
 
-#### 1 - Install build prerequisites: six and random2
+#### 1 - Install build prerequisites: six, random2 and pysol-cards
 
 This is kind of stupid and maybe it can be fixed in the future, but for now:
 
 ```
 pip install six
 pip install random2
+pip install pysol-cards
 ```
 
 You may want to use your OS distribution package system instead, for example:
@@ -110,6 +111,12 @@ You may want to use your OS distribution package system instead, for example:
 ```
 sudo apt-get install python-six
 sudo apt-get install python-random2
+```
+
+For Pillow compilation, libjpeg headers and libraries need to be available:
+
+```
+sudo apt-get install libjpeg-dev
 ```
 
 #### 2 - Clone the source from version control
@@ -122,10 +129,10 @@ cd PySolFC
 #### 3 - Create your virtual environment.
 
 ```
-PKGDIR=/usr/local/packages/PySolFC # or whatever
-export PKGDIR
-mkdir -p "$PKGDIR"
-( cd "$PKGDIR" && python -m venv ./env )
+PKGTREE=/usr/local/packages/PySolFC # or whatever
+export PKGTREE
+mkdir -p "$PKGTREE"
+( cd "$PKGTREE" && python -m venv ./env )
 ```
 
 #### 4 - Run the install script
@@ -139,12 +146,11 @@ mkdir -p "$PKGDIR"
 #### 6 - Enjoy playing
 
 ```
-"$PKGDIR"/env/bin/pysol.py
+"$PKGTREE"/env/bin/pysol.py
 ```
 
 ## Alternate toolkit.
 
-- Python2 (2.7 or later)
 - Kivy (10.0 or later)
 
 - Features:
@@ -154,7 +160,7 @@ mkdir -p "$PKGDIR"
 - Running from source without installation:
 
 ```
-python2 pysol.py --kivy
+python pysol.py --kivy
 ```
 
 ### Configuring Freecell Solver
@@ -183,6 +189,7 @@ to its CMake-based build-system:
 - [PySol-Sound-Server fork](https://github.com/shlomif/pysol-sound-server)
 - [Sources for the PySolFC web site](https://github.com/shlomif/pysolfc-website)
 - [PySolFC Announcements Drafts](https://github.com/shlomif/pysolfc-announcements)
+- [PySolFC-Cardsets tarballs sources repo](https://github.com/shlomif/PySolFC-Cardsets)
 - [Extra mahjongg cardsets for PySolFC - originally for flowersol](https://github.com/shlomif/PySol-Extra-Mahjongg-Cardsets)
 - [The old "pysol-music" distribution](https://github.com/shlomif/pysol-music)
 

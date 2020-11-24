@@ -351,6 +351,7 @@ class Scorpion(RelaxedSpider):
 
 class ScorpionTail_RowStack(Yukon_AC_RowStack, Spider_RowStack):
     canDropCards = Spider_RowStack.canDropCards
+    canMoveCards = OpenStack.canMoveCards
 
 
 class ScorpionTail(Scorpion):

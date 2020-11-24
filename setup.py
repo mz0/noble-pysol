@@ -2,19 +2,31 @@
 # -*- mode: python; -*-
 
 import os
-from distutils.core import setup
 
 from pysollib.settings import PACKAGE_URL
 from pysollib.settings import VERSION
+
+from setuptools import setup
+
 if os.name == 'nt':
     import py2exe  # noqa: F401
 
+
+def get_data_files(source, destination):
+    """Iterates over all files under the given tree, to install them to the
+    destination using the data_files keyword of setuptools.setup."""
+    for path, _, files in os.walk(source):
+        files = [os.path.join(path, f) for f in files]
+        path = path.replace(source, destination, 1)
+        yield (path, files)
+
+
 if os.name == 'posix':
     data_dir = 'share/PySolFC'
-elif os.name == 'nt':
-    data_dir = 'data'
+    locale_dir = 'share/locale'
 else:
     data_dir = 'data'
+    locale_dir = 'locale'
 
 ddirs = [
     'html',
@@ -32,22 +44,15 @@ for s in open('MANIFEST.in'):
 data_files = []
 
 for d in ddirs:
-    for root, dirs, files in os.walk(os.path.join('data', d)):
-        if root.find('.svn') >= 0:
-            continue
-        if files:
-            # files = map(lambda f: os.path.join(root, f), files)
-            files = [os.path.join(root, f) for f in files]
-            data_files.append((os.path.join(data_dir, root[5:]), files))
+    data_files += get_data_files(os.path.join('data', d),
+                                 os.path.join(data_dir, d))
+
+data_files += get_data_files('locale', locale_dir)
 
 if os.name == 'posix':
-    data_files.append(('share/pixmaps', ['data/pysol.xbm', 'data/pysol.xpm']))
-    data_files.append(('share/icons',
-                       ['data/images/misc/pysol01.png',
-                        'data/images/misc/pysol02.png', ]))
-    for l in ('ru', 'ru_RU'):
-        data_files.append(('share/locale/%s/LC_MESSAGES' % l,
-                           ['locale/%s/LC_MESSAGES/pysol.mo' % l]))
+    for size in os.listdir('data/images/icons'):
+        data_files.append(('share/icons/hicolor/%s/apps' % size,
+                           ['data/images/icons/%s/pysol.png' % size]))
     data_files.append((data_dir, ['data/pysolfc.glade']))
     data_files.append(('share/applications', ['data/pysol.desktop']))
 
@@ -69,11 +74,18 @@ kw = {
     'author': 'Skomoroh',
     'author_email': 'skomoroh@gmail.com',
     'description': 'a Python solitaire game collection',
+    'install_requires': [
+        'attrs',
+        'configobj',
+        'pycotap',
+        'pysol_cards',
+        'random2',
+        'six',
+    ],
     'long_description': long_description,
     'license': 'GPL',
     'scripts': ['pysol.py'],
     'packages': ['pysollib',
-                 'pysollib.configobj',
                  'pysollib.macosx',
                  'pysollib.winsystems',
                  'pysollib.tk',
@@ -82,6 +94,7 @@ kw = {
                  'pysollib.ui',
                  'pysollib.ui.tktile',
                  'pysollib.kivy',
+                 'pysollib.game',
                  'pysollib.games',
                  'pysollib.games.special',
                  'pysollib.games.ultra',

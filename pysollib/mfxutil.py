@@ -107,9 +107,9 @@ def print_err(s, level=1):
     elif level == 2:
         ss = PACKAGE+': DEBUG WARNING:'
     try:
-        print_(ss, s.encode(locale.getpreferredencoding()), file=sys.stderr)
-    except Exception:
         print_(ss, s, file=sys.stderr)
+    except Exception:
+        print_(ss, s.encode(locale.getpreferredencoding()), file=sys.stderr)
     sys.stderr.flush()
 
 
@@ -143,7 +143,11 @@ def getprefdir(package):
 
 
 # high resolution clock() and sleep()
-uclock = time.clock
+try:
+    uclock = time.perf_counter
+except Exception:
+    uclock = time.clock
+
 usleep = time.sleep
 if os.name == "posix":
     uclock = time.time

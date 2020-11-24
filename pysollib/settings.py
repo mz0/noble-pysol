@@ -32,7 +32,7 @@ PACKAGE = 'PySolFC'
 TITLE = 'PySol'
 PACKAGE_URL = 'http://pysolfc.sourceforge.net/'
 
-VERSION_TUPLE = (2, 6, 4)
+VERSION_TUPLE = (2, 10, 1)
 VERSION = '.'.join(map(str, VERSION_TUPLE))
 
 # Tk windowing system (auto set up in init.py)
@@ -63,8 +63,8 @@ if os.name == 'posix':
     DATA_DIRS = [
         '/usr/share/PySolFC',
         '/usr/local/share/PySolFC',
-        '/usr/games/PySolFC',
-        '/usr/local/games/PySolFC',
+        '/usr/share/games/PySolFC',
+        '/usr/local/share/games/PySolFC',
         ]
 if os.name == 'nt':
     pass
