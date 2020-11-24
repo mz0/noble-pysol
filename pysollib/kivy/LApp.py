@@ -31,6 +31,7 @@ from kivy.base import EventLoop
 from kivy.base import stopTouchApp
 from kivy.cache import Cache
 from kivy.clock import Clock
+from kivy.config import Config
 from kivy.core.audio import SoundLoader
 from kivy.core.window import Window
 from kivy.graphics import Color
@@ -51,6 +52,11 @@ from kivy.uix.treeview import TreeView
 from kivy.uix.treeview import TreeViewLabel
 from kivy.uix.widget import Widget
 from kivy.utils import platform
+
+from pysollib.kivy.androidperms import requestStoragePerm
+
+if platform != 'android':
+    Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
 # =============================================================================
 
@@ -671,7 +677,10 @@ class LRectangle(Widget, LBase):
                     event = LEvent()
                     event.x = ppos[0]
                     event.y = ppos[1]
-                    self.group.bindings['<1>'](event)
+                    if touch.is_double_tap:
+                        self.group.bindings['<Double-1>'](event)
+                    else:
+                        self.group.bindings['<1>'](event)
                     return True
         return False
 
@@ -708,9 +717,27 @@ class LImageItem(BoxLayout, LBase):
         # ev. noch globales cache für stacks->game und cards->stack
         # einrichten. Aber: stacks hängt vom jeweiligen spiel ab.
 
-    def send_event_pressed_1(self, event):
-        if self.group and '<1>' in self.group.bindings:
-            self.group.bindings['<1>'](event)
+    def send_event_pressed_n(self, event, n):
+        if self.group and n in self.group.bindings:
+            self.group.bindings[n](event)
+
+    def send_event_pressed(self, touch, event):
+
+        if touch.is_double_tap:
+            self.send_event_pressed_n(event, '<Double-1>')
+        else:
+            button = 'left'
+            if 'button' in touch.profile:
+                button = touch.button
+            if button == 'left':
+                self.send_event_pressed_n(event, '<1>')
+                return
+            if button == 'middle':
+                self.send_event_pressed_n(event, '<2>')
+                return
+            if button == 'right':
+                self.send_event_pressed_n(event, '<3>')
+                return
 
     def on_touch_down(self, touch):
 
@@ -734,7 +761,7 @@ class LImageItem(BoxLayout, LBase):
                                 event.y = ppos[1]
                                 self.dragstart = touch.pos
                                 event.cardid = i
-                                self.send_event_pressed_1(event)
+                                self.send_event_pressed(touch, event)
                                 return True
 
             if self.group is not None:
@@ -1168,7 +1195,7 @@ class LMenu(ActionView, LBase):
         class MyActionPrev(ActionPrevious, LBase):
             pass
 
-        kw['app_icon'] = 'data/images/misc/pysol01.png'
+        kw['app_icon'] = 'data/images/icons/48x48/pysol.png'
         kw['with_previous'] = prev
         kw['size_hint'] = (.01, 1)
         self.ap = MyActionPrev(**kw)
@@ -1541,6 +1568,12 @@ class LMainWindow(BoxLayout, LTkBase):
         self.workStack = LStack()
         self.app = None
 
+        '''
+        from kivy.graphics import opengl_utils
+        print('OPENGL support:')
+        print(opengl_utils.gl_get_extensions())
+        '''
+
         # self.touches = []
 
         # beispiel zu canvas (hintergrund)
@@ -1759,10 +1792,9 @@ class LApp(App):
 
     def doSize(self, obj, val):
         mval = self.mainWindow.size
-        logging.info("LApp: size changed %s - %s (%s)" % (obj, val, mval))
-        # Clock.schedule_once(self.delayedRebuild, 0.01)
-        Clock.schedule_once(self.makeDelayedRebuild(), 0.01)
-        # self.mainWindow.rebuildContainer()
+        if (val[0] != mval[0] and val[1] != mval[1]):
+            logging.info("LApp: size changed %s - %s (%s)" % (obj, val, mval))
+            Clock.schedule_once(self.makeDelayedRebuild(), 0.01)
         pass
 
     def on_start(self):
@@ -1779,6 +1811,8 @@ class LApp(App):
         self.mainloop = self.app.mainproc()  # Einrichten
         self.mainloop.send(None)                # Spielprozess starten
         logging.info("LApp: on_start processed")
+        # Android: Request missing android permissions.
+        requestStoragePerm()
 
     def on_stop(self):
         # Achtung wird u.U. 2 mal aufgerufen !!!
@@ -1829,12 +1863,6 @@ class LApp(App):
         # save statistics
         try:
             app.saveStatistics()
-        except Exception:
-            traceback.print_exc()
-            pass
-        # save comments
-        try:
-            app.saveComments()
         except Exception:
             traceback.print_exc()
             pass

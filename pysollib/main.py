@@ -56,25 +56,25 @@ if TOOLKIT == 'kivy':
     def fatal_no_cardsets(app):
         app.wm_withdraw()
         MfxMessageDialog(app.top, title=_("%s installation error") % TITLE,
-                         text=_('''No cardsets were found !!!
+                         text=_('''No cardsets were found!!!
 
 Cardsets should be installed into:
-%s/cardsets/
+%(dir)s
 
-Please check your %s installation.
-''') % (getprefdir(PACKAGE), TITLE),
+Please check your %(app)s installation.
+''') % {'dir': getprefdir(PACKAGE) + '/cardsets/', 'app': TITLE},
             bitmap="error", strings=(_("&Quit"),))
 else:
     def fatal_no_cardsets(app):
         app.wm_withdraw()
         MfxMessageDialog(app.top, title=_("%s installation error") % TITLE,
-                         text=_('''No cardsets were found !!!
+                         text=_('''No cardsets were found!!!
 
 Main data directory is:
-%s
+%(dir)s
 
-Please check your %s installation.
-''') % (app.dataloader.dir, TITLE),
+Please check your %(app)s installation.
+''') % {'dir': app.dataloader.dir, 'app': TITLE},
                      bitmap="error", strings=(_("&Quit"),))
 
 
@@ -86,17 +86,18 @@ def parse_option(argv):
     prog_name = argv[0]
     try:
         optlist, args = getopt.getopt(argv[1:], "g:i:hD:",
-                                      ["game=", "gameid=",
+                                      ["deal=", "game=", "gameid=",
                                        "french-only",
                                        "noplugins",
                                        "nosound",
                                        "sound-mod=",
                                        "help"])
     except getopt.GetoptError as err:
-        print_err(_("%s\ntry %s --help for more information") %
-                  (err, prog_name), 0)
+        print_err(str(err) + "\n" + _("try %s --help for more information") %
+                  prog_name, 0)
         return None
     opts = {"help": False,
+            "deal": None,
             "game": None,
             "gameid": None,
             "french-only": False,
@@ -107,6 +108,8 @@ def parse_option(argv):
     for i in optlist:
         if i[0] in ("-h", "--help"):
             opts["help"] = True
+        elif i[0] in ("--deal"):
+            opts["deal"] = i[1]
         elif i[0] in ("-g", "--game"):
             opts["game"] = i[1]
         elif i[0] in ("-i", "--gameid"):
@@ -164,6 +167,7 @@ def pysol_init(app, args):
     opts, filename = opts
     if filename:
         app.commandline.loadgame = filename
+    app.commandline.deal = opts['deal']
     app.commandline.game = opts['game']
     if opts['gameid'] is not None:
         try:
@@ -299,13 +303,14 @@ def pysol_init(app, args):
         app.intro.progress.destroy()
         d = MfxMessageDialog(top, title=_("%s installation error") % TITLE,
                              text=_('''
-No games were found !!!
+No games were found!!!
 
 Main data directory is:
-%s
+%(dir)s
 
-Please check your %s installation.
-''') % (app.dataloader.dir, TITLE), bitmap="error", strings=(_("&Quit"),))
+Please check your %(app)s installation.
+''') % {'dir': app.dataloader.dir, 'app': TITLE},
+                             bitmap="error", strings=(_("&Quit"),))
         return 1
 
     # init cardsets
@@ -350,7 +355,10 @@ Please check your %s installation.
         if music:
             app.music_playlist = list(music)[:]
             app.miscrandom.shuffle(app.music_playlist)
-            if 1:
+            # Cancelling because otherwise people complain
+            # that the music order is not random.
+            SHOULD_PUT_bye_for_now_FIRST = False
+            if SHOULD_PUT_bye_for_now_FIRST:
                 for m in app.music_playlist:
                     if m.name.lower() == "bye_for_now":
                         app.music_playlist.remove(m)

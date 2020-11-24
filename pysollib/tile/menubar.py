@@ -29,7 +29,8 @@ from pysollib.ui.tktile.menubar import MfxMenu, PysolMenubarTkCommon
 from pysollib.ui.tktile.solverdialog import connect_game_solver_dialog
 from pysollib.util import CARDSET
 
-from . import ttk
+from six.moves import tkinter_ttk as ttk
+
 from .selectgame import SelectGameDialog, SelectGameDialogWithPreview
 from .selecttile import SelectTileDialogWithPreview
 from .soundoptionsdialog import SoundOptionsDialog
@@ -105,8 +106,8 @@ class PysolMenubarTk(PysolMenubarTkCommon):
         self._calc_MfxMessageDialog()(
             self.top, title=_("Change theme"),
             text=_("""\
-This settings will take effect
-the next time you restart """)+TITLE,
+These settings will take effect
+the next time you restart %(app)s""") % {'app': TITLE},
             bitmap="warning",
             default=0, strings=(_("&OK"),))
 

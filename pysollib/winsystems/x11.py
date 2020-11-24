@@ -33,7 +33,7 @@ from pysollib.winsystems.common import \
 
 if TOOLKIT == 'tk':
     if USE_TILE:
-        from pysollib.tile import ttk
+        from six.moves import tkinter_ttk as ttk
 
 
 # ************************************************************************
@@ -43,10 +43,6 @@ if TOOLKIT == 'tk':
 def init_root_window(root, app):
 
     base_init_root_window(root, app)
-
-    #         if TOOLKIT == 'tk':
-    #             window.wm_iconbitmap("@"+filename)
-    #             window.wm_iconmask("@"+filename)
 
     # root.self.wm_maxsize(9999, 9999) # unlimited
     if TOOLKIT == 'gtk':

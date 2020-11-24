@@ -410,7 +410,8 @@ class CanvasFormatter(PysolStatsFormatter):
         #
         y += self.h
         total, played, won, lost, time_, moves, perc = self.getStatSummary()
-        s = _("Total (%d out of %d games)") % (played, total)
+        s = _("Total (%(played)d out of %(total)d games)") % {
+            'played': played, 'total': total}
         self.pstats(y, (s, won+lost, won, lost, time_, moves, perc))
 
     def writeLog(self, player, prev_games):
@@ -771,8 +772,8 @@ class Top_StatsDialog(MfxDialog):
             #                 s.score_casino_result.min,
             #                 s.score_casino_result.max,
             #                 round(s.score_casino_result.average, 2), ))
-            for l, min, max, avr, tot, top in ll:
-                tkinter.Label(frame, text=l).grid(row=row, column=0)
+            for label, min, max, avr, tot, top in ll:
+                tkinter.Label(frame, text=label).grid(row=row, column=0)
                 tkinter.Label(frame, text=str(min)).grid(row=row, column=1)
                 tkinter.Label(frame, text=str(max)).grid(row=row, column=2)
                 tkinter.Label(frame, text=str(avr)).grid(row=row, column=3)

@@ -24,7 +24,6 @@
 import os
 
 from pysollib.gamedb import GI
-from pysollib.help import help_html
 from pysollib.mfxutil import KwStruct, Struct, destruct
 from pysollib.mfxutil import format_time
 from pysollib.mygettext import _
@@ -39,10 +38,10 @@ from .selecttree import SelectDialogTreeCanvas
 from .selecttree import SelectDialogTreeLeaf, SelectDialogTreeNode
 from .tkwidget import MfxDialog, MfxScrolledCanvas
 
-
 # ************************************************************************
 # * Nodes
 # ************************************************************************
+
 
 class SelectGameLeaf(SelectDialogTreeLeaf):
     pass
@@ -137,7 +136,6 @@ class SelectGameData(SelectDialogTreeData):
         if 1 and gg:
             s_by_compatibility = SelectGameNode(None, _("by Compatibility"),
                                                 tuple(gg))
-            pass
         #
         s_by_pysol_version, gg = None, []
         for name, games in GI.GAMES_BY_PYSOL_VERSION:
@@ -146,7 +144,7 @@ class SelectGameData(SelectDialogTreeData):
             if name is None or not list(filter(
                     select_func, self.all_games_gi)):
                 continue
-            name = _("New games in v. ") + name
+            name = _("New games in v. %(version)s") % {'version': name}
             gg.append(SelectGameNode(None, name, select_func))
         if 1 and gg:
             s_by_pysol_version = SelectGameNode(None, _("by PySol version"),
@@ -167,16 +165,16 @@ class SelectGameData(SelectDialogTreeData):
             list(app.gdb.getGamesTuplesSortedByAlternateName()))
         #
         self.rootnodes = [_f for _f in (
-            SelectGameNode(None, _("All Games"), None),
+            SelectGameNode(None, _("All Games"), None, expanded=0),
             SelectGameNode(None, _("Alternate Names"), ul_alternate_names),
             SelectGameNode(None, _("Popular Games"),
                            lambda gi: gi.si.game_flags & GI.GT_POPULAR),
+            s_by_type,
             s_mahjongg,
             s_oriental,
             s_special,
             SelectGameNode(None, _("Custom Games"),
                            lambda gi: gi.si.game_type == GI.GT_CUSTOM),
-            s_by_type,
             SelectGameNode(None, _('by Skill Level'), (
                 SelectGameNode(None, _('Luck only'),
                                lambda gi: gi.skill_level == GI.SL_LUCK),
@@ -232,8 +230,6 @@ class SelectGameData(SelectDialogTreeData):
                                    lambda gi: gi.si.redeals == 3),
                     SelectGameNode(None, _("Unlimited redeals"),
                                    lambda gi: gi.si.redeals == -1),
-                    SelectGameNode(None, "Variable redeals",
-                                   lambda gi: gi.si.redeals == -2),
                     SelectGameNode(
                         None, _("Other number of redeals"),
                         lambda gi: gi.si.redeals not in (-1, 0, 1, 2, 3)),
@@ -308,8 +304,8 @@ class SelectGameDialog(MfxDialog):
     def initKw(self, kw):
         kw = KwStruct(kw,
                       strings=(None, None, _("&Cancel"),), default=0,
-                      separator=True,
                       resizable=True,
+                      separator=True,
                       padx=10, pady=10,
                       buttonpadx=10, buttonpady=5,
                       )
@@ -322,14 +318,15 @@ class SelectGameDialog(MfxDialog):
         MfxDialog.destroy(self)
 
     def mDone(self, button):
-        if button == 0:                    # Ok or double click
+        if button == 0:                 # Ok or double click
             self.gameid = self.tree.selection_key
             self.tree.n_expansions = 1  # save xyview in any case
-        if button == 1:                    # Rules
+        if button == 1:                # Rules
             doc = self.app.getGameRulesFilename(self.tree.selection_key)
             if not doc:
                 return
             dir = os.path.join("html", "rules")
+            from pysollib.help import help_html
             help_html(self.app, doc, dir, self.top)
             return
         MfxDialog.mDone(self, button)
@@ -436,7 +433,8 @@ class SelectGameDialogWithPreview(SelectGameDialog):
 
     def initKw(self, kw):
         kw = KwStruct(kw,
-                      strings=(_("&Select"), _("&Rules"), _("&Cancel"),),
+                      strings=((_("&Rules"), 10), 'sep',
+                               _("&Select"), _("&Cancel"),),
                       default=0,
                       )
         return SelectGameDialog.initKw(self, kw)
@@ -486,7 +484,6 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                 audio=self.app.audio,
                 canvas=canvas,
                 cardset=self.app.cardset.copy(),
-                comments=self.app.comments.new(),
                 gamerandom=self.app.gamerandom,
                 gdb=self.app.gdb,
                 gimages=self.app.gimages,
@@ -516,7 +513,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         # self.top.wm_title("Select Game - " +
         #   self.app.getGameTitleName(gameid))
         title = self.app.getGameTitleName(gameid)
-        self.top.wm_title(_("Playable Preview - ") + title)
+        self.top.wm_title(_("Playable Preview - %(game)s") % {'game': title})
         #
         self.preview_game = gi.gameclass(gi)
         self.preview_game.createPreview(self.preview_app)
@@ -545,7 +542,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         #
         self.updateInfo(gameid)
         #
-        rules_button = self.buttons[1]
+        rules_button = self.buttons[0]
         if self.app.getGameRulesFilename(gameid):
             rules_button.config(state="normal")
         else:

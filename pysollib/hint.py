@@ -22,14 +22,12 @@
 # ---------------------------------------------------------------------------##
 
 
-# imports
 import os
 import re
 import subprocess
 import time
 from io import BytesIO
 
-# PySol imports
 from pysollib.mfxutil import destruct
 from pysollib.pysolrandom import constructRandom
 from pysollib.settings import DEBUG, FCS_COMMAND
@@ -704,7 +702,6 @@ class Yukon_Hint(YukonType_Hint):
         return score + bonus, color
 
 
-# FIXME
 class FreeCellType_Hint(CautiousDefaultHint):
     pass
 
@@ -729,10 +726,6 @@ class PySolHintLayoutImportError(Exception):
         return self.msg + ":\n\n" + ', '.join(self.cards)
 
 
-# ************************************************************************
-# * FreeCell-Solver
-# ************************************************************************
-
 class Base_Solver_Hint:
     def __init__(self, game, dialog, **game_type):
         self.game = game
@@ -752,8 +745,9 @@ class Base_Solver_Hint:
             self.base_rank = game_type['base_rank']
         else:
             self.base_rank = game.s.foundations[0].cap.base_rank
-        # print 'game_type:', game_type
-        # print 'base_rank:', self.base_rank
+
+    def _setText(self, **kw):
+        return self.dialog.setText(**kw)
 
     def config(self, **kw):
         self.options.update(kw)
@@ -761,18 +755,18 @@ class Base_Solver_Hint:
     def _card2str_format(self, fmt, rank, suit):
         # row and reserves
         rank = (rank-self.base_rank) % 13
-        return fmt % {'R': "A23456789TJQK"[rank], 'S': "CSHD"[suit]}
+        return fmt.format(R="A23456789TJQK"[rank], S="CSHD"[suit])
 
     def card2str1_(self, rank, suit):
         # row and reserves
-        return self._card2str_format('%(R)s%(S)s', rank, suit)
+        return self._card2str_format('{R}{S}', rank, suit)
 
     def card2str1(self, card):
         return self.card2str1_(card.rank, card.suit)
 
     def card2str2(self, card):
         # foundations
-        return self._card2str_format('%(S)s-%(R)s', card.rank, card.suit)
+        return self._card2str_format('{S}-{R}', card.rank, card.suit)
 
 # hard solvable: Freecell #47038300998351211829 (65539 iters)
 
@@ -780,7 +774,6 @@ class Base_Solver_Hint:
         if taken_hint and taken_hint[6]:
             return [taken_hint[6]]
         h = self.hints[self.hints_index]
-        # print 'getHints', taken_hint, h
         if h is None:
             return None
         ncards, src, dest = h
@@ -793,10 +786,7 @@ class Base_Solver_Hint:
             if src is self.game.s.talon:
                 if not src.cards[-1].face_up:
                     self.game.flipMove(src)
-                # src.prepareStack()
-                # src.dealCards()
                 dest = self.game.s.foundations[0]
-                # skip = True
             else:
                 cards = src.cards[-ncards:]
                 for f in self.game.s.foundations:
@@ -808,7 +798,6 @@ class Base_Solver_Hint:
         if skip:
             return []
         hint = (999999, 0, ncards, src, dest, None, thint)
-        # print hint
         return [hint]
 
     def colonPrefixMatch(self, prefix, s):
@@ -838,6 +827,25 @@ class Base_Solver_Hint:
         return BytesIO(pout), BytesIO(perr)
 
 
+use_fc_solve_lib = False
+
+try:
+    import freecell_solver
+    fc_solve_lib_obj = freecell_solver.FreecellSolver()
+    use_fc_solve_lib = True
+except BaseException:
+    pass
+
+use_bh_solve_lib = False
+
+try:
+    import black_hole_solver
+    bh_solve_lib_obj = black_hole_solver.BlackHoleSolver()
+    use_bh_solve_lib = True
+except BaseException:
+    pass
+
+
 class FreeCellSolver_Hint(Base_Solver_Hint):
     def _determineIfSolverState(self, line):
         if re.search('^(?:Iterations count exceeded)', line):
@@ -854,8 +862,8 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
         return ('preset' in game_type and
                 game_type['preset'] == 'simple_simon')
 
-    def _addBoardLine(self, l):
-        self.board += l + '\n'
+    def _addBoardLine(self, line):
+        self.board += line + '\n'
         return
 
     def _addPrefixLine(self, prefix, b):
@@ -975,8 +983,6 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
         game = self.game
         self.board = ''
         is_simple_simon = self._isSimpleSimon()
-        #
-        #
         b = ''
         for s in game.s.foundations:
             if s.cards:
@@ -1005,44 +1011,45 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
         game_type = self.game_type
         global FCS_VERSION
         if FCS_VERSION is None:
-            pout, _ = self.run_solver(FCS_COMMAND + ' --version', '')
-            s = six.text_type(pout.read(), encoding='utf-8')
-            m = re.search(r'version ([0-9]+)\.([0-9]+)\.([0-9]+)', s)
-            if m:
-                FCS_VERSION = (int(m.group(1)), int(m.group(2)),
-                               int(m.group(3)))
+            if use_fc_solve_lib:
+                FCS_VERSION = (5, 0, 0)
             else:
-                FCS_VERSION = (0, 0, 0)
+                pout, _ = self.run_solver(FCS_COMMAND + ' --version', '')
+                s = six.text_type(pout.read(), encoding='utf-8')
+                m = re.search(r'version ([0-9]+)\.([0-9]+)\.([0-9]+)', s)
+                if m:
+                    FCS_VERSION = (int(m.group(1)), int(m.group(2)),
+                                   int(m.group(3)))
+                else:
+                    FCS_VERSION = (0, 0, 0)
 
         progress = self.options['progress']
 
         board = self.calcBoardString()
-        #
         if DEBUG:
             print('--------------------\n', board, '--------------------')
-        #
         args = []
-        # args += ['-sam', '-p', '-opt', '--display-10-as-t']
-        args += ['-m', '-p', '-opt', '-sel']
-        if FCS_VERSION >= (4, 20, 0):
-            args += ['-hoi']
-        if progress:
+        if use_fc_solve_lib:
+            args += ['--reset', '-opt', ]
+        else:
+            args += ['-m', '-p', '-opt', '-sel']
+            if FCS_VERSION >= (4, 20, 0):
+                args += ['-hoi']
+        if (not use_fc_solve_lib) and progress:
             args += ['--iter-output']
             fcs_iter_output_step = None
             if FCS_VERSION >= (4, 20, 0):
-                # fcs_iter_output_step = 10000
                 fcs_iter_output_step = self.options['iters_step']
                 args += ['--iter-output-step', str(fcs_iter_output_step)]
             if DEBUG:
                 args += ['-s']
         if self.options['preset'] and self.options['preset'] != 'none':
             args += ['--load-config', self.options['preset']]
-        args += ['--max-iters', self.options['max_iters'],
-                 '--decks-num', game.gameinfo.decks,
-                 '--stacks-num', len(game.s.rows),
-                 '--freecells-num', len(game.s.reserves),
+        args += ['--max-iters', str(self.options['max_iters']),
+                 '--decks-num', str(game.gameinfo.decks),
+                 '--stacks-num', str(len(game.s.rows)),
+                 '--freecells-num', str(len(game.s.reserves)),
                  ]
-        #
         if 'preset' in game_type:
             args += ['--preset', game_type['preset']]
         if 'sbb' in game_type:
@@ -1052,10 +1059,13 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
         if 'esf' in game_type:
             args += ['--empty-stacks-filled-by', game_type['esf']]
 
-        command = FCS_COMMAND+' '+' '.join([str(i) for i in args])
-        pout, perr = self.run_solver(command, board)
+        if use_fc_solve_lib:
+            fc_solve_lib_obj.input_cmd_line(args)
+            status = fc_solve_lib_obj.solve_board(board)
+        else:
+            command = FCS_COMMAND+' '+' '.join(args)
+            pout, perr = self.run_solver(command, board)
         self.solver_state = 'unknown'
-        #
         stack_types = {
             'the': game.s.foundations,
             'stack': game.s.rows,
@@ -1063,8 +1073,7 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
             }
         if DEBUG:
             start_time = time.time()
-        if progress:
-            # iteration output
+        if not(use_fc_solve_lib) and progress:
             iter_ = 0
             depth = 0
             states = 0
@@ -1081,97 +1090,113 @@ class FreeCellSolver_Hint(Base_Solver_Hint):
                 elif self.colonPrefixMatch('Stored-States', s):
                     states = self._v
                     if iter_ % 100 == 0 or fcs_iter_output_step:
-                        self.dialog.setText(iter=iter_, depth=depth,
-                                            states=states)
+                        self._setText(iter=iter_, depth=depth, states=states)
                 elif re.search('^(?:-=-=)', s):
                     break
                 elif self._determineIfSolverState(s):
                     break
-            self.dialog.setText(iter=iter_, depth=depth, states=states)
+            self._setText(iter=iter_, depth=depth, states=states)
 
         hints = []
-        for sbytes in pout:
-            s = six.text_type(sbytes, encoding='utf-8')
-            if DEBUG:
-                print(s)
-            if self._determineIfSolverState(s):
-                next
-            m = re.match('Total number of states checked is ([0-9]+)\\.', s)
-            if m:
-                iter_ = int(m.group(1))
-                self.dialog.setText(iter=iter_)
+        if use_fc_solve_lib:
+            self._setText(
+                iter=fc_solve_lib_obj.get_num_times(),
+                depth=0,
+                states=fc_solve_lib_obj.get_num_states_in_collection(),
+            )
+            if status == 0:
+                m = fc_solve_lib_obj.get_next_move()
+                while m:
+                    type_ = ord(m.s[0])
+                    src = ord(m.s[1])
+                    dest = ord(m.s[2])
+                    hints.append([
+                        (ord(m.s[3]) if type_ == 0
+                         else (13 if type_ == 11 else 1)),
+                        (game.s.rows if (type_ in [0, 1, 4, 11, ])
+                         else game.s.reserves)[src],
+                        (game.s.rows[dest] if (type_ in [0, 2])
+                         else (game.s.reserves[dest]
+                               if (type_ in [1, 3]) else None))])
 
-            m = re.match('This scan generated ([0-9]+) states\\.', s)
-
-            if m:
-                states = int(m.group(1))
-                self.dialog.setText(states=states)
-
-            m = re.match('Move (.*)', s)
-            if not m:
-                continue
-
-            move_s = m.group(1)
-
-            m = re.match(
-                'the sequence on top of Stack ([0-9]+) to the foundations',
-                move_s)
-
-            if m:
-                ncards = 13
-                st = stack_types['stack']
-                sn = int(m.group(1))
-                src = st[sn]
-                dest = None
+                    m = fc_solve_lib_obj.get_next_move()
             else:
+                self.solver_state = 'unsolved'
+        else:
+            for sbytes in pout:
+                s = six.text_type(sbytes, encoding='utf-8')
+                if DEBUG:
+                    print(s)
+                if self._determineIfSolverState(s):
+                    break
                 m = re.match(
-                    '(?P<ncards>a card|(?P<count>[0-9]+) cards) '
-                    'from (?P<source_type>stack|freecell) '
-                    '(?P<source_idx>[0-9]+) to '
-                    '(?P<dest>the foundations|(?P<dest_type>freecell|stack) '
-                    '(?P<dest_idx>[0-9]+))\\s*', move_s)
+                    'Total number of states checked is ([0-9]+)\\.', s)
+                if m:
+                    self._setText(iter=int(m.group(1)))
 
+                m = re.match('This scan generated ([0-9]+) states\\.', s)
+
+                if m:
+                    self._setText(states=int(m.group(1)))
+
+                m = re.match('Move (.*)', s)
                 if not m:
                     continue
 
-                ncards = m.group('ncards')
-                if ncards == 'a card':
-                    ncards = 1
-                else:
-                    ncards = int(m.group('count'))
+                move_s = m.group(1)
 
-                st = stack_types[m.group('source_type')]
-                sn = int(m.group('source_idx'))
-                src = st[sn]            # source stack
+                m = re.match(
+                    'the sequence on top of Stack ([0-9]+) to the foundations',
+                    move_s)
 
-                dest_s = m.group('dest')
-                if dest_s == 'the foundations':
-                    # to foundation
+                if m:
+                    ncards = 13
+                    st = stack_types['stack']
+                    sn = int(m.group(1))
+                    src = st[sn]
                     dest = None
                 else:
-                    # to rows or reserves
-                    dt = stack_types[m.group('dest_type')]
-                    dn = int(m.group('dest_idx'))
-                    dest = dt[dn]
+                    m = re.match(
+                        '(?P<ncards>a card|(?P<count>[0-9]+) cards) '
+                        'from (?P<source_type>stack|freecell) '
+                        '(?P<source_idx>[0-9]+) to '
+                        '(?P<dest>the foundations|'
+                        '(?P<dest_type>freecell|stack) '
+                        '(?P<dest_idx>[0-9]+))\\s*', move_s)
 
-            hints.append([ncards, src, dest])
-            # print src, dest, ncards
+                    if not m:
+                        continue
 
-        #
+                    if m.group('ncards') == 'a card':
+                        ncards = 1
+                    else:
+                        ncards = int(m.group('count'))
+
+                    st = stack_types[m.group('source_type')]
+                    sn = int(m.group('source_idx'))
+                    src = st[sn]
+
+                    dest_s = m.group('dest')
+                    if dest_s == 'the foundations':
+                        dest = None
+                    else:
+                        dt = stack_types[m.group('dest_type')]
+                        dest = dt[int(m.group('dest_idx'))]
+
+                hints.append([ncards, src, dest])
+
         if DEBUG:
             print('time:', time.time()-start_time)
-        # print perr.read(),
 
         self.hints = hints
         if len(hints) > 0:
             if self.solver_state != 'intractable':
                 self.solver_state = 'solved'
-        self.hints.append(None)         # XXX
+        self.hints.append(None)
 
-        # print self.hints
-
-        pout.close()
-        perr.close()
+        if not use_fc_solve_lib:
+            pout.close()
+            perr.close()
 
 
 class BlackHoleSolver_Hint(Base_Solver_Hint):
@@ -1206,96 +1231,116 @@ class BlackHoleSolver_Hint(Base_Solver_Hint):
         game_type = self.game_type
 
         board = self.calcBoardString()
-        #
         if DEBUG:
             print('--------------------\n', board, '--------------------')
-        #
-        args = []
-        # args += ['-sam', '-p', '-opt', '--display-10-as-t']
-        args += ['--game', game_type['preset'], '--rank-reach-prune']
-        args += ['--max-iters', self.options['max_iters']]
-        if 'queens_on_kings' in game_type:
-            args += ['--queens-on-kings']
-        if 'wrap_ranks' in game_type:
-            args += ['--wrap-ranks']
-        #
+        if use_bh_solve_lib:
+            # global bh_solve_lib_obj
+            # bh_solve_lib_obj = bh_solve_lib_obj.new_bhs_user_handle()
+            bh_solve_lib_obj.recycle()
+            bh_solve_lib_obj.read_board(
+                board=board,
+                game_type=game_type['preset'],
+                place_queens_on_kings=(
+                    game_type['queens_on_kings']
+                    if ('queens_on_kings' in game_type) else True),
+                wrap_ranks=(
+                    game_type['wrap_ranks']
+                    if ('wrap_ranks' in game_type) else True),
+            )
+            bh_solve_lib_obj.limit_iterations(self.options['max_iters'])
+        else:
+            args = []
+            args += ['--game', game_type['preset'], '--rank-reach-prune']
+            args += ['--max-iters', str(self.options['max_iters'])]
+            if 'queens_on_kings' in game_type:
+                args += ['--queens-on-kings']
+            if 'wrap_ranks' in game_type:
+                args += ['--wrap-ranks']
 
-        command = self.BLACK_HOLE_SOLVER_COMMAND + ' ' + \
-            ' '.join([str(i) for i in args])
-        pout, perr = self.run_solver(command, board)
-        #
+            command = self.BLACK_HOLE_SOLVER_COMMAND + ' ' + ' '.join(args)
+
         if DEBUG:
             start_time = time.time()
 
         result = ''
-        # iteration output
-        iter_ = 0
-        depth = 0
-        states = 0
 
-        for sbytes in pout:
-            s = six.text_type(sbytes, encoding='utf-8')
-            if DEBUG >= 5:
-                print(s)
+        if use_bh_solve_lib:
+            ret_code = bh_solve_lib_obj.resume_solution()
+        else:
+            pout, perr = self.run_solver(command, board)
 
-            m = re.search('^(Intractable|Unsolved|Solved)!', s.rstrip())
-            if m:
-                result = m.group(1)
-                break
+            for sbytes in pout:
+                s = six.text_type(sbytes, encoding='utf-8')
+                if DEBUG >= 5:
+                    print(s)
 
-        self.dialog.setText(iter=iter_, depth=depth, states=states)
-        self.solver_state = result.lower()
+                m = re.search('^(Intractable|Unsolved|Solved)!', s.rstrip())
+                if m:
+                    result = m.group(1)
+                    break
 
+        self._setText(iter=0, depth=0, states=0)
         hints = []
-        for sbytes in pout:
-            s = six.text_type(sbytes, encoding='utf-8')
-            if DEBUG:
-                print(s)
+        if use_bh_solve_lib:
+            self.solver_state = (
+                'solved' if ret_code == 0 else
+                ('intractable'
+                 if bh_solve_lib_obj.ret_code_is_suspend(ret_code)
+                 else 'unsolved'))
+            self._setText(iter=bh_solve_lib_obj.get_num_times())
+            self._setText(
+                states=bh_solve_lib_obj.get_num_states_in_collection())
+            if self.solver_state == 'solved':
+                m = bh_solve_lib_obj.get_next_move()
+                while m:
+                    found_stack_idx = m.get_column_idx()
+                    if len(game.s.rows) > found_stack_idx >= 0:
+                        src = game.s.rows[found_stack_idx]
 
-            if s.strip() == 'Deal talon':
-                hints.append([1, game.s.talon, None])
-                continue
+                        hints.append([1, src, None])
+                    else:
+                        hints.append([1, game.s.talon, None])
+                    m = bh_solve_lib_obj.get_next_move()
+        else:
+            self.solver_state = result.lower()
+            for sbytes in pout:
+                s = six.text_type(sbytes, encoding='utf-8')
+                if DEBUG:
+                    print(s)
 
-            m = re.match('Total number of states checked is ([0-9]+)\\.', s)
-            if m:
-                iter_ = int(m.group(1))
-                self.dialog.setText(iter=iter_)
-                continue
+                if s.strip() == 'Deal talon':
+                    hints.append([1, game.s.talon, None])
+                    continue
 
-            m = re.match('This scan generated ([0-9]+) states\\.', s)
+                m = re.match(
+                    'Total number of states checked is ([0-9]+)\\.', s)
+                if m:
+                    self._setText(iter=int(m.group(1)))
+                    continue
 
-            if m:
-                states = int(m.group(1))
-                self.dialog.setText(states=states)
-                continue
+                m = re.match('This scan generated ([0-9]+) states\\.', s)
 
-            m = re.match(
-                'Move a card from stack ([0-9]+) to the foundations', s)
-            if not m:
-                continue
+                if m:
+                    self._setText(states=int(m.group(1)))
+                    continue
 
-            found_stack_idx = int(m.group(1))
-            ncards = 1
-            st = game.s.rows
-            sn = found_stack_idx
-            src = st[sn]            # source stack
-            dest = None
+                m = re.match(
+                    'Move a card from stack ([0-9]+) to the foundations', s)
+                if not m:
+                    continue
 
-            hints.append([ncards, src, dest])
-            # print src, dest, ncards
+                found_stack_idx = int(m.group(1))
+                src = game.s.rows[found_stack_idx]
 
-        #
+                hints.append([1, src, None])
+            pout.close()
+            perr.close()
+
         if DEBUG:
             print('time:', time.time()-start_time)
-        # print perr.read(),
 
+        hints.append(None)
         self.hints = hints
-        self.hints.append(None)         # XXX
-
-        # print self.hints
-
-        pout.close()
-        perr.close()
 
 
 class FreeCellSolverWrapper:

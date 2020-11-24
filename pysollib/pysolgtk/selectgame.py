@@ -290,7 +290,7 @@ class SelectGameDialogWithPreview(MfxDialog):
         for version, vg in GI.GAMES_BY_PYSOL_VERSION:
             def selecter(gi, vg=vg):
                 return gi.id in vg
-            label = _("New games in v. ") + version
+            label = _("New games in v. %(version)s") % {'version': version}
             data.append((label, selecter))
         self._addGamesFromData(data, store, None,
                                _("by PySol version"), all_games)
@@ -393,7 +393,6 @@ class SelectGameDialogWithPreview(MfxDialog):
                 audio=self.app.audio,
                 canvas=canvas,
                 cardset=self.app.cardset.copy(),
-                comments=self.app.comments.new(),
                 gamerandom=self.app.gamerandom,
                 gdb=self.app.gdb,
                 gimages=self.app.gimages,
@@ -423,7 +422,7 @@ class SelectGameDialogWithPreview(MfxDialog):
         # self.top.wm_title(
         #   "Select Game - " + self.app.getGameTitleName(gameid))
         title = self.app.getGameTitleName(gameid)
-        self.set_title(_("Playable Preview - ") + title)
+        self.set_title(_("Playable Preview - %(game)s") % {'game': title})
         #
         self.preview_game = gi.gameclass(gi)
         self.preview_game.createPreview(self.preview_app)

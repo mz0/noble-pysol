@@ -21,7 +21,6 @@
 #
 # ---------------------------------------------------------------------------
 
-
 import os
 
 from pysollib.gamedb import GI
@@ -33,8 +32,8 @@ from pysollib.ui.tktile.selecttree import SelectDialogTreeData
 from pysollib.ui.tktile.tkutil import unbind_destroy
 
 from six.moves import UserList
+from six.moves import tkinter_ttk as ttk
 
-from . import ttk
 from .selecttree import SelectDialogTreeCanvas
 from .selecttree import SelectDialogTreeLeaf, SelectDialogTreeNode
 from .tkwidget import MfxDialog, MfxScrolledCanvas
@@ -80,7 +79,8 @@ class SelectGameData(SelectDialogTreeData):
     def __init__(self, app):
         SelectDialogTreeData.__init__(self)
         self.all_games_gi = list(map(
-            app.gdb.get, app.gdb.getGamesIdSortedByName()))
+            app.gdb.get,
+            app.gdb.getGamesIdSortedByName()))
         self.no_games = [SelectGameLeaf(None, None, _("(no games)"), None), ]
         #
         s_by_type = s_oriental = s_special = s_original = s_contrib = \
@@ -144,7 +144,7 @@ class SelectGameData(SelectDialogTreeData):
             if name is None or not list(filter(
                     select_func, self.all_games_gi)):
                 continue
-            name = _("New games in v. ") + name
+            name = _("New games in v. %(version)s") % {'version': name}
             gg.append(SelectGameNode(None, name, select_func))
         if 1 and gg:
             s_by_pysol_version = SelectGameNode(None, _("by PySol version"),
@@ -230,8 +230,6 @@ class SelectGameData(SelectDialogTreeData):
                                    lambda gi: gi.si.redeals == 3),
                     SelectGameNode(None, _("Unlimited redeals"),
                                    lambda gi: gi.si.redeals == -1),
-                    # SelectGameNode(None, "Variable redeals",
-                    #                 lambda gi: gi.si.redeals == -2),
                     SelectGameNode(
                         None, _("Other number of redeals"),
                         lambda gi: gi.si.redeals not in (-1, 0, 1, 2, 3)),
@@ -328,6 +326,7 @@ class SelectGameDialog(MfxDialog):
             dir = os.path.join("html", "rules")
             from pysollib.help import help_html
             help_html(self.app, doc, dir, self.top)
+            self.top.grab_release()  # Don't want the help window appear frozen
             return
         MfxDialog.mDone(self, button)
 
@@ -485,7 +484,6 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                 audio=self.app.audio,
                 canvas=canvas,
                 cardset=self.app.cardset.copy(),
-                comments=self.app.comments.new(),
                 gamerandom=self.app.gamerandom,
                 gdb=self.app.gdb,
                 gimages=self.app.gimages,
@@ -515,7 +513,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         # self.top.wm_title("Select Game - " +
         #   self.app.getGameTitleName(gameid))
         title = self.app.getGameTitleName(gameid)
-        self.top.wm_title(_("Playable Preview - ") + title)
+        self.top.wm_title(_("Playable Preview - %(game)s") % {'game': title})
         #
         self.preview_game = gi.gameclass(gi)
         self.preview_game.createPreview(self.preview_app)
