@@ -6,5 +6,5 @@ Abstract: PySol is a collection of more than 1000 solitaire card games
 Section: Games/Card
 
 Format: HTML
-Index: /usr/share/doc/pysolfc/html/index.html
-Files: /usr/share/doc/pysolfc/html/*.html
+Index: /usr/share/games/pysolfc/html/index.html
+Files: /usr/share/games/pysolfc/html/*.html
