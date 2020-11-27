@@ -4,7 +4,7 @@ pysolfc (2.10.1-1) unstable; urgency=medium
     - Hanafuda card stacks have been fixed (Closes: #859047).
   * debian/patches: Refresh patches for new upstream release, remove merged ones
   * debian/control:
-    - Add build-depends python3-setuptools.
+    - Add build-depends python3-setuptools and python3-attr.
     - Add build-depends and depends python3-pysol-cards.
     - Bump policy to 4.5.1.
   * Switch to debhelper-compat 13. "nocheck" test can be dropped in d/rules.
@@ -20,7 +20,7 @@ pysolfc (2.10.1-1) unstable; urgency=medium
   * debian/docs: Update list of useful documentation.
   * debian/clean: Update comments, add po/de.po.
 
- -- Juhani Numminen <juhaninumminen0@gmail.com>  Fri, 27 Nov 2020 17:24:16 +0200
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Fri, 27 Nov 2020 18:00:42 +0200
 
 pysolfc (2.6.4-3) unstable; urgency=medium
 
