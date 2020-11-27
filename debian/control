@@ -10,6 +10,7 @@ Build-Depends: debhelper-compat (= 12),
                python3-configobj,
                python3-pygame,
                python3-random2,
+               python3-setuptools,
                python3-six,
                python3-tk
 Rules-Requires-Root: no
