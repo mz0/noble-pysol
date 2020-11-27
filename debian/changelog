@@ -1,3 +1,27 @@
+pysolfc (2.10.1-1) unstable; urgency=medium
+
+  * New upstream version 2.10.1.
+    - Hanafuda card stacks have been fixed (Closes: #859047).
+  * debian/patches: Refresh patches for new upstream release, remove merged ones
+  * debian/control:
+    - Add build-depends python3-setuptools.
+    - Add build-depends and depends python3-pysol-cards.
+    - Bump policy to 4.5.1.
+  * Switch to debhelper-compat 13. "nocheck" test can be dropped in d/rules.
+  * debian/rules:
+    - Run unit tests.
+    - override_dh_auto_build: Utilize upstream Makefile more.
+  * Path usr/share/games/pysolfc/html must not be symlink to usr/share/doc/...
+    The game will not function if the files are removed (Policy §12.3).
+    Remove /usr/share/doc/pysolfc/html because dpkg makes it hard to keep both
+    paths while changing symlink to dir.
+  * Remove debian/doc-base. No HTML docs in /usr/share/doc anymore
+    (lintian: doc-base-file-references-wrong-path).
+  * debian/docs: Update list of useful documentation.
+  * debian/clean: Update comments, add po/de.po.
+
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Fri, 27 Nov 2020 17:24:16 +0200
+
 pysolfc (2.6.4-3) unstable; urgency=medium
 
   * debian/patches/python3.8: Don't use the removed time.clock() anymore.
