@@ -23,9 +23,13 @@ override_dh_install:
 	# rm the original directory, and later on dh_link will create a symlink.
 	rm -r debian/pysolfc/usr/share/games/pysolfc/html/
 
-# Only run import tests for now. Missing deps for running the full suite:
+# Run some parts of the test suite. Missing deps for using 'make test':
 # python3-pycotap, python3-flake8-import-order, libtest-trailingspace-perl,
 # libcode-tidyall-plugin-flake8-perl
 override_dh_auto_test:
-	TEST_TAGS=SKIP_PY2 python3 scripts/gen_individual_importing_tests.py
+	TEST_TAGS=SKIP_PY2 $(MAKE) pretest
 	PYTHONPATH=. prove tests/individually-importing/*.py
+	set -e; for py in $(shell py3versions -s); do \
+		PYTHONPATH=.:tests/lib \
+		$$py -m unittest discover -v tests/lib/pysol_tests/ '*'; \
+	done
