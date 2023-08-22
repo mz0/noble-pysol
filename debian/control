@@ -2,8 +2,7 @@ Source: pysolfc
 Section: games
 Priority: optional
 Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
-Uploaders: Hugo Lefeuvre <hle@debian.org>,
-           Juhani Numminen <juhaninumminen0@gmail.com>
+Uploaders: Juhani Numminen <juhaninumminen0@gmail.com>
 Build-Depends: debhelper-compat (= 13),
                dh-python,
                python3-all,
