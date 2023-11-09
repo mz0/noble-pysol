@@ -29,14 +29,15 @@ from pysollib.mfxutil import format_time
 from pysollib.mygettext import _
 from pysollib.resource import CSI
 from pysollib.ui.tktile.selecttree import SelectDialogTreeData
-from pysollib.ui.tktile.tkutil import unbind_destroy
+from pysollib.ui.tktile.tkutil import bind, unbind_destroy
 
 from six.moves import UserList
+from six.moves import tkinter
 from six.moves import tkinter_ttk as ttk
 
 from .selecttree import SelectDialogTreeCanvas
 from .selecttree import SelectDialogTreeLeaf, SelectDialogTreeNode
-from .tkwidget import MfxDialog, MfxScrolledCanvas
+from .tkwidget import MfxDialog, MfxScrolledCanvas, PysolCombo
 
 # ************************************************************************
 # * Nodes
@@ -109,7 +110,7 @@ class SelectGameData(SelectDialogTreeData):
                                 select_mahjongg_game)
         g.append(gg)
         if g[0]:
-            s_by_type = SelectGameNode(None, _("French games"),
+            s_by_type = SelectGameNode(None, _("French Games"),
                                        tuple(g[0]), expanded=1)
         if g[1]:
             s_oriental = SelectGameNode(None, _("Oriental Games"),
@@ -230,9 +231,11 @@ class SelectGameData(SelectDialogTreeData):
                                    lambda gi: gi.si.redeals == 3),
                     SelectGameNode(None, _("Unlimited redeals"),
                                    lambda gi: gi.si.redeals == -1),
+                    SelectGameNode(None, _("Variable redeals"),
+                                   lambda gi: gi.si.redeals == -2),
                     SelectGameNode(
                         None, _("Other number of redeals"),
-                        lambda gi: gi.si.redeals not in (-1, 0, 1, 2, 3)),
+                        lambda gi: gi.si.redeals not in (-2, -1, 0, 1, 2, 3)),
                 )),
                 s_by_compatibility,
             )),
@@ -243,9 +246,11 @@ class SelectGameData(SelectDialogTreeData):
                                lambda gi: gi.si.game_flags & GI.GT_CHILDREN),
                 SelectGameNode(None, _("Games with Scoring"),
                                lambda gi: gi.si.game_flags & GI.GT_SCORE),
-                SelectGameNode(
-                    None, _("Games with Separate Decks"),
-                    lambda gi: gi.si.game_flags & GI.GT_SEPARATE_DECKS),
+                SelectGameNode(None, _("Games with Stripped Decks"),
+                               lambda gi: gi.si.game_flags & GI.GT_STRIPPED),
+                SelectGameNode(None, _("Games with Separate Decks"),
+                               lambda gi: gi.si.game_flags &
+                               GI.GT_SEPARATE_DECKS),
                 SelectGameNode(None, _("Open Games (all cards visible)"),
                                lambda gi: gi.si.game_flags & GI.GT_OPEN),
                 SelectGameNode(None, _("Relaxed Variants"),
@@ -282,6 +287,7 @@ class SelectGameDialog(MfxDialog):
         kw = self.initKw(kw)
         MfxDialog.__init__(self, parent, title, kw.resizable, kw.default)
         top_frame, bottom_frame = self.createFrames(kw)
+
         self.createBitmaps(top_frame, kw)
         #
         self.app = app
@@ -342,27 +348,32 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         kw = self.initKw(kw)
         MfxDialog.__init__(self, parent, title, kw.resizable, kw.default)
         top_frame, bottom_frame = self.createFrames(kw)
+
         self.createBitmaps(top_frame, kw)
         #
         self.app = app
         self.gameid = gameid
         self.bookmark = bookmark
+        self.criteria = SearchCriteria()
         self.random = None
         if self.TreeDataHolder_Class.data is None:
             self.TreeDataHolder_Class.data = self.TreeData_Class(app)
         #
+
+        pw = parent.winfo_width()
+        ph = parent.winfo_height()
+        py = parent.winfo_y()
+        px = parent.winfo_x()
+
+        h = int(ph * .8)
+        w = int(pw * .8)
+        w1 = int(min(275, pw / 2.5))
+        geometry = ("%dx%d+%d+%d" % (w, h, px + ((pw - w) / 2),
+                                     py + (int((ph - h) / 1.5))))
         self.top.wm_minsize(400, 200)
-        sw = self.top.winfo_screenwidth()
-        if sw >= 1100:
-            w1, w2 = 250, 600
-        elif sw >= 900:
-            w1, w2 = 250, 500
-        elif sw >= 800:
-            w1, w2 = 220, 480
-        else:
-            w1, w2 = 200, 300
+
         # print sw, w1, w2
-        w2 = max(200, min(w2, 10 + 12*(app.subsampled_images.CARDW+10)))
+        # w2 = max(200, min(w2, 10 + 12 * (app.subsampled_images.CARDW + 10)))
         # print sw, w1, w2
         # padx, pady = kw.padx, kw.pady
         # padx, pady = kw.padx/2, kw.pady/2
@@ -374,11 +385,55 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         right_frame = ttk.Frame(paned_window)
         paned_window.add(left_frame)
         paned_window.add(right_frame)
+
+        notebook = ttk.Notebook(left_frame)
+        notebook.pack(expand=True, fill='both')
+        tree_frame = ttk.Frame(notebook)
+        notebook.add(tree_frame, text=_('Tree View'))
+        search_frame = ttk.Frame(notebook)
+        notebook.add(search_frame, text=_('Search'))
+
         # Tree
         font = app.getFont("default")
-        self.tree = self.Tree_Class(self, left_frame, key=gameid,
-                                    default=kw.default, font=font, width=w1)
+        self.tree = self.Tree_Class(self, tree_frame, key=gameid,
+                                    default=kw.default, font=font,
+                                    width=w1)
         self.tree.frame.pack(padx=padx, pady=pady, expand=True, fill='both')
+
+        # Search
+        searchbox = ttk.Frame(search_frame)
+        searchText = tkinter.StringVar()
+        self.list_searchlabel = tkinter.Label(searchbox, text="Search:",
+                                              justify='left', anchor='w')
+        self.list_searchlabel.pack(side="top", fill='both', ipadx=1)
+        self.list_searchtext = tkinter.Entry(searchbox,
+                                             textvariable=searchText)
+
+        self.advSearch = tkinter.Button(searchbox, text='...',
+                                        command=self.advancedSearch)
+        self.advSearch.pack(side="right")
+
+        self.list_searchtext.pack(side="top", fill='both',
+                                  padx=padx, pady=pady, ipadx=1)
+        searchText.trace('w', self.basicSearch)
+
+        searchbox.pack(side="top", fill="both")
+
+        self.list_scrollbar = tkinter.Scrollbar(search_frame)
+        self.list_scrollbar.pack(side="right", fill='both')
+
+        self.createBitmaps(search_frame, kw)
+        self.list = tkinter.Listbox(search_frame, exportselection=False)
+        self.list.pack(padx=padx, pady=pady, expand=True, side='left',
+                       fill='both', ipadx=1)
+        self.updateSearchList("")
+        bind(self.list, '<<ListboxSelect>>', self.selectSearchResult)
+        bind(self.list, '<FocusOut>',
+             lambda e: self.list.selection_clear(0, 'end'))
+
+        self.list.config(yscrollcommand=self.list_scrollbar.set)
+        self.list_scrollbar.config(command=self.list.yview)
+
         # LabelFrame
         info_frame = ttk.LabelFrame(right_frame, text=_('About game'))
         info_frame.grid(row=0, column=0, padx=padx, pady=pady,
@@ -400,8 +455,8 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             ('played',      _('Played:'),           stats_frame,  0),
             ('won',         _('Won:'),              stats_frame,  1),
             ('lost',        _('Lost:'),             stats_frame,  2),
-            ('time',        _('Playing time:'),     stats_frame,  3),
-            ('moves',       _('Moves:'),            stats_frame,  4),
+            ('time',        _('Avg. win time:'),     stats_frame,  3),
+            ('moves',       _('Avg. win moves:'),    stats_frame,  4),
             ('percent',     _('% won:'),            stats_frame,  5),
                 ):
             title_label = ttk.Label(f, text=t, justify='left', anchor='w')
@@ -413,8 +468,9 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         info_frame.rowconfigure(6, weight=1)
         stats_frame.rowconfigure(6, weight=1)
         # Canvas
-        self.preview = MfxScrolledCanvas(right_frame, width=w2)
-        self.preview.setTile(app, app.tabletile_index, force=True)
+        self.preview = MfxScrolledCanvas(right_frame)
+        self.preview.setTile(app, app.tabletile_index,
+                             app.opt.tabletile_scale_method, force=True)
         self.preview.grid(row=1, column=0, columnspan=3,
                           padx=padx, pady=pady, sticky='nsew')
         right_frame.columnconfigure(1, weight=1)
@@ -429,7 +485,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         self.preview_app = None
         self.updatePreview(gameid, animations=0)
         # focus = self.tree.frame
-        self.mainloop(focus, kw.timeout)
+        self.mainloop(focus, kw.timeout, geometry=geometry)
 
     def initKw(self, kw):
         kw = KwStruct(kw,
@@ -467,6 +523,179 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                 destruct(self.preview_app)
             self.preview_app = None
 
+    def basicSearch(self, *args):
+        self.updateSearchList(self.list_searchtext.get())
+
+    def updateSearchList(self, searchString):
+        self.criteria.name = searchString
+        self.performSearch()
+
+    def performSearch(self):
+        self.list.delete(0, "end")
+        self.list.vbar_show = True
+        games = self.app.gdb.getAllGames()
+
+        results = []
+        for game in games:
+            if (self.criteria.category != "" and
+                    self.criteria.categoryOptions[self.criteria.category]
+                    != game.category):
+                continue
+            if (self.criteria.type != ""
+                    and self.criteria.typeOptions[self.criteria.type]
+                    != game.si.game_type):
+                continue
+            if (self.criteria.skill != ""
+                    and self.criteria.skillOptions[self.criteria.skill]
+                    != game.skill_level):
+                continue
+            if (self.criteria.decks != ""
+                    and self.criteria.deckOptions[self.criteria.decks]
+                    != game.decks):
+                continue
+            if (self.criteria.redeals != "" and
+                    self.criteria.redeals != "Other number of redeals"
+                    and self.criteria.redealOptions[self.criteria.redeals]
+                    != game.redeals):
+                continue
+            if self.criteria.redeals == "Other number of redeals"\
+                    and game.redeals < 4:
+                continue
+
+            compat_okay = True
+            for name, games in GI.GAMES_BY_COMPATIBILITY:
+                if self.criteria.compat == name:
+                    if game.id not in games:
+                        compat_okay = False
+                        break
+
+            if not compat_okay:
+                continue
+
+            invent_okay = True
+            for name, games in GI.GAMES_BY_INVENTORS:
+                if self.criteria.inventor == name:
+                    if game.id not in games:
+                        invent_okay = False
+                        break
+
+            if not invent_okay:
+                continue
+
+            if self.criteria.version != "":
+                version_okay = False
+                version_found = False
+                for name, games in GI.GAMES_BY_PYSOL_VERSION:
+                    if self.criteria.version == name:
+                        version_found = True
+                        if game.id in games:
+                            version_okay = True
+                            break
+                    elif ((not version_found and
+                           self.criteria.versioncompare == "Present in")
+                          or (version_found and
+                              self.criteria.versioncompare == "New since")):
+                        if game.id in games:
+                            version_okay = True
+                            break
+
+                if not version_okay:
+                    continue
+
+            if self.criteria.statistics != '':
+                won, lost = (self.app.stats.getStats
+                             (self.app.opt.player, game.id))
+                statoption = \
+                    self.criteria.statisticsOptions[self.criteria.statistics]
+                if statoption == 'played' and won + lost == 0:
+                    continue
+                elif statoption == 'won' and won == 0:
+                    continue
+                elif statoption == 'not won' and (won != 0 or lost == 0):
+                    continue
+                elif statoption == 'not played' and won + lost != 0:
+                    continue
+
+            if (self.criteria.popular and
+                    not (game.si.game_flags & GI.GT_POPULAR)):
+                continue
+            if (self.criteria.children and
+                    not (game.si.game_flags & GI.GT_CHILDREN)):
+                continue
+            if (self.criteria.scoring and
+                    not (game.si.game_flags & GI.GT_SCORE)):
+                continue
+            if (self.criteria.stripped and
+                    not (game.si.game_flags & GI.GT_STRIPPED)):
+                continue
+            if (self.criteria.separate and
+                    not (game.si.game_flags & GI.GT_SEPARATE_DECKS)):
+                continue
+            if (self.criteria.open and not (game.si.game_flags & GI.GT_OPEN)):
+                continue
+            if (self.criteria.relaxed and
+                    not (game.si.game_flags & GI.GT_RELAXED)):
+                continue
+            if (self.criteria.original and
+                    not (game.si.game_flags & GI.GT_ORIGINAL)):
+                continue
+
+            if self.app.checkSearchString(self.criteria.name, game.name):
+                results.append(game.name)
+            if self.criteria.usealt:
+                for altname in game.altnames:
+                    if self.app.checkSearchString(self.criteria.name, altname):
+                        results.append(altname)
+        results.sort(key=lambda x: x.lower())
+        pos = 0
+        for result in results:
+            self.list.insert(pos, result)
+            pos += 1
+
+    def advancedSearch(self):
+        d = SelectGameAdvancedSearch(self.top, _("Advanced search"),
+                                     self.criteria)
+        if d.status == 0 and d.button == 0:
+            self.criteria.name = d.name.get()
+
+            self.list_searchtext.delete(0, "end")
+            self.list_searchtext.insert(0, d.name.get())
+
+            self.criteria.usealt = d.usealt.get()
+            self.criteria.category = d.category.get()
+            self.criteria.type = d.type.get()
+            self.criteria.skill = d.skill.get()
+            self.criteria.decks = d.decks.get()
+            self.criteria.redeals = d.redeals.get()
+            self.criteria.compat = d.compat.get()
+            self.criteria.inventor = d.inventor.get()
+            self.criteria.versioncompare = d.versioncompare.get()
+            self.criteria.version = d.version.get()
+            self.criteria.statistics = d.statistics.get()
+
+            self.criteria.popular = d.popular.get()
+            self.criteria.children = d.children.get()
+            self.criteria.scoring = d.scoring.get()
+            self.criteria.stripped = d.stripped.get()
+            self.criteria.separate = d.separate.get()
+            self.criteria.open = d.open.get()
+            self.criteria.relaxed = d.relaxed.get()
+            self.criteria.original = d.original.get()
+            self.performSearch()
+
+    def selectSearchResult(self, event):
+        if self.list.size() <= 0:
+            return
+        oldcur = self.list["cursor"]
+        self.list["cursor"] = "watch"
+        sel = self.list.get(self.list.curselection())
+        game = self.app.gdb.getGameByName(sel)
+        self.list.update_idletasks()
+        self.tree.n_selections += 1
+        self.tree.updateSelection(game)
+        self.updatePreview(game)
+        self.list["cursor"] = oldcur
+
     def updatePreview(self, gameid, animations=10):
         if gameid == self.preview_key:
             return
@@ -487,7 +716,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                 gamerandom=self.app.gamerandom,
                 gdb=self.app.gdb,
                 gimages=self.app.gimages,
-                images=self.app.subsampled_images,
+                images=None,
                 menubar=None,
                 miscrandom=self.app.miscrandom,
                 opt=self.app.opt.copy(),
@@ -503,6 +732,19 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             self.preview_app.opt.shadow = 0
             self.preview_app.opt.shade = 0
         #
+
+        c = self.app.cardsets_cache.get(gi.category)
+        if not c:
+            cardset = self.app.cardset_manager.getByName(
+                self.app.opt.cardset[gi.category][0])
+            self.app.loadCardset(cardset, id=gi.category,
+                                 tocache=True, noprogress=True)
+            c = self.app.cardsets_cache.get(gi.category)
+        if c:
+            self.preview_app.images = c[2]
+        else:
+            self.preview_app.images = self.app.subsampled_images
+
         self.preview_app.audio = None    # turn off audio for initial dealing
         if animations >= 0:
             self.preview_app.opt.animations = animations
@@ -513,7 +755,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         # self.top.wm_title("Select Game - " +
         #   self.app.getGameTitleName(gameid))
         title = self.app.getGameTitleName(gameid)
-        self.top.wm_title(_("Playable Preview - %(game)s") % {'game': title})
+        self.top.wm_title(_("Select Game - %(game)s") % {'game': title})
         #
         self.preview_game = gi.gameclass(gi)
         self.preview_game.createPreview(self.preview_app)
@@ -557,18 +799,11 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         type = ''
         if gi.si.game_type in GI.TYPE_NAMES:
             type = _(GI.TYPE_NAMES[gi.si.game_type])
-        sl = {
-            GI.SL_LUCK:         _('Luck only'),
-            GI.SL_MOSTLY_LUCK:  _('Mostly luck'),
-            GI.SL_BALANCED:     _('Balanced'),
-            GI.SL_MOSTLY_SKILL: _('Mostly skill'),
-            GI.SL_SKILL:        _('Skill only'),
-            }
-        skill_level = sl.get(gi.skill_level)
+        skill_level = GI.SKILL_LEVELS.get(gi.skill_level)
         if gi.redeals == -2:
-            redeals = _('variable')
+            redeals = _('Variable')
         elif gi.redeals == -1:
-            redeals = _('unlimited')
+            redeals = _('Unlimited')
         else:
             redeals = str(gi.redeals)
         # stats
@@ -603,3 +838,312 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                 title_label.grid()
                 text_label.grid()
             text_label.config(text=t)
+
+
+class SearchCriteria:
+    def __init__(self):
+        self.name = ""
+        self.usealt = True
+        self.category = ""
+        self.type = ""
+        self.skill = ""
+        self.decks = ""
+        self.redeals = ""
+        self.compat = ""
+        self.inventor = ""
+        self.versioncompare = "New in"
+        self.version = ""
+        self.statistics = ""
+
+        self.popular = False
+        self.children = False
+        self.scoring = False
+        self.stripped = False
+        self.separate = False
+        self.open = False
+        self.relaxed = False
+        self.original = False
+
+        categoryOptions = {-1: ""}
+        categoryOptions.update(CSI.TYPE_NAME)
+        del categoryOptions[7]  # Navagraha Ganjifa is unused.
+        self.categoryOptions = dict((v, k) for k, v in categoryOptions.items())
+
+        typeOptions = {-1: ""}
+        typeOptions.update(GI.TYPE_NAMES)
+        del typeOptions[29]  # Simple games type is unused.
+        self.typeOptions = dict((v, k) for k, v in typeOptions.items())
+
+        skillOptions = {-1: ""}
+        skillOptions.update(GI.SKILL_LEVELS)
+        self.skillOptions = dict((v, k) for k, v in skillOptions.items())
+
+        self.deckOptions = {"": 0,
+                            "1 deck games": 1,
+                            "2 deck games": 2,
+                            "3 deck games": 3,
+                            "4 deck games": 4}
+
+        self.redealOptions = {"": -3,
+                              "No redeal": 0,
+                              "1 redeal": 1,
+                              "2 redeals": 2,
+                              "3 redeals": 3,
+                              "Unlimited redeals": -1,
+                              "Variable redeals": -2,
+                              "Other number of redeals": 4}
+
+        self.versionCompareOptions = ("New in", "Present in", "New since")
+
+        self.statisticsOptions = {"": "all",
+                                  "Games played": "played",
+                                  "Games played and won": "won",
+                                  "Games played and not won": "not won",
+                                  "Games not played": "not played"}
+
+
+class SelectGameAdvancedSearch(MfxDialog):
+    def __init__(self, parent, title, criteria, **kw):
+        kw = self.initKw(kw)
+        MfxDialog.__init__(self, parent, title, kw.resizable, kw.default)
+        top_frame, bottom_frame = self.createFrames(kw)
+
+        self.createBitmaps(top_frame, kw)
+        #
+        self.name = tkinter.StringVar()
+        self.name.set(criteria.name)
+        self.usealt = tkinter.BooleanVar()
+        self.usealt.set(criteria.usealt)
+        self.category = tkinter.StringVar()
+        self.category.set(criteria.category)
+        self.type = tkinter.StringVar()
+        self.type.set(criteria.type)
+        self.skill = tkinter.StringVar()
+        self.skill.set(criteria.skill)
+        self.decks = tkinter.StringVar()
+        self.decks.set(criteria.decks)
+        self.redeals = tkinter.StringVar()
+        self.redeals.set(criteria.redeals)
+        self.compat = tkinter.StringVar()
+        self.compat.set(criteria.compat)
+        self.inventor = tkinter.StringVar()
+        self.inventor.set(criteria.inventor)
+        self.versioncompare = tkinter.StringVar()
+        self.versioncompare.set(criteria.versioncompare)
+        self.version = tkinter.StringVar()
+        self.version.set(criteria.version)
+        self.statistics = tkinter.StringVar()
+        self.statistics.set(criteria.statistics)
+
+        self.popular = tkinter.BooleanVar()
+        self.popular.set(criteria.popular)
+        self.children = tkinter.BooleanVar()
+        self.children.set(criteria.children)
+        self.scoring = tkinter.BooleanVar()
+        self.scoring.set(criteria.scoring)
+        self.stripped = tkinter.BooleanVar()
+        self.stripped.set(criteria.stripped)
+        self.separate = tkinter.BooleanVar()
+        self.separate.set(criteria.separate)
+        self.open = tkinter.BooleanVar()
+        self.open.set(criteria.open)
+        self.relaxed = tkinter.BooleanVar()
+        self.relaxed.set(criteria.relaxed)
+        self.original = tkinter.BooleanVar()
+        self.original.set(criteria.original)
+        #
+        row = 0
+
+        labelName = tkinter.Label(top_frame, text="Name:", anchor="w")
+        labelName.grid(row=row, column=0, columnspan=1, sticky='ew',
+                       padx=1, pady=1)
+        textName = tkinter.Entry(top_frame, textvariable=self.name)
+        textName.grid(row=row, column=1, columnspan=4, sticky='ew',
+                      padx=1, pady=1)
+        row += 1
+
+        altCheck = tkinter.Checkbutton(top_frame, variable=self.usealt,
+                                       text=_("Check alternate names"),
+                                       anchor="w")
+        altCheck.grid(row=row, column=1, columnspan=4, sticky='ew',
+                      padx=1, pady=1)
+        row += 1
+
+        categoryValues = list(criteria.categoryOptions.keys())
+        categoryValues.sort()
+
+        labelCategory = tkinter.Label(top_frame, text="Category:", anchor="w")
+        labelCategory.grid(row=row, column=0, columnspan=1, sticky='ew',
+                           padx=1, pady=1)
+        textCategory = PysolCombo(top_frame, values=categoryValues,
+                                  textvariable=self.category, state='readonly')
+        textCategory.grid(row=row, column=1, columnspan=4, sticky='ew',
+                          padx=1, pady=1)
+        row += 1
+
+        typeValues = list(criteria.typeOptions.keys())
+        typeValues.sort()
+
+        labelType = tkinter.Label(top_frame, text="Type:", anchor="w")
+        labelType.grid(row=row, column=0, columnspan=1, sticky='ew',
+                       padx=1, pady=1)
+        textType = PysolCombo(top_frame, values=typeValues,
+                              textvariable=self.type, state='readonly')
+        textType.grid(row=row, column=1, columnspan=4, sticky='ew',
+                      padx=1, pady=1)
+        row += 1
+
+        skillValues = list(criteria.skillOptions.keys())
+
+        labelSkill = tkinter.Label(top_frame, text="Skill level:", anchor="w")
+        labelSkill.grid(row=row, column=0, columnspan=1, sticky='ew',
+                        padx=1, pady=1)
+        textSkill = PysolCombo(top_frame, values=skillValues,
+                               textvariable=self.skill, state='readonly')
+        textSkill.grid(row=row, column=1, columnspan=4, sticky='ew',
+                       padx=1, pady=1)
+        row += 1
+
+        deckValues = list(criteria.deckOptions.keys())
+
+        labelDecks = tkinter.Label(top_frame, text="Decks:", anchor="w")
+        labelDecks.grid(row=row, column=0, columnspan=1, sticky='ew',
+                        padx=1, pady=1)
+        textDecks = PysolCombo(top_frame, values=deckValues,
+                               textvariable=self.decks, state='readonly')
+        textDecks.grid(row=row, column=1, columnspan=4, sticky='ew',
+                       padx=1, pady=1)
+        row += 1
+
+        redealValues = list(criteria.redealOptions.keys())
+
+        labelRedeals = tkinter.Label(top_frame, text="Redeals:", anchor="w")
+        labelRedeals.grid(row=row, column=0, columnspan=1, sticky='ew',
+                          padx=1, pady=1)
+        textRedeals = PysolCombo(top_frame, values=redealValues,
+                                 textvariable=self.redeals, state='readonly')
+        textRedeals.grid(row=row, column=1, columnspan=4, sticky='ew',
+                         padx=1, pady=1)
+        row += 1
+
+        compatValues = list()
+        compatValues.append("")
+        for name, games in GI.GAMES_BY_COMPATIBILITY:
+            compatValues.append(name)
+
+        labelCompat = tkinter.Label(top_frame, text="Compatibility:",
+                                    anchor="w")
+        labelCompat.grid(row=row, column=0, columnspan=1, sticky='ew',
+                         padx=1, pady=1)
+        textCompat = PysolCombo(top_frame, values=compatValues,
+                                textvariable=self.compat, state='readonly')
+        textCompat.grid(row=row, column=1, columnspan=4, sticky='ew',
+                        padx=1, pady=1)
+        row += 1
+
+        inventorValues = list()
+        inventorValues.append("")
+        for name, games in GI.GAMES_BY_INVENTORS:
+            inventorValues.append(name)
+
+        labelInventor = tkinter.Label(top_frame, text="Inventor:", anchor="w")
+        labelInventor.grid(row=row, column=0, columnspan=1, sticky='ew',
+                           padx=1, pady=1)
+        textInventor = PysolCombo(top_frame, values=inventorValues,
+                                  textvariable=self.inventor, state='readonly')
+        textInventor.grid(row=row, column=1, columnspan=4, sticky='ew',
+                          padx=1, pady=1)
+        row += 1
+
+        versionCompareValues = list(criteria.versionCompareOptions)
+        versionValues = list()
+        versionValues.append("")
+        for name, games in GI.GAMES_BY_PYSOL_VERSION:
+            versionValues.append(name)
+
+        labelVersion = tkinter.Label(top_frame, text="PySol Version:",
+                                     anchor="w")
+        labelVersion.grid(row=row, column=0, columnspan=1, sticky='ew',
+                          padx=1, pady=1)
+        textVersionCompare = PysolCombo(top_frame, values=versionCompareValues,
+                                        textvariable=self.versioncompare,
+                                        state='readonly')
+        textVersionCompare.grid(row=row, column=1, columnspan=2, sticky='ew',
+                                padx=1, pady=1)
+        textVersion = PysolCombo(top_frame, values=versionValues,
+                                 textvariable=self.version, state='readonly')
+        textVersion.grid(row=row, column=3, columnspan=2, sticky='ew',
+                         padx=1, pady=1)
+        row += 1
+
+        statisticsValues = list(criteria.statisticsOptions.keys())
+
+        labelStats = tkinter.Label(top_frame, text="Statistics:", anchor="w")
+        labelStats.grid(row=row, column=0, columnspan=1, sticky='ew',
+                        padx=1, pady=1)
+        textStats = PysolCombo(top_frame, values=statisticsValues,
+                               textvariable=self.statistics, state='readonly')
+        textStats.grid(row=row, column=1, columnspan=4, sticky='ew',
+                       padx=1, pady=1)
+        row += 1
+
+        col = 0
+        popularCheck = tkinter.Checkbutton(top_frame, variable=self.popular,
+                                           text=_("Popular"), anchor="w")
+        popularCheck.grid(row=row, column=col, columnspan=1, sticky='ew',
+                          padx=1, pady=1)
+        col += 1
+
+        childCheck = tkinter.Checkbutton(top_frame, variable=self.children,
+                                         text=_("Children's"), anchor="w")
+        childCheck.grid(row=row, column=col, columnspan=1, sticky='ew',
+                        padx=1, pady=1)
+        col += 1
+
+        scoreCheck = tkinter.Checkbutton(top_frame, variable=self.scoring,
+                                         text=_("Scored"), anchor="w")
+        scoreCheck.grid(row=row, column=col, columnspan=1, sticky='ew',
+                        padx=1, pady=1)
+        col += 1
+
+        stripCheck = tkinter.Checkbutton(top_frame, variable=self.stripped,
+                                         text=_("Stripped Deck"), anchor="w")
+        stripCheck.grid(row=row, column=col, columnspan=1, sticky='ew',
+                        padx=1, pady=1)
+        row += 1
+        col = 0
+
+        sepCheck = tkinter.Checkbutton(top_frame, variable=self.separate,
+                                       text=_("Separate Decks"), anchor="w")
+        sepCheck.grid(row=row, column=col, columnspan=1, sticky='ew',
+                      padx=1, pady=1)
+        col += 1
+
+        openCheck = tkinter.Checkbutton(top_frame, variable=self.open,
+                                        text=_("Open"), anchor="w")
+        openCheck.grid(row=row, column=col, columnspan=1, sticky='ew',
+                       padx=1, pady=1)
+        col += 1
+
+        relaxedCheck = tkinter.Checkbutton(top_frame, variable=self.relaxed,
+                                           text=_("Relaxed"), anchor="w")
+        relaxedCheck.grid(row=row, column=col, columnspan=1, sticky='ew',
+                          padx=1, pady=1)
+        col += 1
+
+        originalCheck = tkinter.Checkbutton(top_frame, variable=self.original,
+                                            text=_("Original"), anchor="w")
+        originalCheck.grid(row=row, column=col, columnspan=1, sticky='ew',
+                           padx=1, pady=1)
+        col += 1
+
+        focus = self.createButtons(bottom_frame, kw)
+        # focus = text_w
+        self.mainloop(focus, kw.timeout)
+
+    def initKw(self, kw):
+        kw = KwStruct(kw,
+                      strings=(_("&OK"), _("&Cancel")), default=0,
+                      padx=10, pady=10,
+                      )
+        return MfxDialog.initKw(self, kw)

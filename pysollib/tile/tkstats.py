@@ -480,7 +480,8 @@ class AllGamesFrame(ttk.Frame):
 
     def fillTreeview(self, player):
         if self.tree_items:
-            self.tree.delete(tuple(self.tree_items))
+            for item in self.tree.get_children():
+                self.tree.delete(item)
             self.tree_items = []
         self.formatter.writeStats(player, sort_by=self.sort_by)
         if self.dialog.buttons:
@@ -614,7 +615,8 @@ class Status_StatsDialog(MfxMessageDialog):
         w1 = (_("Highlight piles: ") + str(stats.highlight_piles) + "\n" +
               _("Highlight cards: ") + str(stats.highlight_cards) + "\n" +
               _("Highlight same rank: ") +
-              str(stats.highlight_samerank) + "\n")
+              str(stats.highlight_samerank) + "\n" +
+              _('Face-down peeks: ') + str(stats.peeks) + '\n')
         if game.s.talon:
             if game.gameinfo.redeals != 0:
                 w2 = w2 + _("\nRedeals: ") + str(game.s.talon.round - 1)
@@ -858,7 +860,7 @@ class ProgressionFrame(ttk.Frame):
         w = dialog.tkfont.measure('M') * 42
         w = max(w, 500)
         w = min(w, 600)
-        self.canvas_width, self.canvas_height = w, 250
+        self.canvas_width, self.canvas_height = w, 325
         cond = parent.winfo_screenwidth() < 800 or \
             parent.winfo_screenheight() < 600
         if cond:
@@ -889,8 +891,9 @@ class ProgressionFrame(ttk.Frame):
                             variable=var, value='current',
                             command=self.updateGraph)
         b.pack(fill='x', expand=True, padx=3, pady=1)
+
         label_frame = ttk.LabelFrame(right_frame, text=_('Statistics for'))
-        label_frame.pack(side='top', fill='x', pady=10)
+        label_frame.pack(side='top', fill='x', pady=5)
         self.variable = var = tkinter.StringVar()
         var.set('week')
         for v, t in (
@@ -902,8 +905,9 @@ class ProgressionFrame(ttk.Frame):
             b = ttk.Radiobutton(label_frame, text=t, variable=var,
                                 value=v, command=self.updateGraph)
             b.pack(fill='x', expand=True, padx=3, pady=1)
+
         label_frame = ttk.LabelFrame(right_frame, text=_('Show graphs'))
-        label_frame.pack(side='top', fill='x')
+        label_frame.pack(side='top', fill='x', pady=5)
         self.played_graph_var = tkinter.BooleanVar()
         self.played_graph_var.set(True)
         b = ttk.Checkbutton(label_frame, text=_('Played'),
@@ -921,6 +925,21 @@ class ProgressionFrame(ttk.Frame):
         b = ttk.Checkbutton(label_frame, text=_('% won'),
                             command=self.updateGraph,
                             variable=self.percent_graph_var)
+        b.pack(fill='x', expand=True, padx=3, pady=1)
+
+        label_frame = ttk.LabelFrame(right_frame, text=_('Date format'))
+        label_frame.pack(side='top', fill='x', pady=5)
+        self.date_format = tkinter.StringVar()
+        self.date_format.set(self.app.opt.date_format)
+        b = ttk.Radiobutton(label_frame, text=_('MM-DD'),
+                            command=self.updateDateFormat,
+                            variable=self.date_format,
+                            value='%m-%d')
+        b.pack(fill='x', expand=True, padx=3, pady=1)
+        b = ttk.Radiobutton(label_frame, text=_('DD-MM'),
+                            command=self.updateDateFormat,
+                            variable=self.date_format,
+                            value='%d-%m')
         b.pack(fill='x', expand=True, padx=3, pady=1)
 
         # self.createGraph()
@@ -989,6 +1008,10 @@ class ProgressionFrame(ttk.Frame):
 
         self.updateGraph()
 
+    def updateDateFormat(self, *args):
+        self.app.opt.date_format = self.date_format.get()
+        self.updateGraph()
+
     def updateGraph(self, *args):
         interval = self.variable.get()
         canvas = self.canvas
@@ -997,13 +1020,19 @@ class ProgressionFrame(ttk.Frame):
         self.items = []
 
         all_games = (self.all_games_variable.get() == 'all')
-        result = self.formatter.getResults(interval, all_games)
+
+        date_format = self.date_format.get()
 
         if interval in ('week', 'month'):
             t = _('Games/day')
         else:
             t = _('Games/week')
+            date_format += '-%y'
+
         canvas.itemconfig(self.games_text_id, text=t)
+
+        result = self.formatter.getResults(interval, all_games,
+                                           date_format)
 
         graph_width = self.canvas_width-self.left_margin-self.right_margin
         graph_height = self.canvas_height-self.top_margin-self.bottom_margin

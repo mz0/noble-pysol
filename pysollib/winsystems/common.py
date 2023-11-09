@@ -53,8 +53,13 @@ def init_tile(app, top):
 
 
 def set_theme(app, top, theme):
-    # set theme
-    style = ttk.Style(top)
+    # set
+    try:
+        from ttkthemes import themed_style
+        style = themed_style.ThemedStyle(top)
+    except ImportError:
+        style = ttk.Style(top)
+
     try:
         style.theme_use(theme)
     except Exception:
@@ -93,6 +98,7 @@ def base_init_root_window(root, app):
 
     if TOOLKIT == 'tk':
         icons = [loadImage(img) for img in app.dataloader.findAllIconSizes()]
+        icons.sort(reverse=True, key=lambda img: img.width())
         if icons:
             try:
                 root.wm_iconphoto(True, *icons)
@@ -106,16 +112,10 @@ def base_init_root_window(root, app):
     else:
         root.wm_minsize(520, 360)
 
-    if TOOLKIT == 'gtk':
-        pass
-    if TOOLKIT == 'kivy':
-        pass
-    elif USE_TILE:
+    if TOOLKIT == 'tk' and USE_TILE:
         theme = app.opt.tile_theme
         init_tile(app, root)
         set_theme(app, root, theme)
-    else:
-        pass
 
 
 class BaseTkSettings:

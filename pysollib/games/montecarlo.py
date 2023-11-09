@@ -21,12 +21,15 @@
 #
 # ---------------------------------------------------------------------------##
 
+import math
+
 from pysollib.game import Game
 from pysollib.gamedb import GI, GameInfo, registerGame
 from pysollib.hint import DefaultHint
 from pysollib.layout import Layout
 from pysollib.stack import \
         AbstractFoundationStack, \
+        AutoDealTalonStack, \
         BasicRowStack, \
         DealRowRedealTalonStack, \
         InitialDealTalonStack, \
@@ -49,7 +52,7 @@ class MonteCarlo_Hint(DefaultHint):
 
 # ************************************************************************
 # * Monte Carlo
-# * Monte Carlo (2 decks)
+# * Monte Carlo (2 Decks)
 # ************************************************************************
 
 class MonteCarlo_Talon(TalonStack):
@@ -112,6 +115,7 @@ class MonteCarlo(Game):
     Hint_Class = MonteCarlo_Hint
 
     FILL_STACKS_AFTER_DROP = False
+    FILL_STACKS_BEFORE_SHIFT = False
 
     #
     # game layout
@@ -173,15 +177,10 @@ class MonteCarlo(Game):
             return diff in (-6, -5, -4, -1, 1, 4, 5, 6)
 
     def fillEmptyStacks(self):
-        free, n = 0, 0
+        n = 0
         self.startDealSample()
-        for r in self.s.rows:
-            assert len(r.cards) <= 1
-            if not r.cards:
-                free += 1
-            elif free > 0:
-                to_stack = self.allstacks[r.id - free]
-                self.moveMove(1, r, to_stack, frames=4, shadow=0)
+        free = self.shiftCards()
+        remcards = free > len(self.s.talon.cards) > 0
         if free > 0:
             for r in self.s.rows:
                 if not r.cards:
@@ -190,8 +189,22 @@ class MonteCarlo(Game):
                     self.flipMove(self.s.talon)
                     self.moveMove(1, self.s.talon, r)
                     n += 1
+        if remcards and self.FILL_STACKS_BEFORE_SHIFT:
+            self.shiftCards()
         self.stopSamples()
         return n + free
+
+    def shiftCards(self):
+        free = 0
+        for r in self.s.rows:
+            assert len(r.cards) <= 1
+            if not r.cards:
+                free += 1
+            elif free > 0 and (not self.FILL_STACKS_BEFORE_SHIFT
+                               or not self.s.talon.cards):
+                to_stack = self.allstacks[r.id - free]
+                self.moveMove(1, r, to_stack, frames=4, shadow=0)
+        return free
 
 
 class MonteCarlo2Decks(MonteCarlo):
@@ -262,6 +275,31 @@ class SimpleCarlo(MonteCarlo):
 
 
 # ************************************************************************
+# * Quatorze
+# ************************************************************************
+
+class Quatorze_RowStack(MonteCarlo_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not OpenStack.acceptsCards(self, from_stack, cards):
+            return False
+        # check the rank
+        if self.cards[-1].rank + cards[0].rank != 12:
+            return False
+        # now look if the stacks are neighbours
+        return self.game.isNeighbour(from_stack, self)
+
+
+class Quatorze(MonteCarlo):
+    RowStack_Class = Quatorze_RowStack
+    FILL_STACKS_AFTER_DROP = True
+    FILL_STACKS_BEFORE_SHIFT = True
+
+    def isNeighbour(self, stack1, stack2):
+        return (stack1.id // 5 == stack2.id // 5 or
+                stack1.id % 5 == stack2.id % 5)
+
+
+# ************************************************************************
 # * Simple Pairs
 # ************************************************************************
 
@@ -281,7 +319,7 @@ class SimplePairs(MonteCarlo):
                                                   max_accept=1, max_cards=2,
                                                   dir=0, base_rank=NO_RANK))
         x, y = l.XM, l.YM + 3*l.YS//2
-        s.talon = TalonStack(x, y, self, max_rounds=1)
+        s.talon = AutoDealTalonStack(x, y, self, max_rounds=1)
         l.createText(s.talon, "s")
         x = x + 5*l.XS
         s.foundations.append(self.Foundation_Class(x, y, self, suit=ANY_SUIT,
@@ -299,6 +337,36 @@ class SimplePairs(MonteCarlo):
 
     def isNeighbour(self, stack1, stack2):
         return 0 <= stack1.id <= 15 and 0 <= stack2.id <= 15
+
+
+# ************************************************************************
+# * Block Ten
+# * Simple Tens
+# ************************************************************************
+
+class BlockTen_RowStack(MonteCarlo_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not OpenStack.acceptsCards(self, from_stack, cards):
+            return False
+        # check the rank
+        if self.cards[-1].rank + cards[0].rank + 2 == 10:
+            return True
+        if self.cards[-1].rank > 9 and self.cards[-1].rank == cards[0].rank:
+            return True
+
+        return False
+
+
+class BlockTen(SimplePairs):
+    RowStack_Class = BlockTen_RowStack
+
+    def isGameWon(self):
+        return len(self.s.foundations[0].cards) == 48
+
+
+class SimpleTens(BlockTen):
+    def isGameWon(self):
+        return len(self.s.foundations[0].cards) == 36
 
 
 # ************************************************************************
@@ -370,6 +438,7 @@ class Neighbour(MonteCarlo):
 
 # ************************************************************************
 # * Fourteen
+# * Double Fourteen
 # ************************************************************************
 
 class Fourteen_RowStack(MonteCarlo_RowStack):
@@ -390,21 +459,21 @@ class Fourteen(Game):
     # game layout
     #
 
-    def createGame(self):
+    def createGame(self, colsperrow=6):
         # create layout
         l, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM + 7*l.XS, l.YM + 5*l.YS)
+        self.setSize(l.XM + (colsperrow + 1) * l.XS, l.YM + 5 * l.YS)
 
         # create stacks
         for i in (0, 2.5):
-            for j in range(6):
+            for j in range(colsperrow):
                 x, y = l.XM + j*l.XS, l.YM + i*l.YS
                 s.rows.append(self.RowStack_Class(x, y, self,
                                                   max_move=1, max_accept=1,
                                                   dir=0, base_rank=NO_RANK))
-        x, y = l.XM + 6*l.XS, l.YM
+        x, y = l.XM + colsperrow * l.XS, l.YM
         s.foundations.append(self.Foundation_Class(x, y, self, suit=ANY_SUIT,
                              max_move=0, max_cards=52, base_rank=ANY_RANK))
         l.createText(s.foundations[0], "s")
@@ -430,8 +499,19 @@ class Fourteen(Game):
         return card1.rank + card2.rank == 12
 
 
+class DoubleFourteen(Fourteen):
+    def createGame(self):
+        Fourteen.createGame(self, colsperrow=9)
+
+    def startGame(self):
+        self._startDealNumRows(4)
+        self.s.talon.dealRow()
+        self.s.talon.dealRow(rows=self.s.rows[:14])
+
+
 # ************************************************************************
 # * Nestor
+# * Double Nestor
 # ************************************************************************
 
 class Nestor_RowStack(MonteCarlo_RowStack):
@@ -448,6 +528,9 @@ class Nestor(Game):
 
     FILL_STACKS_AFTER_DROP = False
 
+    COLS = 8
+    COLCARDS = 6
+
     #
     # game layout
     #
@@ -457,16 +540,17 @@ class Nestor(Game):
         l, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM+8*l.XS, l.YM+2*l.YS+12*l.YOFFSET)
+        self.setSize(l.XM + self.COLS * l.XS,
+                     l.YM + 2 * l.YS + (self.COLCARDS + 6) * l.YOFFSET)
 
         # create stacks
         x, y = l.XM, l.YM
-        for i in range(8):
+        for i in range(self.COLS):
             s.rows.append(self.RowStack_Class(x, y, self,
                                               max_move=1, max_accept=1,
                                               dir=0, base_rank=NO_RANK))
             x += l.XS
-        x, y = l.XM+2*l.XS, self.height-l.YS
+        x, y = l.XM + ((self.COLS / 2) - 2) * l.XS, self.height-l.YS
         for i in range(4):
             s.rows.append(self.RowStack_Class(x, y, self,
                                               max_move=1, max_accept=1,
@@ -474,7 +558,8 @@ class Nestor(Game):
             x += l.XS
         x, y = self.width-l.XS, self.height-l.YS
         s.foundations.append(self.Foundation_Class(x, y, self, suit=ANY_SUIT,
-                             max_move=0, max_cards=52, base_rank=ANY_RANK))
+                             max_move=0, max_cards=(52 * self.gameinfo.decks),
+                                                   base_rank=ANY_RANK))
         l.createText(s.foundations[0], "n")
         x, y = l.XM, self.height - l.YS
         s.talon = InitialDealTalonStack(x, y, self)
@@ -495,29 +580,36 @@ class Nestor(Game):
 
     def _shuffleHook(self, cards):
         # no row will have two cards of the same rank
-        for i in range(8):
+        for i in range(self.COLS):
             for t in range(1000):  # just in case
-                j = self._checkRow(cards[i*6:(i+1)*6])
+                j = self._checkRow(cards[i * self.COLCARDS:(i + 1)
+                                   * self.COLCARDS])
                 if j < 0:
                     break
-                j += i*6
-                k = self.random.choice(list(range((i+1)*6, 52)))
+                j += i * self.COLCARDS
+                k = self.random.choice(list(range((i+1) * self.COLCARDS,
+                                                  (52 * self.gameinfo.decks))))
                 cards[j], cards[k] = cards[k], cards[j]
         cards.reverse()
         return cards
 
     def startGame(self):
-        for r in self.s.rows[:8]:
-            for j in range(6):
+        for r in self.s.rows[:self.COLS]:
+            for j in range(self.COLCARDS):
                 self.s.talon.dealRow(rows=[r], frames=0)
         self.startDealSample()
-        self.s.talon.dealRow(rows=self.s.rows[8:])
+        self.s.talon.dealRow(rows=self.s.rows[self.COLS:])
 
     def getAutoStacks(self, event=None):
         return ((), (), self.sg.dropstacks)
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
         return card1.rank == card2.rank
+
+
+class DoubleNestor(Nestor):
+    COLS = 10
+    COLCARDS = 10
 
 
 # ************************************************************************
@@ -572,21 +664,26 @@ class Vertical(Nestor):
 class TheWish(Game):
 
     FILL_STACKS_AFTER_DROP = False
+    ROWS = 8
 
     def createGame(self):
         # create layout
         l, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM+6*l.XS, 2*l.YM+2*l.YS+6*l.YOFFSET)
+        self.setSize(l.XM + ((self.ROWS / 2) + 2) * l.XS,
+                     2 * l.YM + 2 * l.YS + 6 * l.YOFFSET)
 
+        currentrow = 0
         # create stacks
         for i in range(2):
-            for j in range(4):
-                x, y = l.XM + j*l.XS, l.YM+i*(l.YM+l.YS+3*l.YOFFSET)
-                s.rows.append(Nestor_RowStack(x, y, self,
-                                              max_move=1, max_accept=1,
-                                              dir=0, base_rank=NO_RANK))
+            for j in range(math.ceil(self.ROWS / 2)):
+                if currentrow < self.ROWS:
+                    x, y = l.XM + j*l.XS, l.YM+i*(l.YM+l.YS+3*l.YOFFSET)
+                    s.rows.append(Nestor_RowStack(x, y, self,
+                                                  max_move=1, max_accept=1,
+                                                  dir=0, base_rank=NO_RANK))
+                    currentrow += 1
 
         x, y = self.width - l.XS, l.YM
         s.talon = InitialDealTalonStack(x, y, self)
@@ -627,6 +724,15 @@ class TheWishOpen(TheWish):
 
     def startGame(self):
         self._startDealNumRowsAndDealSingleRow(3)
+
+
+class PatientPairs(TheWish):
+    ROWS = 13
+
+
+class PatientPairsOpen(TheWishOpen):
+    ROWS = 13
+
 
 # ************************************************************************
 # * Der letzte Monarch (The last Monarch)
@@ -779,7 +885,7 @@ class DerLetzteMonarch(Game):
 
 
 class TheLastMonarchII(DerLetzteMonarch):
-    Talon_Class = TalonStack
+    Talon_Class = AutoDealTalonStack
 
     def createGame(self):
         DerLetzteMonarch.createGame(self, texts=True)
@@ -811,7 +917,7 @@ class DoubletsII(Game):
                                           dir=0, base_rank=NO_RANK))
             x += l.XS
         x, y = l.XM, self.height-l.YS
-        s.talon = TalonStack(x, y, self)
+        s.talon = AutoDealTalonStack(x, y, self)
         l.createText(s.talon, 'n')
 
         x, y = self.width-l.XS, self.height-l.YS
@@ -887,11 +993,47 @@ class RightAndLeft(Game):
         self._startAndDealRow()
 
 
+# ************************************************************************
+# * Aces Square
+# ************************************************************************
+
+class AcesSquare_RowStack(MonteCarlo_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not OpenStack.acceptsCards(self, from_stack, cards):
+            return False
+        if self.cards[-1].rank == 0 or cards[0].rank == 0:
+            return False
+
+        return (self.game.isNeighbour(from_stack, self)
+                and self.cards[-1].suit == cards[0].suit)
+
+
+class AcesSquare(MonteCarlo):
+    Talon_Class = AutoDealTalonStack
+    RowStack_Class = AcesSquare_RowStack
+
+    def createGame(self):
+        MonteCarlo.createGame(self, rows=4, cols=4)
+
+    def isGameWon(self):
+        return len(self.s.foundations[0].cards) == 48
+
+    def fillStack(self, stack):
+        if stack in self.s.rows:
+            if len(stack.cards) == 0 and len(self.s.talon.cards) > 0:
+                self.flipMove(self.s.talon)
+                self.moveMove(1, self.s.talon, stack)
+
+    def isNeighbour(self, stack1, stack2):
+        return (stack1.id // 4 == stack2.id // 4 or
+                stack1.id % 4 == stack2.id % 4)
+
+
 # register the game
 registerGame(GameInfo(89, MonteCarlo, "Monte Carlo",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
                       altnames=("Quilt",)))
-registerGame(GameInfo(216, MonteCarlo2Decks, "Monte Carlo (2 decks)",
+registerGame(GameInfo(216, MonteCarlo2Decks, "Monte Carlo (2 Decks)",
                       GI.GT_PAIRING_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(212, Weddings, "Weddings",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
@@ -899,12 +1041,15 @@ registerGame(GameInfo(90, SimpleCarlo, "Simple Carlo",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(91, SimplePairs, "Simple Pairs",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_LUCK,
-                      altnames=("Jamestown",)))
+                      altnames=("Jamestown", "Pirate Gold", "Treasure Hunt",
+                                "Hunter")))
 registerGame(GameInfo(92, Neighbour, "Neighbour",
                       GI.GT_PAIRING_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(96, Fourteen, "Fourteen",
                       GI.GT_PAIRING_TYPE | GI.GT_OPEN, 1, 0,
-                      GI.SL_MOSTLY_LUCK))
+                      GI.SL_MOSTLY_LUCK, altnames=("Fourteen Out",
+                                                   "Fourteen Puzzle",
+                                                   "Take Fourteen")))
 registerGame(GameInfo(235, Nestor, "Nestor",
                       GI.GT_PAIRING_TYPE | GI.GT_OPEN, 1, 0,
                       GI.SL_MOSTLY_LUCK))
@@ -912,12 +1057,13 @@ registerGame(GameInfo(152, DerLetzteMonarch, "The Last Monarch",
                       GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
                       altnames=("Der letzte Monarch",)))
 registerGame(GameInfo(328, TheWish, "The Wish",
-                      GI.GT_PAIRING_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
-                      ranks=(0, 6, 7, 8, 9, 10, 11, 12)))
-registerGame(GameInfo(329, TheWishOpen, "The Wish (open)",
-                      GI.GT_PAIRING_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
-                      GI.SL_MOSTLY_SKILL,
-                      ranks=(0, 6, 7, 8, 9, 10, 11, 12)))
+                      GI.GT_PAIRING_TYPE | GI.GT_STRIPPED, 1, 0,
+                      GI.SL_MOSTLY_LUCK, ranks=(0, 6, 7, 8, 9, 10, 11, 12)))
+registerGame(GameInfo(329, TheWishOpen, "The Wish (Open)",
+                      GI.GT_PAIRING_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL |
+                      GI.GT_STRIPPED, 1, 0, GI.SL_MOSTLY_SKILL,
+                      ranks=(0, 6, 7, 8, 9, 10, 11, 12),
+                      rules_filename="thewish.html"))
 registerGame(GameInfo(368, Vertical, "Vertical",
                       GI.GT_PAIRING_TYPE | GI.GT_OPEN, 1, 0,
                       GI.SL_MOSTLY_LUCK))
@@ -928,3 +1074,25 @@ registerGame(GameInfo(663, TheLastMonarchII, "The Last Monarch II",
                       GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(727, RightAndLeft, "Right and Left",
                       GI.GT_PAIRING_TYPE, 2, -1, GI.SL_LUCK))
+registerGame(GameInfo(801, DoubleNestor, "Double Nestor",
+                      GI.GT_PAIRING_TYPE | GI.GT_OPEN, 2, 0,
+                      GI.SL_MOSTLY_LUCK))
+registerGame(GameInfo(810, Quatorze, "Quatorze",
+                      GI.GT_PAIRING_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
+registerGame(GameInfo(829, BlockTen, "Block Ten",
+                      GI.GT_PAIRING_TYPE, 1, 0, GI.SL_LUCK))
+registerGame(GameInfo(862, SimpleTens, "Simple Tens",
+                      GI.GT_PAIRING_TYPE | GI.GT_STRIPPED, 1, 0, GI.SL_LUCK,
+                      ranks=(0, 1, 2, 3, 4, 5, 6, 7, 8),
+                      altnames=("Add Up Tens",)))
+registerGame(GameInfo(867, DoubleFourteen, "Double Fourteen",
+                      GI.GT_PAIRING_TYPE | GI.GT_OPEN, 2, 0,
+                      GI.SL_MOSTLY_LUCK))
+registerGame(GameInfo(874, PatientPairs, "Patient Pairs",
+                      GI.GT_PAIRING_TYPE, 1, 0, GI.SL_MOSTLY_LUCK,
+                      altnames=("Isabel",)))
+registerGame(GameInfo(875, PatientPairsOpen, "Patient Pairs (Open)",
+                      GI.GT_PAIRING_TYPE | GI.GT_OPEN, 1, 0,
+                      GI.SL_MOSTLY_SKILL, rules_filename="patientpairs.html"))
+registerGame(GameInfo(898, AcesSquare, "Aces Square",
+                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_BALANCED))

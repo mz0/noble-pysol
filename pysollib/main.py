@@ -321,11 +321,24 @@ Please check your %(app)s installation.
         cardset = app.cardset_manager.getByName(c[0])
         if cardset and c[1]:
             cardset.updateCardback(backname=c[1])
-    if not cardset:
-        cardset = app.cardset_manager.get(0)
-    if app.cardset_manager.len() == 0 or not cardset:
+    if app.cardset_manager.len() == 0:
         fatal_no_cardsets(app)
         return 3
+    if not cardset:
+        MfxMessageDialog(top, title=_("Cardset error"),
+                         text=_('''
+The cardset "%(cs)s" was not found.
+
+Please ensure that this cardset has been installed, and that your
+Cardsets package is up to date.
+''') % {'cs': c[0]},
+                         bitmap="error")
+        cardset = app.cardset_manager.getByName("Standard")
+        if not cardset:
+            cardset = app.cardset_manager.get(0)
+            if not cardset:
+                fatal_no_cardsets(app)
+                return 3
 
     # init tiles
     manager = app.tabletile_manager
@@ -374,13 +387,15 @@ Please check your %(app)s installation.
     # load cardset
     progress = app.intro.progress
     if not app.loadCardset(cardset, progress=progress, update=1):
-        for cardset in app.cardset_manager.getAll():
-            progress.reset()
-            if app.loadCardset(cardset, progress=progress, update=1):
-                break
-        else:
-            fatal_no_cardsets(app)
-            return 3
+        if not cardset:
+            for cardset in app.cardset_manager.getAll():
+                progress.reset()
+
+                if app.loadCardset(cardset, progress=progress, update=1):
+                    break
+            else:
+                fatal_no_cardsets(app)
+                return 3
 
     # ok
     return 0

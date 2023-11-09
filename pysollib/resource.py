@@ -123,6 +123,8 @@ class ResourceManager:
             pass
 
     def getSearchDirs(self, app, search, env=None):
+        """Get a list of normalized directory paths. The returned list has no
+        duplicates."""
         if isinstance(search, str):
             search = (search,)
         result = []
@@ -166,6 +168,7 @@ class CSI:
     SIZE_MEDIUM = 3
     SIZE_LARGE = 4
     SIZE_XLARGE = 5
+    SIZE_HIRES = 6
 
     # cardset types
     TYPE_FRENCH = 1
@@ -177,6 +180,7 @@ class CSI:
     TYPE_NAVAGRAHA_GANJIFA = 7
     TYPE_DASHAVATARA_GANJIFA = 8
     TYPE_TRUMP_ONLY = 9
+    TYPE_MATCHING = 10
 
     TYPE = {
         1:  _("French type (52 cards)"),
@@ -188,6 +192,7 @@ class CSI:
         7:  _("Navagraha Ganjifa type (108 cards)"),
         8:  _("Dashavatara Ganjifa type (120 cards)"),
         9:  _("Trumps only type (variable cards)"),
+        10: _("Matching type (variable cards)"),
     }
 
     TYPE_NAME = {
@@ -200,18 +205,59 @@ class CSI:
         7:  _("Navagraha Ganjifa"),
         8:  _("Dashavatara Ganjifa"),
         9:  _("Trumps only"),
+        10: _("Matching"),
     }
 
     TYPE_ID = {
-        1: "french",
-        2: "hanafuda",
-        3: "tarock",
-        4: "mahjongg",
-        5: "hex-a-deck",
-        6: "mughal-ganjifa",
-        7: "navagraha-ganjifa",
-        8: "dashavatara-ganjifa",
-        9: "trumps-only",
+        1:  "french",
+        2:  "hanafuda",
+        3:  "tarock",
+        4:  "mahjongg",
+        5:  "hex-a-deck",
+        6:  "mughal-ganjifa",
+        7:  "navagraha-ganjifa",
+        8:  "dashavatara-ganjifa",
+        9:  "trumps-only",
+        10: "matching"
+    }
+
+    TYPE_SUITS = {
+        1:  "cshd",
+        2:  "abcdefghijkl",
+        3:  "cshd",
+        4:  "abc",
+        5:  "cshd",
+        6:  "abcdefgh",
+        7:  "abcdefghi",
+        8:  "abcdefghij",
+        9:  "",
+        10: ""
+    }
+
+    TYPE_RANKS = {
+        1:  list(range(13)),
+        2:  list(range(4)),
+        3:  list(range(14)),
+        4:  list(range(10)),
+        5:  list(range(16)),
+        6:  list(range(12)),
+        7:  list(range(12)),
+        8:  list(range(12)),
+        9:  list(range(0)),
+        10: list(range(0)),
+    }
+
+    TYPE_TRUMPS = {
+        1:  (),
+        2:  (),
+        3:  list(range(22)),
+        4:  list(range(12)),
+        5:  list(range(4)),
+        6:  (),
+        7:  (),
+        8:  (),
+        9:  (),
+        10: (),
     }
 
     # cardset styles
@@ -222,7 +268,7 @@ class CSI:
         4:  _("Art"),                  #
         5:  _("Cartoons"),             #
         6:  _("Children"),             #
-        7:  _("Classic look"),         #
+        7:  _("Classic Look"),         #
         8:  _("Collectors"),           # scanned collectors cardsets
         9:  _("Computers"),            #
         10:  _("Engines"),              #
@@ -232,6 +278,7 @@ class CSI:
         29:  _("Hex A Deck"),           #
         13:  _("Holiday"),              #
         28:  _("Mahjongg"),             #
+        32:  _("Matching"),             #
         14:  _("Movies"),               #
         31:  _("Matrix"),               #
         15:  _("Music"),                #
@@ -241,11 +288,11 @@ class CSI:
         20:  _("Places"),               #
         21:  _("Plain"),                #
         22:  _("Products"),             #
-        18:  _("Round cardsets"),       #
+        18:  _("Round Cardsets"),       #
         23:  _("Science Fiction"),      #
         24:  _("Sports"),               #
         27:  _("Tarock"),               #
-        25:  _("Vehicels"),             #
+        25:  _("Vehicles"),             #
         26:  _("Video Games"),          #
     }
 
@@ -405,44 +452,28 @@ class CardsetManager(ResourceManager):
         if s not in CSI.TYPE:
             return 0
         cs.si.type = s
+        cs.suits = CSI.TYPE_SUITS[s]
+        cs.ranks = CSI.TYPE_RANKS[s]
+        cs.trumps = CSI.TYPE_TRUMPS[s]
         if s == CSI.TYPE_FRENCH:
-            cs.ranks = list(range(13))
-            cs.suits = "cshd"
+            pass
         elif s == CSI.TYPE_HANAFUDA:
             cs.nbottoms = 15
-            cs.ranks = list(range(4))
-            cs.suits = "abcdefghijkl"
         elif s == CSI.TYPE_TAROCK:
             cs.nbottoms = 8
-            cs.ranks = list(range(14))
-            cs.suits = "cshd"
-            cs.trumps = list(range(22))
         elif s == CSI.TYPE_MAHJONGG:
-            cs.ranks = list(range(10))
-            cs.suits = "abc"
-            cs.trumps = list(range(12))
-            #
             cs.nbottoms = 0
             cs.nletters = 0
             cs.nshadows = 0
         elif s == CSI.TYPE_HEXADECK:
             cs.nbottoms = 8
-            cs.ranks = list(range(16))
-            cs.suits = "cshd"
-            cs.trumps = list(range(4))
         elif s == CSI.TYPE_MUGHAL_GANJIFA:
             cs.nbottoms = 11
-            cs.ranks = list(range(12))
-            cs.suits = "abcdefgh"
         elif s == CSI.TYPE_NAVAGRAHA_GANJIFA:
             # ???return 0                            ## FIXME
             cs.nbottoms = 12
-            cs.ranks = list(range(12))
-            cs.suits = "abcdefghi"
         elif s == CSI.TYPE_DASHAVATARA_GANJIFA:
             cs.nbottoms = 13
-            cs.ranks = list(range(12))
-            cs.suits = "abcdefghij"
         elif s == CSI.TYPE_TRUMP_ONLY:
             # ???return 0                            ## FIXME
             # cs.nbottoms = 7
@@ -452,8 +483,16 @@ class CardsetManager(ResourceManager):
             cs.nbottoms = 1
             cs.nletters = 0
             cs.nshadows = 0
-            cs.ranks = ()
-            cs.suits = ""
+            cs.trumps = list(range(cs.ncards))
+        elif s == CSI.TYPE_MATCHING:
+            # ???return 0                            ## FIXME
+            # cs.nbottoms = 7
+            # cs.ranks = ()
+            # cs.suits = ""
+            # cs.trumps = range(cs.ncards)
+            cs.nbottoms = 1
+            cs.nletters = 0
+            cs.nshadows = 0
             cs.trumps = list(range(cs.ncards))
 
         else:
@@ -475,8 +514,10 @@ class CardsetManager(ResourceManager):
                 cs.si.size = CSI.SIZE_MEDIUM
             elif CW <= 90 and CH <= 125:
                 cs.si.size = CSI.SIZE_LARGE
-            else:
+            elif CW <= 150 and CH <= 210:
                 cs.si.size = CSI.SIZE_XLARGE
+            else:
+                cs.si.size = CSI.SIZE_HIRES
         #
         keys = cs.styles[:]
         cs.si.styles = tuple([s for s in keys if s in CSI.STYLE])

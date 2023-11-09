@@ -184,7 +184,7 @@ class LesserQueue(AbstractFlowerGame):
         l.createText(s.talon, "n")
         s.talon.texts.rounds = MfxCanvasText(
             self.canvas,
-            self.width//2, h-2*l.TEXT_MARGIN,
+            self.width // 2, h - 2.5 * l.TEXT_HEIGHT - l.TEXT_MARGIN,
             anchor="center",
             font=self.app.getFont("canvas_default"))
         x = x + l.XS
@@ -208,7 +208,7 @@ class LesserQueue(AbstractFlowerGame):
             x = x + l.XS
         self.texts.info = MfxCanvasText(
             self.canvas,
-            self.width//2, h-l.TEXT_MARGIN,
+            self.width // 2, h - l.TEXT_MARGIN - l.TEXT_HEIGHT,
             anchor="center",
             font=self.app.getFont("canvas_default"))
 
@@ -739,7 +739,8 @@ r(12380, Eularia, 'Eularia', GI.GT_HANAFUDA, 1, -1, GI.SL_BALANCED)
 r(12381, Peony, 'Peony', GI.GT_HANAFUDA, 1, -1, GI.SL_BALANCED)
 r(12382, Iris, 'Iris', GI.GT_HANAFUDA, 1, 0, GI.SL_BALANCED)
 r(12383, Pine, 'Pine', GI.GT_HANAFUDA, 1, 0, GI.SL_BALANCED)
-r(12384, Wisteria, 'Wisteria', GI.GT_HANAFUDA, 1, 0, GI.SL_MOSTLY_SKILL)
+r(12384, Wisteria, 'Wisteria', GI.GT_HANAFUDA | GI.GT_OPEN, 1, 0,
+  GI.SL_MOSTLY_SKILL)
 r(12385, FlowerArrangement, 'Flower Arrangement', GI.GT_HANAFUDA, 2, 0,
   GI.SL_BALANCED)
 

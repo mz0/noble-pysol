@@ -26,6 +26,7 @@ from pysollib.games.montecarlo import MonteCarlo_RowStack
 from pysollib.layout import Layout
 from pysollib.stack import \
         AbstractFoundationStack, \
+        AutoDealTalonStack, \
         BasicRowStack, \
         DealRowTalonStack, \
         OpenStack, \
@@ -34,7 +35,6 @@ from pysollib.stack import \
         Spider_RK_Foundation, \
         Stack, \
         StackWrapper, \
-        TalonStack, \
         isRankSequence
 from pysollib.util import ACE, ANY_RANK, ANY_SUIT, NO_RANK, \
         UNLIMITED_ACCEPTS, \
@@ -280,7 +280,7 @@ class Cover_RowStack(MonteCarlo_RowStack):
 
 class Cover(AcesUp):
     Foundation_Class = StackWrapper(AbstractFoundationStack, max_accept=0)
-    Talon_Class = TalonStack
+    Talon_Class = AutoDealTalonStack
     RowStack_Class = StackWrapper(Cover_RowStack, max_accept=1)
 
     FILL_STACKS_AFTER_DROP = 0          # for MonteCarlo_RowStack
@@ -415,7 +415,7 @@ registerGame(GameInfo(213, RussianAces, "Russian Aces",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_LUCK))
 registerGame(GameInfo(130, PerpetualMotion, "Perpetual Motion",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK,
-                      altnames="First Law"))
+                      altnames=("First Law", "Narcotic")))
 registerGame(GameInfo(353, AcesUp5, "Aces Up 5",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_LUCK))
 registerGame(GameInfo(552, Cover, "Cover",
@@ -423,7 +423,8 @@ registerGame(GameInfo(552, Cover, "Cover",
 registerGame(GameInfo(583, FiringSquad, "Firing Squad",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(684, Deck, "Deck",
-                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_LUCK))
+                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_LUCK,
+                      altnames=('Affinity', 'Suits Up')))
 registerGame(GameInfo(756, TabbyCat, "Tabby Cat",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(757, Manx, "Manx",

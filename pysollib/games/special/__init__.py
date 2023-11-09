@@ -20,7 +20,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ---------------------------------------------------------------------------##
+from . import cribbage  # noqa: F401
 from . import hanoi  # noqa: F401
+from . import lightsout  # noqa: F401
 from . import memory  # noqa: F401
 from . import pegged  # noqa: F401
 from . import poker  # noqa: F401

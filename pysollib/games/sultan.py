@@ -28,6 +28,7 @@ from pysollib.layout import Layout
 from pysollib.stack import \
         AC_FoundationStack, \
         AbstractFoundationStack, \
+        AutoDealTalonStack, \
         BasicRowStack, \
         DealRowRedealTalonStack, \
         DealRowTalonStack, \
@@ -41,7 +42,6 @@ from pysollib.stack import \
         SS_RowStack, \
         Stack, \
         StackWrapper, \
-        TalonStack, \
         UD_AC_RowStack, \
         UD_SS_RowStack, \
         WasteStack, \
@@ -65,7 +65,8 @@ class Sultan(Game):
         l, s = Layout(self), self.s
 
         # set window
-        w, h = 3*l.XM+5*l.XS, l.YM+4*l.YS+l.TEXT_HEIGHT+l.TEXT_MARGIN
+        w, h = 3 * l.XM + 5 * l.XS, l.YM + 4 * l.YS + \
+            (2 * l.TEXT_HEIGHT) + l.TEXT_MARGIN
         self.setSize(w, h)
 
         # create stacks
@@ -96,10 +97,10 @@ class Sultan(Game):
             s.rows.append(ReserveStack(x, y, self))
             y += l.YS
 
-        x, y = 2*l.XM+1.5*l.XS, l.YM+3*l.YS
+        x, y = 2*l.XM+1.5*l.XS, l.YM+3*l.YS + l.TEXT_HEIGHT
         s.talon = WasteTalonStack(x, y, self, max_rounds=3)
         l.createText(s.talon, "s")
-        l.createRoundText(self.s.talon, 'sss')
+        l.createRoundText(self.s.talon, 'n')
         x += l.XS
         s.waste = WasteStack(x, y, self)
         l.createText(s.waste, "s")
@@ -267,11 +268,11 @@ class Contradance(Game):
 
         x, y = l.XM+3*l.XS, l.YM+3*l.YS
         s.talon = WasteTalonStack(x, y, self, max_rounds=2)
-        l.createText(s.talon, 'n')
-        l.createRoundText(self.s.talon, 'nnn')
+        l.createText(s.talon, 'sw')
+        l.createRoundText(self.s.talon, 'n')
         x += l.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 'n')
+        l.createText(s.waste, 'se')
 
         l.defaultStackGroups()
 
@@ -367,12 +368,20 @@ class LadyOfTheManor(Game):
     Foundation_Class_1 = RK_FoundationStack
     Foundation_Class_2 = RK_FoundationStack
 
+    ACE_STACK = False
+
     def createGame(self):
 
         l, s = Layout(self), self.s
-        self.setSize(l.XM+8*l.XS, l.YM+max(4*l.YS, 3*l.YS+14*l.YOFFSET))
+        cols = 8
+        if self.ACE_STACK:
+            cols += 1
+        self.setSize(l.XM + cols * l.XS,
+                     l.YM + max(4 * l.YS, 3 * l.YS + 14 * l.YOFFSET))
 
         x, y = l.XM, self.height-l.YS
+        if self.ACE_STACK:
+            x += (l.XS / 2)
         for i in range(4):
             suit = i
             if self.Foundation_Class_1 is RK_FoundationStack:
@@ -387,13 +396,22 @@ class LadyOfTheManor(Game):
             s.foundations.append(
                 self.Foundation_Class_2(x, y, self, suit=suit))
             x += l.XS
-        x, y = l.XM+2*l.XS, l.YM+l.YS
+        x, y = l.XM + 2 * l.XS, l.YM + l.YS
+        if self.ACE_STACK:
+            x += (l.XS / 2)
         for i in range(4):
             s.rows.append(LadyOfTheManor_RowStack(x, y, self, max_accept=0))
             x += l.XS
-        for i, j in ((0, 2), (0, 1), (0, 0),
-                     (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0),
-                     (7, 0), (7, 1), (7, 2), ):
+        if self.ACE_STACK:
+            reservelocs = ((0, 2), (0, 1), (0, 0),
+                           (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0),
+                           (7, 0), (8, 0), (8, 1), (8, 2), )
+        else:
+            reservelocs = ((0, 2), (0, 1), (0, 0),
+                           (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0),
+                           (7, 0), (7, 1), (7, 2),)
+
+        for i, j in reservelocs:
             x, y = l.XM+i*l.XS, l.YM+j*l.YS
             s.reserves.append(LadyOfTheManor_Reserve(x, y, self, max_accept=0))
 
@@ -417,8 +435,27 @@ class LadyOfTheManor(Game):
         while self.s.talon.cards:
             self.flipMove(self.s.talon)
             c = self.s.talon.cards[-1]
-            r = self.s.reserves[c.rank-1]
+            if self.ACE_STACK:
+                r = self.s.reserves[c.rank]
+            else:
+                r = self.s.reserves[c.rank - 1]
             self.moveMove(1, self.s.talon, r, frames=4)
+
+
+class Archway(LadyOfTheManor):
+    Foundation_Class_1 = SS_FoundationStack
+    Foundation_Class_2 = StackWrapper(SS_FoundationStack, dir=-1)
+
+    ACE_STACK = True
+
+    def _shuffleHook(self, cards):
+        return self._shuffleHookMoveToTop(
+            cards,
+            lambda c: (c.rank in (ACE, KING) and c.deck == 0,
+                       (c.rank, c.suit)))
+
+    def startGame(self):
+        LadyOfTheManor.startGame(self, flip=True)
 
 
 # ************************************************************************
@@ -507,6 +544,11 @@ class Matrimony(Game):
                                    self.s.foundations[7]], frames=0)
         self._startAndDealRow()
 
+    def getSnapshotHash(self):
+        # Takes the round into account - a single card redeal can result
+        # in an identical snapshot.
+        return Game.getSnapshotHash(self) + str(self.s.talon.round)
+
 
 # ************************************************************************
 # * Picture Patience
@@ -520,7 +562,7 @@ class PicturePatience(Game):
         l, s = Layout(self), self.s
         w, h = 3*l.XM+5*l.XS, l.YM+4*l.YS
         if max_rounds > 1:
-            h += l.TEXT_HEIGHT+l.TEXT_MARGIN
+            h += (2 * l.TEXT_HEIGHT) + l.TEXT_MARGIN
         self.setSize(w, h)
 
         x, y = l.XM, l.YM
@@ -541,12 +583,14 @@ class PicturePatience(Game):
                 x += l.XS
             y += l.YS
         x, y = 2*l.XM+l.XS+l.XS//2, l.YM+3*l.YS
+        if max_rounds > 1:
+            y += l.TEXT_HEIGHT
         s.talon = WasteTalonStack(x, y, self, max_rounds=max_rounds)
         x += l.XS
         s.waste = WasteStack(x, y, self)
         if max_rounds > 1:
             l.createText(s.talon, 's')
-            l.createRoundText(s.talon, 'sss')
+            l.createRoundText(s.talon, 'n')
             l.createText(s.waste, 's')
         else:
             l.createText(s.talon, 'sw')
@@ -1175,7 +1219,7 @@ class Grandee(Game):
 
 
 class Turncoats(Grandee):
-    Talon_Class = TalonStack
+    Talon_Class = AutoDealTalonStack
     RowStack_Class = StackWrapper(UD_AC_RowStack, base_rank=NO_RANK)
 
     def createGame(self):
@@ -1350,7 +1394,8 @@ class CatherineTheGreat(Game):
 # register the game
 registerGame(GameInfo(330, Sultan, "Sultan",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK,
-                      altnames=("Sultan of Turkey",)))
+                      altnames=("Sultan of Turkey",
+                                "Emperor of Germany")))
 registerGame(GameInfo(331, SultanPlus, "Sultan +",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(354, Boudoir, "Boudoir",
@@ -1373,14 +1418,13 @@ registerGame(GameInfo(429, Patriarchs, "Patriarchs",
 registerGame(GameInfo(438, SixesAndSevens, "Sixes and Sevens",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(477, CornerSuite, "Corner Suite",
-                      GI.GT_2DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
+                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(559, Marshal, "Marshal",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(565, RoyalAids, "Royal Aids",
                       GI.GT_2DECK_TYPE, 2, UNLIMITED_REDEALS, GI.SL_BALANCED))
 registerGame(GameInfo(598, PicturePatience, "Picture Patience",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK,
-                      rules_filename="patriarchs.html"))
+                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(635, CircleEight, "Circle Eight",
                       GI.GT_1DECK_TYPE, 1, 1, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(646, Adela, "Adela",
@@ -1403,3 +1447,5 @@ registerGame(GameInfo(745, DesertIsland, "Desert Island",
                       GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(761, CatherineTheGreat, "Catherine the Great",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
+registerGame(GameInfo(844, Archway, "Archway",
+                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_LUCK))

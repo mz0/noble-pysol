@@ -47,9 +47,9 @@ class PlayerOptionsDialog(MfxDialog):
         #
         frame = ttk.Frame(top_frame)
         frame.pack(expand=True, fill='both', padx=5, pady=10)
-        widget = ttk.Label(frame, text=_("\nPlease enter your name"),
+        widget = ttk.Label(frame, text=_("Please enter your name"),
                            takefocus=0)
-        widget.grid(row=0, column=0, columnspan=2, sticky='ew', padx=0, pady=5)
+        widget.grid(row=0, column=0, columnspan=2, sticky='ew', padx=0, pady=0)
         #
         w = kw.get("e_width", 30)    # width in characters
         names = self.app.getAllUserNames()
@@ -58,7 +58,7 @@ class PlayerOptionsDialog(MfxDialog):
         self.player_var.grid(row=1, column=0, sticky='ew', padx=0, pady=5)
         #
         widget = ttk.Checkbutton(frame, variable=self.confirm_var,
-                                 text=_("Confirm quit"))
+                                 text=_("Confirm discard game"))
         widget.grid(row=2, column=0, columnspan=2, sticky='ew', padx=0, pady=5)
         widget = ttk.Checkbutton(frame, variable=self.update_stats_var,
                                  text=_("Update statistics and logs"))

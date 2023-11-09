@@ -1,5 +1,6 @@
 import math
 import os
+import platform
 import re
 import sys
 
@@ -13,7 +14,7 @@ from pysollib.settings import TITLE, WIN_SYSTEM
 from pysollib.settings import USE_FREECELL_SOLVER
 from pysollib.ui.tktile.tkconst import COMPOUNDS, CURSOR_WATCH, EVENT_HANDLED
 from pysollib.ui.tktile.tkconst import EVENT_PROPAGATE
-from pysollib.ui.tktile.tkconst import TOOLBAR_BUTTONS
+from pysollib.ui.tktile.tkconst import STATUSBAR_ITEMS, TOOLBAR_BUTTONS
 from pysollib.ui.tktile.tkutil import after_idle, bind
 
 from six.moves import tkinter
@@ -22,21 +23,39 @@ from six.moves import tkinter_tkfiledialog
 
 def createToolbarMenu(menubar, menu):
     tearoff = menu.cget('tearoff')
-#     data_dir = os.path.join(menubar.app.dataloader.dir, 'images', 'toolbar')
-#     submenu = MfxMenu(menu, label=n_('Style'), tearoff=tearoff)
-#     for f in os.listdir(data_dir):
-#         d = os.path.join(data_dir, f)
-#         if os.path.isdir(d) and os.path.exists(os.path.join(d, 'small')):
-#             name = f.replace('_', ' ').capitalize()
-#             submenu.add_radiobutton(
-#               label=name,
-#               variable=menubar.tkopt.toolbar_style,
-#               value=f, command=menubar.mOptToolbarStyle)
+    data_dir = os.path.join(menubar.app.dataloader.dir, 'images', 'toolbar')
+    submenu = MfxMenu(menu, label=n_('Icon Style'), tearoff=tearoff)
+    styledirs = os.listdir(data_dir)
+    styledirs.sort()
+    for f in styledirs:
+        d = os.path.join(data_dir, f)
+        if os.path.isdir(d) and os.path.exists(os.path.join(d, 'small')):
+            name = f.replace('_', ' ').capitalize()
+            submenu.add_radiobutton(
+              label=name,
+              variable=menubar.tkopt.toolbar_style,
+              value=f, command=menubar.mOptToolbarStyle)
+    submenu = MfxMenu(menu, label=n_('Icon Size'), tearoff=tearoff)
+    submenu.add_radiobutton(label=n_("Small icons"),
+                            variable=menubar.tkopt.toolbar_size, value=0,
+                            command=menubar.mOptToolbarSize)
+    submenu.add_radiobutton(label=n_("Large icons"),
+                            variable=menubar.tkopt.toolbar_size, value=1,
+                            command=menubar.mOptToolbarSize)
+    submenu.add_radiobutton(label=n_("Extra large icons"),
+                            variable=menubar.tkopt.toolbar_size, value=2,
+                            command=menubar.mOptToolbarSize)
     submenu = MfxMenu(menu, label=n_('Compound'), tearoff=tearoff)
     for comp, label in COMPOUNDS:
         submenu.add_radiobutton(
             label=label, variable=menubar.tkopt.toolbar_compound,
             value=comp, command=menubar.mOptToolbarCompound)
+    submenu = MfxMenu(menu, label=n_('Visible buttons'), tearoff=tearoff)
+    for w in TOOLBAR_BUTTONS:
+        submenu.add_checkbutton(
+            label=_(w.capitalize()),
+            variable=menubar.tkopt.toolbar_vars[w],
+            command=lambda m=menubar, w=w: m.mOptToolbarConfig(w))
     menu.add_separator()
     menu.add_radiobutton(label=n_("Hide"),
                          variable=menubar.tkopt.toolbar, value=0,
@@ -53,20 +72,58 @@ def createToolbarMenu(menubar, menu):
     menu.add_radiobutton(label=n_("Right"),
                          variable=menubar.tkopt.toolbar, value=4,
                          command=menubar.mOptToolbar)
-    #  menu.add_separator()
-    #  menu.add_radiobutton(label=n_("Small icons"),
-    #                       variable=menubar.tkopt.toolbar_size, value=0,
-    #                       command=menubar.mOptToolbarSize)
-    #  menu.add_radiobutton(label=n_("Large icons"),
-    #                       variable=menubar.tkopt.toolbar_size, value=1,
-    #                       command=menubar.mOptToolbarSize)
+
+
+def createStatusbarMenu(menubar, menu):
+    menu.add_checkbutton(
+        label=n_("Show &statusbar"), variable=menubar.tkopt.statusbar,
+        command=menubar.mOptStatusbar)
     menu.add_separator()
-    submenu = MfxMenu(menu, label=n_('Visible buttons'), tearoff=tearoff)
-    for w in TOOLBAR_BUTTONS:
-        submenu.add_checkbutton(
-            label=_(w.capitalize()),
-            variable=menubar.tkopt.toolbar_vars[w],
-            command=lambda m=menubar, w=w: m.mOptToolbarConfig(w))
+    for comp, label in STATUSBAR_ITEMS:
+        menu.add_checkbutton(
+            label=label,
+            variable=menubar.tkopt.statusbar_vars[comp],
+            command=lambda m=menubar, w=comp: m.mOptStatusbarConfig(w))
+
+
+def createResamplingMenu(menubar, menu):
+    tearoff = menu.cget('tearoff')
+    submenu = MfxMenu(menu, label=n_('R&esampling'), tearoff=tearoff)
+
+    submenu.add_radiobutton(label=n_("&Nearest Neighbor"),
+                            variable=menubar.tkopt.resampling,
+                            value=int(Image.NEAREST),
+                            command=menubar.mOptResampling)
+    if hasattr(Image, "BILINEAR"):
+        submenu.add_radiobutton(label=n_("&Bilinear"),
+                                variable=menubar.tkopt.resampling,
+                                value=int(Image.BILINEAR),
+                                command=menubar.mOptResampling)
+    if hasattr(Image, "BICUBIC"):
+        submenu.add_radiobutton(label=n_("B&icubic"),
+                                variable=menubar.tkopt.resampling,
+                                value=int(Image.BICUBIC),
+                                command=menubar.mOptResampling)
+    if hasattr(Image, "LANCZOS"):
+        submenu.add_radiobutton(label=n_("&Lanczos"),
+                                variable=menubar.tkopt.resampling,
+                                value=int(Image.LANCZOS),
+                                command=menubar.mOptResampling)
+    elif hasattr(Image, "ANTIALIAS"):
+        submenu.add_radiobutton(label=n_("&Antialiasing"),
+                                variable=menubar.tkopt.resampling,
+                                value=int(Image.ANTIALIAS),
+                                command=menubar.mOptResampling)
+    if hasattr(Image, "BOX"):
+        submenu.add_radiobutton(label=n_("B&ox"),
+                                variable=menubar.tkopt.resampling,
+                                value=int(Image.BOX),
+                                command=menubar.mOptResampling)
+    if hasattr(Image, "HAMMING"):
+        submenu.add_radiobutton(label=n_("&Hamming"),
+                                variable=menubar.tkopt.resampling,
+                                value=int(Image.HAMMING),
+                                command=menubar.mOptResampling)
 
 
 # ************************************************************************
@@ -162,24 +219,37 @@ class PysolMenubarTkCommon:
             undo=tkinter.BooleanVar(),
             bookmarks=tkinter.BooleanVar(),
             hint=tkinter.BooleanVar(),
+            free_hint=tkinter.BooleanVar(),
             shuffle=tkinter.BooleanVar(),
             highlight_piles=tkinter.BooleanVar(),
             highlight_cards=tkinter.BooleanVar(),
             highlight_samerank=tkinter.BooleanVar(),
             highlight_not_matching=tkinter.BooleanVar(),
+            peek_facedown=tkinter.BooleanVar(),
+            stuck_notification=tkinter.BooleanVar(),
             mahjongg_show_removed=tkinter.BooleanVar(),
             shisen_show_hint=tkinter.BooleanVar(),
+            accordion_deal_all=tkinter.BooleanVar(),
+            pegged_auto_remove=tkinter.BooleanVar(),
             sound=tkinter.BooleanVar(),
             auto_scale=tkinter.BooleanVar(),
+            preserve_aspect_ratio=tkinter.BooleanVar(),
+            resampling=tkinter.IntVar(),
+            spread_stacks=tkinter.BooleanVar(),
+            center_layout=tkinter.BooleanVar(),
+            save_games_geometry=tkinter.BooleanVar(),
             cardback=tkinter.IntVar(),
             tabletile=tkinter.IntVar(),
             animations=tkinter.IntVar(),
             redeal_animation=tkinter.BooleanVar(),
             win_animation=tkinter.BooleanVar(),
+            flip_animation=tkinter.BooleanVar(),
             shadow=tkinter.BooleanVar(),
             shade=tkinter.BooleanVar(),
             shade_filled_stacks=tkinter.BooleanVar(),
+            compact_stacks=tkinter.BooleanVar(),
             shrink_face_down=tkinter.BooleanVar(),
+            randomize_place=tkinter.BooleanVar(),
             toolbar=tkinter.IntVar(),
             toolbar_style=tkinter.StringVar(),
             toolbar_relief=tkinter.StringVar(),
@@ -188,7 +258,6 @@ class PysolMenubarTkCommon:
             statusbar=tkinter.BooleanVar(),
             num_cards=tkinter.BooleanVar(),
             helpbar=tkinter.BooleanVar(),
-            save_games_geometry=tkinter.BooleanVar(),
             splashscreen=tkinter.BooleanVar(),
             demo_logo=tkinter.BooleanVar(),
             mouse_type=tkinter.StringVar(),
@@ -197,9 +266,12 @@ class PysolMenubarTkCommon:
             pause=tkinter.BooleanVar(),
             theme=tkinter.StringVar(),
             toolbar_vars={},
+            statusbar_vars={},
         )
         for w in TOOLBAR_BUTTONS:
             self.tkopt.toolbar_vars[w] = tkinter.BooleanVar()
+        for w, x in STATUSBAR_ITEMS:
+            self.tkopt.statusbar_vars[w] = tkinter.BooleanVar()
 
     def _setOptions(self):
         tkopt, opt = self.tkopt, self.app.opt
@@ -210,23 +282,36 @@ class PysolMenubarTkCommon:
         tkopt.quickplay.set(opt.quickplay)
         tkopt.undo.set(opt.undo)
         tkopt.hint.set(opt.hint)
+        tkopt.free_hint.set(opt.free_hint)
         tkopt.shuffle.set(opt.shuffle)
         tkopt.bookmarks.set(opt.bookmarks)
         tkopt.highlight_piles.set(opt.highlight_piles)
         tkopt.highlight_cards.set(opt.highlight_cards)
         tkopt.highlight_samerank.set(opt.highlight_samerank)
         tkopt.highlight_not_matching.set(opt.highlight_not_matching)
+        tkopt.peek_facedown.set(opt.peek_facedown)
+        tkopt.stuck_notification.set(opt.stuck_notification)
         tkopt.shrink_face_down.set(opt.shrink_face_down)
         tkopt.shade_filled_stacks.set(opt.shade_filled_stacks)
+        tkopt.compact_stacks.set(opt.compact_stacks)
+        tkopt.randomize_place.set(opt.randomize_place)
         tkopt.mahjongg_show_removed.set(opt.mahjongg_show_removed)
         tkopt.shisen_show_hint.set(opt.shisen_show_hint)
+        tkopt.accordion_deal_all.set(opt.accordion_deal_all)
+        tkopt.pegged_auto_remove.set(opt.pegged_auto_remove)
         tkopt.sound.set(opt.sound)
         tkopt.auto_scale.set(opt.auto_scale)
+        tkopt.preserve_aspect_ratio.set(opt.preserve_aspect_ratio)
+        tkopt.resampling.set(opt.resampling)
+        tkopt.spread_stacks.set(opt.spread_stacks)
+        tkopt.center_layout.set(opt.center_layout)
+        tkopt.save_games_geometry.set(opt.save_games_geometry)
         tkopt.cardback.set(self.app.cardset.backindex)
         tkopt.tabletile.set(self.app.tabletile_index)
         tkopt.animations.set(opt.animations)
         tkopt.redeal_animation.set(opt.redeal_animation)
         tkopt.win_animation.set(opt.win_animation)
+        tkopt.flip_animation.set(opt.flip_animation)
         tkopt.shadow.set(opt.shadow)
         tkopt.shade.set(opt.shade)
         tkopt.toolbar.set(opt.toolbar)
@@ -236,9 +321,8 @@ class PysolMenubarTkCommon:
         tkopt.toolbar_size.set(opt.toolbar_size)
         tkopt.toolbar_relief.set(opt.toolbar_relief)
         tkopt.statusbar.set(opt.statusbar)
-        tkopt.num_cards.set(opt.num_cards)
-        tkopt.helpbar.set(opt.helpbar)
-        tkopt.save_games_geometry.set(opt.save_games_geometry)
+        # tkopt.num_cards.set(opt.num_cards)
+        # tkopt.helpbar.set(opt.helpbar)
         tkopt.demo_logo.set(opt.demo_logo)
         tkopt.splashscreen.set(opt.splashscreen)
         tkopt.mouse_type.set(opt.mouse_type)
@@ -246,6 +330,8 @@ class PysolMenubarTkCommon:
         tkopt.negative_bottom.set(opt.negative_bottom)
         for w in TOOLBAR_BUTTONS:
             tkopt.toolbar_vars[w].set(opt.toolbar_vars.get(w, False))
+        for w, x in STATUSBAR_ITEMS:
+            tkopt.statusbar_vars[w].set(opt.statusbar_vars.get(w, False))
 
     def connectGame(self, game):
         self.game = game
@@ -305,6 +391,10 @@ class PysolMenubarTkCommon:
         submenu.add_command(
             label=n_("&All games"), command=lambda:
             self.mSelectRandomGame('all'), accelerator=m+"R")
+        submenu.add_separator()
+        submenu.add_command(
+            label=n_("&Games played"),
+            command=lambda: self.mSelectRandomGame('played'))
         submenu.add_command(
             label=n_("Games played and &won"),
             command=lambda: self.mSelectRandomGame('won'))
@@ -317,6 +407,9 @@ class PysolMenubarTkCommon:
         menu.add_command(
             label=n_("Select game by nu&mber..."),
             command=self.mSelectGameById, accelerator=m+"M")
+        menu.add_command(
+            label=n_("Next game by num&ber"),
+            command=self.mNewGameWithNextId, accelerator=m+"N")
         menu.add_separator()
         submenu = MfxMenu(menu, label=n_("Fa&vorite games"))
         menu.add_command(label=n_("A&dd to favorites"), command=self.mAddFavor)
@@ -365,6 +458,11 @@ class PysolMenubarTkCommon:
         menu.add_command(label=n_("Redo &all"), command=self.mRedoAll)
 
         menu.add_separator()
+        menu.add_command(
+            label=n_("Restart"),
+            command=self.mRestart, accelerator=m+"G")
+
+        menu.add_separator()
         submenu = MfxMenu(menu, label=n_("&Set bookmark"))
         for i in range(9):
             label = _("Bookmark %d") % (i + 1)
@@ -381,17 +479,17 @@ class PysolMenubarTkCommon:
         menu.add_command(
             label=n_("&Clear bookmarks"),
             command=self.mClearBookmarks)
-        menu.add_separator()
-
-        menu.add_command(
-            label=n_("Restart"),
-            command=self.mRestart, accelerator=m+"G")
 
         menu.add_separator()
-        menu.add_command(label=n_("Solitaire &Wizard"), command=self.mWizard)
         menu.add_command(
-            label=n_("&Edit current game"),
+            label=n_("Solitaire &Wizard..."),
+            command=self.mWizard)
+        menu.add_command(
+            label=n_("&Edit current game..."),
             command=self.mWizardEdit)
+        menu.add_command(
+            label=n_("&Delete current game"),
+            command=self.mWizardDelete)
 
         menu = MfxMenu(self.menubar, label=n_("&Game"))
         menu.add_command(
@@ -412,20 +510,19 @@ class PysolMenubarTkCommon:
         menu.add_command(
             label=n_("S&tatus..."),
             command=lambda: self.mPlayerStats(mode=100), accelerator=m+"Y")
-        menu.add_checkbutton(
-            label=n_("&Comments..."), variable=self.tkopt.comment,
-            command=self.mEditGameComment)
-        menu.add_separator()
         menu.add_command(
             label=n_("&Statistics..."),
             command=self.mPlayerStats, accelerator=m+"T")
         menu.add_command(
+            label=n_("D&emo statistics..."),
+            command=lambda: self.mPlayerStats(mode=1101))
+        menu.add_command(
             label=n_("Log..."),
             command=lambda: self.mPlayerStats(mode=103))
         menu.add_separator()
-        menu.add_command(
-            label=n_("D&emo statistics"),
-            command=lambda: self.mPlayerStats(mode=1101))
+        menu.add_checkbutton(
+            label=n_("&Comments..."), variable=self.tkopt.comment,
+            command=self.mEditGameComment)
 
         menu = MfxMenu(self.menubar, label=n_("&Assist"))
         menu.add_command(
@@ -435,7 +532,7 @@ class PysolMenubarTkCommon:
             label=n_("Highlight p&iles"),
             command=self.mHighlightPiles, accelerator="I")
         menu.add_command(
-            label=n_("&Find card"),
+            label=n_("&Find card..."),
             command=self.mFindCard, accelerator="F3")
         menu.add_separator()
         menu.add_command(
@@ -445,9 +542,9 @@ class PysolMenubarTkCommon:
             label=n_("Demo (&all games)"),
             command=self.mMixedDemo)
         if USE_FREECELL_SOLVER:
-            menu.add_command(label=n_("&Solver"), command=self.mSolver)
+            menu.add_command(label=n_("&Solver..."), command=self.mSolver)
         else:
-            menu.add_command(label=n_("&Solver"), state='disabled')
+            menu.add_command(label=n_("&Solver..."), state='disabled')
         menu.add_separator()
         menu.add_command(
             label=n_("&Piles description"),
@@ -459,7 +556,7 @@ class PysolMenubarTkCommon:
         menu = MfxMenu(self.menubar, label=n_("&Options"))
         menu.add_command(
             label=n_("&Player options..."),
-            command=self.mOptPlayerOptions)
+            command=self.mOptPlayerOptions, accelerator=m+'P')
         submenu = MfxMenu(menu, label=n_("&Automatic play"))
         submenu.add_checkbutton(
             label=n_("Auto &face up"), variable=self.tkopt.autofaceup,
@@ -488,6 +585,9 @@ class PysolMenubarTkCommon:
             label=n_("Enable shu&ffle"), variable=self.tkopt.shuffle,
             command=self.mOptEnableShuffle)
         submenu.add_checkbutton(
+            label=n_("Free hin&ts"), variable=self.tkopt.free_hint,
+            command=self.mOptFreeHints)
+        submenu.add_checkbutton(
             label=n_("Enable highlight p&iles"),
             variable=self.tkopt.highlight_piles,
             command=self.mOptEnableHighlightPiles)
@@ -500,9 +600,17 @@ class PysolMenubarTkCommon:
             variable=self.tkopt.highlight_samerank,
             command=self.mOptEnableHighlightSameRank)
         submenu.add_checkbutton(
+            label=n_("Enable face-down &peek"),
+            variable=self.tkopt.peek_facedown,
+            command=self.mOptEnablePeekFacedown)
+        submenu.add_checkbutton(
             label=n_("Highlight &no matching"),
             variable=self.tkopt.highlight_not_matching,
             command=self.mOptEnableHighlightNotMatching)
+        submenu.add_checkbutton(
+            label=n_("Stuc&k notification"),
+            variable=self.tkopt.stuck_notification,
+            command=self.mOptEnableStuckNotification)
         submenu.add_separator()
         submenu.add_checkbutton(
             label=n_("&Show removed tiles (in Mahjongg games)"),
@@ -512,16 +620,18 @@ class PysolMenubarTkCommon:
             label=n_("Show hint &arrow (in Shisen-Sho games)"),
             variable=self.tkopt.shisen_show_hint,
             command=self.mOptShisenShowHint)
+        submenu.add_checkbutton(
+            label=n_("&Deal all cards (in Accordion type games)"),
+            variable=self.tkopt.accordion_deal_all,
+            command=self.mOptAccordionDealAll)
+        submenu.add_checkbutton(
+            label=n_("A&uto-remove first card (in Pegged games)"),
+            variable=self.tkopt.pegged_auto_remove,
+            command=self.mOptPeggedAutoRemove)
         menu.add_separator()
         label = n_("&Sound...")
-        if not self.app.audio.CAN_PLAY_SOUND:
-            menu.add_checkbutton(
-                label=label, variable=self.tkopt.sound,
-                command=self.mOptSoundDialog, state='disabled')
-        else:
-            menu.add_checkbutton(
-                label=label, variable=self.tkopt.sound,
-                command=self.mOptSoundDialog)
+        menu.add_command(
+            label=label, command=self.mOptSoundDialog)
         # cardsets
         if USE_PIL:
             submenu = MfxMenu(menu, label=n_("Card si&ze"))
@@ -531,9 +641,30 @@ class PysolMenubarTkCommon:
             submenu.add_command(
                 label=n_("&Decrease the card size"),
                 command=self.mDecreaseCardset, accelerator=m+"-")
+            submenu.add_command(
+                label=n_("&Reset the card size"),
+                command=self.mResetCardset)
+            submenu.add_separator()
             submenu.add_checkbutton(
                 label=n_("&Auto scaling"), variable=self.tkopt.auto_scale,
                 command=self.mOptAutoScale, accelerator=m+'0')
+            submenu.add_checkbutton(
+                label=n_("&Preserve aspect ratio"),
+                variable=self.tkopt.preserve_aspect_ratio,
+                command=self.mOptPreserveAspectRatio)
+            submenu.add_separator()
+            createResamplingMenu(self, submenu)
+            submenu = MfxMenu(menu, label=n_("Card la&yout"))
+            submenu.add_checkbutton(
+                label=n_("&Spread stacks"), variable=self.tkopt.spread_stacks,
+                command=self.mOptSpreadStacks)
+            submenu.add_checkbutton(
+                label=n_("&Center layout"), variable=self.tkopt.center_layout,
+                command=self.mOptCenterLayout)
+            submenu.add_checkbutton(
+                label=n_("Save games &geometry"),
+                variable=self.tkopt.save_games_geometry,
+                command=self.mOptSaveGamesGeometry)
         # manager = self.app.cardset_manager
         # n = manager.len()
         menu.add_command(
@@ -563,6 +694,14 @@ class PysolMenubarTkCommon:
             label=n_("Shade &filled stacks"),
             variable=self.tkopt.shade_filled_stacks,
             command=self.mOptShadeFilledStacks)
+        submenu.add_checkbutton(
+            label=n_("&Compact long stacks"),
+            variable=self.tkopt.compact_stacks,
+            command=self.mOptCompactStacks)
+        submenu.add_checkbutton(
+            label=n_("&Randomize card placement"),
+            variable=self.tkopt.randomize_place,
+            command=self.mOptRandomizePlace)
         submenu = MfxMenu(menu, label=n_("A&nimations"))
         submenu.add_radiobutton(
             label=n_("&None"), variable=self.tkopt.animations, value=0,
@@ -587,6 +726,10 @@ class PysolMenubarTkCommon:
             label=n_("&Redeal animation"),
             variable=self.tkopt.redeal_animation,
             command=self.mRedealAnimation)
+        submenu.add_checkbutton(
+            label=n_("F&lip animation"),
+            variable=self.tkopt.flip_animation,
+            command=self.mFlipAnimation)
         if Image:
             submenu.add_checkbutton(
                 label=n_("&Winning animation"),
@@ -619,20 +762,12 @@ class PysolMenubarTkCommon:
         submenu = MfxMenu(menu, label=n_("&Toolbar"))
         createToolbarMenu(self, submenu)
         submenu = MfxMenu(menu, label=n_("Stat&usbar"))
-        submenu.add_checkbutton(
-            label=n_("Show &statusbar"), variable=self.tkopt.statusbar,
-            command=self.mOptStatusbar)
-        submenu.add_checkbutton(
-            label=n_("Show &number of cards"), variable=self.tkopt.num_cards,
-            command=self.mOptNumCards)
-        submenu.add_checkbutton(
-            label=n_("Show &help bar"), variable=self.tkopt.helpbar,
-            command=self.mOptHelpbar)
-        # if not USE_PIL:
-        menu.add_checkbutton(
-            label=n_("Save games &geometry"),
-            variable=self.tkopt.save_games_geometry,
-            command=self.mOptSaveGamesGeometry)
+        createStatusbarMenu(self, submenu)
+        if not USE_PIL:
+            menu.add_checkbutton(
+                label=n_("Save games &geometry"),
+                variable=self.tkopt.save_games_geometry,
+                command=self.mOptSaveGamesGeometry)
         menu.add_checkbutton(
             label=n_("&Demo logo"), variable=self.tkopt.demo_logo,
             command=self.mOptDemoLogo)
@@ -646,20 +781,32 @@ class PysolMenubarTkCommon:
         if self.progress:
             self.progress.update(step=1)
 
+        # macOS: tk creates the menu item "Help->PySolFC Help", therefore
+        # we will not create a duplicate "Help->Contents" item.
+        # The tk-provided menu item expects this callback.
+        self.top.createcommand('tk::mac::ShowHelp', self.mHelp)
+
         menu = MfxMenu(self.menubar, label=n_("&Help"))
+        if WIN_SYSTEM != "aqua":
+            menu.add_command(
+                label=n_("&Contents"),
+                command=self.mHelp, accelerator=m+"F1")
         menu.add_command(
-            label=n_("&Contents"),
-            command=self.mHelp, accelerator=m+"F1")
-        menu.add_command(
-            label=n_("&How to play"),
+            label=n_("&How to use PySol"),
             command=self.mHelpHowToPlay)
         menu.add_command(
             label=n_("&Rules for this game"),
             command=self.mHelpRules, accelerator="F1")
+        menu.add_separator()
+        menu.add_command(
+            label=n_("What's &new?"),
+            command=self.mHelpNews)
+        menu.add_command(
+            label=n_("R&eport a Bug"),
+            command=self.mHelpReportBug)
         menu.add_command(
             label=n_("&License terms"),
             command=self.mHelpLicense)
-        # menu.add_command(label=n_("What's &new ?"), command=self.mHelpNews)
         if WIN_SYSTEM != "aqua":
             menu.add_separator()
             menu.add_command(
@@ -743,20 +890,14 @@ class PysolMenubarTkCommon:
         self._bindKey(ctrl, "Up", self.mSelectPrevGameById)
         self._bindKey(ctrl, "Down", self.mSelectNextGameById)
 
+        if os.name == 'posix' and platform.system() != 'Darwin':
+            self._bindKey('Alt-', 'F4', self.mQuit)
+
     #
     # key binding utility
     #
 
     def _bindKey(self, modifier, key, func):
-        #  if 0 and not modifier and len(key) == 1:
-        #      self.keybindings[key.lower()] = func
-        #      self.keybindings[key.upper()] = func
-        #      return
-        if not modifier and len(key) == 1:
-            # ignore Ctrl/Shift/Alt
-            # but don't ignore NumLock (state == 16)
-            def func(e, f2=func):
-                return e.state in (0, 16) and f2(e)
         sequence = "<" + modifier + "KeyPress-" + key + ">"
         bind(self.top, sequence, func)
         if len(key) == 1 and key != key.upper():
@@ -793,9 +934,7 @@ class PysolMenubarTkCommon:
         m = "Ctrl-"
         if sys.platform == "darwin":
             m = "Cmd-"
-        menu.add_command(label=n_("All &games..."), accelerator=m+"W",
-                         command=self.mSelectGameDialog)
-        menu.add_command(label=n_("Playable pre&view..."), accelerator=m+"V",
+        menu.add_command(label=n_("All &games..."), accelerator=m+"V",
                          command=self.mSelectGameDialogWithPreview)
         if not SELECT_GAME_MENU:
             return
@@ -846,9 +985,15 @@ class PysolMenubarTkCommon:
     def _addSelectMahjonggGameSubMenu(self, games, menu, command, variable):
         def select_func(gi):
             return gi.si.game_type == GI.GT_MAHJONGG
+
+        def sort_func(gi):
+            return gi.short_name
+
         mahjongg_games = list(filter(select_func, games))
         if len(mahjongg_games) == 0:
             return
+
+        mahjongg_games.sort(key=sort_func)
         #
         menu = MfxMenu(menu, label=n_("&Mahjongg games"))
 
@@ -926,7 +1071,8 @@ class PysolMenubarTkCommon:
         self.updateGamesMenu(submenu, games)
 
     def _addSelectAllGameSubMenu(self, games, menu, command, variable):
-        menu = MfxMenu(menu, label=n_("&All games by name"))
+        if menu.name == "select":
+            menu = MfxMenu(menu, label=n_("&All games by name"))
         n, d = 0, self.cb_max
         i = 0
         while True:
@@ -1062,6 +1208,24 @@ class PysolMenubarTkCommon:
             if gi:
                 games.append(gi)
         self.updateGamesMenu(submenu, games)
+
+    def updateCustomGamesMenu(self):
+        menu = self.menupath[".menubar.select.customgames"][2]
+        menu2 = self.menupath[".menubar.select.allgamesbyname"][2]
+
+        def select_func_visible(gi):
+            return gi.si.game_type != GI.GT_HIDDEN
+
+        def select_func_custom(gi):
+            return gi.si.game_type == GI.GT_CUSTOM
+
+        games = list(map(self.app.gdb.get,
+                         self.app.gdb.getGamesIdSortedByName()))
+        games = list(filter(select_func_visible, games))
+        self.progress = False
+        self.updateGamesMenu(menu2, games)
+        games = list(filter(select_func_custom, games))
+        self.updateGamesMenu(menu, games)
 
     def updateBookmarkMenuState(self):
         state = self._getEnabledState
@@ -1344,6 +1508,12 @@ Unsupported game for import.
         self.app.opt.hint = self.tkopt.hint.get()
         self.game.updateMenus()
 
+    def mOptFreeHints(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.free_hint = self.tkopt.free_hint.get()
+        self.game.updateMenus()
+
     def mOptEnableShuffle(self, *args):
         if self._cancelDrag(break_pause=False):
             return
@@ -1368,11 +1538,23 @@ Unsupported game for import.
         self.app.opt.highlight_samerank = self.tkopt.highlight_samerank.get()
         # self.game.updateMenus()
 
+    def mOptEnablePeekFacedown(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.peek_facedown = self.tkopt.peek_facedown.get()
+        # self.game.updateMenus()
+
     def mOptEnableHighlightNotMatching(self, *args):
         if self._cancelDrag(break_pause=False):
             return
         self.app.opt.highlight_not_matching = \
             self.tkopt.highlight_not_matching.get()
+        # self.game.updateMenus()
+
+    def mOptEnableStuckNotification(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.stuck_notification = self.tkopt.stuck_notification.get()
         # self.game.updateMenus()
 
     def mOptAnimations(self, *args):
@@ -1384,6 +1566,11 @@ Unsupported game for import.
         if self._cancelDrag(break_pause=False):
             return
         self.app.opt.redeal_animation = self.tkopt.redeal_animation.get()
+
+    def mFlipAnimation(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.flip_animation = self.tkopt.flip_animation.get()
 
     def mWinAnimation(self, *args):
         if self._cancelDrag(break_pause=False):
@@ -1414,6 +1601,13 @@ Unsupported game for import.
         self.game.endGame(bookmark=1)
         self.game.quitGame(bookmark=1)
 
+    def mOptCompactStacks(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.compact_stacks = self.tkopt.compact_stacks.get()
+        self.game.endGame(bookmark=1)
+        self.game.quitGame(bookmark=1)
+
     def mOptMahjonggShowRemoved(self, *args):
         if self._cancelDrag():
             return
@@ -1429,20 +1623,38 @@ Unsupported game for import.
         self.app.opt.shisen_show_hint = self.tkopt.shisen_show_hint.get()
         # self.game.updateMenus()
 
+    def mOptAccordionDealAll(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.accordion_deal_all = self.tkopt.accordion_deal_all.get()
+        # self.game.updateMenus()
+
+    def mOptPeggedAutoRemove(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.pegged_auto_remove = self.tkopt.pegged_auto_remove.get()
+        # self.game.updateMenus()
+
     def _updateCardSize(self):
         geom = (self.app.canvas.winfo_width(),
                 self.app.canvas.winfo_height())
         self.app.opt.game_geometry = geom
-        self.app.game.resizeGame()
-        if self.app.opt.auto_scale:
+        self.app.game.resizeGame(card_size_manually=True)
+        if self.app.opt.auto_scale or self.app.opt.spread_stacks:
             w, h = self.app.opt.game_geometry
             self.app.canvas.setInitialSize(w, h, scrollregion=False)
+            # Resize a second time to auto scale
+            self.app.game.resizeGame(card_size_manually=False)
         else:
             w = int(round(self.app.game.width * self.app.opt.scale_x))
             h = int(round(self.app.game.height * self.app.opt.scale_y))
             self.app.canvas.setInitialSize(w, h)
             self.app.top.wm_geometry("")    # cancel user-specified geometry
         # self.app.top.update_idletasks()
+        self.app.setTile(self.app.tabletile_index)
+        self.tkopt.tabletile.set(self.app.tabletile_index)
+
+        self.updateMenus()
 
     def mIncreaseCardset(self, *event):
         if self._cancelDrag(break_pause=True):
@@ -1474,13 +1686,78 @@ Unsupported game for import.
         self.tkopt.auto_scale.set(False)
         self._updateCardSize()
 
+    def mResetCardset(self, *event):
+        if self._cancelDrag(break_pause=True):
+            return
+        self.app.opt.scale_x = 1
+        self.app.opt.scale_y = 1
+
+        self.app.opt.auto_scale = False
+        self.tkopt.auto_scale.set(False)
+        self._updateCardSize()
+
     def mOptAutoScale(self, *event):
         if self._cancelDrag(break_pause=True):
             return
         auto_scale = not self.app.opt.auto_scale
+
+        # In the future, it should be possible to use both options together,
+        # but the current logic conflicts, so not allowed for now.
+        self.app.opt.spread_stacks = False
+        self.tkopt.spread_stacks.set(False)
+
         self.app.opt.auto_scale = auto_scale
         self.tkopt.auto_scale.set(auto_scale)
         self._updateCardSize()
+
+    def mOptPreserveAspectRatio(self, *event):
+        if self._cancelDrag(break_pause=True):
+            return
+        preserve_aspect_ratio = not self.app.opt.preserve_aspect_ratio
+
+        self.app.opt.preserve_aspect_ratio = preserve_aspect_ratio
+        self.tkopt.preserve_aspect_ratio.set(preserve_aspect_ratio)
+        self._updateCardSize()
+
+    def mOptResampling(self, *event):
+        if self._cancelDrag(break_pause=False):
+            return
+        resampling = self.tkopt.resampling.get()
+        self.app.opt.resampling = resampling
+        self.tkopt.resampling.set(resampling)  # update radiobutton
+        self.app.opt.resampling = (self.tkopt.resampling.get())
+        self._updateCardSize()
+
+    def mOptSpreadStacks(self, *event):
+        if self._cancelDrag(break_pause=True):
+            return
+        spread_stacks = not self.app.opt.spread_stacks
+
+        # In the future, it should be possible to use both options together,
+        # but the current logic conflicts, so not allowed for now.
+        self.app.opt.auto_scale = False
+        self.tkopt.auto_scale.set(False)
+
+        self.app.opt.spread_stacks = spread_stacks
+        self.tkopt.spread_stacks.set(spread_stacks)
+        self._updateCardSize()
+
+    def mOptCenterLayout(self, *event):
+        if self._cancelDrag(break_pause=True):
+            return
+        self.app.opt.center_layout = not self.app.opt.center_layout
+        self._updateCardSize()
+
+    def mOptRandomizePlace(self, *event):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.randomize_place = self.tkopt.randomize_place.get()
+        self._updateCardSize()
+
+    def mOptSaveGamesGeometry(self, *event):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.save_games_geometry = self.tkopt.save_games_geometry.get()
 
     def _mOptCardback(self, index):
         if self._cancelDrag(break_pause=False):
@@ -1529,9 +1806,12 @@ Unsupported game for import.
                 tile.color = d.key
                 if self.app.setTile(0):
                     self.tkopt.tabletile.set(0)
-            elif d.key > 0 and d.key != self.app.tabletile_index:
-                if self.app.setTile(d.key):
+            elif d.key > 0 and (d.key != self.app.tabletile_index or
+                                d.preview_scaling !=
+                                self.app.opt.tabletile_scale_method):
+                if self.app.setTile(d.key, d.preview_scaling):
                     self.tkopt.tabletile.set(d.key)
+                self.app.opt.tabletile_scale_method = d.preview_scaling
 
     def mOptToolbar(self, *event):
         # if self._cancelDrag(break_pause=False): return
@@ -1563,6 +1843,9 @@ Unsupported game for import.
         if self.app.statusbar.show(side, resize=resize):
             self.top.update_idletasks()
 
+    def mOptStatusbarConfig(self, w):
+        self.statusbarConfig(w, self.tkopt.statusbar_vars[w].get())
+
     def mOptNumCards(self, *event):
         if self._cancelDrag(break_pause=False):
             return
@@ -1578,11 +1861,6 @@ Unsupported game for import.
         resize = not self.app.opt.save_games_geometry
         if self.app.helpbar.show(show, resize=resize):
             self.top.update_idletasks()
-
-    def mOptSaveGamesGeometry(self, *event):
-        if self._cancelDrag(break_pause=False):
-            return
-        self.app.opt.save_games_geometry = self.tkopt.save_games_geometry.get()
 
     def mOptDemoLogo(self, *event):
         if self._cancelDrag(break_pause=False):
@@ -1684,14 +1962,7 @@ Error while saving game.
                 return
 
             if SELECT_GAME_MENU:
-                menu = self.menupath[".menubar.select.customgames"][2]
-
-                def select_func(gi):
-                    return gi.si.game_type == GI.GT_CUSTOM
-                games = list(map(self.app.gdb.get,
-                                 self.app.gdb.getGamesIdSortedByName()))
-                games = list(filter(select_func, games))
-                self.updateGamesMenu(menu, games)
+                self.updateCustomGamesMenu()
 
             self.tkopt.gameid.set(gameid)
             self._mSelectGame(gameid, force=True)
@@ -1706,11 +1977,33 @@ Error while saving game.
             return
         self.wizardDialog(edit=True)
 
+    def mWizardDelete(self, *event):
+        if self._cancelDrag(break_pause=False):
+            return
+        if not self.game.areYouSure(_("Delete game"),
+                                    _("Delete the game %s?")
+                                    % self.game.gameinfo.name):
+            return
+        from pysollib.wizardutil import delete_game
+        delete_game(self.game)
+        self.game.endGame()
+        self.game.quitGame(2)
+
+        if SELECT_GAME_MENU:
+            self.updateCustomGamesMenu()
+
     def toolbarConfig(self, w, v):
         if self._cancelDrag(break_pause=False):
             return
         self.app.opt.toolbar_vars[w] = v
         self.app.toolbar.config(w, v)
+        self.top.update_idletasks()
+
+    def statusbarConfig(self, w, v):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.statusbar_vars[w] = v
+        self.app.statusbar.config(w, v)
         self.top.update_idletasks()
 
     #

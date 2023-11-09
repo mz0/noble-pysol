@@ -60,9 +60,20 @@ class Matrix_RowStack(OpenStack):
         # the tile (from Tk's stacking view)
         return len(self.cards) - 1
 
+    def _calcMouseBind(self, binding_format):
+        return self.game.app.opt.calcCustomMouseButtonsBinding(binding_format)
+
     def initBindings(self):
-        bind(self.group, "<1>", self._Stack__clickEventHandler)
-        bind(self.group, "<Control-1>", self._Stack__controlclickEventHandler)
+        bind(
+            self.group,
+            self._calcMouseBind("<{mouse_button1}>"),
+            self._Stack__clickEventHandler
+        )
+        bind(
+            self.group,
+            self._calcMouseBind("<Control-{mouse_button1}>"),
+            self._Stack__controlclickEventHandler,
+        )
 
     def getBottomImage(self):
         return self.game.app.images.getBlankBottom()
@@ -120,7 +131,7 @@ class Matrix_RowStack(OpenStack):
 # * Matrix Game
 # ************************************************************************
 
-class Matrix3(Game):
+class Matrix(Game):
 
     #
     # Game layout
@@ -198,50 +209,14 @@ class Matrix3(Game):
 
 
 # ************************************************************************
-# * Size variations
-# ************************************************************************
-
-class Matrix4(Matrix3):
-    pass
-
-
-class Matrix5(Matrix3):
-    pass
-
-
-class Matrix6(Matrix3):
-    pass
-
-
-class Matrix7(Matrix3):
-    pass
-
-
-class Matrix8(Matrix3):
-    pass
-
-
-class Matrix9(Matrix3):
-    pass
-
-
-class Matrix10(Matrix3):
-    pass
-
-
-class Matrix20(Matrix3):
-    pass
-
-
-# ************************************************************************
 # * Register a Matrix game
 # ************************************************************************
 
-def r(id, gameclass, short_name):
+def r(id, short_name, width):
     name = short_name
-    ncards = int(name[:2]) * int(name[:2])
+    ncards = width ** 2
     gi = GameInfo(
-        id, gameclass, name,
+        id, Matrix, name,
         GI.GT_MATRIX, 1, 0, GI.SL_SKILL,
         category=GI.GC_TRUMP_ONLY, short_name=short_name,
         suits=(), ranks=(), trumps=list(range(ncards)),
@@ -252,14 +227,14 @@ def r(id, gameclass, short_name):
     return gi
 
 
-r(22223, Matrix3, " 3x3 Matrix")
-r(22224, Matrix4, " 4x4 Matrix")
-r(22225, Matrix5, " 5x5 Matrix")
-r(22226, Matrix6, " 6x6 Matrix")
-r(22227, Matrix7, " 7x7 Matrix")
-r(22228, Matrix8, " 8x8 Matrix")
-r(22229, Matrix9, " 9x9 Matrix")
-r(22230, Matrix10, "10x10 Matrix")
-# r(22240, Matrix20, "20x20 Matrix")
+r(22223, "Matrix 3x3", 3)
+r(22224, "Matrix 4x4", 4)
+r(22225, "Matrix 5x5", 5)
+r(22226, "Matrix 6x6", 6)
+r(22227, "Matrix 7x7", 7)
+r(22228, "Matrix 8x8", 8)
+r(22229, "Matrix 9x9", 9)
+r(22230, "Matrix 10x10", 10)
+# r(22240, "Matrix 20x20", 20)
 
 del r

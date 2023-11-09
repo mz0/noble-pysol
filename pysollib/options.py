@@ -28,10 +28,11 @@ import traceback
 import configobj
 
 import pysollib.settings
-from pysollib.mfxutil import print_err
+from pysollib.mfxutil import USE_PIL,\
+    get_default_resampling, print_err
 from pysollib.mygettext import _
 from pysollib.mygettext import myGettext
-from pysollib.pysoltk import TOOLBAR_BUTTONS, TOOLKIT
+from pysollib.pysoltk import STATUSBAR_ITEMS, TOOLBAR_BUTTONS, TOOLKIT
 from pysollib.resource import CSI
 
 
@@ -43,9 +44,25 @@ import validate
 # * Options
 # ************************************************************************
 
+_global_settings = {
+    'mouse_button1': 1,
+    'mouse_button2': 2,
+    'mouse_button3': 3,
+}
+
+
+def calcCustomMouseButtonsBinding(binding_format):
+    assert _global_settings['mouse_button1']
+    return binding_format.format(
+        mouse_button1=_global_settings['mouse_button1'],
+        mouse_button2=_global_settings['mouse_button2'],
+        mouse_button3=_global_settings['mouse_button3'],
+    )
+
 
 configspec = '''
 [general]
+last_version = list
 player = string
 confirm = boolean
 update_player_stats = boolean
@@ -57,10 +74,13 @@ shuffle = boolean
 undo = boolean
 bookmarks = boolean
 hint = boolean
+free_hint = boolean
 highlight_piles = boolean
 highlight_cards = boolean
 highlight_samerank = boolean
 highlight_not_matching = boolean
+peek_facedown = boolean
+stuck_notification = boolean
 mahjongg_show_removed = boolean
 mahjongg_create_solvable = integer(0, 2)
 shisen_show_hint = boolean
@@ -81,22 +101,19 @@ toolbar = integer(0, 4)
 toolbar_style = string
 toolbar_relief = string
 toolbar_compound = string
-toolbar_size = integer(0, 1)
+toolbar_size = integer(0, 2)
 statusbar = boolean
-statusbar_game_number = boolean
-statusbar_stuck = boolean
-num_cards = boolean
-helpbar = boolean
 num_recent_games = integer(10, 100)
 last_gameid = integer
 game_holded = integer
 wm_maximized = boolean
 splashscreen = boolean
+date_format = string
 mouse_type = string
 mouse_undo = boolean
 negative_bottom = boolean
 randomize_place = boolean
-save_cardsets = boolean
+use_cardset_bottoms = boolean
 dragcursor = boolean
 save_games_geometry = boolean
 game_geometry = int_list(min=2, max=2)
@@ -104,10 +121,14 @@ sound = boolean
 sound_mode = integer(0, 1)
 sound_sample_volume = integer(0, 128)
 sound_sample_buffer_size = integer(1, 4)
+music = boolean
 tabletile_name = string
+tabletile_scale_method = integer
+center_layout = boolean
 recent_gameid = int_list
 favorite_gameid = int_list
 visible_buttons = string_list
+visible_status = string_list
 translate_game_names = boolean
 solver_presets = string_list
 solver_show_progress = boolean
@@ -138,6 +159,7 @@ gamewon = boolean
 droppair = boolean
 redo = boolean
 dealwaste = boolean
+extra = boolean
 
 [fonts]
 sans = list
@@ -178,16 +200,20 @@ highlight_piles = float(0.2, 9.9)
 7 = string_list(min=2, max=2)
 8 = string_list(min=2, max=2)
 9 = string_list(min=2, max=2)
+10 = string_list(min=2, max=2)
 scale_cards = boolean
 scale_x = float
 scale_y = float
 auto_scale = boolean
+spread_stacks = boolean
 preserve_aspect_ratio = boolean
+resampling = integer(0, 10)
 '''.splitlines()
 
 
 class Options:
     GENERAL_OPTIONS = [
+        ('last_version', 'list'),
         ('player', 'str'),
         ('confirm', 'bool'),
         ('update_player_stats', 'bool'),
@@ -199,14 +225,19 @@ class Options:
         ('undo', 'bool'),
         ('bookmarks', 'bool'),
         ('hint', 'bool'),
+        ('free_hint', 'bool'),
         ('highlight_piles', 'bool'),
         ('highlight_cards', 'bool'),
         ('highlight_samerank', 'bool'),
         ('highlight_not_matching', 'bool'),
+        ('peek_facedown', 'bool'),
+        ('stuck_notification', 'bool'),
         ('mahjongg_show_removed', 'bool'),
         ('mahjongg_create_solvable', 'int'),
         ('shisen_show_hint', 'bool'),
         ('shisen_show_matching', 'bool'),
+        ('accordion_deal_all', 'bool'),
+        ('pegged_auto_remove', 'bool'),
         ('animations', 'int'),
         ('redeal_animation', 'bool'),
         ('win_animation', 'bool'),
@@ -225,20 +256,22 @@ class Options:
         ('toolbar_compound', 'str'),
         ('toolbar_size', 'int'),
         ('statusbar', 'bool'),
-        ('statusbar_game_number', 'bool'),
-        ('statusbar_stuck', 'bool'),
-        ('num_cards', 'bool'),
-        ('helpbar', 'bool'),
+        # ('statusbar_game_number', 'bool'),
+        # ('statusbar_stuck', 'bool'),
+        # ('num_cards', 'bool'),
+        # ('helpbar', 'bool'),
         ('num_recent_games', 'int'),
         ('last_gameid', 'int'),
         ('game_holded', 'int'),
         ('wm_maximized', 'bool'),
         ('splashscreen', 'bool'),
+        ('date_format', 'str'),
         ('mouse_type', 'str'),
         ('mouse_undo', 'bool'),
         ('negative_bottom', 'bool'),
         ('randomize_place', 'bool'),
-        ('save_cardsets', 'bool'),
+        ('use_cardset_bottoms', 'bool'),
+        # ('save_cardsets', 'bool'),
         ('dragcursor', 'bool'),
         ('save_games_geometry', 'bool'),
         ('sound', 'bool'),
@@ -246,13 +279,19 @@ class Options:
         ('sound_sample_volume', 'int'),
         ('sound_music_volume', 'int'),
         ('sound_sample_buffer_size', 'int'),
+        ('music', 'bool'),
         ('tabletile_name', 'str'),
+        ('tabletile_scale_method', 'int'),
+        ('center_layout', 'bool'),
         ('translate_game_names', 'bool'),
         ('solver_presets', 'list'),
         ('solver_show_progress', 'bool'),
         ('solver_max_iterations', 'int'),
         ('solver_iterations_output_step', 'int'),
         ('solver_preset', 'string'),
+        ('mouse_button1', 'int'),
+        ('mouse_button2', 'int'),
+        ('mouse_button3', 'int'),
         # ('toolbar_vars', 'list'),
         # ('recent_gameid', 'list'),
         # ('favorite_gameid', 'list'),
@@ -266,6 +305,8 @@ class Options:
 
         self.version_tuple = pysollib.settings.VERSION_TUPLE  # XXX
         self.saved = 0                  # XXX
+
+        self.last_version = (2, 20, 1)
         # options menu:
         self.player = _("Unknown")
         self.confirm = True
@@ -278,12 +319,17 @@ class Options:
         self.undo = True
         self.bookmarks = True
         self.hint = True
+        self.free_hint = False
         self.highlight_piles = True
         self.highlight_cards = True
         self.highlight_samerank = True
         self.highlight_not_matching = True
+        self.peek_facedown = False
+        self.stuck_notification = False
         self.mahjongg_show_removed = False
         self.mahjongg_create_solvable = 2  # 0 - none, 1 - easy, 2 - hard
+        self.accordion_deal_all = True
+        self.pegged_auto_remove = True
         if TOOLKIT == 'kivy':
             self.mahjongg_create_solvable = 1  # 0 - none, 1 - easy, 2 - hard
         self.shisen_show_hint = True
@@ -307,19 +353,26 @@ class Options:
         # self.toolbar_style = 'default'
         if TOOLKIT == 'kivy':
             self.toolbar = 4  # 0 == hide, 1,2,3,4 == top, bottom, lef, right
-        self.toolbar_style = 'bluecurve'
+        self.toolbar_style = 'remix'
         self.toolbar_relief = 'flat'
         self.toolbar_compound = 'none'  # icons only
         self.toolbar_size = 0
         self.toolbar_vars = {}
         for w in TOOLBAR_BUTTONS:
             self.toolbar_vars[w] = True  # show all buttons
+        self.statusbar_vars = {}
+        for w, x in STATUSBAR_ITEMS:
+            self.statusbar_vars[w] = True
         self.statusbar = True
-        self.statusbar_game_number = False  # show game number in statusbar
-        self.statusbar_stuck = False        # show stuck indicator
-        self.num_cards = False
-        self.helpbar = False
+        # self.statusbar_game_number = False  # show game number in statusbar
+        # self.statusbar_stuck = False        # show stuck indicator
+        # self.num_cards = False
+        # self.helpbar = False
         self.splashscreen = True
+        self.date_format = '%m-%d'
+        self.mouse_button1 = 1
+        self.mouse_button2 = 2
+        self.mouse_button3 = 3
         self.mouse_type = 'drag-n-drop'  # or 'sticky-mouse' or 'point-n-click'
         self.mouse_undo = False         # use mouse for undo/redo
         self.negative_bottom = True
@@ -332,6 +385,7 @@ class Options:
         self.sound_sample_volume = 75
         self.sound_music_volume = 100
         self.sound_sample_buffer_size = 1  # 1 - 4 (1024 - 4096 bytes)
+        self.music = True
         self.sound_samples = {
             'areyousure': True,
             'autodrop': True,
@@ -342,7 +396,7 @@ class Options:
             'dealwaste': True,
             'droppair': True,
             'drop': True,
-            # 'extra': True,
+            'extra': True,
             'flip': True,
             'move': True,
             'nomove': True,
@@ -399,7 +453,7 @@ class Options:
                                     11004, 14405, 14410, 15411, 22225]
         self.last_gameid = 0            # last game played
         self.game_holded = 0            # gameid or 0
-        self.wm_maximized = 0
+        self.wm_maximized = 1
         self.save_games_geometry = False
         # saved games geometry (gameid: (width, height))
         self.games_geometry = {}
@@ -407,14 +461,22 @@ class Options:
         self.offsets = {}           # cards offsets
         #
         self.randomize_place = False
-        self.save_cardsets = True
+        self.use_cardset_bottoms = False
+        # self.save_cardsets = True
         self.dragcursor = True
         #
         self.scale_cards = False
         self.scale_x = 1.0
         self.scale_y = 1.0
-        self.auto_scale = False
+        self.auto_scale = True
+        self.spread_stacks = False
+        self.center_layout = True
         self.preserve_aspect_ratio = True
+        self.tabletile_scale_method = 0
+        self.resampling = 0
+        if USE_PIL:
+            self.resampling = int(get_default_resampling())
+
         # solver
         self.solver_presets = [
             'none',
@@ -470,7 +532,7 @@ class Options:
                           top.winfo_screendepth())
         # bg
         if sd > 8:
-            self.tabletile_name = "Nostalgy.gif"  # basename
+            self.tabletile_name = "Felt_Green.gif"  # basename
         else:
             self.tabletile_name = None
         # cardsets
@@ -482,20 +544,37 @@ class Options:
 
         # if sw > 1024 and sh > 768:
         #    c = 'Dondorf'
-        self.cardset = {
-            # game_type:        (cardset_name, back_file)
-            0:                  (c, ""),
-            CSI.TYPE_FRENCH:    (c, ""),
-            CSI.TYPE_HANAFUDA:  ("Kintengu", ""),
-            CSI.TYPE_MAHJONGG:  ("Crystal Mahjongg", ""),
-            CSI.TYPE_TAROCK:    ("Vienna 2K", ""),
-            CSI.TYPE_HEXADECK:  ("Hex A Deck", ""),
-            CSI.TYPE_MUGHAL_GANJIFA: ("Mughal Ganjifa", ""),
-            # CSI.TYPE_NAVAGRAHA_GANJIFA: ("Navagraha Ganjifa", ""),
-            CSI.TYPE_NAVAGRAHA_GANJIFA: ("Dashavatara Ganjifa", ""),
-            CSI.TYPE_DASHAVATARA_GANJIFA: ("Dashavatara Ganjifa", ""),
-            CSI.TYPE_TRUMP_ONLY: ("Matrix", ""),
-        }
+        if USE_PIL:
+            self.cardset = {
+                0:                  ("Neo", ""),
+                CSI.TYPE_FRENCH:    ("Neo", ""),
+                CSI.TYPE_HANAFUDA:  ("Louie Mantia Hanafuda", ""),
+                CSI.TYPE_MAHJONGG:  ("Uni Mahjongg", ""),
+                CSI.TYPE_TAROCK:    ("Neo Tarock", ""),
+                CSI.TYPE_HEXADECK:  ("Neo Hex", ""),
+                CSI.TYPE_MUGHAL_GANJIFA: ("Mughal Ganjifa XL", ""),
+                # CSI.TYPE_NAVAGRAHA_GANJIFA: ("Navagraha Ganjifa", ""),
+                CSI.TYPE_NAVAGRAHA_GANJIFA: ("Dashavatara Ganjifa XL", ""),
+                CSI.TYPE_DASHAVATARA_GANJIFA: ("Dashavatara Ganjifa XL", ""),
+                CSI.TYPE_TRUMP_ONLY: ("Next Matrix", ""),
+                CSI.TYPE_MATCHING: ("Neo", "")
+            }
+        else:
+            self.cardset = {
+                # game_type:        (cardset_name, back_file)
+                0:                  (c, ""),
+                CSI.TYPE_FRENCH:    (c, ""),
+                CSI.TYPE_HANAFUDA:  ("Kintengu", ""),
+                CSI.TYPE_MAHJONGG:  ("Crystal Mahjongg", ""),
+                CSI.TYPE_TAROCK:    ("Vienna 2K", ""),
+                CSI.TYPE_HEXADECK:  ("Hex A Deck", ""),
+                CSI.TYPE_MUGHAL_GANJIFA: ("Mughal Ganjifa", ""),
+                # CSI.TYPE_NAVAGRAHA_GANJIFA: ("Navagraha Ganjifa", ""),
+                CSI.TYPE_NAVAGRAHA_GANJIFA: ("Dashavatara Ganjifa", ""),
+                CSI.TYPE_DASHAVATARA_GANJIFA: ("Dashavatara Ganjifa", ""),
+                CSI.TYPE_TRUMP_ONLY: ("Matrix", ""),
+                CSI.TYPE_MATCHING: (c, ""),
+            }
 
     # not changeable options
     def setConstants(self):
@@ -516,6 +595,8 @@ class Options:
     def save(self, filename):
         config = self._config
 
+        self.last_version = self.version_tuple
+
         # general
         for key, t in self.GENERAL_OPTIONS:
             val = getattr(self, key)
@@ -529,6 +610,9 @@ class Options:
         visible_buttons = [b for b in self.toolbar_vars
                            if self.toolbar_vars[b]]
         config['general']['visible_buttons'] = visible_buttons
+        visible_status = [b for b in self.statusbar_vars
+                          if self.statusbar_vars[b]]
+        config['general']['visible_status'] = visible_status
         if 'none' in config['general']['solver_presets']:
             config['general']['solver_presets'].remove('none')
 
@@ -553,7 +637,8 @@ class Options:
         for key, val in self.cardset.items():
             config['cardsets'][str(key)] = val
         for key in ('scale_cards', 'scale_x', 'scale_y',
-                    'auto_scale', 'preserve_aspect_ratio'):
+                    'auto_scale', 'spread_stacks',
+                    'preserve_aspect_ratio', 'resampling'):
             config['cardsets'][key] = getattr(self, key)
 
         # games_geometry
@@ -631,7 +716,7 @@ class Options:
         vdt = validate.Validator()
         res = config.validate(vdt)
         # from pprint import pprint; pprint(res)
-        if res is not True:
+        if isinstance(res, dict):
             for section, data in res.items():
                 if data is True:
                     continue
@@ -669,6 +754,10 @@ class Options:
         if visible_buttons is not None:
             for key in TOOLBAR_BUTTONS:
                 self.toolbar_vars[key] = (key in visible_buttons)
+        visible_status = self._getOption('general', 'visible_status', 'list')
+        if visible_status is not None:
+            for key, label in STATUSBAR_ITEMS:
+                self.statusbar_vars[key] = (key in visible_status)
 
         myGettext.language = self.language
 
@@ -723,7 +812,9 @@ class Options:
                        ('scale_x', 'float'),
                        ('scale_y', 'float'),
                        ('auto_scale', 'bool'),
-                       ('preserve_aspect_ratio', 'bool')):
+                       ('spread_stacks', 'bool'),
+                       ('preserve_aspect_ratio', 'bool'),
+                       ('resampling', 'int')):
             val = self._getOption('cardsets', key, t)
             if val is not None:
                 setattr(self, key, val)
@@ -751,3 +842,20 @@ class Options:
                 self.offsets[key] = val
             except Exception:
                 traceback.print_exc()
+
+        # mouse buttons swap
+        def _positive(button):
+            return max([button, 1])
+        _global_settings['mouse_button1'] = _positive(self.mouse_button1)
+        _global_settings['mouse_button2'] = _positive(self.mouse_button2)
+        _global_settings['mouse_button3'] = _positive(self.mouse_button3)
+
+    def calcCustomMouseButtonsBinding(self, binding_format):
+        """docstring for calcCustomMouseButtonsBinding"""
+        def _positive(button):
+            return max([button, 1])
+        return binding_format.format(
+            mouse_button1=_positive(self.mouse_button1),
+            mouse_button2=_positive(self.mouse_button2),
+            mouse_button3=_positive(self.mouse_button3),
+        )

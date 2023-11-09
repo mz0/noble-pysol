@@ -27,9 +27,9 @@ import os
 from pysollib.gamedb import GI
 from pysollib.help import help_about, help_html
 from pysollib.mfxutil import Struct, openURL
-from pysollib.mfxutil import print_err
+from pysollib.mfxutil import USE_PIL, print_err
 from pysollib.mygettext import _
-from pysollib.pysolrandom import constructRandom
+from pysollib.pysolrandom import construct_random
 from pysollib.pysoltk import AllGames_StatsDialog, SingleGame_StatsDialog
 from pysollib.pysoltk import ColorsDialog
 from pysollib.pysoltk import EditTextDialog
@@ -65,6 +65,10 @@ class PysolMenubar(PysolMenubarTk):
             save=0,
             save_as=0,
             hold_and_quit=0,
+            rndplayed=0,
+            rndwon=0,
+            rndnotwon=0,
+            rndnotplayed=0,
             undo=0,
             redo=0,
             restart=0,
@@ -77,6 +81,7 @@ class PysolMenubar(PysolMenubarTk):
             quickplay=0,
             demo=0,
             highlight_piles=0,
+            autoscale=0,
             find_card=0,
             rules=0,
             pause=0,
@@ -122,6 +127,10 @@ class PysolMenubar(PysolMenubarTk):
         opt = self.app.opt
         ms = self.menustate
         # 0 = DISABLED, 1 = ENABLED
+        ms.rndplayed = len(self._mGetPossibleRandomGames("played")) > 0
+        ms.rndwon = len(self._mGetPossibleRandomGames("won")) > 0
+        ms.rndnotwon = len(self._mGetPossibleRandomGames("not won")) > 0
+        ms.rndnotplayed = len(self._mGetPossibleRandomGames("not played")) > 0
         ms.save_as = game.canSaveGame()
         ms.hold_and_quit = ms.save_as
         if game.filename and ms.save_as:
@@ -151,6 +160,8 @@ class PysolMenubar(PysolMenubarTk):
             ms.quickplay = 1
         if opt.highlight_piles and game.getHighlightPilesStacks():
             ms.highlight_piles = 1
+        if opt.auto_scale:
+            ms.autoscale = 1
         if game.canFindCard():
             ms.find_card = 1
         if game.app.getGameRulesFilename(game.id):  # note: this may return ""
@@ -171,6 +182,12 @@ class PysolMenubar(PysolMenubarTk):
         # File menu
         self.setMenuState(ms.save, "file.save")
         self.setMenuState(ms.save_as, "file.saveas")
+        self.setMenuState(ms.rndplayed, "file.selectrandomgame.gamesplayed")
+        self.setMenuState(ms.rndwon, "file.selectrandomgame.gamesplayedandwon")
+        self.setMenuState(ms.rndnotwon,
+                          "file.selectrandomgame.gamesplayedandnotwon")
+        self.setMenuState(ms.rndnotplayed,
+                          "file.selectrandomgame.gamesnotplayed")
         self.setMenuState(ms.hold_and_quit, "file.holdandquit")
         # Edit menu
         self.setMenuState(ms.undo, "edit.undo")
@@ -179,6 +196,7 @@ class PysolMenubar(PysolMenubarTk):
         self.updateBookmarkMenuState()
         self.setMenuState(ms.restart, "edit.restart")
         self.setMenuState(ms.custom_game, "edit.editcurrentgame")
+        self.setMenuState(ms.custom_game, "edit.deletecurrentgame")
         # Game menu
         self.setMenuState(ms.deal, "game.dealcards")
         self.setMenuState(ms.autodrop, "game.autodrop")
@@ -195,6 +213,15 @@ class PysolMenubar(PysolMenubarTk):
         self.setMenuState(ms.autodrop, "options.automaticplay.autodrop")
         self.setMenuState(ms.autodeal, "options.automaticplay.autodeal")
         self.setMenuState(ms.quickplay, "options.automaticplay.quickplay")
+        if USE_PIL:
+            self.setMenuState(ms.autoscale,
+                              "options.cardsize.preserveaspectratio")
+            self.setMenuState(not ms.autoscale,
+                              "options.cardsize.increasethecardsize")
+            self.setMenuState(not ms.autoscale,
+                              "options.cardsize.decreasethecardsize")
+            self.setMenuState(not ms.autoscale,
+                              "options.cardsize.resetthecardsize")
         # Help menu
         self.setMenuState(ms.rules, "help.rulesforthisgame")
         # Toolbar
@@ -203,6 +230,7 @@ class PysolMenubar(PysolMenubarTk):
         self.setToolbarState(ms.undo, "undo")
         self.setToolbarState(ms.redo, "redo")
         self.setToolbarState(ms.autodrop, "autodrop")
+        self.setToolbarState(ms.hint, "hint")
         self.setToolbarState(ms.shuffle, "shuffle")
         self.setToolbarState(ms.pause, "pause")
         self.setToolbarState(ms.rules, "rules")
@@ -251,7 +279,7 @@ class PysolMenubar(PysolMenubarTk):
 
     def _mNewGameBySeed(self, seed, origin):
         try:
-            random = constructRandom(seed)
+            random = construct_random(seed)
             if random is None:
                 return
             id = self.game.id
@@ -311,6 +339,14 @@ class PysolMenubar(PysolMenubarTk):
             if not self.game.areYouSure(_("Select random game")):
                 return
         game_id = None
+        games = self._mGetPossibleRandomGames(type)
+        if games:
+            game_id = self.app.chooseRandomOutOfGames(games)
+        if game_id and game_id != self.game.id:
+            self.game.endGame()
+            self.game.quitGame(game_id)
+
+    def _mGetPossibleRandomGames(self, type='all'):
         games = []
         for g in self.app.gdb.getGamesIdSortedById():
             gi = self.app.getGameInfo(g)
@@ -323,17 +359,15 @@ class PysolMenubar(PysolMenubarTk):
             won, lost = self.app.stats.getStats(self.app.opt.player, gi.id)
             if type == 'all':
                 games.append(gi.id)
+            elif type == 'played' and won + lost > 0:
+                games.append(gi.id)
             elif type == 'won' and won > 0:
                 games.append(gi.id)
             elif type == 'not won' and won == 0 and lost > 0:
                 games.append(gi.id)
-            elif type == 'not played' and won+lost == 0:
+            elif type == 'not played' and won + lost == 0:
                 games.append(gi.id)
-        if games:
-            game_id = self.app.chooseRandomOutOfGames(games)
-        if game_id and game_id != self.game.id:
-            self.game.endGame()
-            self.game.quitGame(game_id)
+        return games
 
     def _mSelectNextGameFromList(self, gl, step):
         if self._cancelDrag():
@@ -519,7 +553,8 @@ class PysolMenubar(PysolMenubarTk):
                     text += os.linesep
                 enc = locale.getpreferredencoding()
                 try:
-                    open(fn, 'a').write(text.encode(enc, 'replace'))
+                    with open(fn, 'at') as fh:
+                        fh.write(text.encode(enc, 'replace'))
                 except Exception as err:
                     d = MfxExceptionDialog(
                         self.top, err,
@@ -732,6 +767,7 @@ class PysolMenubar(PysolMenubarTk):
                 self.game.updateStatus(player=self.app.opt.player)
                 self.game.updateStatus(stats=self.app.stats.getStats(
                     self.app.opt.player, self.game.id))
+        self.updateMenus()
 
     def mOptColors(self, *args):
         if self._cancelDrag(break_pause=False):
@@ -805,6 +841,11 @@ class PysolMenubar(PysolMenubarTk):
         # FIXME: plugins
         help_html(self.app, self.app.getGameRulesFilename(self.game.id), dir)
 
+    def mHelpReportBug(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        help_html(self.app, "report_bug.html", "html")
+
     def mHelpLicense(self, *args):
         if self._cancelDrag(break_pause=False):
             return
@@ -847,7 +888,8 @@ class PysolMenubar(PysolMenubarTk):
     def mPlayNextMusic(self, *args):
         if self._cancelDrag(break_pause=False):
             return
-        if self.app.audio and self.app.opt.sound_music_volume > 0:
+        if (self.app.audio and self.app.music and
+                self.app.opt.sound_music_volume > 0):
             self.app.audio.playNextMusic()
             if 1 and DEBUG:
                 index = self.app.audio.getMusicInfo()
@@ -919,6 +961,11 @@ class PysolToolbar(PysolToolbarTk):
     def mShuffle(self, *args):
         if not self._busy():
             self.menubar.mShuffle()
+        return 1
+
+    def mHint(self, *args):
+        if not self._busy():
+            self.menubar.mHint()
         return 1
 
     def mPause(self, *args):

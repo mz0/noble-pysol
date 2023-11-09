@@ -93,7 +93,7 @@ class Montana_Talon(TalonStack):
         # move out-of-sequence cards from the Tableau to the Talon
         stacks = []
         gaps = [None] * 4 * decks
-        for g in range(4*decks):
+        for g in range(4 * decks):
             i = g * RSTEP
             r = rows[i]
             if r.cards and r.cards[-1].rank == RBASE:
@@ -153,10 +153,7 @@ class Montana_RowStack(BasicRowStack):
             return self.quickPlayHandler(event)
         return BasicRowStack.clickHandler(self, event)
 
-    # bottom to get events for an empty stack
-    prepareBottom = Stack.prepareInvisibleBottom
-
-    getBottomImage = Stack._getReserveBottomImage
+    getBottomImage = Stack._getBlankBottomImage
 
 
 class Montana(Game):
@@ -207,12 +204,13 @@ class Montana(Game):
 
     def startGame(self):
         frames = 0
-        for i in range(52):
+        toprows = len(self.s.talon.cards) * .75
+        for i in range(len(self.s.talon.cards)):
             c = self.s.talon.cards[-1]
             if c.rank == ACE:
                 self.s.talon.dealRow(rows=self.s.internals, frames=0)
             else:
-                if frames == 0 and i >= 39:
+                if frames == 0 and i >= toprows:
                     self.startDealSample()
                     frames = 4
                 self.s.talon.dealRow(rows=(self.s.rows[i],), frames=frames)
@@ -265,6 +263,21 @@ class Spaces_Talon(Montana_Talon):
 
 class Spaces(Montana):
     Talon_Class = StackWrapper(Spaces_Talon, max_rounds=3)
+
+
+# ************************************************************************
+# * Station
+# ************************************************************************
+
+class Station_Talon(Montana_Talon):
+    def getRedealSpaces(self, stacks, gaps):
+        # use the last space of each row.
+        return [self.game.s.rows[12], self.game.s.rows[25],
+                self.game.s.rows[38], self.game.s.rows[51]]
+
+
+class Station(Montana):
+    Talon_Class = StackWrapper(Station_Talon, max_rounds=3)
 
 
 # ************************************************************************
@@ -584,9 +597,17 @@ class Spoilt(Game):
 
 # ************************************************************************
 # * Double Montana
+# * Paganini II
+# * Double Blue Moon
+# * Double Red Moon
 # ************************************************************************
 
 class DoubleMontana(Montana):
+    Talon_Class = StackWrapper(Montana_Talon, max_rounds=3)
+    RLEN, RSTEP, RBASE = 104, 13, 1
+
+
+class PaganiniII(DoubleMontana):
     Talon_Class = InitialDealTalonStack
     Hint_Class = Galary_Hint
     RLEN, RSTEP, RBASE = 112, 14, 0
@@ -597,7 +618,7 @@ class DoubleMontana(Montana):
     def startGame(self):
         frames = 0
         for i in range(self.RLEN):
-            if i == self.RLEN-self.RSTEP:  # last row
+            if i == self.RLEN - self.RSTEP:  # last row
                 self.startDealSample()
                 frames = -1
             if i % self.RSTEP == 0:     # left column
@@ -605,7 +626,7 @@ class DoubleMontana(Montana):
             self.s.talon.dealRow(rows=(self.s.rows[i],), frames=frames)
 
 
-class DoubleBlueMoon(DoubleMontana, BlueMoon):
+class DoubleBlueMoon(PaganiniII, BlueMoon):
     Talon_Class = StackWrapper(Montana_Talon, max_rounds=3)
     RLEN, RSTEP, RBASE = 112, 14, 0
 
@@ -614,7 +635,7 @@ class DoubleBlueMoon(DoubleMontana, BlueMoon):
     startGame = BlueMoon.startGame
 
 
-class DoubleRedMoon(DoubleMontana, RedMoon):
+class DoubleRedMoon(PaganiniII, RedMoon):
     Talon_Class = StackWrapper(Montana_Talon, max_rounds=3)
     RLEN, RROWS = 112, 8
     _shuffleHook = RedMoon._shuffleHook
@@ -624,13 +645,35 @@ class DoubleRedMoon(DoubleMontana, RedMoon):
     startGame = RedMoon.startGame
 
 
+# ************************************************************************
+# * House of Commons
+# * Pretzel
+# ************************************************************************
+
+
+class HouseOfCommons(Montana):
+    Talon_Class = StackWrapper(Montana_Talon, max_rounds=2)
+    RLEN, RSTEP, RBASE = 40, 10, 1
+
+    def createGame(self):
+        Montana.createGame(self, round_text=True)
+
+
+class Pretzel(Montana):
+    Talon_Class = InitialDealTalonStack
+    RLEN, RSTEP, RBASE = 20, 5, 1
+
+    def createGame(self):
+        Montana.createGame(self, round_text=False)
+
+
 # register the game
 registerGame(GameInfo(53, Montana, "Montana",
                       GI.GT_MONTANA | GI.GT_OPEN, 1, 2, GI.SL_MOSTLY_SKILL,
-                      si={"ncards": 48}, altnames="Gaps"))
+                      si={"ncards": 48}, altnames=("Gaps", "Vacancies")))
 registerGame(GameInfo(116, Spaces, "Spaces",
                       GI.GT_MONTANA | GI.GT_OPEN, 1, 2, GI.SL_MOSTLY_SKILL,
-                      si={"ncards": 48}))
+                      si={"ncards": 48}, altnames="Addiction"))
 registerGame(GameInfo(63, BlueMoon, "Blue Moon",
                       GI.GT_MONTANA | GI.GT_OPEN, 1, 2, GI.SL_MOSTLY_SKILL,
                       altnames=("Rangoon",)))
@@ -640,24 +683,36 @@ registerGame(GameInfo(275, Galary, "Galary",
                       GI.GT_MONTANA | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 2,
                       GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(276, Moonlight, "Moonlight",
-                      GI.GT_MONTANA | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 2,
-                      GI.SL_MOSTLY_SKILL,
-                      si={"ncards": 48}))
+                      GI.GT_MONTANA | GI.GT_OPEN, 1, 2, GI.SL_MOSTLY_SKILL,
+                      si={"ncards": 48}, altnames="Free Parking"))
 registerGame(GameInfo(380, Jungle, "Jungle",
                       GI.GT_MONTANA | GI.GT_OPEN, 1, 1, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(381, SpacesAndAces, "Spaces and Aces",
                       GI.GT_MONTANA | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(706, Paganini, "Paganini",
-                      GI.GT_MONTANA | GI.GT_OPEN, 1, 1, GI.SL_MOSTLY_SKILL,
-                      ranks=(0, 5, 6, 7, 8, 9, 10, 11, 12),
+                      GI.GT_MONTANA | GI.GT_OPEN | GI.GT_STRIPPED, 1, 1,
+                      GI.SL_MOSTLY_SKILL, ranks=(0, 5, 6, 7, 8, 9, 10, 11, 12),
                       altnames=('Long Trip',)))
 registerGame(GameInfo(736, Spoilt, "Spoilt",
-                      GI.GT_MONTANA, 1, 0, GI.SL_MOSTLY_LUCK,
-                      ranks=(0, 6, 7, 8, 9, 10, 11, 12),
-                      ))
-registerGame(GameInfo(759, DoubleMontana, "Double Montana",
+                      GI.GT_MONTANA | GI.GT_STRIPPED, 1, 0, GI.SL_MOSTLY_LUCK,
+                      ranks=(0, 6, 7, 8, 9, 10, 11, 12)))
+registerGame(GameInfo(759, PaganiniII, "Paganini II",
                       GI.GT_MONTANA | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(770, DoubleBlueMoon, "Double Blue Moon",
                       GI.GT_MONTANA | GI.GT_OPEN, 2, 2, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(771, DoubleRedMoon, "Double Red Moon",
                       GI.GT_MONTANA | GI.GT_OPEN, 2, 2, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(794, HouseOfCommons, "House of Commons",
+                      GI.GT_MONTANA | GI.GT_OPEN | GI.GT_STRIPPED, 1, 1,
+                      GI.SL_MOSTLY_SKILL, ranks=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
+                      si={"ncards": 36}))
+registerGame(GameInfo(795, Pretzel, "Pretzel",
+                      GI.GT_MONTANA | GI.GT_OPEN | GI.GT_STRIPPED, 1, 0,
+                      GI.SL_MOSTLY_SKILL, ranks=(0, 1, 2, 3, 4),
+                      si={"ncards": 16}))
+registerGame(GameInfo(858, Station, "Station",
+                      GI.GT_MONTANA | GI.GT_OPEN, 1, 2, GI.SL_MOSTLY_SKILL,
+                      si={"ncards": 48}))
+registerGame(GameInfo(877, DoubleMontana, "Double Montana",
+                      GI.GT_MONTANA | GI.GT_OPEN, 2, 2, GI.SL_MOSTLY_SKILL,
+                      si={"ncards": 96}))

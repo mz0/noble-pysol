@@ -8,9 +8,6 @@ from pysollib.settings import VERSION
 
 from setuptools import setup
 
-if os.name == 'nt':
-    import py2exe  # noqa: F401
-
 
 def get_data_files(source, destination):
     """Iterates over all files under the given tree, to install them to the
@@ -75,7 +72,7 @@ kw = {
     'author_email': 'skomoroh@gmail.com',
     'description': 'a Python solitaire game collection',
     'install_requires': [
-        'attrs',
+        'attrs>=18.2.0',
         'configobj',
         'pycotap',
         'pysol_cards',
@@ -86,7 +83,6 @@ kw = {
     'license': 'GPL',
     'scripts': ['pysol.py'],
     'packages': ['pysollib',
-                 'pysollib.macosx',
                  'pysollib.winsystems',
                  'pysollib.tk',
                  'pysollib.tile',
@@ -103,8 +99,6 @@ kw = {
     }
 
 if os.name == 'nt':
-    kw['windows'] = [{'script': 'pysol.py',
-                      'icon_resources': [(1, 'data/pysol.ico')], }]
     kw['packages'].remove('pysollib.pysolgtk')
 
 setup(**kw)

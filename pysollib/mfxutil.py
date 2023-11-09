@@ -34,12 +34,13 @@ from pysollib.settings import PACKAGE, TOOLKIT
 import six
 from six import print_
 
-Image = ImageTk = ImageOps = None
+Image = ImageTk = ImageOps = ImageDraw = None
 if TOOLKIT == 'tk':
     try:  # PIL
         from PIL import Image
         from PIL import ImageTk  # noqa: F401
         from PIL import ImageOps  # noqa: F401
+        from PIL import ImageDraw  # noqa: F401
     except ImportError:
         Image = None
     else:
@@ -87,7 +88,13 @@ def latin1_to_ascii(n):
 
 
 def latin1_normalize(n):
-    return re.sub(r"[^\w]", "", latin1_to_ascii(n).lower())
+    normal = re.sub(r"[^\w]", "", latin1_to_ascii(n).lower())
+    # Some game names end in a +, and would have the same normalized
+    # name as their counterpart.  This is a failsafe to avoid duplicate
+    # name conflicts.  Though there is probably a better way to do this.
+    if n.endswith("+"):
+        normal += "plus"
+    return normal
 
 
 def format_time(t):
@@ -97,6 +104,17 @@ def format_time(t):
     if t < 3600:
         return "%d:%02d" % (t // 60, t % 60)
     return "%d:%02d:%02d" % (t // 3600, (t % 3600) // 60, t % 60)
+
+
+def get_default_resampling():
+    if not USE_PIL:
+        return 0
+    elif hasattr(Image, "ANTIALIAS"):
+        return Image.ANTIALIAS
+    elif hasattr(Image, "LANCZOS"):
+        return Image.LANCZOS
+    else:
+        return Image.NEAREST
 
 
 def print_err(s, level=1):
@@ -132,7 +150,13 @@ def getprefdir(package):
         from pysollib.kivy.LApp import get_platform
         plat = get_platform()
         if plat == 'android':
-            os.environ['HOME'] = '/sdcard'
+            from pysollib.kivy.androidperms import getStoragePerm
+            from android.storage import primary_external_storage_path
+            from android.storage import app_storage_path
+            if getStoragePerm():
+                os.environ['HOME'] = primary_external_storage_path()
+            else:
+                os.environ['HOME'] = app_storage_path()
 
     if os.name == "nt":
         return win32_getprefdir(package)
@@ -285,30 +309,23 @@ class KwStruct:
 # ************************************************************************
 
 def pickle(obj, filename, protocol=0):
-    f = None
     try:
-        f = open(filename, "wb")
-        Pickler(f, protocol).dump(obj)
-        f.close()
-        f = None
+        with open(filename, "wb") as fh:
+            Pickler(fh, protocol).dump(obj)
         # print "Pickled", filename
     finally:
-        if f:
-            f.close()
+        pass
 
 
 def unpickle(filename):
-    f, obj = None, None
+    obj = None
     try:
-        f = open(filename, "rb")
-        x = Unpickler(f).load()
-        f.close()
-        f = None
+        with open(filename, "rb") as fh:
+            x = Unpickler(fh).load()
         obj = x
         # print "Unpickled", filename
     finally:
-        if f:
-            f.close()
+        pass
     return obj
 
 

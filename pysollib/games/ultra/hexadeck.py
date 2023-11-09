@@ -26,6 +26,7 @@ import math
 
 from pysollib.game import Game
 from pysollib.gamedb import GI, GameInfo, registerGame
+from pysollib.games.montana import Montana, Montana_RowStack
 from pysollib.hint import CautiousDefaultHint, DefaultHint
 from pysollib.layout import Layout
 from pysollib.mfxutil import kwdefault
@@ -34,13 +35,15 @@ from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import \
         AC_RowStack, \
         AbstractFoundationStack, \
+        BasicRowStack, \
         InitialDealTalonStack, \
         OpenStack, \
         ReserveStack, \
         SS_FoundationStack, \
         StackWrapper, \
         WasteStack, \
-        WasteTalonStack
+        WasteTalonStack, \
+        Yukon_AC_RowStack
 from pysollib.util import ANY_RANK, ANY_SUIT, NO_RANK, UNLIMITED_ACCEPTS, \
         UNLIMITED_MOVES
 
@@ -1438,6 +1441,170 @@ class Snakestone(Convolution):
 # *
 # ************************************************************************
 
+
+class HexYukon_RowStack(Yukon_AC_RowStack):
+
+    def canMoveCards(self, cards):
+        if len(cards) > 1:
+            for card in cards:
+                if card.suit == 4:
+                    return False
+        return Yukon_AC_RowStack.canMoveCards(self, cards)
+
+    def acceptsCards(self, from_stack, cards):
+        if not self.basicAcceptsCards(from_stack, cards):
+            return 0
+        stackcards = self.cards
+        if stackcards:
+            if (stackcards[-1].suit == 4 or cards[0].suit == 4):
+                return 1
+        return Yukon_AC_RowStack.acceptsCards(self, from_stack, cards)
+
+
+class HexYukon(Game):
+    Layout_Method = staticmethod(Layout.yukonLayout)
+    Talon_Class = InitialDealTalonStack
+    Foundation_Class = HexADeck_FoundationStack
+    RowStack_Class = StackWrapper(HexYukon_RowStack, base_rank=15)
+
+    def createGame(self, **layout):
+        # create layout
+        l, s = Layout(self), self.s
+        kwdefault(layout, rows=8, texts=0, playcards=25)
+        self.Layout_Method(l, **layout)
+        self.setSize(l.size[0], l.size[1])
+        # create stacks
+        s.talon = self.Talon_Class(l.s.talon.x, l.s.talon.y, self)
+        for r in l.s.foundations:
+            s.foundations.append(
+                self.Foundation_Class(
+                    r.x, r.y, self,
+                    r.suit, mod=16, max_cards=16, max_move=1))
+        for r in l.s.rows:
+            s.rows.append(self.RowStack_Class(r.x, r.y, self))
+        # default
+        l.defaultAll()
+        return l
+
+    def startGame(self):
+        for i in range(1, len(self.s.rows)):
+            self.s.talon.dealRow(rows=self.s.rows[i:], flip=0, frames=0)
+        for i in range(4):
+            self.s.talon.dealRow(rows=self.s.rows[0:], flip=1, frames=0)
+        self._startAndDealRow()
+
+    def getHighlightPilesStacks(self):
+        return ()
+
+    shallHighlightMatch = Game._shallHighlightMatch_AC
+
+
+# ************************************************************************
+# *
+# ************************************************************************
+
+
+class MagicMontana_RowStack(Montana_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not BasicRowStack.acceptsCards(self, from_stack, cards):
+            return False
+
+        if self.id % self.game.RSTEP == 0:
+            return cards[0].rank == self.game.RBASE
+
+        left = self.game.s.rows[self.id - 1]
+        if left.cards:
+            if left.cards[-1].suit == 4:
+                return False
+            if cards[0].suit == 4:
+                return True
+
+        return left.cards and left.cards[-1].suit == cards[0].suit \
+            and left.cards[-1].rank + 1 == cards[0].rank
+
+
+class MagicMontana_Hint(DefaultHint):
+    def computeHints(self):
+        game = self.game
+        RSTEP, RBASE = game.RSTEP, game.RBASE
+        freerows = [s for s in game.s.rows if not s.cards]
+        # for each stack
+        for r in game.s.rows:
+            if not r.cards:
+                continue
+            assert len(r.cards) == 1 and r.cards[-1].face_up
+            c, pile, rpile = r.cards[0], r.cards, []
+            if r.id % RSTEP > 0:
+                left = game.s.rows[r.id - 1]
+            else:
+                left = None
+                if c.rank == RBASE:
+                    # do not move the leftmost card of a row if the
+                    # rank is correct
+                    continue
+            for t in freerows:
+                if self.shallMovePile(r, t, pile, rpile):
+                    # FIXME: this scoring is completely simple
+                    if left and left.cards:
+                        # prefer low-rank left neighbours
+                        score = 40000 + (self.K - left.cards[-1].rank)
+                    else:
+                        score = 50000
+
+                    # Deprioritize moving wizards, unless the next card
+                    # is a 10.  This will prevent an endless loop in the
+                    # demo, but more advanced logic can probably use the
+                    # wizards more strategically.
+                    if r.cards[-1].suit == 4:
+                        if t.id % RSTEP > 0:
+                            leftt = game.s.rows[t.id - 1]
+
+                            if leftt.cards[-1].rank < 15:
+                                score -= 30000
+                        else:
+                            continue
+
+                    self.addHint(score, 1, r, t)
+
+
+class MagicMontana(Montana):
+    RowStack_Class = MagicMontana_RowStack
+    Hint_Class = MagicMontana_Hint
+
+    RLEN, RSTEP, RBASE = 72, 18, 0
+
+    def startGame(self):
+        frames = 0
+        for i in range(self.RLEN):
+            if i == self.RLEN-self.RSTEP:  # last row
+                self.startDealSample()
+                frames = -1
+            if i % self.RSTEP == 0:     # left column
+                continue
+            self.s.talon.dealRow(rows=(self.s.rows[i],), frames=frames)
+
+    def isGameWon(self):
+        rows = self.s.rows
+        for i in range(0, self.RLEN, self.RSTEP):
+            if not rows[i].cards:
+                return False
+            suit = rows[i].cards[-1].suit
+            for j in range(self.RSTEP - 2):
+                r = rows[i + j]
+                if not r.cards or r.cards[-1].rank != self.RBASE + j \
+                        or r.cards[-1].suit != suit:
+                    return False
+            w = rows[i + self.RSTEP - 2]
+            if not w.cards or w.cards[-1].suit != 4:
+                return False
+        return True
+
+
+# ************************************************************************
+# *
+# ************************************************************************
+
+
 def r(id, gameclass, name, game_type, decks, redeals, skill_level):
     game_type = game_type | GI.GT_HEXADECK
     gi = GameInfo(id, gameclass, name, game_type, decks, redeals, skill_level,
@@ -1467,9 +1634,15 @@ r(16675, CluitjarsLair, 'Cluitjar\'s Lair', GI.GT_HEXADECK, 1, 0,
   GI.SL_BALANCED)
 r(16676, MerlinsMeander, 'Merlin\'s Meander', GI.GT_HEXADECK, 2, 2,
   GI.SL_BALANCED)
-r(16677, MagesGame, 'Mage\'s Game', GI.GT_HEXADECK, 1, 0, GI.SL_BALANCED)
-r(16678, Convolution, 'Convolution', GI.GT_HEXADECK, 2, 0, GI.SL_MOSTLY_SKILL)
-r(16679, Labyrinth, 'Hex Labyrinth', GI.GT_HEXADECK, 2, 0, GI.SL_MOSTLY_SKILL)
-r(16680, Snakestone, 'Snakestone', GI.GT_HEXADECK, 2, 0, GI.SL_MOSTLY_SKILL)
-
+r(16677, MagesGame, 'Mage\'s Game', GI.GT_HEXADECK | GI.GT_OPEN, 1, 0,
+  GI.SL_BALANCED)
+r(16678, Convolution, 'Convolution', GI.GT_HEXADECK | GI.GT_OPEN, 2, 0,
+  GI.SL_MOSTLY_SKILL)
+r(16679, Labyrinth, 'Hex Labyrinth', GI.GT_HEXADECK | GI.GT_OPEN, 2, 0,
+  GI.SL_MOSTLY_SKILL)
+r(16680, Snakestone, 'Snakestone', GI.GT_HEXADECK | GI.GT_OPEN, 2, 0,
+  GI.SL_MOSTLY_SKILL)
+r(16681, HexYukon, 'Hex Yukon', GI.GT_HEXADECK, 1, 0, GI.SL_BALANCED)
+r(16682, MagicMontana, 'Magic Montana', GI.GT_HEXADECK | GI.GT_OPEN, 1, 2,
+  GI.SL_MOSTLY_SKILL)
 del r

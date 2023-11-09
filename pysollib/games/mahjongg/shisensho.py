@@ -93,6 +93,7 @@ class Shisen_Foundation(AbstractFoundationStack):
 
 
 class Shisen_RowStack(Mahjongg_RowStack):
+    allowAdjacent = True
 
     def basicIsBlocked(self):
         return 0
@@ -112,7 +113,9 @@ class Shisen_RowStack(Mahjongg_RowStack):
             a.append([5]*(rows+2))
 
         def can_move(x, y, nx, ny, direct, d, direct_chng_cnt):
-            if nx == x2 and ny == y2:
+            if (nx == x2 and ny == y2 and (self.allowAdjacent or
+                                           (abs(dx) > 1 and abs(dy) > 1)
+                                           or direct_chng_cnt > 0)):
                 return 1
             if nx < 0 or ny < 0 or nx > cols+1 or ny > rows+1:
                 return 0
@@ -250,7 +253,8 @@ class Shisen_RowStack(Mahjongg_RowStack):
         cs = game.app.cardset
         path = self.acceptsCards(other_stack, [other_stack.cards[-1]])
         # print path
-        x0, y0 = game.XMARGIN, game.YMARGIN
+        x0, y0 = (game.XMARGIN + game.center_offset[0],
+                  game.YMARGIN + game.center_offset[1])
         cardw, cardh = images.CARDW, images.CARDH
         if cs.version >= 6:
             cardw -= cs.SHADOW_XOFFSET
@@ -309,7 +313,7 @@ class AbstractShisenGame(AbstractMahjonggGame):
         l, s = Layout(self), self.s
         # dx, dy = 3, -3
 
-        cs = self.app.cardset
+        cs = self.app.images.cs
         if cs.version >= 6:
             dx = l.XOFFSET
             dy = -l.YOFFSET
@@ -322,6 +326,10 @@ class AbstractShisenGame(AbstractMahjonggGame):
             d_x = 0
             d_y = 0
             self._delta_x, self._delta_y = 0, 0
+        # TODO - This should be moved to subsample logic in the future.
+        if self.preview > 1:
+            d_x /= 2
+            d_y /= 2
 
         font = self.app.getFont("canvas_default")
 
@@ -498,6 +506,30 @@ class NotShisen_24x12(AbstractShisenGame):
 
 
 # ************************************************************************
+# * Four Rivers
+# ************************************************************************
+class FourRivers_RowStack(Shisen_RowStack):
+    allowAdjacent = False
+
+
+class FourRivers_14x6(AbstractShisenGame):
+    RowStack_Class = FourRivers_RowStack
+    L = (14, 6)
+    NCARDS = 84
+
+
+class FourRivers_18x8(AbstractShisenGame):
+    RowStack_Class = FourRivers_RowStack
+    L = (18, 8)
+
+
+class FourRivers_24x12(AbstractShisenGame):
+    RowStack_Class = FourRivers_RowStack
+    L = (24, 12)
+    NCARDS = 288
+
+
+# ************************************************************************
 # * register a Shisen-Sho type game
 # ************************************************************************
 
@@ -524,6 +556,8 @@ r(11006, Shisen_24x12_NoGravity, "Shisen-Sho (No Gravity) 24x12")
 r(11011, NotShisen_14x6, "Not Shisen-Sho 14x6", "notshisensho.html")
 r(11012, NotShisen_18x8, "Not Shisen-Sho 18x8", "notshisensho.html")
 r(11013, NotShisen_24x12, "Not Shisen-Sho 24x12", "notshisensho.html")
-
+r(11014, FourRivers_14x6, "Four Rivers 14x6", "fourrivers.html")
+r(11015, FourRivers_18x8, "Four Rivers 18x8", "fourrivers.html")
+r(11016, FourRivers_24x12, "Four Rivers 24x12", "fourrivers.html")
 
 del r

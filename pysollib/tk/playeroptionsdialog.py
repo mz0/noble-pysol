@@ -87,10 +87,10 @@ class PlayerOptionsDialog(MfxDialog):
         #
         frame = tkinter.Frame(top_frame)
         frame.pack(expand=True, fill='both', padx=5, pady=10)
-        widget = tkinter.Label(frame, text=_("\nPlease enter your name"),
+        widget = tkinter.Label(frame, text=_("Please enter your name"),
                                # justify='left', anchor='w',
                                takefocus=0)
-        widget.grid(row=0, column=0, columnspan=2, sticky='ew', padx=0, pady=5)
+        widget.grid(row=0, column=0, columnspan=2, sticky='ew', padx=0, pady=0)
         w = kw.get("e_width", 30)    # width in characters
         self.player_var = tkinter.Entry(frame, exportselection=1, width=w)
         self.player_var.insert(0, app.opt.player)
@@ -99,7 +99,8 @@ class PlayerOptionsDialog(MfxDialog):
                                 command=self.selectUserName)
         widget.grid(row=1, column=1, padx=5, pady=5)
         widget = tkinter.Checkbutton(frame, variable=self.confirm_var,
-                                     anchor='w', text=_("Confirm quit"))
+                                     anchor='w',
+                                     text=_("Confirm discard game"))
         widget.grid(row=2, column=0, columnspan=2, sticky='ew', padx=0, pady=5)
         widget = tkinter.Checkbutton(frame, variable=self.update_stats_var,
                                      anchor='w',

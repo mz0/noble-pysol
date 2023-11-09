@@ -105,7 +105,7 @@ class SelectGameData(SelectDialogTreeData):
                                 select_mahjongg_game)
         g.append(gg)
         if g[0]:
-            s_by_type = SelectGameNode(None, _("French games"),
+            s_by_type = SelectGameNode(None, _("French Games"),
                                        tuple(g[0]), expanded=1)
         if g[1]:
             s_oriental = SelectGameNode(None, _("Oriental Games"),
@@ -255,7 +255,7 @@ class SelectGameData(SelectDialogTreeData):
                                lambda gi: gi.si.redeals == -2),
                     SelectGameNode(None, _("Other number of redeals"),
                                lambda gi: gi.si.redeals not in
-                               (-1, 0, 1, 2, 3)),
+                               (-2, -1, 0, 1, 2, 3)),
                 )),
                 s_by_compatibility,
             )),
@@ -266,6 +266,8 @@ class SelectGameData(SelectDialogTreeData):
                                lambda gi: gi.si.game_flags & GI.GT_CHILDREN),
                 SelectGameNode(None, _("Games with Scoring"),
                                lambda gi: gi.si.game_flags & GI.GT_SCORE),
+                SelectGameNode(None, _("Games with Stripped Decks"),
+                               lambda gi: gi.si.game_flags & GI.GT_STRIPPED),
                 SelectGameNode(None, _("Games with Separate Decks"),
                            lambda gi: gi.si.game_flags & GI.GT_SEPARATE_DECKS),
                 SelectGameNode(None, _("Open Games (all cards visible)"),

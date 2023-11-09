@@ -31,6 +31,7 @@ from pysollib.mygettext import _
 from pysollib.stack import \
         AC_RowStack, \
         AbstractFoundationStack, \
+        AutoDealTalonStack, \
         BasicRowStack, \
         DealRowTalonStack, \
         InitialDealTalonStack, \
@@ -45,8 +46,8 @@ from pysollib.stack import \
         WasteTalonStack, \
         isRankSequence, \
         isSameSuitSequence
-from pysollib.util import ACE, ANY_RANK, ANY_SUIT, KING, UNLIMITED_ACCEPTS, \
-        UNLIMITED_MOVES
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT, BLACK, KING, RED,\
+        UNLIMITED_ACCEPTS, UNLIMITED_MOVES
 
 # ************************************************************************
 # * Curds and Whey
@@ -350,6 +351,7 @@ class BavarianPatience(GermanPatience):
 
 # ************************************************************************
 # * Trusty Twelve
+# * Up and Up
 # * Knotty Nines
 # * Sweet Sixteen
 # ************************************************************************
@@ -372,15 +374,19 @@ class TrustyTwelve_Hint(AbstractHint):
 class TrustyTwelve(Game):
     Hint_Class = TrustyTwelve_Hint
 
+    TALON_CLASS = AutoDealTalonStack
+    ROWSTACK_CLASS = RK_RowStack
+
     def createGame(self, rows=12):
         l, s = Layout(self), self.s
-        self.setSize(l.XM+(rows+1)*l.XS, l.YM+l.YS+12*l.YOFFSET)
+        self.setSize((2 * l.XM) + (rows + 1) * l.XS,
+                     l.YM + l.YS + 12 * l.YOFFSET)
         x, y = l.XM, l.YM
-        s.talon = TalonStack(x, y, self)
+        s.talon = self.TALON_CLASS(x, y, self)
         l.createText(s.talon, "s")
-        x += l.XS
+        x += (l.XS + l.XM)
         for i in range(rows):
-            s.rows.append(RK_RowStack(x, y, self, max_move=1))
+            s.rows.append(self.ROWSTACK_CLASS(x, y, self, max_move=1))
             x += l.XS
         l.defaultStackGroups()
 
@@ -391,7 +397,8 @@ class TrustyTwelve(Game):
         if not stack.cards and stack in self.s.rows:
             if self.s.talon.cards:
                 old_state = self.enterState(self.S_FILL)
-                self.s.talon.flipMove()
+                if not self.s.talon.cards[-1].face_up:
+                    self.s.talon.flipMove()
                 self.s.talon.moveMove(1, stack)
                 self.leaveState(old_state)
 
@@ -399,6 +406,24 @@ class TrustyTwelve(Game):
         return len(self.s.talon.cards) == 0
 
     shallHighlightMatch = Game._shallHighlightMatch_RK
+
+
+class UpAndUp_TalonStack(OpenTalonStack):
+    rightclickHandler = OpenStack.rightclickHandler
+    doubleclickHandler = OpenStack.doubleclickHandler
+
+
+class UpAndUp(TrustyTwelve):
+    TALON_CLASS = UpAndUp_TalonStack
+    ROWSTACK_CLASS = StackWrapper(RK_RowStack, mod=13, dir=1)
+
+    def createGame(self):
+        TrustyTwelve.createGame(self, rows=10)
+        self.sg.dropstacks.append(self.s.talon)
+
+    def startGame(self):
+        TrustyTwelve.startGame(self)
+        self.s.talon.fillStack()
 
 
 class KnottyNines(TrustyTwelve):
@@ -467,22 +492,23 @@ class EightPacks(Game):
 
     def createGame(self, max_rounds=3, width=10, playcards=14):
         l, s = Layout(self), self.s
-        self.setSize(l.XM+width*l.XS,
-                     l.YM+2*l.YS+l.TEXT_HEIGHT+playcards*l.YOFFSET)
+        self.setSize(l.XM + width * l.XS,
+                     l.YM + 2 * l.YS + (2 * l.TEXT_HEIGHT) +
+                     playcards * l.YOFFSET)
 
         x, y = l.XM, l.YM
         for i in range(10):
             s.rows.append(self.RowStack_Class(x, y, self, dir=1))
             x += l.XS
 
-        x, y = self.width-l.XS, self.height-l.YS
+        x, y = self.width - l.XS, self.height - l.YS - l.TEXT_HEIGHT
         s.talon = WasteTalonStack(x, y, self, max_rounds=max_rounds)
-        l.createText(s.talon, 'n')
-        l.createRoundText(s.talon, 'nnn')
+        l.createText(s.talon, 's')
+        l.createRoundText(s.talon, 'n')
 
         x -= l.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 'n')
+        l.createText(s.waste, 's')
 
         l.defaultStackGroups()
 
@@ -528,6 +554,53 @@ class FourPacks(EightPacks):
         return True
 
 
+# ************************************************************************
+# * Fire and Ice
+# ************************************************************************
+
+class FireAndIce(Game):
+    RowStack_Class = RK_RowStack
+
+    def createGame(self, playcards=18):
+        l, s = Layout(self), self.s
+        self.setSize(l.XM + (10.5 * l.XS),
+                     l.YM + l.YS + playcards * l.YOFFSET)
+
+        x, y = l.XM, l.YM
+        for i in range(5):
+            s.rows.append(self.RowStack_Class(x, y, self))
+            x += l.XS
+
+        x += l.XS / 2
+
+        for i in range(5):
+            s.rows.append(self.RowStack_Class(x, y, self))
+            x += l.XS
+
+        x, y = self.width - l.XS, self.height - l.YS
+        s.talon = InitialDealTalonStack(x, y, self)
+
+        l.defaultStackGroups()
+
+    def startGame(self):
+        for i in range(4):
+            self.s.talon.dealRow(frames=0)
+        r = self.s.rows
+        rows = (r[0], r[9])
+        self.s.talon.dealRow(rows=rows, frames=0)
+        self._startAndDealRow()
+
+    def isGameWon(self):
+        for i in self.s.rows[0:5]:
+            for j in i.cards:
+                if j.color != RED:
+                    return False
+        for i in self.s.rows[5:10]:
+            for j in i.cards:
+                if j.color != BLACK:
+                    return False
+
+
 # register the game
 registerGame(GameInfo(294, CurdsAndWhey, "Curds and Whey",
                       GI.GT_SPIDER | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
@@ -564,3 +637,7 @@ registerGame(GameInfo(724, EightPacks, "Eight Packs",
                       GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(762, FourPacks, "Four Packs",
                       GI.GT_2DECK_TYPE, 2, 1, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(830, FireAndIce, "Fire and Ice",
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
+registerGame(GameInfo(833, UpAndUp, "Up and Up",
+                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_BALANCED))
