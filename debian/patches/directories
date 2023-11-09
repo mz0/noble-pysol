@@ -4,7 +4,7 @@ Forwarded: not-needed
 
 --- a/pysollib/mfxutil.py
 +++ b/pysollib/mfxutil.py
-@@ -139,7 +139,7 @@
+@@ -163,7 +163,7 @@
      home = os.environ.get("HOME", "").strip()
      if not home or not os.path.isdir(home):
          home = os.curdir
@@ -15,7 +15,7 @@ Forwarded: not-needed
  # high resolution clock() and sleep()
 --- a/setup.py
 +++ b/setup.py
-@@ -22,7 +22,7 @@
+@@ -19,7 +19,7 @@
  
  
  if os.name == 'posix':
@@ -26,10 +26,11 @@ Forwarded: not-needed
      data_dir = 'data'
 --- a/pysollib/settings.py
 +++ b/pysollib/settings.py
-@@ -61,10 +61,7 @@
+@@ -61,11 +61,7 @@
  # you can add your extra directories here
  if os.name == 'posix':
      DATA_DIRS = [
+-        '/app/share/PySolFC',
 -        '/usr/share/PySolFC',
 -        '/usr/local/share/PySolFC',
 -        '/usr/share/games/PySolFC',
