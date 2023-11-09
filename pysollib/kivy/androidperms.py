@@ -13,6 +13,8 @@ except ImportError:
 # LB190927.
 # wait loop removed. (Implement it in external code if needed.)
 # LB191011.
+# supportlib replaced by androidx.appcompat
+# LB221121.
 
 
 class AndroidPerms(object):
@@ -22,9 +24,12 @@ class AndroidPerms(object):
         self.PythonActivity = jnius.autoclass(
             'org.kivy.android.PythonActivity')
         self.Compat = jnius.autoclass(
-            'android.support.v4.content.ContextCompat')
+            'androidx.core.content.ContextCompat')
         self.currentActivity = jnius.cast(
             'android.app.Activity', self.PythonActivity.mActivity)
+        self.build = jnius.autoclass("android.os.Build")
+        self.version = jnius.autoclass("android.os.Build$VERSION")
+        self.vcodes = jnius.autoclass("android.os.Build$VERSION_CODES")
 
     def getPerm(self, permission):
         if jnius is None:
@@ -45,6 +50,9 @@ class AndroidPerms(object):
     def requestPerms(self, permissions):
         if jnius is None:
             return True
+        logging.info("androidperms: API version %d" % (self.version.SDK_INT))
+        if self.version.SDK_INT > 29:
+            return
         logging.info("androidperms: invoke permission dialog")
         self.currentActivity.requestPermissions(permissions, 0)
         return
@@ -58,7 +66,5 @@ def getStoragePerm():
 
 def requestStoragePerm():
     ap = AndroidPerms()
-    # ap.requestPerms(
-    #    ["android.permission.READ_EXTERNAL_STORAGE","android.permission.WRITE_EXTERNAL_STORAGE"])
     ap.requestPerms(
         ["android.permission.WRITE_EXTERNAL_STORAGE"])

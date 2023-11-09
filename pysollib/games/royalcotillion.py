@@ -143,7 +143,7 @@ class OddAndEven(RoyalCotillion):
         l, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM + 8*l.XS, l.YM + 4*l.YS)
+        self.setSize(l.XM + 8 * l.XS, l.YM + l.TEXT_HEIGHT + 4 * l.YS)
 
         # create stacks
         x, y, = l.XM, l.YM
@@ -161,13 +161,13 @@ class OddAndEven(RoyalCotillion):
             for j in range((4, 5)[i]):
                 s.reserves.append(ReserveStack(x, y, self, max_accept=0))
                 x += l.XS
-        x, y = l.XM, self.height - l.YS
+        x, y = l.XM, self.height - l.YS - l.TEXT_HEIGHT
         s.talon = WasteTalonStack(x, y, self, max_rounds=2)
-        l.createText(s.talon, "n")
-        l.createRoundText(s.talon, 'nnn')
+        l.createText(s.talon, "s")
+        l.createRoundText(s.talon, 'n')
         x += l.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, "n")
+        l.createText(s.waste, "s")
 
         # define stack-groups
         l.defaultStackGroups()
@@ -332,7 +332,7 @@ class Alhambra(Game):
             l.createText(s.talon, 'n')
         anchor = 'nn'
         if rows > 1:
-            anchor = 'nnn'
+            anchor = 'sw'
         l.createRoundText(s.talon, anchor)
 
         x += l.XS
@@ -1357,7 +1357,8 @@ class TwilightZone(Game):
 
 # register the game
 registerGame(GameInfo(54, RoyalCotillion, "Royal Cotillion",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_LUCK))
+                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_LUCK,
+                      altnames=("Lords and Ladies",)))
 registerGame(GameInfo(55, OddAndEven, "Odd and Even",
                       GI.GT_2DECK_TYPE, 2, 1, GI.SL_LUCK))
 registerGame(GameInfo(143, Kingdom, "Kingdom",
@@ -1367,15 +1368,16 @@ registerGame(GameInfo(234, Alhambra, "Alhambra",
 registerGame(GameInfo(97, Carpet, "Carpet",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(391, BritishConstitution, "British Constitution",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED,
+                      GI.GT_2DECK_TYPE | GI.GT_STRIPPED, 2, 0, GI.SL_BALANCED,
                       ranks=list(range(11)),  # without Queens and Kings
                       altnames=("Constitution",)))
 registerGame(GameInfo(392, NewBritishConstitution, "New British Constitution",
-                      GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0, GI.SL_BALANCED,
+                      GI.GT_2DECK_TYPE | GI.GT_STRIPPED | GI.GT_ORIGINAL, 2, 0,
+                      GI.SL_BALANCED,
                       ranks=list(range(11))  # without Queens and Kings
                       ))
 registerGame(GameInfo(443, Twenty, "Twenty",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
+                      GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(465, Granada, "Granada",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(579, ThreePirates, "Three Pirates",
@@ -1383,9 +1385,11 @@ registerGame(GameInfo(579, ThreePirates, "Three Pirates",
 registerGame(GameInfo(608, Frames, "Frames",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(609, GrantsReinforcement, "Grant's Reinforcement",
-                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED))
+                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED,
+                      altnames=("Reinforcements",)))
 registerGame(GameInfo(638, RoyalRendezvous, "Royal Rendezvous",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
+                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED,
+                      altnames=('Royal Appointment',)))
 registerGame(GameInfo(639, ShadyLanes, "Shady Lanes",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(675, FourWinds, "Four Winds",

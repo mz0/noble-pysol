@@ -1,10 +1,91 @@
 [[news]]
 === News
-
-* _3 July, 2020:_ There is a new stable release
-https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.10.1/[PySolFC
-v2.10.1]. New in this release:
-** Bug fix: allow to use the freecell_solver.py Python bindings without needing to have the "fc-solve" executable in the path
+* _10 July, 2023:_ There is a new beta release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.21.0/[PySolFC
+v2.21.0]. New in this release:
+** Ten new games.
+** Compatibility with Pillow 10.0.
+** Several new display options.
+** Other bugfixes and enhancements.
+* _16 April, 2023:_ There is a new stable release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.20.1/[PySolFC
+v2.20.1]. New in this release:
+** The release packages have been updated to use the latest version of Python, and all the dependent libraries.
+** New alternate release packages for Windows and Mac that include the full cardsets library (these are larger and may take longer to download/install).
+** Bugfixes and other enhancements.
+* _26 February, 2023:_ There is a new stable release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.20.0/[PySolFC
+v2.20.0]. Additionally, there is a new Cardsets release
+https://sourceforge.net/projects/pysolfc/files/PySolFC-Cardsets/PySolFC-Cardsets-2.2/[PySolFC-Cardsets v.2.2]. New in this release:
+** Over 40 new games, bringing the total to 1,200!
+** Memory games can now use any type of cardset, including new Matching type cardsets.
+** New options in the Solitaire Wizard.
+** Additional documentation for a number of PySol's features.
+** Bugfixes and other enhancements.
+* _11 October, 2022:_ Linux users, PySolFC is now available https://flathub.org/apps/details/io.sourceforge.pysolfc.PySolFC[on Flathub].
+* _9 October, 2022:_ There is a new stable release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.18.0/[PySolFC
+v2.18.0]. New in this release:
+** Advanced search feature - the ability to search for games, cardsets, or table tiles based on many different criteria.
+** Complete documentation containing rules for all 1,100+ games.
+** Revamped status bar, displaying more info.
+** The Find Card feature now supports all types of games.
+** Many new display and assist options.
+** Bugfixes, code cleanup, etc.
+* _10 May, 2022_ There is a new stable release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.16.0/[PySolFC
+v2.16.0]. Anyone upgrading from a version prior to 2.15.0 should read the notes for that version before upgrading. New in this release:
+** Enhancements to many images and graphical displays.
+** More game rules in the documentation.
+** Bugfixes, cleanup, and other enhancements.
+* _12 March, 2022_ There is a new beta release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.15.0/[PySolFC
+v2.15.0].  Additionally, there is a new Cardsets release https://sourceforge.net/projects/pysolfc/files/PySolFC-Cardsets/PySolFC-Cardsets-2.1/[PySolFC-Cardsets v.2.1]
+(required to run 2.15).  This is a pretty sizable release, so this beta version
+is being offered before a stable 2.16 in the next couple months.  Any https://github.com/shlomif/PySolFC/issues[feedback
+and bug reports] are greatly appreciated.  The full list of changes for this release
+is quite long, but here are the highlights:
+** 35 new games, plus enhancements and fixes to many existing games.
+** Many new game rules added to the documentation.
+** New high resolution default display.  This new display uses high resolution
+cardsets and scaling to make the games look impressive on larger monitors.
+*** Note that the new high-resolution options will not override your currently selected
+options for existing users.  If you want to use the new settings, you can delete or
+rename your options.cfg file.
+*** Also note that because of these changes, upgrading your version of PySolFC Cardsets
+is required even if you're using the minimal package.  If you are using the Windows or
+Mac installer, this will be handled automatically, but you'll need to upgrade if you're
+setting it up manually.
+** New feature to search for games, cardsets, and table tiles by name.
+** Many new display options.
+** Bugfixes and cleanup.
+** And more.
+* _10 December, 2021:_ There is a new stable release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.14.1/[PySolFC
+v2.14.1].  This release fixes a number of bugs, including one that causes
+crashes for some users when opening the select game/cardset/table tile window.
+* _19 September, 2021:_ There is a new stable release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.14.0/[PySolFC
+v2.14.0]. New in this release:
+** 16 new games
+** Support for Python 3.10 (Minimum requirement is still Python 2.7)
+** A new macOS package.
+** Enhancements to the tree select dialogs for selecting games, cardsets, and table tiles.
+** Further additions/improvements to the documentation.
+** Many bugfixes and cleanups.
+* _11 July, 2021:_ There is a new stable release
+https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.12.0/[PySolFC
+v2.12.0]. New in this release:
+** 40 new games!
+** Support for using higher resolution cardsets.  The high resolution "Neo"
+cardset has been added to the Windows Installer package and is available in
+https://sourceforge.net/projects/pysolfc/files/PySolFC-Cardsets/PySolFC-Cardsets-2.1PRE/[a preview release of
+PySolFC-Cardsets 2.1].
+** Improved organization and categorization of the games list.
+** New display options - added option to center the game layout in the window.
+** New audio options - can now disable music without disabling sound effects.
+** Improved documentation - added rules to a large number of games that were missing them.
+** Bugfixes and cleanup.
 * _22 June, 2020:_ There is a new stable release
 https://sourceforge.net/projects/pysolfc/files/PySolFC/PySolFC-2.10.0/[PySolFC
 v2.10.0]. New in this release:

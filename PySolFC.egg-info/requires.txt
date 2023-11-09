@@ -1,4 +1,4 @@
-attrs
+attrs>=18.2.0
 configobj
 pycotap
 pysol_cards

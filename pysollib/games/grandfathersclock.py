@@ -25,19 +25,21 @@ from pysollib.game import Game
 from pysollib.gamedb import GI, GameInfo, registerGame
 from pysollib.hint import CautiousDefaultHint, DefaultHint
 from pysollib.layout import Layout
+from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import \
-        AC_FoundationStack, \
-        BasicRowStack, \
-        DealRowTalonStack, \
-        InitialDealTalonStack, \
-        InvisibleStack, \
-        RK_RowStack, \
-        SC_RowStack, \
-        SS_FoundationStack, \
-        SS_RowStack, \
-        WasteStack, \
-        WasteTalonStack
-from pysollib.util import ACE, ANY_SUIT, JACK, KING, QUEEN
+    AC_FoundationStack, \
+    BasicRowStack, \
+    DealRowTalonStack, \
+    InitialDealTalonStack, \
+    InvisibleStack, \
+    RK_RowStack, \
+    SC_RowStack, \
+    SS_FoundationStack, \
+    SS_RowStack, \
+    StackWrapper, \
+    WasteStack, \
+    WasteTalonStack
+from pysollib.util import ACE, ANY_SUIT, BLACK, JACK, KING, QUEEN, RANKS, RED
 
 
 class GrandfathersClock_Hint(CautiousDefaultHint):
@@ -115,7 +117,8 @@ class GrandfathersClock(Game):
         return clocks + cards
 
     def startGame(self):
-        self.playSample("grandfathersclock", loop=1)
+        self.startDealSample()
+        self.playSample("grandfathersclock", loop=1, priority=200)
         self._dealNumRows(4)
         self.s.talon.dealRow()
         self.s.talon.dealRow(rows=self.s.foundations)
@@ -142,6 +145,8 @@ class Dial(Game):
 
         x0, y0 = l.XM+2*l.XS, l.YM
         rank = 0
+        font = self.app.getFont("canvas_default")
+
         for xx, yy in ((3.5, 0.15),
                        (4.5, 0.5),
                        (5,   1.5),
@@ -158,19 +163,30 @@ class Dial(Game):
                        ):
             x = int(x0 + xx*l.XS)
             y = int(y0 + yy*l.YS)
-            s.foundations.append(
-                AC_FoundationStack(
+            stack = AC_FoundationStack(
                     x, y, self, suit=ANY_SUIT,
-                    dir=0, max_cards=4, base_rank=rank, max_move=0))
+                    dir=0, max_cards=4, base_rank=rank, max_move=0)
+            stack.getBottomImage = stack._getReserveBottomImage
+            s.foundations.append(stack)
+            if self.preview <= 1:
+                label = RANKS[rank][0]
+                if label == "1":
+                    label = "10"
+                stack.texts.misc = MfxCanvasText(self.canvas,
+                                                 x + l.CW // 2,
+                                                 y + l.CH // 2,
+                                                 anchor="center",
+                                                 font=font)
+                stack.texts.misc.config(text=label)
             rank += 1
 
         x, y = l.XM, l.YM
         s.talon = WasteTalonStack(x, y, self, max_rounds=2)
         l.createText(s.talon, 's')
-        l.createRoundText(s.talon, 'sss')
         x += l.XS
         s.waste = WasteStack(x, y, self)
         l.createText(s.waste, 's')
+        l.createRoundText(s.talon, 'ne', dx=l.XS)
 
         l.defaultStackGroups()
 
@@ -182,9 +198,6 @@ class Dial(Game):
 # ************************************************************************
 # * Hemispheres
 # ************************************************************************
-
-BLACK, RED = 0, 1
-
 
 class Hemispheres_Hint(DefaultHint):
     def shallMovePile(self, from_stack, to_stack, pile, rpile):
@@ -478,6 +491,7 @@ class BigBen(Game):
 # ************************************************************************
 
 class Clock_RowStack(RK_RowStack):
+    getBottomImage = RK_RowStack._getReserveBottomImage
 
     def _numFaceDown(self):
         ncards = 0
@@ -537,6 +551,10 @@ class Clock_RowStack(RK_RowStack):
 
 
 class Clock(Game):
+    RowStack_Class = Clock_RowStack
+    Talon_Class = InitialDealTalonStack
+
+    HAS_WASTE = False
 
     def createGame(self):
         # create layout
@@ -545,9 +563,14 @@ class Clock(Game):
         # set window
         dx = l.XS + 3*l.XOFFSET
         w = max(5.25*dx + l.XS, 5.5*dx)
+        if self.HAS_WASTE:
+            w += (1.5 * l.XS)
         self.setSize(l.XM + w, l.YM + 4*l.YS)
 
+        font = self.app.getFont("canvas_default")
+
         # create stacks
+        row_rank = 0
         for xx, yy in (
             (3.25, 0.15),
             (4.25, 0.5),
@@ -564,26 +587,58 @@ class Clock(Game):
                 ):
             x = l.XM + xx*dx
             y = l.YM + yy*l.YS
-            stack = Clock_RowStack(x, y, self, max_move=0)
+            if self.HAS_WASTE:
+                x += (2 * l.XS)
+            stack = self.RowStack_Class(x, y, self, max_move=0,
+                                        base_rank=row_rank)
             stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
             stack.SHRINK_FACTOR = 1
             s.rows.append(stack)
+            if self.preview <= 1:
+                label = RANKS[row_rank][0]
+                if label == "1":
+                    label = "10"
+                stack.texts.misc = MfxCanvasText(self.canvas,
+                                                 x + l.CW // 2,
+                                                 y + l.CH // 2,
+                                                 anchor="center",
+                                                 font=font)
+                stack.texts.misc.config(text=label)
+            row_rank += 1
 
         x, y = l.XM + 2.25*dx, l.YM + 1.5*l.YS
-        stack = Clock_RowStack(x, y, self, max_move=1)
+        if self.HAS_WASTE:
+            x += (2 * l.XS)
+        stack = self.RowStack_Class(x, y, self, max_move=1, base_rank=row_rank)
         stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
         stack.SHRINK_FACTOR = 1
         s.rows.append(stack)
+        if self.preview <= 1:
+            stack.texts.misc = MfxCanvasText(self.canvas,
+                                             x + l.CW // 2,
+                                             y + l.CH // 2,
+                                             anchor="center",
+                                             font=font)
+            stack.texts.misc.config(text=(RANKS[row_rank][0]))
 
-        x, y = self.width - l.XS, self.height - l.YS
-        s.talon = InitialDealTalonStack(x, y, self)
+        if self.HAS_WASTE:
+            x, y = l.XM, l.YM
+            s.talon = self.Talon_Class(x, y, self)
+            l.createText(s.talon, 's')
+            x += l.XS
+            s.waste = WasteStack(x, y, self)
+            l.createText(s.waste, 's')
+            l.createRoundText(s.talon, 'ne', dx=l.XS)
+        else:
+            x, y = self.width - l.XS, self.height - l.YS
+            s.talon = self.Talon_Class(x, y, self)
 
         # create an invisible stacks
         s.internals.append(InvisibleStack(self))
         s.internals.append(InvisibleStack(self))
 
         # default
-        l.defaultAll()
+        l.defaultStackGroups()
 
     def startGame(self):
         for i in range(3):
@@ -606,6 +661,44 @@ class Clock(Game):
         return (), (), ()
 
 
+# ************************************************************************
+# * German Clock
+# ************************************************************************
+
+class GermanClock_RowStack(AC_FoundationStack):
+    getBottomImage = AC_FoundationStack._getReserveBottomImage
+
+    def acceptsCards(self, from_stack, cards):
+        num_cards = len(self.cards)
+        for i in range(13):
+            check_seq = self.game.s.rows[i].cards
+            if len(check_seq) > num_cards:
+                if check_seq[num_cards].suit != cards[0].suit:
+                    return False
+
+        return AC_FoundationStack.acceptsCards(self, from_stack, cards)
+
+
+class GermanClock(Clock):
+    RowStack_Class = StackWrapper(GermanClock_RowStack, dir=0, max_move=0,
+                                  suit=ANY_SUIT)
+    Talon_Class = StackWrapper(WasteTalonStack, max_rounds=2)
+
+    HAS_WASTE = True
+
+    def startGame(self):
+        pass
+
+    def isGameWon(self):
+        for r in self.s.rows:
+            if len(r.cards) < 4:
+                return False
+        return True
+
+    def getAutoStacks(self, event=None):
+        return Game.getAutoStacks(self, event)
+
+
 # register the game
 registerGame(GameInfo(261, GrandfathersClock, "Grandfather's Clock",
                       GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_BALANCED))
@@ -618,4 +711,7 @@ registerGame(GameInfo(697, BigBen, "Big Ben",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(737, Clock, "Clock",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_LUCK,
-                      altnames=("Travellers",)))
+                      altnames=("Travellers", "Sundial")))
+registerGame(GameInfo(827, GermanClock, "German Clock",
+                      GI.GT_1DECK_TYPE, 1, 1, GI.SL_MOSTLY_LUCK,
+                      altnames=("Die Uhr",)))

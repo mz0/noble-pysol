@@ -40,6 +40,7 @@ from pysollib.stack import \
     WasteStack, \
     WasteTalonStack, \
     Yukon_AC_RowStack, \
+    Yukon_BO_RowStack, \
     Yukon_SS_RowStack
 from pysollib.util import ANY_SUIT, KING
 
@@ -55,18 +56,25 @@ class Yukon(Game):
     RowStack_Class = StackWrapper(Yukon_AC_RowStack, base_rank=KING)
     Hint_Class = Yukon_Hint
 
-    def createGame(self, **layout):
+    DIFF_SUITS = True
+
+    def createGame(self, rows=7, **layout):
         # create layout
         l, s = Layout(self), self.s
-        kwdefault(layout, rows=7, texts=0, playcards=25)
+        kwdefault(layout, rows=rows, texts=0, playcards=25)
         self.Layout_Method(l, **layout)
         self.setSize(l.size[0], l.size[1])
         # create stacks
         s.talon = self.Talon_Class(l.s.talon.x, l.s.talon.y, self)
         for r in l.s.foundations:
-            s.foundations.append(
-                self.Foundation_Class(
-                    r.x, r.y, self, suit=r.suit, max_move=0))
+            if self.DIFF_SUITS:
+                s.foundations.append(
+                    self.Foundation_Class(
+                        r.x, r.y, self, suit=r.suit, max_move=0))
+            else:
+                s.foundations.append(
+                    self.Foundation_Class(
+                        r.x, r.y, self, suit=ANY_SUIT, max_move=0))
         for r in l.s.rows:
             s.rows.append(self.RowStack_Class(r.x, r.y, self))
         # default
@@ -100,17 +108,8 @@ class RussianSolitaire(Yukon):
 # * Moosehide (build down in any suit but the same)
 # ************************************************************************
 
-class Moosehide_RowStack(Yukon_AC_RowStack):
-    def _isYukonSequence(self, c1, c2):
-        return (c1.suit != c2.suit and c1.rank == c2.rank+1)
-
-    def getHelp(self):
-        return _('Tableau. Build down in any suit but the same, can move '
-                 'any face-up cards regardless of sequence.')
-
-
 class Moosehide(Yukon):
-    RowStack_Class = StackWrapper(Moosehide_RowStack, base_rank=KING)
+    RowStack_Class = StackWrapper(Yukon_BO_RowStack, base_rank=KING)
 
     def shallHighlightMatch(self, stack1, card1, stack2, card2):
         return (card1.suit != card2.suit and
@@ -455,6 +454,7 @@ class Panopticon(TenAcross):
 
 # ************************************************************************
 # * Australian Patience
+# * Tasmanian Patience
 # * Raw Prawn
 # * Bim Bom
 # ************************************************************************
@@ -463,11 +463,12 @@ class AustralianPatience(RussianSolitaire):
 
     RowStack_Class = StackWrapper(Yukon_SS_RowStack, base_rank=KING)
 
-    def createGame(self, rows=7):
+    def createGame(self, rows=7, max_rounds=1, num_deal=1):
         l, s = Layout(self), self.s
         Layout.klondikeLayout(l, rows=rows, waste=1)
         self.setSize(l.size[0], l.size[1])
-        s.talon = WasteTalonStack(l.s.talon.x, l.s.talon.y, self, max_rounds=1)
+        s.talon = WasteTalonStack(l.s.talon.x, l.s.talon.y, self,
+                                  max_rounds=max_rounds, num_deal=num_deal)
         s.waste = WasteStack(l.s.waste.x, l.s.waste.y, self)
         for r in l.s.foundations:
             s.foundations.append(
@@ -478,6 +479,11 @@ class AustralianPatience(RussianSolitaire):
 
     def startGame(self):
         self._startDealNumRowsAndDealRowAndCards(3)
+
+
+class TasmanianPatience(AustralianPatience):
+    def createGame(self):
+        AustralianPatience.createGame(self, max_rounds=-1, num_deal=3)
 
 
 class RawPrawn(AustralianPatience):
@@ -540,6 +546,7 @@ class Queensland(Yukon):
 # ************************************************************************
 # * Russian Spider
 # * Double Russian Spider
+# * Kiev
 # ************************************************************************
 
 class RussianSpider_RowStack(Yukon_SS_RowStack):  # Spider_SS_RowStack
@@ -557,29 +564,28 @@ class RussianSpider(RussianSolitaire):
     RowStack_Class = StackWrapper(RussianSpider_RowStack, base_rank=KING)
     Foundation_Class = Spider_SS_Foundation
 
-    def createGame(self, rows=7):
-        # create layout
-        l, s = Layout(self), self.s
-        l.yukonLayout(rows=rows, texts=0, playcards=25)
-        self.setSize(l.size[0], l.size[1])
-        # create stacks
-        s.talon = self.Talon_Class(l.s.talon.x, l.s.talon.y, self)
-        for r in l.s.foundations:
-            s.foundations.append(
-                self.Foundation_Class(
-                    r.x, r.y, self, suit=ANY_SUIT, max_move=0))
-        for r in l.s.rows:
-            s.rows.append(self.RowStack_Class(r.x, r.y, self))
-        # default
-        l.defaultAll()
+    DIFF_SUITS = False
 
 
 class DoubleRussianSpider(RussianSpider, DoubleRussianSolitaire):
     def createGame(self):
-        RussianSpider.createGame(self, rows=10)
+        Yukon.createGame(self, rows=10)
 
     def startGame(self):
         DoubleRussianSolitaire.startGame(self)
+
+
+class Kiev(RussianSpider):
+    Layout_Method = staticmethod(Layout.klondikeLayout)
+    Talon_Class = DealRowTalonStack
+
+    def createGame(self):
+        return Yukon.createGame(self, waste=0, texts=1)
+
+    def startGame(self):
+        for i in range(3):
+            self.s.talon.dealRow(flip=0, frames=0)
+        self._startAndDealRow()
 
 
 # ************************************************************************
@@ -688,6 +694,64 @@ class Wave(Game):
     shallHighlightMatch = Game._shallHighlightMatch_AC
 
 
+class YukonicPlague(Yukon):
+
+    def createGame(self):
+        # create layout
+        l, s = Layout(self), self.s
+
+        ROWS = 7
+
+        # set size so that at least 2//3 of a card is visible with 20 cards
+        h = l.CH * 2 // 27 * l.YOFFSET
+        h = l.YM + max(h, 5 * l.YS)
+
+        # create rows
+        x, y = l.XM, l.YM
+
+        w1, w2 = (7 * (l.XS + l.XM)), (2 * l.XS)
+        if w2 + 13 * l.XOFFSET > w1:
+            l.XOFFSET = int((w1 - w2) / 13)
+
+        reserve = OpenStack(x * 3, y, self)
+        reserve.CARD_XOFFSET = l.XOFFSET
+        l.createText(reserve, "sw")
+        s.reserves.append(reserve)
+
+        y += l.YS
+        for i in range(ROWS):
+            self.s.rows.append(self.RowStack_Class(x, y, self))
+            x += l.XS
+
+        # Don't know why this is necessary for the Yukon layout.
+        # But we should probably figure out how to get this to work
+        # like other games.
+        self.setRegion(self.s.rows, (-999, -999, x - l.CW // 2, 999999))
+
+        # create foundations
+        y = l.YM
+        for suit in range(4):
+            self.s.foundations.append(self.Foundation_Class(
+                x, y, self, suit=suit, max_move=0))
+            y += l.YS
+
+        x, y = l.XM, h - l.YS
+        self.s.talon = self.Talon_Class(x, y, self)
+
+        # set window
+        self.setSize(l.XM + 8 * l.XS, h)
+        l.defaultAll()
+
+    def startGame(self):
+        for i in range(13):
+            self.s.talon.dealRow(rows=self.s.reserves, frames=0)
+        for i in range(2):
+            self.s.talon.dealRow(rows=self.s.rows[1:7], flip=0, frames=0)
+        for i in range(5):
+            self.s.talon.dealRow(rows=self.s.rows[i + 1:7], flip=1, frames=0)
+        self._startAndDealRow()
+
+
 # register the game
 registerGame(GameInfo(19, Yukon, "Yukon",
                       GI.GT_YUKON, 1, 0, GI.SL_BALANCED))
@@ -695,7 +759,7 @@ registerGame(GameInfo(20, RussianSolitaire, "Russian Solitaire",
                       GI.GT_YUKON, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(27, Odessa, "Odessa",
                       GI.GT_YUKON, 1, 0, GI.SL_BALANCED))
-registerGame(GameInfo(278, Grandfather, "Grandfather",
+registerGame(GameInfo(278, Grandfather, "Tvete's Grandfather",
                       GI.GT_YUKON, 1, 2, GI.SL_BALANCED))
 registerGame(GameInfo(186, Alaska, "Alaska",
                       GI.GT_YUKON, 1, 0, GI.SL_BALANCED))
@@ -722,7 +786,8 @@ registerGame(GameInfo(285, Panopticon, "Panopticon",
 registerGame(GameInfo(339, Moosehide, "Moosehide",
                       GI.GT_YUKON, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(387, Roslin, "Roslin",
-                      GI.GT_YUKON, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_YUKON, 1, 0, GI.SL_MOSTLY_SKILL,
+                      altnames=("Roslyn",)))
 registerGame(GameInfo(447, AustralianPatience, "Australian Patience",
                       GI.GT_YUKON, 1, 0, GI.SL_BALANCED,
                       altnames=('Outback Patience',)))
@@ -744,8 +809,15 @@ registerGame(GameInfo(530, RussianSpider, "Russian Spider",
 registerGame(GameInfo(531, DoubleRussianSpider, "Double Russian Spider",
                       GI.GT_SPIDER | GI.GT_ORIGINAL, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(603, Brisbane, "Brisbane",
-                      GI.GT_SPIDER, 1, 0, GI.SL_BALANCED))
+                      GI.GT_YUKON, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(707, Hawaiian, "Hawaiian",
-                      GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0, GI.SL_BALANCED))
+                      GI.GT_YUKON | GI.GT_ORIGINAL, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(732, Wave, "Wave",
-                      GI.GT_2DECK_TYPE | GI.GT_ORIGINAL, 2, 0, GI.SL_BALANCED))
+                      GI.GT_YUKON | GI.GT_ORIGINAL, 2, 0, GI.SL_BALANCED))
+registerGame(GameInfo(826, YukonicPlague, "Yukonic Plague",
+                      GI.GT_YUKON, 1, 0, GI.SL_BALANCED))
+registerGame(GameInfo(857, TasmanianPatience, "Tasmanian Patience",
+                      GI.GT_YUKON, 1, -1, GI.SL_BALANCED))
+registerGame(GameInfo(897, Kiev, "Kiev",
+                      GI.GT_SPIDER, 1, 0, GI.SL_BALANCED,
+                      altnames=('Kyiv',)))

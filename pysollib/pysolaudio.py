@@ -225,7 +225,7 @@ class PysolSoundServerModuleClient(AbstractAudioClient):
         return -1
 
     def playContinuousMusic(self, music_list):
-        if self.audiodev is None or not self.app:
+        if self.audiodev is None or not self.app or not self.app.opt.music:
             return
         try:
             loop = 999999
@@ -248,7 +248,8 @@ class PysolSoundServerModuleClient(AbstractAudioClient):
         s, m = 0, 0
         if self.app.opt.sound:
             s = self.app.opt.sound_sample_volume
-            m = self.app.opt.sound_music_volume
+            if self.app.opt.music:
+                m = self.app.opt.sound_music_volume
         try:
             self.cmd("setwavvol %d" % s)
             self.cmd("setmusvol %d" % m)
@@ -501,6 +502,7 @@ class PyGameAudioClient(AbstractAudioClient):
     def __init__(self):
         AbstractAudioClient.__init__(self)
         import pygame.mixer
+        import pygame.mixer_music
         import pygame.time
         if os.name == 'nt':
             # for py2exe
@@ -509,7 +511,8 @@ class PyGameAudioClient(AbstractAudioClient):
             import pygame.mixer_music
         self.mixer = pygame.mixer
         self.time = pygame.time
-        self.music = self.mixer.music
+        self.mixer_music = pygame.mixer_music
+        self.music = self.mixer_music
         self.audiodev = self.mixer
         self.sound = None
         self.sound_channel = None
@@ -560,15 +563,15 @@ class PyGameAudioClient(AbstractAudioClient):
         self.sound_channel = None
 
     def _playMusicLoop(self):
-        # print '_playMusicLoop'
+        # print('_playMusicLoop')
         music_list = self.music_list
         if not music_list:
             return
         while True:
-            if not self.music:
+            if not self.music or not self.app.opt.music:
                 break
             for m in music_list:
-                if not self.music:
+                if not self.music or not self.app.opt.music:
                     break
                 vol = self.app.opt.sound_music_volume/128.0
                 try:
@@ -603,13 +606,14 @@ class PyGameAudioClient(AbstractAudioClient):
         th.start()
 
     def updateSettings(self):
-        if not self.app.opt.sound or self.app.opt.sound_music_volume == 0:
+        if (not self.app.opt.sound or not self.app.opt.music or
+                self.app.opt.sound_music_volume == 0):
             if self.music:
                 self.music.stop()
                 self.music = None
         else:
             if not self.music:
-                self.music = self.mixer.music
+                self.music = self.mixer_music
                 th = Thread(target=self._playMusicLoop)
                 th.start()
             else:

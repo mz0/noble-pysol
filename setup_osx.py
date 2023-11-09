@@ -1,6 +1,6 @@
 """
-Usage:
-    python setup.py py2app
+Command to create a macOS app bundle:
+    PYTHONPATH=. python3 setup_osx.py py2app
 """
 
 import os
@@ -56,7 +56,9 @@ DATA_FILES = ['docs', 'data', 'locale', 'scripts', 'COPYING', 'README.md',
               ] + SOLVER
 RESOURCES = []
 FRAMEWORKS = [SOLVER_LIB_PATH] if SOLVER_LIB_PATH else []
-OPTIONS = dict(argv_emulation=True,
+# with argv_emulation=True, the app window is not shown when launched
+OPTIONS = dict(argv_emulation=False,
+               emulate_shell_environment=True,
                plist=PLIST,
                iconfile=ICON_FILE,
                resources=RESOURCES,

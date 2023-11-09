@@ -79,6 +79,10 @@ def init():
             pysollib.settings.DEBUG = 1
         print(('PySol debugging: set DEBUG to', pysollib.settings.DEBUG))
 
+    if '--version' in sys.argv:
+        print("PySol FC version {}".format(pysollib.settings.VERSION))
+        sys.exit(0)
+
     # init toolkit
     if '--gtk' in sys.argv:
         pysollib.settings.TOOLKIT = 'gtk'
@@ -106,11 +110,6 @@ def init():
             sys.exit("%s needs Tcl/Tk 8.4 or better (you have %s)" %
                      (pysollib.settings.TITLE, str(tkinter.TkVersion)))
         pysollib.settings.WIN_SYSTEM = root.tk.call('tk', 'windowingsystem')
-        if pysollib.settings.WIN_SYSTEM == 'aqua':
-            # TkAqua displays the console automatically in application
-            # bundles, so we hide it here.
-            from pysollib.macosx.appSupport import hideTkConsole
-            hideTkConsole(root)
         #
         if pysollib.settings.USE_TILE == 'auto':
             # check Tile
@@ -122,7 +121,7 @@ def init():
             else:
                 pysollib.settings.USE_TILE = True
         # "can't invoke event <<ThemeChanged>>: application has been destroyed"
-        # root.destroy()
+        root.destroy()
         tkinter._default_root = None
 
     # check FreeCell-Solver

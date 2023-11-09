@@ -65,7 +65,7 @@ class MfxDialog:  # ex. _ToplevelDialog
         # self.top.wm_maxsize(w-4, h-32)
         bind(self.top, "WM_DELETE_WINDOW", self.wmDeleteWindow)
 
-    def mainloop(self, focus=None, timeout=0, transient=True):
+    def mainloop(self, focus=None, timeout=0, transient=True, geometry=""):
         bind(self.top, "<Escape>", self.mCancel)
         bind(self.top, '<Alt-Key>', self.altKeyEvent)  # for accelerators
         if focus is not None:
@@ -78,6 +78,8 @@ class MfxDialog:  # ex. _ToplevelDialog
                 if traceback:
                     traceback.print_exc()
                 pass
+            if geometry != "":
+                self.top.geometry(geometry)
             if timeout > 0:
                 self.timer = after(self.top, timeout, self.mTimeout)
             try:
@@ -320,7 +322,11 @@ class PysolAboutDialog(MfxMessageDialog):
         url_label = ttk.Label(frame, text=kw.url, font=font,
                               foreground='blue', cursor='hand2')
         url_label.pack()
-        url_label.bind('<1>', self._urlClicked)
+        from pysollib.options import calcCustomMouseButtonsBinding
+        url_label.bind(
+            calcCustomMouseButtonsBinding('<{mouse_button1}>'),
+            self._urlClicked
+        )
         #
         focus = self.createButtons(bottom_frame, kw)
         self.mainloop(focus, kw.timeout)
@@ -504,7 +510,7 @@ class MfxScrolledCanvas:
     #
     #
 
-    def setTile(self, app, i, force=False):
+    def setTile(self, app, i, scale_method, force=False):
         tile = app.tabletile_manager.get(i)
         if tile is None or tile.error:
             return False
@@ -521,8 +527,19 @@ class MfxScrolledCanvas:
                     tile.color == app.opt.colors['table']):
                 return False
         #
-        if not self.canvas.setTile(tile.filename, tile.stretch,
-                                   tile.save_aspect):
+        stretch = tile.stretch
+        save_aspect = tile.save_aspect
+
+        if scale_method < 0 and stretch:
+            scale_method = app.opt.tabletile_scale_method
+        elif not stretch:
+            scale_method = 0
+
+        if scale_method > 0:
+            stretch = scale_method > 1
+            save_aspect = scale_method > 2
+
+        if not self.canvas.setTile(tile.filename, stretch, save_aspect):
             tile.error = True
             return False
 
@@ -608,7 +625,9 @@ class MfxScrolledCanvas:
         if self.canvas.busy:
             return
         sb = self.hbar
-        if float(first) <= 0 and float(last) >= 1:
+        # TODO - Setting this to .99 takes the scrollbar size into account.
+        # But there is probably a better way to do it.
+        if float(first) <= 0 and float(last) >= .99:
             sb.grid_remove()
             self.hbar_show = False
         else:
@@ -621,7 +640,8 @@ class MfxScrolledCanvas:
         if self.canvas.busy:
             return
         sb = self.vbar
-        if float(first) <= 0 and float(last) >= 1:
+        # TODO - See _setHbar above.
+        if float(first) <= 0 and float(last) >= .99:
             sb.grid_remove()
             self.vbar_show = False
         else:

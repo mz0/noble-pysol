@@ -21,15 +21,22 @@
 #
 # ---------------------------------------------------------------------------##
 
-
-import imp
-
 import pysollib.settings
 from pysollib.mfxutil import Struct, print_err
 from pysollib.mygettext import _, n_
 from pysollib.resource import CSI
 
 import six
+
+# Handle import of import library - different libraries are needed
+# for different Python versions.
+imp = None
+util = None
+try:
+    from importlib import util
+except ImportError:
+    util = None
+    import imp
 
 # ************************************************************************
 # * constants
@@ -48,6 +55,9 @@ class GI:
     GC_NAVAGRAHA_GANJIFA = CSI.TYPE_NAVAGRAHA_GANJIFA
     GC_DASHAVATARA_GANJIFA = CSI.TYPE_DASHAVATARA_GANJIFA
     GC_TRUMP_ONLY = CSI.TYPE_TRUMP_ONLY
+    GC_MATCHING = CSI.TYPE_MATCHING
+
+    NUM_CATEGORIES = CSI.TYPE_MATCHING
 
     # game type
     GT_1DECK_TYPE = 0
@@ -57,6 +67,7 @@ class GI:
     GT_BAKERS_DOZEN = 4
     GT_BELEAGUERED_CASTLE = 5
     GT_CANFIELD = 6
+    GT_CRIBBAGE_TYPE = 37
     GT_DASHAVATARA_GANJIFA = 7
     GT_FAN_TYPE = 8
     GT_FORTY_THIEVES = 9
@@ -64,8 +75,10 @@ class GI:
     GT_GOLF = 11
     GT_GYPSY = 12
     GT_HANAFUDA = 13
+    GT_HANOI = 35
     GT_HEXADECK = 14
     GT_KLONDIKE = 15
+    GT_LIGHTS_OUT = 38
     GT_MAHJONGG = 16
     GT_MATRIX = 17
     GT_MEMORY = 18
@@ -75,17 +88,20 @@ class GI:
     GT_NAVAGRAHA_GANJIFA = 22
     GT_NUMERICA = 23
     GT_PAIRING_TYPE = 24
+    GT_PEGGED = 36
     GT_POKER_TYPE = 25
     GT_PUZZLE_TYPE = 26
     GT_RAGLAN = 27
     GT_ROW_TYPE = 28
+    GT_SHISEN_SHO = 34
     GT_SIMPLE_TYPE = 29
     GT_SPIDER = 30
     GT_TAROCK = 31
     GT_TERRACE = 32
     GT_YUKON = 33
-    GT_SHISEN_SHO = 34
+
     GT_CUSTOM = 40
+
     # extra flags
     GT_BETA = 1 << 12      # beta version of game driver
     GT_CHILDREN = 1 << 13      # *not used*
@@ -98,6 +114,7 @@ class GI:
     GT_SCORE = 1 << 20      # game has some type of scoring
     GT_SEPARATE_DECKS = 1 << 21
     GT_XORIGINAL = 1 << 22      # original games by other people, not playable
+    GT_STRIPPED = 1 << 23
     # skill level
     SL_LUCK = 1
     SL_MOSTLY_LUCK = 2
@@ -128,6 +145,32 @@ class GI:
         GT_2DECK_TYPE:          n_("Two-Deck games"),
         GT_3DECK_TYPE:          n_("Three-Deck games"),
         GT_4DECK_TYPE:          n_("Four-Deck games"),
+
+        GT_MAHJONGG:            n_("Mahjongg"),
+        GT_HANAFUDA:            n_("Hanafuda"),
+        GT_MUGHAL_GANJIFA:      n_("Mughal Ganjifa"),
+        GT_DASHAVATARA_GANJIFA: n_("Dashavatara Ganjifa"),
+
+        GT_CRIBBAGE_TYPE:       n_("Cribbage"),
+        GT_HEXADECK:            n_("Hex A Deck"),
+        GT_LIGHTS_OUT:          n_("Lights Out"),
+        GT_MATRIX:              n_("Matrix"),
+        GT_MEMORY:              n_("Memory"),
+        GT_PEGGED:              n_("Pegged"),
+        GT_POKER_TYPE:          n_("Poker"),
+        GT_SHISEN_SHO:          n_("Shisen-Sho"),
+        GT_TAROCK:              n_("Tarock"),
+        GT_HANOI:               n_("Tower of Hanoi"),
+
+        GT_CUSTOM:              n_("Custom"),
+    }
+
+    SKILL_LEVELS = {
+        SL_LUCK: _('Luck only'),
+        SL_MOSTLY_LUCK: _('Mostly luck'),
+        SL_BALANCED: _('Balanced'),
+        SL_MOSTLY_SKILL: _('Mostly skill'),
+        SL_SKILL: _('Skill only'),
     }
 
     #      SELECT_GAME_BY_TYPE = []
@@ -138,43 +181,37 @@ class GI:
     #              (name, lambda gi, gt=gt: gi.si.game_type == gt))
     #      SELECT_GAME_BY_TYPE = tuple(SELECT_GAME_BY_TYPE)
 
+    def _gen_select(title, game_type):
+        def _callback(gi, gt=game_type):
+            return gi.si.game_type == gt
+        return (title, _callback)
+
     SELECT_GAME_BY_TYPE = (
-        (n_("Baker's Dozen type"), lambda gi,
-            gt=GT_BAKERS_DOZEN: gi.si.game_type == gt),
-        (n_("Beleaguered Castle type"),
-            lambda gi, gt=GT_BELEAGUERED_CASTLE: gi.si.game_type == gt),
-        (n_("Canfield type"),
-            lambda gi, gt=GT_CANFIELD: gi.si.game_type == gt),
-        (n_("Fan type"), lambda gi, gt=GT_FAN_TYPE: gi.si.game_type == gt),
-        (n_("Forty Thieves type"),
-            lambda gi, gt=GT_FORTY_THIEVES: gi.si.game_type == gt),
-        (n_("FreeCell type"),
-            lambda gi, gt=GT_FREECELL: gi.si.game_type == gt),
-        (n_("Golf type"), lambda gi, gt=GT_GOLF: gi.si.game_type == gt),
-        (n_("Gypsy type"), lambda gi, gt=GT_GYPSY: gi.si.game_type == gt),
-        (n_("Klondike type"),
-            lambda gi, gt=GT_KLONDIKE: gi.si.game_type == gt),
-        (n_("Montana type"), lambda gi, gt=GT_MONTANA: gi.si.game_type == gt),
-        (n_("Napoleon type"),
-            lambda gi, gt=GT_NAPOLEON: gi.si.game_type == gt),
-        (n_("Numerica type"),
-            lambda gi, gt=GT_NUMERICA: gi.si.game_type == gt),
-        (n_("Pairing type"),
-            lambda gi, gt=GT_PAIRING_TYPE: gi.si.game_type == gt),
-        (n_("Raglan type"), lambda gi, gt=GT_RAGLAN: gi.si.game_type == gt),
-        (n_("Simple games"),
-            lambda gi, gt=GT_SIMPLE_TYPE: gi.si.game_type == gt),
-        (n_("Spider type"), lambda gi, gt=GT_SPIDER: gi.si.game_type == gt),
-        (n_("Terrace type"), lambda gi, gt=GT_TERRACE: gi.si.game_type == gt),
-        (n_("Yukon type"), lambda gi, gt=GT_YUKON: gi.si.game_type == gt),
-        (n_("One-Deck games"),
-            lambda gi, gt=GT_1DECK_TYPE: gi.si.game_type == gt),
-        (n_("Two-Deck games"),
-            lambda gi, gt=GT_2DECK_TYPE: gi.si.game_type == gt),
-        (n_("Three-Deck games"),
-            lambda gi, gt=GT_3DECK_TYPE: gi.si.game_type == gt),
-        (n_("Four-Deck games"),
-            lambda gi, gt=GT_4DECK_TYPE: gi.si.game_type == gt),
+        _gen_select(title=n_("Baker's Dozen type"), game_type=GT_BAKERS_DOZEN),
+        _gen_select(
+            title=n_("Beleaguered Castle type"),
+            game_type=GT_BELEAGUERED_CASTLE),
+        _gen_select(title=n_("Canfield type"), game_type=GT_CANFIELD),
+        _gen_select(title=n_("Fan type"), game_type=GT_FAN_TYPE),
+        _gen_select(
+            title=n_("Forty Thieves type"), game_type=GT_FORTY_THIEVES),
+        _gen_select(title=n_("FreeCell type"), game_type=GT_FREECELL),
+        _gen_select(title=n_("Golf type"), game_type=GT_GOLF),
+        _gen_select(title=n_("Gypsy type"), game_type=GT_GYPSY),
+        _gen_select(title=n_("Klondike type"), game_type=GT_KLONDIKE),
+        _gen_select(title=n_("Montana type"), game_type=GT_MONTANA),
+        _gen_select(title=n_("Napoleon type"), game_type=GT_NAPOLEON),
+        _gen_select(title=n_("Numerica type"), game_type=GT_NUMERICA),
+        _gen_select(title=n_("Pairing type"), game_type=GT_PAIRING_TYPE),
+        _gen_select(title=n_("Raglan type"), game_type=GT_RAGLAN),
+        _gen_select(title=n_("Simple games"), game_type=GT_SIMPLE_TYPE),
+        _gen_select(title=n_("Spider type"), game_type=GT_SPIDER),
+        _gen_select(title=n_("Terrace type"), game_type=GT_TERRACE),
+        _gen_select(title=n_("Yukon type"), game_type=GT_YUKON),
+        _gen_select(title=n_("One-Deck games"), game_type=GT_1DECK_TYPE),
+        _gen_select(title=n_("Two-Deck games"), game_type=GT_2DECK_TYPE),
+        _gen_select(title=n_("Three-Deck games"), game_type=GT_3DECK_TYPE),
+        _gen_select(title=n_("Four-Deck games"), game_type=GT_4DECK_TYPE),
     )
 
     SELECT_ORIGINAL_GAME_BY_TYPE = (
@@ -228,20 +265,29 @@ class GI:
     )
 
     SELECT_SPECIAL_GAME_BY_TYPE = (
-        (n_("Shisen-Sho"), lambda gi, gt=GT_SHISEN_SHO: gi.si.game_type == gt),
+        (n_("Cribbage type"),
+            lambda gi, gt=GT_CRIBBAGE_TYPE: gi.si.game_type == gt),
         (n_("Hex A Deck type"),
             lambda gi, gt=GT_HEXADECK: gi.si.game_type == gt),
+        (n_("Lights Out type"),
+            lambda gi, gt=GT_LIGHTS_OUT: gi.si.game_type == gt),
         (n_("Matrix type"), lambda gi, gt=GT_MATRIX: gi.si.game_type == gt),
         (n_("Memory type"), lambda gi, gt=GT_MEMORY: gi.si.game_type == gt),
+        (n_("Pegged type"), lambda gi, gt=GT_PEGGED: gi.si.game_type == gt),
         (n_("Poker type"), lambda gi, gt=GT_POKER_TYPE: gi.si.game_type == gt),
         (n_("Puzzle type"),
             lambda gi, gt=GT_PUZZLE_TYPE: gi.si.game_type == gt),
+        (n_("Shisen-Sho type"),
+            lambda gi, gt=GT_SHISEN_SHO: gi.si.game_type == gt),
         (n_("Tarock type"), lambda gi, gt=GT_TAROCK: gi.si.game_type == gt),
+        (n_("Tower of Hanoi type"),
+            lambda gi, gt=GT_HANOI: gi.si.game_type == gt),
     )
 
     # These obsolete gameids have been used in previous versions of
     # PySol and are no longer supported because of internal changes
-    # (mainly rule changes). The game has been assigned a new id.
+    # (mainly rule changes or removed duplicate games). The game
+    # has been assigned a new id.
     PROTECTED_GAMES = {
          22:  106,              # Double Canfield
          32:  901,              # La Belle Lucie (Midnight Oil)
@@ -249,13 +295,31 @@ class GI:
          72:  115,              # Little Forty
          75:  126,              # Red and Black
          82:  901,              # La Belle Lucie (Midnight Oil)
-         # 155: 5034,              # Mahjongg - Flying Dragon
-         # 156: 5035,              # Mahjongg - Fortress Towers
-         262:  105,              # Canfield
-         902:   88,              # Trefoil
-         904:   68,              # Lexington Harp
-         297:  631,              # Alternation/Alternations
+         155: 5034,             # Mahjongg - Flying Dragon
+         156: 5035,             # Mahjongg - Fortress Towers
+         262: 105,              # Canfield
+         283: 25,               # Gargantua/Jumbo
+         902: 88,               # Trefoil
+         904: 68,               # Lexington Harp
+         237: 22231,            # Three Peaks
+         297: 631,              # Alternation/Alternations
+         526: 447,              # Australian/Outback Patience
+         640: 566,              # Hypotenuse/Brazilian Patience
     }
+
+    # For games by compatibility, note that missing games may actually
+    # be present under alternate names.  This needs to be verified.
+    # If such a game is found, the alternate name should be added if
+    # possible, and the game recorded in the compatibility section
+    # appropriately.
+    #
+    # Note that there are instances where another program's
+    # implementation of a game uses different rules than PySol, or
+    # has a different game with the same name.  These are marked
+    # as missing.
+    #
+    # If a game is listed as missing from multiple collections below,
+    # adding it should be a priority.
 
     GAMES_BY_COMPATIBILITY = (
         # Atari ST Patience game v2.13 (we have 10 out of 10 games)
@@ -274,17 +338,28 @@ class GI:
         #     41, 42, 43, 58, 59, 92, 93, 94, 95, 96,
         #     100, 105, 111, 112, 113, 130, 200, 201,
         # )),
-        # Gnome AisleRiot 2.2.0 (we have 61 out of 70 games)
+        # Gnome AisleRiot 2.2.0 (we have 65 out of 70 games)
+        # Gnome AisleRiot 3.22.7
         #   still missing:
-        #         Gay gordons, Helsinki,
-        #         Isabel, Labyrinth, Quatorze, Thieves,
-        #         Treize, Valentine, Yeld.
+        #       Hamilton, Labyrinth, Thieves, Treize, Valentine, Wall
         ("Gnome AisleRiot", (
-            1, 2, 8, 9, 11, 12, 19, 24, 27, 29, 31, 33, 34, 35, 36, 40,
-            41, 42, 43, 45, 48, 58, 59, 67, 89, 91, 92, 93, 94, 95, 96,
-            100, 105, 111, 112, 113, 130, 139, 144, 146, 147, 148, 200,
-            201, 206, 224, 225, 229, 230, 233, 257, 258, 280, 281, 282,
-            283, 284, 551, 552, 553, 737,
+            1, 2, 8, 9, 11, 12, 13, 19, 24, 27, 29, 31, 33, 34, 35, 36,
+            38, 40, 41, 42, 43, 45, 48, 58, 65, 67, 89, 91, 92, 93, 94,
+            95, 96, 97, 100, 104, 105, 111, 112, 113, 130, 135, 139, 144,
+            146, 147, 148, 200, 201, 206, 224, 225, 229, 230, 233, 257,
+            258, 277, 280, 281, 282, 283, 284, 334, 384, 479, 495, 551,
+            552, 553, 572, 593, 674, 700, 715, 716, 737, 772, 810, 819,
+            824, 829, 859, 874, 22231,
+        )),
+
+        # Hoyle Card Games
+        # still missing:
+        #       Bowling (Schwader version), Euchre, Slide, Arcade games
+        ("Hoyle Card Games", (
+            2, 8, 9, 11, 13, 19, 24, 29, 31, 34, 36, 38, 42, 53, 57, 64,
+            105, 112, 126, 133, 134, 135, 139, 147, 173, 222, 234, 235,
+            256, 258, 296, 330, 398, 484, 619, 657, 737, 784, 800, 805,
+            901, 903,
         )),
 
         #  KDE Patience 0.7.3 from KDE 1.1.2 (we have 6 out of 9 games)
@@ -294,8 +369,73 @@ class GI:
         #  KDE Patience 2.0 from KDE 2.2beta1 (we have 12 out of 14 games)
         # ("KDE Patience", (1, 2, 7, 8, 18, 19, 23, 36, 50, 256, 261, 903,)),
         # KDE Patience 2.0 from KDE 3.1.1 (we have 15 out of 15 games)
-        ("KDE Patience", (1, 2, 7, 8, 18, 19, 23, 36, 50,
-                          256, 261, 277, 278, 279, 903,)),
+        # ("KDE Patience", (1, 2, 7, 8, 18, 19, 23, 36, 50,
+        #                256, 261, 277, 278, 279, 903,)),
+        # Now KPatience - Calculation and Napoleon's Tomb have been removed.
+        ("KPatience", (1, 2, 7, 8, 11, 18, 19, 23, 36, 50, 261, 278, 903,)),
+
+        # Microsoft Solitaire (we have all 5 games)
+        ("Microsoft Solitaire Collection", (2, 8, 11, 38, 22231,)),
+
+        # Solitaire Royale
+        # still missing: Pairs
+        ("Solitaire Royale", (
+            2, 36, 38, 105, 128, 176, 256, 328, 484, 835
+        )),
+
+        # Solitude for Windows
+        # still missing:
+        #       Bowling (Sackson version), Four Kingdoms, Icicles
+        ("Solitude for Windows", (
+            2, 8, 11, 13, 19, 24, 25, 29, 30, 31, 33, 34, 36, 38, 42,
+            43, 45, 48, 50, 53, 56, 57, 58, 62, 64, 67, 69, 71, 86, 87,
+            88, 89, 95, 96, 97, 98, 100, 104, 105, 107, 109, 112, 125,
+            128, 133, 134, 135, 139, 146, 147, 171, 172, 173, 221, 222,
+            224, 228, 233, 234, 235, 256, 257, 258, 282, 314, 327, 330,
+            355, 356, 398, 406, 414, 418, 434, 437, 484, 593, 715, 716,
+            737, 751, 805, 830, 845, 847, 888, 901, 903
+        )),
+
+        # XM Solitaire
+        # NOTE: This collection has a lot of games with the same name as
+        # established games but completely different rules, or more obscure
+        # variations with more generic names.  As such rules/names may
+        # conflict with other attempts to add games in the future, games
+        # from XM Solitaire should be researched before being added to PySol.
+        #
+        # still missing:
+        #       Ace of Hearts, Agnes Three, Antares, Avenue, Baker's Fan,
+        #       Baker's Spider, Bedeviled, Binding, Black Holes,
+        #       Black Spider, California, Cascade, Club, Color Cell,
+        #       Cornelius, Desert Fox, Deuces and Queens, Double Antares,
+        #       Double Antarctica, Double Arctica, Double Baker's Spider,
+        #       Double Cascade, Double Line 8, Double Majesty,
+        #       Double Spidercells, Doublet Cell 5, Doubt, Dream Fan,
+        #       Dumfries Cell, Falcon Wing, Fan Nine, Fanny 6, Four By Ten,
+        #       FreeCell AK, Gaps Alter, Gaps Diff, George V,
+        #       Grandmother's Clock, In a Frame, Inverted FreeCell, Kings,
+        #       Klondike FreeCell, La Cabane, La Double Entente,
+        #       Little Gazette, Magic FreeCell, Mini Gaps, Montreal,
+        #       Napoleon at Iena, Napoleon at Waterloo, Napoleon's Guards,
+        #       Nationale, Oasis, Opera, Ordered Suits, Osmotic FreeCell,
+        #       Pair FreeCell, Pairs 2, Petal, Reserved Thirteens,
+        #       Sea Spider, Sept Piles 0, Short Solitaire,
+        #       Simple Alternations, Smart Osmosis, Step By Step, Strategy 7,
+        #       Stripped FreeCell, Tarantula, Triple Dispute, Trusty Twenty,
+        #       Two Ways 3, Up Or Down, Versailles, Vertical FreeCell,
+        #       Wasp Baby, Yukon FreeCell
+        ("XM Solitaire", (
+            2, 8, 9, 13, 15, 18, 19, 20, 29, 30, 31, 34, 36, 38, 41, 42,
+            45, 46, 50, 53, 54, 56, 57, 64, 77, 78, 86, 96, 97, 98, 105,
+            110, 112, 124, 145, 220, 222, 223, 224, 228, 231, 233, 234,
+            235, 236, 257, 258, 264, 265, 267, 270, 271, 290, 291, 292,
+            303, 309, 314, 318, 320, 322, 324, 325, 336, 338, 341, 363,
+            364, 372, 376, 383, 384, 385, 386, 390, 391, 393, 398, 405,
+            415, 416, 425, 451, 453, 461, 464, 466, 467, 476, 480, 484,
+            511, 512, 513, 516, 561, 610, 625, 629, 631, 638, 641, 647,
+            650, 655, 678, 684, 734, 751, 784, 825, 829, 834, 837, 844,
+            862, 867, 880, 889, 901,
+        )),
 
         # xpat2 1.06 (we have 14 out of 16 games)
         #   still missing: Michael's Fantasy, modCanfield
@@ -307,25 +447,38 @@ class GI:
     GAMES_BY_INVENTORS = (
         ("Paul Alfille", (8,)),
         ("C.L. Baker", (45,)),
-        ("David Bernazzani", (314,)),
-        ("Gordon Bower", (763,)),
+        ("David Bernazzani", (314, 830,)),
+        ("Gordon Bower", (763, 783, 852,)),
         ("Art Cabral", (9,)),
+        ("Richard A. Canfield", (105, 835,)),
+        ("Lillian Davies and Christa Baran", (605,)),
+        ("Ann Edwards", (869,)),
         ("Robert Harbin", (381,)),
-        ("Robert Hogue", (22216,)),
-        ("Charles Jewell", (220, 309,)),
-        ("Michael Keller", (592,)),
+        ("Robert Hogue", (22216, 22217, 22218, 22231,)),
+        ("Erik den Hollander", (344, 544,)),
+        ("Rick Holzgrafe", (756, 757,)),
+        ("Charles Jewell", (220, 309, 894,)),
+        ("Michael Keller", (592, 883,)),
         ("Fred Lunde", (459,)),
+        ("Mark Masten", (811,)),
         ("Albert Morehead and Geoffrey Mott-Smith", (25, 42, 48, 173, 282,
-                                                     303, 362, 547, 738)),
-        ("David Parlett", (64, 98, 294, 338, 654, 674,)),
-        ("Randy Rasa", (187, 190, 191, 192,)),
-        ("Captain Jeffrey T. Spaulding", (400,)),
+                                                     303, 362, 547, 738,
+                                                     845)),
+        ("Toby Ord", (788,)),
+        ("David Parlett", (64, 98, 294, 338, 654, 796, 812, 844)),
+        ("Randy Rasa", (187, 188, 190, 191, 192,)),
+        ("Gregg Seelhoff", (347,)),
         ("Adam Selene", (366,)),
+        ("Jim Sizelove", (555001,)),
+        ("Captain Jeffrey T. Spaulding", (400,)),
         ("John Stoneham", (201,)),
         ("Bryan Stout", (655,)),
         ("Bill Taylor", (349,)),
+        ("Peter Voke", (876,)),
         ("Thomas Warfield", (189, 264, 300, 320, 336, 337, 359,
-                             415, 427, 458, 495, 496, 497, 508,)),
+                             415, 427, 458, 495, 496, 497, 508,
+                             800, 814, 820, 825, 889,)),
+        ("Mary Whitmore Jones", (421, 624,)),
         )
 
     GAMES_BY_PYSOL_VERSION = (
@@ -357,7 +510,8 @@ class GI:
         ("3.21", (143, 144)),
         ("3.30", (145, 146, 147, 148, 149, 150, 151)),
         ("3.40", (152, 153, 154)),
-        ("4.00", (157, 158, 159, 160, 161, 162, 163, 164)),
+        ("4.00", (5034, 5035, 157, 158, 159, 160, 161, 162, 163, 164)),
+        ('4.10', tuple(range(5001, 5034)) + tuple(range(5036, 5103))),
         ("4.20", (165, 166, 167, 168, 169, 170, 171, 172, 173, 174,
                   175, 176, 177, 178)),
         ("4.30", (179, 180, 181, 182, 183, 184)),
@@ -368,7 +522,7 @@ class GI:
                   210, 211, 212, 213, 214, 215, 216, 217, 218, 219,
                   220, 221, 222, 223, 224, 225, 226, 227, 228, 229,
                   230, 231, 232, 233, 234, 235, 236)),
-        ("4.70", (237,)),
+        ("4.70", (237, 22231)),
         ('fc-0.5.0', (  # moved from Ultrasol
                       # 121, 122, 187, 188, 189, 190, 191, 192, 194, 197, 198,
                       5301, 5302, 9011, 11001, 11002, 11003, 11004, 11005,
@@ -386,7 +540,9 @@ class GI:
                       16666, 16667, 16668, 16669, 16670, 16671, 16672, 16673,
                       16674, 16675, 16676, 16677, 16678, 16679, 16680, 22216,
                       22223, 22224, 22225, 22226, 22227, 22228, 22229, 22230,
-                      22231, 22232,)),
+                      22232, ) +
+         tuple(range(5200, 5280)) + tuple(range(5401, 5415)) +
+         tuple(range(5801, 5811)) + tuple(range(5901, 5906))),
         ('fc-0.8.0', tuple(range(263, 323))),  # exclude 297
         ('fc-0.9.0', tuple(range(323, 421))),
         ('fc-0.9.1', tuple(range(421, 441))),
@@ -396,11 +552,21 @@ class GI:
         ('fc-1.0',   tuple(range(671, 711))),
         ('fc-1.1',   tuple(range(711, 759))),
         ('fc-2.0',   tuple(range(11011, 11014)) + tuple(range(759, 767))),
+        ('fc-2.1',   tuple(range(767, 774)) + (1900, 1901, 555001,)),
+        ('fc-2.8',   (343001,)),
+        ('fc-2.12',   tuple(range(774, 811)) + (16681,) +
+         tuple(range(22217, 22219))),
+        ('fc-2.14', tuple(range(811, 827))),
+        ('fc-2.15', tuple(range(827, 855)) + tuple(range(22400, 22407))),
+        ('fc-2.20', tuple(range(855, 897))),
+        ('fc-2.21', tuple(range(897, 900)) + tuple(range(11014, 11017)) +
+         tuple(range(13160, 13163)) + (16682,))
     )
 
     # deprecated - the correct way is to or a GI.GT_XXX flag
     # in the registerGame() call
-    _CHILDREN_GAMES = [16, 33, 55, 90, 91, 96, 97, 176, 903, ]
+    _CHILDREN_GAMES = [16, 33, 55, 90, 91, 96, 97, 176, 328, 329, 862, 865,
+                       886, 903, ]
 
     _OPEN_GAMES = []
 
@@ -425,6 +591,7 @@ class GI:
         5034,  # Mahjongg Flying Dragon
         5401,  # Mahjongg Taipei
         12345,  # Oonsoo
+        22231,  # Three Peaks
     ]
 
 
@@ -475,7 +642,7 @@ class GameInfo(Struct):
         if pysollib.settings.TRANSLATE_GAME_NAMES:
             altnames = [_(n) for n in altnames]
         #
-        if not (1 <= category <= 9):
+        if not (1 <= category <= GI.NUM_CATEGORIES):
             if game_type == GI.GT_HANAFUDA:
                 category = GI.GC_HANAFUDA
             elif game_type == GI.GT_TAROCK:
@@ -593,6 +760,7 @@ class GameManager:
         # if 0 and gi.si.game_flags & GI.GT_XORIGINAL:
         #     return
         # print gi.id, gi.name
+        gi.altnames = sorted(gi.altnames)
         self.__all_games[gi.id] = gi
         self.__all_gamenames[gi.name] = gi
         for n in gi.altnames:
@@ -643,13 +811,13 @@ class GameManager:
         if self.__games_by_name is None:
             l1, l2, l3 = [], [], []
             for id, gi in self.__games.items():
-                name = gi.name  # .lower()
+                name = gi.name .lower()
                 l1.append((name, id))
                 if gi.name != gi.short_name:
-                    name = gi.short_name  # .lower()
+                    name = gi.short_name.lower()
                 l2.append((name, id))
                 for n in gi.altnames:
-                    name = n  # .lower()
+                    name = n.lower()
                     l3.append((name, id, n))
             l1.sort()
             l2.sort()
@@ -694,10 +862,21 @@ def registerGame(gameinfo):
     return gameinfo
 
 
+def hideGame(game):
+    game.gameinfo.si.game_type = GI.GT_HIDDEN
+    registerGame(game.gameinfo)
+
+
 def loadGame(modname, filename, check_game=False):
     # print "load game", modname, filename
     GAME_DB.check_game = check_game
     GAME_DB.current_filename = filename
-    imp.load_source(modname, filename)
+    if util is not None:
+        spec = util.spec_from_file_location(modname, filename)
+        module = util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    else:
+        imp.load_source(modname, filename)
+
     # execfile(filename, globals(), globals())
     GAME_DB.current_filename = None

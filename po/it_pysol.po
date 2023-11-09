@@ -11,17 +11,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it_pysol\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-25 11:41+0200\n"
-"PO-Revision-Date: 2011-07-23 14:48+0200\n"
+"POT-Creation-Date: 2021-12-10 10:19-0500\n"
+"PO-Revision-Date: 2023-06-29 22:24-0400\n"
 "Last-Translator: Giuliano Colla <giuliano.colla@gmail.com>\n"
 "Language-Team: Italiano <it@li.org>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Generated-By: pygettext.py 1.6con\n"
-"Plural-Forms:  nplurals=2; plural=(n != 1);\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Poedit 3.3.1\n"
 
 #: pysollib/actions.py:232 pysollib/kivy/menubar.py:292
 #: pysollib/kivy/toolbar.py:191 pysollib/tile/toolbar.py:176
@@ -62,19 +62,19 @@ msgstr ""
 "Introdurre numero"
 
 #: pysollib/actions.py:293 pysollib/app.py:524 pysollib/app.py:818
-#: pysollib/game/__init__.py:1317 pysollib/game/__init__.py:2538
+#: pysollib/game/__init__.py:1341 pysollib/game/__init__.py:2562
 #: pysollib/kivy/tkhtml.py:691 pysollib/kivy/tkstats.py:254
 #: pysollib/kivy/tkwidget.py:97 pysollib/pysolgtk/playeroptionsdialog.py:79
 #: pysollib/pysolgtk/selecttile.py:158 pysollib/pysolgtk/tkhtml.py:542
 #: pysollib/pysolgtk/tkstats.py:557 pysollib/pysolgtk/tkwidget.py:151
 #: pysollib/tile/fontsdialog.py:140 pysollib/tile/fontsdialog.py:202
-#: pysollib/tile/menubar.py:111 pysollib/tile/playeroptionsdialog.py:89
+#: pysollib/tile/menubar.py:112 pysollib/tile/playeroptionsdialog.py:89
 #: pysollib/tile/selectcardset.py:321 pysollib/tile/selectcardset.py:545
 #: pysollib/tile/selecttile.py:154 pysollib/tile/soundoptionsdialog.py:149
 #: pysollib/tile/soundoptionsdialog.py:188 pysollib/tile/timeoutsdialog.py:92
 #: pysollib/tile/tkstats.py:101 pysollib/tile/tkstats.py:541
 #: pysollib/tile/tkstats.py:646 pysollib/tile/tkstats.py:727
-#: pysollib/tile/tkwidget.py:138 pysollib/tile/tkwidget.py:359
+#: pysollib/tile/tkwidget.py:137 pysollib/tile/tkwidget.py:358
 #: pysollib/tile/wizarddialog.py:143 pysollib/tk/fontsdialog.py:134
 #: pysollib/tk/fontsdialog.py:200 pysollib/tk/playeroptionsdialog.py:64
 #: pysollib/tk/playeroptionsdialog.py:138 pysollib/tk/selectcardset.py:313
@@ -96,9 +96,9 @@ msgstr "&Ok"
 msgid "&Next number"
 msgstr "&Numero successivo"
 
-#: pysollib/actions.py:293 pysollib/app.py:525 pysollib/game/__init__.py:1317
-#: pysollib/game/__init__.py:1991 pysollib/game/__init__.py:2007
-#: pysollib/game/__init__.py:2015 pysollib/game/__init__.py:2022
+#: pysollib/actions.py:293 pysollib/app.py:525 pysollib/game/__init__.py:1341
+#: pysollib/game/__init__.py:2015 pysollib/game/__init__.py:2031
+#: pysollib/game/__init__.py:2039 pysollib/game/__init__.py:2046
 #: pysollib/kivy/menubar.py:2110 pysollib/kivy/menubar.py:2113
 #: pysollib/kivy/selectcardset.py:57
 #: pysollib/pysolgtk/playeroptionsdialog.py:79
@@ -106,9 +106,9 @@ msgstr "&Numero successivo"
 #: pysollib/pysolgtk/selecttile.py:158 pysollib/tile/fontsdialog.py:140
 #: pysollib/tile/fontsdialog.py:202 pysollib/tile/playeroptionsdialog.py:89
 #: pysollib/tile/selectcardset.py:321 pysollib/tile/selectcardset.py:543
-#: pysollib/tile/selectgame.py:306 pysollib/tile/selectgame.py:436
+#: pysollib/tile/selectgame.py:306 pysollib/tile/selectgame.py:437
 #: pysollib/tile/selecttile.py:154 pysollib/tile/soundoptionsdialog.py:149
-#: pysollib/tile/timeoutsdialog.py:92 pysollib/tile/tkwidget.py:359
+#: pysollib/tile/timeoutsdialog.py:92 pysollib/tile/tkwidget.py:358
 #: pysollib/tile/wizarddialog.py:143 pysollib/tk/fontsdialog.py:134
 #: pysollib/tk/fontsdialog.py:200 pysollib/tk/menubar.py:89
 #: pysollib/tk/menubar.py:90 pysollib/tk/playeroptionsdialog.py:64
@@ -207,70 +207,70 @@ msgstr ""
 "\n"
 "%(filename)s"
 
-#: pysollib/actions.py:581
+#: pysollib/actions.py:585
 #, fuzzy, python-format
 msgid "%(app)s Demo Statistics for %(game)s"
 msgstr "Statistiche per "
 
-#: pysollib/actions.py:582
+#: pysollib/actions.py:586
 #, python-format
 msgid "Statistics for %(game)s"
 msgstr "Statistiche per %(game)s"
 
-#: pysollib/actions.py:587
+#: pysollib/actions.py:591
 #, fuzzy, python-format
 msgid "%(app)s Demo Statistics"
 msgstr "Statistiche Demo"
 
-#: pysollib/actions.py:588 pysollib/stats.py:202
+#: pysollib/actions.py:592 pysollib/stats.py:202
 #, python-format
 msgid "Statistics for %(player)s"
 msgstr "Statistiche per %(player)s"
 
-#: pysollib/actions.py:592
+#: pysollib/actions.py:596
 #, fuzzy, python-format
 msgid "%(app)s Demo Full log"
 msgstr "&Demo logo"
 
-#: pysollib/actions.py:593 pysollib/stats.py:235
+#: pysollib/actions.py:597 pysollib/stats.py:235
 #, python-format
 msgid "Full log for %(player)s"
 msgstr "Log completo di %(player)s"
 
-#: pysollib/actions.py:596
+#: pysollib/actions.py:600
 #, fuzzy, python-format
 msgid "%(app)s Demo Session log"
 msgstr "Log della sessione"
 
-#: pysollib/actions.py:597 pysollib/stats.py:242
+#: pysollib/actions.py:601 pysollib/stats.py:242
 #, python-format
 msgid "Session log for %(player)s"
 msgstr "Log della sessione di %(player)s"
 
 #. TRANSLATORS: eg. top 10 or top 5 results for a certain game
-#: pysollib/actions.py:601
+#: pysollib/actions.py:605
 #, fuzzy, python-format
 msgid "%(app)s Demo Top %(tops)d for %(game)s"
 msgstr "Statistiche per "
 
-#: pysollib/actions.py:602
+#: pysollib/actions.py:606
 #, python-format
 msgid "Top %(tops)d for %(game)s"
 msgstr ""
 
-#: pysollib/actions.py:606
+#: pysollib/actions.py:610
 msgid "Game Info"
 msgstr "Informazioni"
 
-#: pysollib/actions.py:609
+#: pysollib/actions.py:613
 msgid "Statistics progression"
 msgstr "Statistiche progressive"
 
-#: pysollib/actions.py:627
+#: pysollib/actions.py:631
 msgid "Reset all statistics"
 msgstr "Pulisci tutte le statistiche"
 
-#: pysollib/actions.py:628
+#: pysollib/actions.py:632
 #, python-format
 msgid ""
 "Reset ALL statistics and logs for player\n"
@@ -279,11 +279,11 @@ msgstr ""
 "Eliminare TUTTE le statistiche di\n"
 "%(player)s ?"
 
-#: pysollib/actions.py:638
+#: pysollib/actions.py:642
 msgid "Reset game statistics"
 msgstr "Pulisci le statistiche del gioco"
 
-#: pysollib/actions.py:639
+#: pysollib/actions.py:643
 #, python-format
 msgid ""
 "Reset statistics and logs for player\n"
@@ -296,23 +296,23 @@ msgstr ""
 "e del gioco\n"
 "%(game)s ?"
 
-#: pysollib/actions.py:704
+#: pysollib/actions.py:711
 msgid "Play demo"
 msgstr "Esegui Demo"
 
-#: pysollib/actions.py:716
+#: pysollib/actions.py:723
 msgid "Set player options"
 msgstr "Opzioni giocatore"
 
-#: pysollib/actions.py:732 data/pysolfc.glade:1986
+#: pysollib/actions.py:739 data/pysolfc.glade:1986
 msgid "Set colors"
 msgstr "Scelta dei colori"
 
-#: pysollib/actions.py:750
+#: pysollib/actions.py:757
 msgid "Set fonts"
 msgstr "Scelta dei caratteri"
 
-#: pysollib/actions.py:760 data/pysolfc.glade:1493
+#: pysollib/actions.py:767 data/pysolfc.glade:1493
 msgid "Set timeouts"
 msgstr "Scelta tempi massimi"
 
@@ -321,11 +321,14 @@ msgstr "Scelta tempi massimi"
 msgid "can't find game: %(game)s"
 msgstr "non trovo il gioco: %(game)s"
 
-#: pysollib/app.py:526 pysollib/game/__init__.py:1991
-#: pysollib/game/__init__.py:2007 pysollib/game/__init__.py:2015
-#: pysollib/game/__init__.py:2022 pysollib/ui/tktile/menubar.py:300
+#: pysollib/app.py:526 pysollib/game/__init__.py:2015
+#: pysollib/game/__init__.py:2031 pysollib/game/__init__.py:2039
+#: pysollib/game/__init__.py:2046 pysollib/ui/tktile/menubar.py:300
 msgid "&New game"
 msgstr "&Nuovo gioco"
+
+msgid "&Back to game"
+msgstr ""
 
 #: pysollib/app.py:672
 #, fuzzy, python-format
@@ -459,6 +462,34 @@ msgstr "Giochi con tre mazzi"
 msgid "Four-Deck games"
 msgstr "Giochi con quattro mazzi"
 
+msgid "Cribbage"
+msgstr ""
+
+msgid "Lights Out"
+msgstr ""
+
+#: pysollib/resource.py:236
+msgid "Matrix"
+msgstr "Matrice"
+
+msgid "Memory"
+msgstr ""
+
+msgid "Pegged"
+msgstr ""
+
+msgid "Poker"
+msgstr ""
+
+msgid "Shisen-Sho"
+msgstr ""
+
+msgid "Tower of Hanoi"
+msgstr ""
+
+msgid "Custom"
+msgstr ""
+
 #: pysollib/gamedb.py:142
 msgid "Baker's Dozen type"
 msgstr "Tipo Baker's Dozen"
@@ -560,7 +591,9 @@ msgid "Navagraha Ganjifa type"
 msgstr "Tipo Navagraha Ganjifa"
 
 #: pysollib/gamedb.py:231
-msgid "Shisen-Sho"
+#, fuzzy
+#| msgid "Shisen-Sho"
+msgid "Shisen-Sho type"
 msgstr "Shisen-Sho"
 
 #: pysollib/gamedb.py:234
@@ -578,6 +611,18 @@ msgstr "Tipo Poker"
 #: pysollib/gamedb.py:237
 msgid "Puzzle type"
 msgstr "Tipo Puzzle"
+
+msgid "Cribbage type"
+msgstr ""
+
+msgid "Lights Out type"
+msgstr ""
+
+msgid "Pegged type"
+msgstr ""
+
+msgid "Tower of Hanoi type"
+msgstr ""
 
 #: pysollib/help.py:43
 msgid "A Python Solitaire Game Collection"
@@ -812,6 +857,15 @@ msgstr ""
 "\n"
 "Verificare l'installazione di %(app)s.\n"
 
+#, python-format
+msgid ""
+"\n"
+"The cardset \"%(cs)s\" was not found.\n"
+"\n"
+"Please ensure that this cardset has been installed, and that your\n"
+"Cardsets package is up to date.\n"
+msgstr ""
+
 #: pysollib/options.py:270
 msgid "Unknown"
 msgstr "Sconosciuto"
@@ -852,6 +906,9 @@ msgstr "Tipo Dashavatara Ganjifa (120 carte)"
 msgid "Trumps only type (variable cards)"
 msgstr "Tipo Trionfi (carte variabili)"
 
+msgid "Matching type (variable cards)"
+msgstr ""
+
 #: pysollib/resource.py:194
 msgid "French"
 msgstr "Francesi"
@@ -888,6 +945,9 @@ msgstr "Dashavatara Ganjifa"
 msgid "Trumps only"
 msgstr "Solo Trionfi"
 
+msgid "Matching"
+msgstr ""
+
 #: pysollib/resource.py:219
 msgid "Adult"
 msgstr "Adulti"
@@ -913,7 +973,7 @@ msgid "Children"
 msgstr "Bambini"
 
 #: pysollib/resource.py:225
-msgid "Classic look"
+msgid "Classic Look"
 msgstr "Classiche"
 
 #: pysollib/resource.py:226
@@ -944,10 +1004,6 @@ msgstr "Vacanze"
 msgid "Movies"
 msgstr "Film"
 
-#: pysollib/resource.py:236
-msgid "Matrix"
-msgstr "Matrice"
-
 #: pysollib/resource.py:237
 msgid "Music"
 msgstr "Musica"
@@ -977,7 +1033,7 @@ msgid "Products"
 msgstr "Prodotti"
 
 #: pysollib/resource.py:244
-msgid "Round cardsets"
+msgid "Round Cardsets"
 msgstr "Carte rotonde"
 
 #: pysollib/resource.py:245
@@ -989,7 +1045,7 @@ msgid "Sports"
 msgstr "Sport"
 
 #: pysollib/resource.py:248
-msgid "Vehicels"
+msgid "Vehicles"
 msgstr "Veicoli"
 
 #: pysollib/resource.py:249
@@ -1084,184 +1140,190 @@ msgstr "USA"
 msgid "Top 10"
 msgstr "Primi 10"
 
-#: pysollib/stack.py:1589 pysollib/games/terrace.py:65
+#: pysollib/stack.py:1591 pysollib/games/terrace.py:65
 #: pysollib/games/terrace.py:85
 #, python-format
 msgid "Base card - %s."
 msgstr "Carta base - %s."
 
-#: pysollib/stack.py:1591
+#: pysollib/stack.py:1593
 msgid "Empty row cannot be filled."
 msgstr "Non si può riempire una colonna vuota."
 
-#: pysollib/stack.py:1593 pysollib/games/terrace.py:65
+#: pysollib/stack.py:1595 pysollib/games/terrace.py:65
 #: pysollib/games/terrace.py:85
 msgid "any card"
 msgstr "qualsiasi carta"
 
-#: pysollib/stack.py:1595 pysollib/util.py:50
+#: pysollib/stack.py:1597 pysollib/util.py:50
 msgid "Jack"
 msgstr "Fante"
 
-#: pysollib/stack.py:1597 pysollib/util.py:50 pysollib/games/canfield.py:529
+#: pysollib/stack.py:1599 pysollib/util.py:50 pysollib/games/canfield.py:529
 #: pysollib/games/special/tarock.py:216
 msgid "Queen"
 msgstr "Regina"
 
-#: pysollib/stack.py:1599 pysollib/util.py:50 pysollib/wizardutil.py:190
+#: pysollib/stack.py:1601 pysollib/util.py:50 pysollib/wizardutil.py:190
 #: pysollib/wizardutil.py:248 pysollib/games/canfield.py:524
 #: pysollib/games/special/tarock.py:216
 msgid "King"
 msgstr "Re"
 
-#: pysollib/stack.py:1601 pysollib/util.py:49 pysollib/wizardutil.py:189
+#: pysollib/stack.py:1603 pysollib/util.py:49 pysollib/wizardutil.py:189
 #: pysollib/wizardutil.py:193 pysollib/wizardutil.py:247
 #: pysollib/games/special/tarock.py:215 pysollib/games/ultra/dashavatara.py:359
 #: pysollib/games/ultra/hexadeck.py:275 pysollib/games/ultra/mughal.py:261
 msgid "Ace"
 msgstr "Asso"
 
-#: pysollib/stack.py:1610
+#: pysollib/stack.py:1612
 msgid "No cards"
 msgstr "Nessuna carta"
 
-#: pysollib/stack.py:1612
+#: pysollib/stack.py:1614
 #, python-format
 msgid "%d card"
 msgid_plural "%d cards"
 msgstr[0] "%d carta"
 msgstr[1] "%d carte"
 
-#: pysollib/stack.py:1832 pysollib/games/larasgame.py:159
+#: pysollib/stack.py:1834 pysollib/games/larasgame.py:159
 #, python-format
 msgid "Round %d"
 msgstr "Giro %d"
 
-#: pysollib/stack.py:1841 pysollib/stack.py:1843 pysollib/stack.py:1893
+#: pysollib/stack.py:1843 pysollib/stack.py:1845 pysollib/stack.py:1895
 msgid "Redeal"
 msgstr "Ridistribuzione"
 
-#: pysollib/stack.py:1843
+#: pysollib/stack.py:1845
 msgid "Stop"
 msgstr "Stop"
 
-#: pysollib/stack.py:1943
+#: pysollib/stack.py:1945
 msgid "Variable redeals."
 msgstr "Ridistribuzioni variabili"
 
-#: pysollib/stack.py:1945
+#: pysollib/stack.py:1947
 msgid "Unlimited redeals."
 msgstr "Ridistribuzioni illimitate"
 
-#: pysollib/stack.py:1948
+#: pysollib/stack.py:1950
 #, fuzzy, python-format
 msgid "%d redeal"
 msgid_plural "%d redeals"
 msgstr[0] "%d ridistribuzione"
 msgstr[1] "%d ridistribuzioni"
 
-#: pysollib/stack.py:1950
+#: pysollib/stack.py:1952
 msgid "Talon."
 msgstr "Tallone."
 
-#: pysollib/stack.py:2223 pysollib/stack.py:2983
+#: pysollib/stack.py:2228 pysollib/stack.py:2992
 msgid "Reserve. No building."
 msgstr "Riserva. Non accetta carte"
 
-#: pysollib/stack.py:2269
+#: pysollib/stack.py:2274
 msgid "Foundation."
 msgstr "Casa."
 
-#: pysollib/stack.py:2309
+#: pysollib/stack.py:2314
 msgid "Foundation. Build up by suit."
 msgstr "Casa. Crescente per seme."
 
-#: pysollib/stack.py:2311
+#: pysollib/stack.py:2316
 msgid "Foundation. Build down by suit."
 msgstr "Casa. Decrescente per seme."
 
-#: pysollib/stack.py:2313 pysollib/stack.py:2327 pysollib/stack.py:2352
-#: pysollib/stack.py:2377
+#: pysollib/stack.py:2318 pysollib/stack.py:2332 pysollib/stack.py:2357
+#: pysollib/stack.py:2382
 msgid "Foundation. Build by same rank."
 msgstr "Casa. Aggiungere per valore."
 
-#: pysollib/stack.py:2323 pysollib/games/golf.py:405
+#: pysollib/stack.py:2328 pysollib/games/golf.py:408
 #: pysollib/games/pileon.py:253
 msgid "Foundation. Build up regardless of suit."
 msgstr "Casa. Sequenza crescente indipendentemente dal seme"
 
-#: pysollib/stack.py:2325
+#: pysollib/stack.py:2330
 msgid "Foundation. Build down regardless of suit."
 msgstr "Casa. Decrescente per qualsiasi seme."
 
-#: pysollib/stack.py:2348
+#: pysollib/stack.py:2353
 msgid "Foundation. Build up by alternate color."
 msgstr "Casa. Crescente a colori alterni."
 
-#: pysollib/stack.py:2350
+#: pysollib/stack.py:2355
 msgid "Foundation. Build down by alternate color."
 msgstr "Casa. Decrescente a colori alterni."
 
-#: pysollib/stack.py:2373 pysollib/games/numerica.py:267
+#: pysollib/stack.py:2378 pysollib/games/numerica.py:267
 #: pysollib/games/royalcotillion.py:932
 msgid "Foundation. Build up by color."
 msgstr "Casa. Crescente per colore."
 
-#: pysollib/stack.py:2375
+#: pysollib/stack.py:2380
 msgid "Foundation. Build down by color."
 msgstr "Casa. Decrescente per colore."
 
-#: pysollib/stack.py:2454 pysollib/games/golf.py:126 pysollib/games/golf.py:319
+msgid "Foundation. Build up in any suit but the same."
+msgstr ""
+
+msgid "Foundation. Build down in any suit but the same."
+msgstr ""
+
+#: pysollib/stack.py:2459 pysollib/games/golf.py:126 pysollib/games/golf.py:322
 msgid "Tableau. No building."
 msgstr "Tableau. Non accetta carte."
 
-#: pysollib/stack.py:2502
+#: pysollib/stack.py:2508
 msgid "Tableau. Build up by alternate color."
 msgstr "Tableau. Crescente a colori alterni."
 
-#: pysollib/stack.py:2504
+#: pysollib/stack.py:2510
 msgid "Tableau. Build down by alternate color."
 msgstr "Tableau. Decrescente a colori alterni."
 
-#: pysollib/stack.py:2506 pysollib/stack.py:2521 pysollib/stack.py:2535
-#: pysollib/stack.py:2549 pysollib/stack.py:2563 pysollib/stack.py:2603
-#: pysollib/stack.py:2622
+#: pysollib/stack.py:2512 pysollib/stack.py:2527 pysollib/stack.py:2541
+#: pysollib/stack.py:2555 pysollib/stack.py:2569 pysollib/stack.py:2609
+#: pysollib/stack.py:2628
 msgid "Tableau. Build by same rank."
 msgstr "Tableau. Stesso valore."
 
-#: pysollib/stack.py:2517
+#: pysollib/stack.py:2523
 msgid "Tableau. Build up by color."
 msgstr "Tableau. Crescente per colore."
 
-#: pysollib/stack.py:2519
+#: pysollib/stack.py:2525
 msgid "Tableau. Build down by color."
 msgstr "Tableau. Decrescente per colore."
 
-#: pysollib/stack.py:2531
+#: pysollib/stack.py:2537
 msgid "Tableau. Build up by suit."
 msgstr "Tableau. Crescente per seme."
 
-#: pysollib/stack.py:2533
+#: pysollib/stack.py:2539
 msgid "Tableau. Build down by suit."
 msgstr "Tableau. Decrescente per seme."
 
-#: pysollib/stack.py:2545
+#: pysollib/stack.py:2551
 msgid "Tableau. Build up regardless of suit."
 msgstr "Tableau. Crescente indipendentemente dal seme."
 
-#: pysollib/stack.py:2547
+#: pysollib/stack.py:2553
 msgid "Tableau. Build down regardless of suit."
 msgstr "Tableau. Decrescente indipendentemente dal seme."
 
-#: pysollib/stack.py:2559
+#: pysollib/stack.py:2565
 msgid "Tableau. Build up in any suit but the same."
 msgstr "Tableau. Crescente in qualsiasi seme purché diverso dal precedente."
 
-#: pysollib/stack.py:2561
+#: pysollib/stack.py:2567
 msgid "Tableau. Build down in any suit but the same."
 msgstr "Tableau. Decrescente in qualsiasi seme purché diverso dal precedente."
 
-#: pysollib/stack.py:2595
+#: pysollib/stack.py:2601
 msgid ""
 "Tableau. Build up regardless of suit. Sequences of cards in alternate color "
 "can be moved as a unit."
@@ -1269,7 +1331,7 @@ msgstr ""
 "Tableau. Crescente indipendentemente dal seme. Sequenze di carte in colori "
 "alterni si possono spostare in blocco."
 
-#: pysollib/stack.py:2599
+#: pysollib/stack.py:2605
 msgid ""
 "Tableau. Build down regardless of suit. Sequences of cards in alternate "
 "color can be moved as a unit."
@@ -1277,7 +1339,7 @@ msgstr ""
 "Tableau. Decrescente indipendentemente dal seme. Sequenze di carte in colori "
 "alterni si possono spostare in blocco."
 
-#: pysollib/stack.py:2614
+#: pysollib/stack.py:2620
 msgid ""
 "Tableau. Build up regardless of suit. Sequences of cards in the same suit "
 "can be moved as a unit."
@@ -1285,7 +1347,7 @@ msgstr ""
 "Tableau. Crescente indipendentemente dal seme. Sequenze di carte dello "
 "stesso seme si possono spostare in blocco."
 
-#: pysollib/stack.py:2618
+#: pysollib/stack.py:2624
 msgid ""
 "Tableau. Build down regardless of suit. Sequences of cards in the same suit "
 "can be moved as a unit."
@@ -1293,7 +1355,22 @@ msgstr ""
 "Tableau. Decrescente indipendentemente dal seme. Sequenze di carte dello "
 "stesso seme si possono spostare in blocco."
 
-#: pysollib/stack.py:2646
+msgid ""
+"Tableau. Build up regardless of suit. Sequences of cards in the same color "
+"can be moved as a unit."
+msgstr ""
+
+msgid ""
+"Tableau. Build up regardless of suit. Sequences of cards in any suit but the "
+"same can be moved as a unit."
+msgstr ""
+
+msgid ""
+"Tableau. Build down regardless of suit. Sequences of cards in any suit but "
+"the same can be moved as a unit."
+msgstr ""
+
+#: pysollib/stack.py:2654
 msgid ""
 "Tableau. Build up by alternate color, can move any face-up cards regardless "
 "of sequence."
@@ -1301,7 +1378,7 @@ msgstr ""
 "Tableau. Crescente a colori alterni, si possono spostare le carte a faccia "
 "in su indipendentemente dalla sequenza."
 
-#: pysollib/stack.py:2649
+#: pysollib/stack.py:2657
 msgid ""
 "Tableau. Build down by alternate color, can move any face-up cards "
 "regardless of sequence."
@@ -1309,7 +1386,7 @@ msgstr ""
 "Tableau. Decrescente a colori alterni, si possono spostare le carte a faccia "
 "in su indipendentemente dalla sequenza."
 
-#: pysollib/stack.py:2652 pysollib/stack.py:2674 pysollib/stack.py:2692
+#: pysollib/stack.py:2660 pysollib/stack.py:2682 pysollib/stack.py:2700
 msgid ""
 "Tableau. Build by same rank, can move any face-up cards regardless of "
 "sequence."
@@ -1317,14 +1394,14 @@ msgstr ""
 "Tableau. Stesso valore, si possono spostare le carte a faccia in su "
 "indipendentemente dalla sequenza."
 
-#: pysollib/stack.py:2668
+#: pysollib/stack.py:2676
 msgid ""
 "Tableau. Build up by suit, can move any face-up cards regardless of sequence."
 msgstr ""
 "Tableau. Crescente per seme, si possono spostare le carte a faccia in su "
 "indipendentemente dalla sequenza."
 
-#: pysollib/stack.py:2671
+#: pysollib/stack.py:2679
 msgid ""
 "Tableau. Build down by suit, can move any face-up cards regardless of "
 "sequence."
@@ -1332,7 +1409,27 @@ msgstr ""
 "Tableau. Decrescente per seme, si possono spostare le carte a faccia in su "
 "indipendentemente dalla sequenza."
 
-#: pysollib/stack.py:2686 pysollib/stack.py:2689
+msgid ""
+"Tableau. Build up by color, can move any face-up cards regardless of "
+"sequence."
+msgstr ""
+
+msgid ""
+"Tableau. Build down by color, can move any face-up cards regardless of "
+"sequence."
+msgstr ""
+
+msgid ""
+"Tableau. Build up by any suit but the same, can move any face-up cards "
+"regardless of sequence."
+msgstr ""
+
+msgid ""
+"Tableau. Build down by any suit but the same, can move any face-up cards "
+"regardless of sequence."
+msgstr ""
+
+#: pysollib/stack.py:2694 pysollib/stack.py:2697
 msgid ""
 "Tableau. Build up regardless of suit, can move any face-up cards regardless "
 "of sequence."
@@ -1340,29 +1437,45 @@ msgstr ""
 "Tableau. Crescente indipendentemente dal seme, si possono spostare le carte "
 "a faccia in su indipendentemente dalla sequenza."
 
-#: pysollib/stack.py:2730
+#: pysollib/stack.py:2738
 msgid "Tableau. Build up or down by color."
 msgstr "Tableau. Crescente o decrescente per colore."
 
-#: pysollib/stack.py:2744
+#: pysollib/stack.py:2752
 msgid "Tableau. Build up or down by alternate color."
 msgstr "Tableau. Crescente o decrescente a colori alterni."
 
-#: pysollib/stack.py:2758
+#: pysollib/stack.py:2766
 msgid "Tableau. Build up or down by suit."
 msgstr "Tableau. Crescente o decrescente per seme."
 
-#: pysollib/stack.py:2772
+#: pysollib/stack.py:2780
 msgid "Tableau. Build up or down regardless of suit."
 msgstr "Tableau. Crescente o decrescente indipendentemente dal seme."
 
-#: pysollib/stack.py:2866
+msgid "Tableau. Build up or down in any suit but the same."
+msgstr ""
+
+#: pysollib/stack.py:2874
 msgid "Waste."
 msgstr "Pozzo."
 
-#: pysollib/stack.py:2984
+#: pysollib/stack.py:2993
 msgid "Free cell."
 msgstr "Free cell."
+
+msgid ""
+"Talon. Unlimited redeals, until running through the deck twice with no hits."
+msgstr ""
+
+msgid "Foundation. Place cards here that match the declared rank."
+msgstr ""
+
+msgid "Devil's Six. Must be played directly to Foundations."
+msgstr ""
+
+msgid "Bastille. Can be dealt to reserve, once it's empty."
+msgstr ""
 
 #: pysollib/stats.py:40 pysollib/stats.py:108 pysollib/pysolgtk/tkstats.py:422
 #: pysollib/pysolgtk/tkstats.py:459 pysollib/tile/tkstats.py:675
@@ -1397,6 +1510,12 @@ msgstr "Tempo di gioco"
 #: data/pysolfc.glade:1178
 msgid "Moves"
 msgstr "Mosse"
+
+msgid "Avg. win time"
+msgstr ""
+
+msgid "Avg. win moves"
+msgstr ""
 
 #: pysollib/stats.py:46 pysollib/pysolgtk/tkstats.py:428
 #: pysollib/tile/tkstats.py:921 pysollib/tile/tkstats.py:951
@@ -1471,6 +1590,18 @@ msgstr "Cuori"
 msgid "Diamond"
 msgstr "Quadri"
 
+msgid "Clubs"
+msgstr ""
+
+msgid "Spades"
+msgstr ""
+
+msgid "Hearts"
+msgstr ""
+
+msgid "Diamonds"
+msgstr ""
+
 #: pysollib/util.py:46
 msgid "black"
 msgstr "Nero"
@@ -1520,48 +1651,48 @@ msgid "Initial setting:"
 msgstr "Configurazione iniziale:"
 
 #: pysollib/wizardutil.py:105 pysollib/pysolgtk/selectgame.py:114
-#: pysollib/tile/selectgame.py:391 pysollib/tk/selectgame.py:392
+#: pysollib/tile/selectgame.py:392 pysollib/tk/selectgame.py:392
 msgid "Name:"
 msgstr "Nome:"
 
 #: pysollib/wizardutil.py:109 pysollib/kivy/selectgame.py:202
-#: pysollib/pysolgtk/selectgame.py:236 pysollib/pysolgtk/selectgame.py:473
+#: pysollib/pysolgtk/selectgame.py:236 pysollib/pysolgtk/selectgame.py:472
 #: pysollib/tile/selectgame.py:179 pysollib/tile/selectgame.py:561
-#: pysollib/tk/selectgame.py:179 pysollib/tk/selectgame.py:562
+#: pysollib/tk/selectgame.py:179 pysollib/tk/selectgame.py:561
 msgid "Luck only"
 msgstr "Solo fortuna"
 
 #: pysollib/wizardutil.py:110 pysollib/kivy/selectgame.py:204
-#: pysollib/pysolgtk/selectgame.py:237 pysollib/pysolgtk/selectgame.py:474
+#: pysollib/pysolgtk/selectgame.py:237 pysollib/pysolgtk/selectgame.py:473
 #: pysollib/tile/selectgame.py:181 pysollib/tile/selectgame.py:562
-#: pysollib/tk/selectgame.py:181 pysollib/tk/selectgame.py:563
+#: pysollib/tk/selectgame.py:181 pysollib/tk/selectgame.py:562
 msgid "Mostly luck"
 msgstr "Prevalentemente fortuna"
 
 #: pysollib/wizardutil.py:111 pysollib/wizardutil.py:115
 #: pysollib/kivy/selectgame.py:206 pysollib/pysolgtk/selectgame.py:238
-#: pysollib/pysolgtk/selectgame.py:475 pysollib/tile/selectgame.py:183
+#: pysollib/pysolgtk/selectgame.py:474 pysollib/tile/selectgame.py:183
 #: pysollib/tile/selectgame.py:563 pysollib/tk/selectgame.py:183
-#: pysollib/tk/selectgame.py:564
+#: pysollib/tk/selectgame.py:563
 msgid "Balanced"
 msgstr "Bilanciato"
 
 #: pysollib/wizardutil.py:112 pysollib/kivy/selectgame.py:208
-#: pysollib/pysolgtk/selectgame.py:239 pysollib/pysolgtk/selectgame.py:476
+#: pysollib/pysolgtk/selectgame.py:239 pysollib/pysolgtk/selectgame.py:475
 #: pysollib/tile/selectgame.py:186 pysollib/tile/selectgame.py:564
-#: pysollib/tk/selectgame.py:186 pysollib/tk/selectgame.py:565
+#: pysollib/tk/selectgame.py:186 pysollib/tk/selectgame.py:564
 msgid "Mostly skill"
 msgstr "Prevalentemente abilità"
 
 #: pysollib/wizardutil.py:113 pysollib/kivy/selectgame.py:210
-#: pysollib/pysolgtk/selectgame.py:240 pysollib/pysolgtk/selectgame.py:477
+#: pysollib/pysolgtk/selectgame.py:240 pysollib/pysolgtk/selectgame.py:476
 #: pysollib/tile/selectgame.py:188 pysollib/tile/selectgame.py:565
-#: pysollib/tk/selectgame.py:188 pysollib/tk/selectgame.py:566
+#: pysollib/tk/selectgame.py:188 pysollib/tk/selectgame.py:565
 msgid "Skill only"
 msgstr "Solo abilità"
 
 #: pysollib/wizardutil.py:116 pysollib/pysolgtk/selectgame.py:118
-#: pysollib/tile/selectgame.py:395 pysollib/tk/selectgame.py:396
+#: pysollib/tile/selectgame.py:396 pysollib/tk/selectgame.py:396
 msgid "Skill level:"
 msgstr "Abilità:"
 
@@ -1605,6 +1736,9 @@ msgstr "Manda nel pozzo"
 msgid "Deal to tableau"
 msgstr "Manda nel tableau"
 
+msgid "Deal to first tableau"
+msgstr ""
+
 #: pysollib/wizardutil.py:142
 msgid "Deal to reserves"
 msgstr "Manda nella riserva"
@@ -1616,7 +1750,7 @@ msgstr "Grounds for a Divorce"
 #: pysollib/wizardutil.py:147 pysollib/wizardutil.py:185
 #: pysollib/wizardutil.py:243 pysollib/wizardutil.py:301
 #: pysollib/pysolgtk/selectgame.py:117 pysollib/tile/selectcardset.py:454
-#: pysollib/tile/selectgame.py:394 pysollib/tk/selectcardset.py:445
+#: pysollib/tile/selectgame.py:395 pysollib/tk/selectcardset.py:445
 #: pysollib/tk/selectgame.py:395
 msgid "Type:"
 msgstr "Tipi:"
@@ -1655,6 +1789,9 @@ msgstr "Numero di carte nel pozzo:"
 msgid "Shuffle during redeal:"
 msgstr "Mescola nella ridistribuzione:"
 
+msgid "No building"
+msgstr ""
+
 #: pysollib/wizardutil.py:176 pysollib/wizardutil.py:184
 #: pysollib/wizardutil.py:224
 msgid "Same suit"
@@ -1685,6 +1822,12 @@ msgstr "Spider alternate color"
 msgid "Spider rank"
 msgstr "Spider rank"
 
+msgid "Spider same color"
+msgstr ""
+
+msgid "Spider any suit but the same"
+msgstr ""
+
 #: pysollib/wizardutil.py:191 pysollib/wizardutil.py:249
 #: pysollib/wizardutil.py:252
 msgid "Any"
@@ -1703,6 +1846,9 @@ msgstr "Ascendente"
 #: pysollib/wizardutil.py:258
 msgid "Down"
 msgstr "Discendente"
+
+msgid "Same rank"
+msgstr ""
 
 #: pysollib/wizardutil.py:200 pysollib/wizardutil.py:259
 msgid "Direction:"
@@ -1750,6 +1896,9 @@ msgstr "Ascendente o discendente per valore"
 msgid "Up or down by same color"
 msgstr "Ascendente o discendente stesso colore"
 
+msgid "Up or down by any suit but the same"
+msgstr ""
+
 #: pysollib/wizardutil.py:238
 msgid "Yukon same suit"
 msgstr "Yuokon stesso seme"
@@ -1761,6 +1910,12 @@ msgstr "Yukon colori alterni"
 #: pysollib/wizardutil.py:240
 msgid "Yukon rank"
 msgstr "Yukon per valore"
+
+msgid "Yukon same color"
+msgstr ""
+
+msgid "Yukon any suit but the same"
+msgstr ""
 
 #: pysollib/wizardutil.py:263 pysollib/wizardutil.py:264
 msgid "Sequence"
@@ -1789,6 +1944,9 @@ msgstr "Triangolo"
 #: pysollib/wizardutil.py:298 pysollib/wizardutil.py:300
 msgid "Rectangle"
 msgstr "Rettangolo"
+
+msgid "Pyramid"
+msgstr ""
 
 #: pysollib/wizardutil.py:308
 msgid "# of face-down cards dealt to the tableau pile:"
@@ -1834,15 +1992,15 @@ msgstr "Riserve "
 msgid "Opening deal"
 msgstr "Servizio di apertura"
 
-#: pysollib/game/__init__.py:141 pysollib/game/__init__.py:147
+#: pysollib/game/__init__.py:148 pysollib/game/__init__.py:154
 msgid "Player\n"
 msgstr "Giocatore\n"
 
-#: pysollib/game/__init__.py:1313
+#: pysollib/game/__init__.py:1337
 msgid "Discard current game?"
 msgstr "Scartare il gioco in corso ?"
 
-#: pysollib/game/__init__.py:1934
+#: pysollib/game/__init__.py:1958
 #, python-format
 msgid ""
 "\n"
@@ -1855,7 +2013,7 @@ msgstr ""
 "il posto %(timerank)d nella top %(tops)d dei tempi di gioco\n"
 "e il posto %(movesrank)d nella top %(tops)d del numero di mosse."
 
-#: pysollib/game/__init__.py:1942
+#: pysollib/game/__init__.py:1966
 #, python-format
 msgid ""
 "\n"
@@ -1866,7 +2024,7 @@ msgstr ""
 "Hai ottenuto\n"
 "il posto %(timerank)d nella top %(tops)d dei tempi di gioco."
 
-#: pysollib/game/__init__.py:1948
+#: pysollib/game/__init__.py:1972
 #, python-format
 msgid ""
 "\n"
@@ -1877,7 +2035,7 @@ msgstr ""
 "Hai ottenuto\n"
 "il posto %(movesrank)d nella top %(tops)s del numero di mosse."
 
-#: pysollib/game/__init__.py:1983 pysollib/game/__init__.py:1999
+#: pysollib/game/__init__.py:2007 pysollib/game/__init__.py:2023
 #, python-format
 msgid ""
 "Your playing time is %(time)s\n"
@@ -1892,7 +2050,7 @@ msgstr[1] ""
 "Il tuo tempo è stato di %(time)s\n"
 "per %(n)d mosse."
 
-#: pysollib/game/__init__.py:1987
+#: pysollib/game/__init__.py:2011
 msgid ""
 "Congratulations, this\n"
 "was a truly perfect game!"
@@ -1900,23 +2058,23 @@ msgstr ""
 "Congratulazioni, questo è stato\n"
 "un gioco veramente perfetto!"
 
-#: pysollib/game/__init__.py:1989 pysollib/game/__init__.py:2005
+#: pysollib/game/__init__.py:2013 pysollib/game/__init__.py:2029
 #: pysollib/kivy/tkwidget.py:170 pysollib/pysolgtk/soundoptionsdialog.py:71
 #: pysollib/tile/soundoptionsdialog.py:83 pysollib/tk/soundoptionsdialog.py:85
 msgid "Game won"
 msgstr "Gioco vinto"
 
-#: pysollib/game/__init__.py:2003
+#: pysollib/game/__init__.py:2027
 msgid "Congratulations, you did it!"
 msgstr "Congratulazioni, ce l'hai fatta!"
 
-#: pysollib/game/__init__.py:2013 pysollib/game/__init__.py:2020
+#: pysollib/game/__init__.py:2037 pysollib/game/__init__.py:2044
 #: pysollib/kivy/tkwidget.py:173 pysollib/pysolgtk/soundoptionsdialog.py:69
 #: pysollib/tile/soundoptionsdialog.py:81 pysollib/tk/soundoptionsdialog.py:83
 msgid "Game finished"
 msgstr "Gioco terminato"
 
-#: pysollib/game/__init__.py:2014 pysollib/game/__init__.py:2539
+#: pysollib/game/__init__.py:2038 pysollib/game/__init__.py:2563
 msgid ""
 "\n"
 "Game finished\n"
@@ -1924,40 +2082,47 @@ msgstr ""
 "\n"
 "Gioco terminato\n"
 
-#: pysollib/game/__init__.py:2021
+#: pysollib/game/__init__.py:2045
+msgid "Game finished, but not without my help..."
+msgstr "Gioco terminato, ma non senza il mio aiuto..."
+
+msgid "You used %(h)s hint(s) during this game."
+msgstr ""
+
+msgid "You are Stuck"
+msgstr ""
+
 msgid ""
 "\n"
-"Game finished, but not without my help...\n"
+"There are no moves left...\n"
 msgstr ""
-"\n"
-"Gioco terminato, ma non senza il mio aiuto...\n"
 
-#: pysollib/game/__init__.py:2022
+#: pysollib/game/__init__.py:2046
 msgid "&Restart"
 msgstr "&Ricomincia"
 
-#: pysollib/game/__init__.py:2418
+#: pysollib/game/__init__.py:2442
 #, python-format
 msgid "Score %6d"
 msgstr "Punteggio %6d"
 
-#: pysollib/game/__init__.py:2522
+#: pysollib/game/__init__.py:2546
 msgid "&Great"
 msgstr "&Grande"
 
-#: pysollib/game/__init__.py:2522
+#: pysollib/game/__init__.py:2546
 msgid "&Cool"
 msgstr "&Forte"
 
-#: pysollib/game/__init__.py:2523
+#: pysollib/game/__init__.py:2547
 msgid "&Yeah"
 msgstr "&Sì!"
 
-#: pysollib/game/__init__.py:2523
+#: pysollib/game/__init__.py:2547
 msgid "&Wow"
 msgstr "&E vai"
 
-#: pysollib/game/__init__.py:2524
+#: pysollib/game/__init__.py:2548
 #, python-format
 msgid ""
 "\n"
@@ -1972,25 +2137,25 @@ msgstr[1] ""
 "\n"
 "Gioco risolto in %d mosse.\n"
 
-#: pysollib/game/__init__.py:2529 pysollib/game/__init__.py:2544
-#: pysollib/game/__init__.py:2559
+#: pysollib/game/__init__.py:2553 pysollib/game/__init__.py:2568
+#: pysollib/game/__init__.py:2583
 #, python-format
 msgid "%s Autopilot"
 msgstr "%s Autopilota"
 
-#: pysollib/game/__init__.py:2556
+#: pysollib/game/__init__.py:2580
 msgid "&Oh well"
 msgstr "&Oh bene"
 
-#: pysollib/game/__init__.py:2556
+#: pysollib/game/__init__.py:2580
 msgid "&That's life"
 msgstr "Così è la vi&ta"
 
-#: pysollib/game/__init__.py:2556
+#: pysollib/game/__init__.py:2580
 msgid "&Hmm"
 msgstr "&Hemm"
 
-#: pysollib/game/__init__.py:2560
+#: pysollib/game/__init__.py:2584
 msgid ""
 "\n"
 "This won't come out...\n"
@@ -1998,34 +2163,34 @@ msgstr ""
 "\n"
 "Questo non riesce...\n"
 
-#: pysollib/game/__init__.py:3007
+#: pysollib/game/__init__.py:3031
 msgid "Set bookmark"
 msgstr "Metti un segnalibro"
 
-#: pysollib/game/__init__.py:3008
+#: pysollib/game/__init__.py:3032
 #, python-format
 msgid "Replace existing bookmark %d?"
 msgstr "Sostituire il segnalibro %d ?"
 
-#: pysollib/game/__init__.py:3029
+#: pysollib/game/__init__.py:3053
 msgid "Goto bookmark"
 msgstr "Va al segnalibro"
 
-#: pysollib/game/__init__.py:3030
+#: pysollib/game/__init__.py:3054
 #, python-format
 msgid "Goto bookmark %d?"
 msgstr "Andare al segnalibro %d ?"
 
-#: pysollib/game/__init__.py:3056
+#: pysollib/game/__init__.py:3080
 msgid "Open game"
 msgstr "Aprire il gioco"
 
-#: pysollib/game/__init__.py:3069 pysollib/game/__init__.py:3078
-#: pysollib/game/__init__.py:3084
+#: pysollib/game/__init__.py:3093 pysollib/game/__init__.py:3102
+#: pysollib/game/__init__.py:3108
 msgid "Load game error"
 msgstr "Errore nel caricare il gioco"
 
-#: pysollib/game/__init__.py:3071
+#: pysollib/game/__init__.py:3095
 msgid ""
 "Error while loading game.\n"
 "\n"
@@ -2038,11 +2203,11 @@ msgstr ""
 "ma potrebbe anche esserci un baco che potresti\n"
 "voler segnalare."
 
-#: pysollib/game/__init__.py:3079
+#: pysollib/game/__init__.py:3103
 msgid "Error while loading game"
 msgstr "Errore nel caricare il gioco"
 
-#: pysollib/game/__init__.py:3086
+#: pysollib/game/__init__.py:3110
 msgid ""
 "Internal error while loading game.\n"
 "\n"
@@ -2051,20 +2216,20 @@ msgstr ""
 "Errore interno nel caricare il gioco.\\ \n"
 "Per piacere segnala questo baco."
 
-#: pysollib/game/__init__.py:3112 pysollib/ui/tktile/menubar.py:1677
+#: pysollib/game/__init__.py:3136 pysollib/ui/tktile/menubar.py:1677
 msgid "Save game error"
 msgstr "Errore nel salvare il gioco"
 
-#: pysollib/game/__init__.py:3113
+#: pysollib/game/__init__.py:3137
 msgid "Error while saving game"
 msgstr "Errore nel salvare il gioco"
 
-#: pysollib/game/__init__.py:3132
+#: pysollib/game/__init__.py:3156
 #, python-format
 msgid "Invalid or damaged %s save file"
 msgstr "Il file %s è errato o corrotto"
 
-#: pysollib/game/__init__.py:3152
+#: pysollib/game/__init__.py:3181
 #, python-format
 msgid ""
 "Cannot load games saved with\n"
@@ -2073,7 +2238,7 @@ msgstr ""
 "Non posso caricare giochi salvati con\n"
 "la versione %(app)s %(ver)s"
 
-#: pysollib/game/__init__.py:3171
+#: pysollib/game/__init__.py:3200
 #, python-format
 msgid ""
 "Cannot load this game from version %s\n"
@@ -2091,7 +2256,7 @@ msgstr ""
 msgid "Tableau. Build regardless of rank and suit."
 msgstr "Tableau: Riempire indipendentemente da valore e seme"
 
-#: pysollib/games/auldlangsyne.py:563 pysollib/games/golf.py:311
+#: pysollib/games/auldlangsyne.py:563 pysollib/games/golf.py:314
 #: pysollib/games/takeaway.py:58
 msgid "Foundation. Build up or down regardless of suit."
 msgstr "Casa: In sequenza crescente o decrescente indipendentemente dal seme"
@@ -2121,6 +2286,19 @@ msgstr ""
 "2: 4 6 8 T Q A 3 5 7 9 J K\n"
 "3: 6 9 Q 2 5 8 J A 4 7 T K\n"
 "4: 8 Q 3 7 J 2 6 T A 5 9 K"
+
+msgid ""
+"\n"
+"5: T 2 7 Q 4 9 A 6 J 3 8 K\n"
+"6: Q 5 J 4 T 3 9 2 8 A 7 K\n"
+"7: A 8 2 9 3 T 4 J 5 Q 6 K\n"
+"8: 3 J 6 A 9 4 Q 7 2 T 5 K"
+msgstr ""
+"\n"
+"5: T 2 7 Q 4 9 A 6 J 3 8 K\n"
+"6: Q 5 J 4 T 3 9 2 8 A 7 K\n"
+"7: A 8 2 9 3 T 4 J 5 Q 6 K\n"
+"8: 3 J 6 A 9 4 Q 7 2 T 5 K"
 
 #: pysollib/games/curdsandwhey.py:76
 msgid "Tableau. Build down by suit or of the same rank."
@@ -2181,7 +2359,7 @@ msgstr "Pozzo. Crescente o decrescente per seme."
 msgid "Tableau. Empty piles can be filled with any card."
 msgstr "Tableau. Le pile vuote si possono riempire con qualsiasi carta"
 
-#: pysollib/games/spider.py:1133
+#: pysollib/games/spider.py:1134
 msgid ""
 "Tableau. Build down regardless of suit. Sequences of cards in the same color "
 "can be moved as a unit."
@@ -2200,6 +2378,9 @@ msgstr "\tQuesto gioco:  "
 #: pysollib/games/tournament.py:224
 msgid "Reserve. Build down by suit."
 msgstr "Riserva. Decrescente per seme."
+
+msgid "Reserve. Build up regardless of suit."
+msgstr "Riserva. Crescente indipendentemente dal seme."
 
 #: pysollib/games/yukon.py:108
 msgid ""
@@ -2260,7 +2441,7 @@ msgstr "Barra strumenti"
 
 #: pysollib/kivy/menubar.py:193 pysollib/kivy/menubar.py:1647
 #: pysollib/pysolgtk/selectgame.py:100 pysollib/pysolgtk/tkstats.py:177
-#: pysollib/tile/selectgame.py:385 pysollib/tile/tkstats.py:51
+#: pysollib/tile/selectgame.py:386 pysollib/tile/tkstats.py:51
 #: pysollib/tile/toolbar.py:188 pysollib/tk/selectgame.py:384
 #: pysollib/tk/toolbar.py:188
 msgid "Statistics"
@@ -2409,6 +2590,9 @@ msgstr "Abilita suggerimenti"
 msgid "Enable shuffle"
 msgstr "Abilita mescola"
 
+msgid "Free hints"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:561
 #, fuzzy
 msgid "Enable highlight piles"
@@ -2424,10 +2608,16 @@ msgstr "Abilita evidenzia &carte"
 msgid "Enable highlight same rank"
 msgstr "Abilita evidenzia stesso valo&re"
 
+msgid "Enable face-down peek"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:576
 #, fuzzy
 msgid "Highlight no matching"
 msgstr "Abilita non corrispondenti"
+
+msgid "Stuck notification"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:583
 #, fuzzy
@@ -2439,11 +2629,17 @@ msgstr "Mo&stra tessere tolte (in Mahjongg)"
 msgid "Show hint arrow (in Shisen-Sho games)"
 msgstr "Mostra suggerimenti e frecci&a (Shisen-Sho)"
 
+msgid "Deal all cards (in Accordion type games)"
+msgstr ""
+
+msgid "Auto-remove first card (in Pegged games)"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:598
 msgid "Language"
 msgstr ""
 
-#: pysollib/kivy/menubar.py:601 pysollib/tile/menubar.py:119
+#: pysollib/kivy/menubar.py:601 pysollib/tile/menubar.py:120
 msgid "Default"
 msgstr "Default"
 
@@ -2616,16 +2812,28 @@ msgstr "Tableau"
 msgid "Solid colors"
 msgstr "Colori pieni"
 
+msgid "Azure"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:832 pysollib/pysolgtk/selecttile.py:105
 #: pysollib/tile/selecttile.py:74 pysollib/tk/selecttile.py:73
 msgid "Blue"
 msgstr "Azzurro"
+
+msgid "Bright Green"
+msgstr ""
+
+msgid "Cyan"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:837 pysollib/pysolgtk/selecttile.py:106
 #: pysollib/tile/selecttile.py:75 pysollib/tk/selecttile.py:74
 #: pysollib/games/ultra/dashavatara.py:361 pysollib/games/ultra/mughal.py:264
 msgid "Green"
 msgstr "Verde"
+
+msgid "Magenta"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:842 pysollib/pysolgtk/selecttile.py:107
 #: pysollib/tile/selecttile.py:76 pysollib/tk/selecttile.py:75
@@ -2643,6 +2851,12 @@ msgstr "Oliva"
 #: pysollib/games/ultra/dashavatara.py:362 pysollib/games/ultra/mughal.py:264
 msgid "Orange"
 msgstr "Arancione"
+
+msgid "Pink"
+msgstr ""
+
+msgid "Purple"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:857 pysollib/pysolgtk/selecttile.py:110
 #: pysollib/tile/selecttile.py:79 pysollib/tk/selecttile.py:78
@@ -2768,9 +2982,8 @@ msgid "Contents"
 msgstr "&Contenuti"
 
 #: pysollib/kivy/menubar.py:1094
-#, fuzzy
-msgid "How to play"
-msgstr "Co&me giocare"
+msgid "How to use PySol"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:1098 pysollib/kivy/toolbar.py:204
 #: pysollib/tile/toolbar.py:189 pysollib/tk/toolbar.py:189
@@ -2866,7 +3079,7 @@ msgstr "Mahjongg"
 
 #: pysollib/kivy/selectgame.py:108 pysollib/pysolgtk/selectgame.py:233
 #: pysollib/tile/selectgame.py:112 pysollib/tk/selectgame.py:112
-msgid "French games"
+msgid "French Games"
 msgstr "Francesi"
 
 #: pysollib/kivy/selectgame.py:111 pysollib/pysolgtk/selectgame.py:229
@@ -3045,6 +3258,9 @@ msgstr "Giochi per bambini (molto facili)"
 msgid "Games with Scoring"
 msgstr "Giochi con punteggio"
 
+msgid "Games with Stripped Decks"
+msgstr ""
+
 #: pysollib/kivy/selectgame.py:269 pysollib/pysolgtk/selectgame.py:304
 #: pysollib/tile/selectgame.py:247 pysollib/tk/selectgame.py:247
 msgid "Games with Separate Decks"
@@ -3108,7 +3324,7 @@ msgid ""
 msgstr ""
 
 #: pysollib/kivy/tkstats.py:225 pysollib/pysolgtk/selectgame.py:123
-#: pysollib/tile/selectgame.py:400 pysollib/tile/tkstats.py:182
+#: pysollib/tile/selectgame.py:401 pysollib/tile/tkstats.py:182
 #: pysollib/tile/tkstats.py:234 pysollib/tk/selectgame.py:401
 #: pysollib/tk/tkstats.py:87 pysollib/tk/tkstats.py:141 data/pysolfc.glade:241
 #: data/pysolfc.glade:519
@@ -3116,7 +3332,7 @@ msgid "Won:"
 msgstr "Vinti:"
 
 #: pysollib/kivy/tkstats.py:227 pysollib/pysolgtk/selectgame.py:124
-#: pysollib/tile/selectgame.py:401 pysollib/tile/tkstats.py:183
+#: pysollib/tile/selectgame.py:402 pysollib/tile/tkstats.py:183
 #: pysollib/tile/tkstats.py:236 pysollib/tk/selectgame.py:402
 #: pysollib/tk/tkstats.py:88 pysollib/tk/tkstats.py:143 data/pysolfc.glade:307
 #: data/pysolfc.glade:544
@@ -3225,7 +3441,7 @@ msgstr "Scelta dello sfondo"
 #: pysollib/pysolgtk/playeroptionsdialog.py:62
 #: pysollib/tile/playeroptionsdialog.py:61
 #: pysollib/tk/playeroptionsdialog.py:102
-msgid "Confirm quit"
+msgid "Confirm discard game"
 msgstr "Conferma uscita"
 
 #: pysollib/pysolgtk/playeroptionsdialog.py:68
@@ -3233,6 +3449,15 @@ msgstr "Conferma uscita"
 #: pysollib/tk/playeroptionsdialog.py:106
 msgid "Update statistics and logs"
 msgstr "Aggiorna statistiche e log"
+
+msgid "Tree View"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Search:"
+msgstr ""
 
 #: pysollib/pysolgtk/selectcardset.py:142 pysollib/tile/selectcardset.py:98
 #: pysollib/tile/selectcardset.py:115 pysollib/tile/selectcardset.py:132
@@ -3274,8 +3499,11 @@ msgstr "Grandi"
 
 #: pysollib/pysolgtk/selectcardset.py:164 pysollib/tile/selectcardset.py:155
 #: pysollib/tk/selectcardset.py:153
-msgid "XLarge cardsets"
+msgid "Extra Large cardsets"
 msgstr "Grandissime"
+
+msgid "Hi-Res cardsets"
+msgstr ""
 
 #: pysollib/pysolgtk/selectcardset.py:170 pysollib/tile/selectcardset.py:84
 #: pysollib/tile/selectcardset.py:181 pysollib/tk/selectcardset.py:83
@@ -3298,76 +3526,142 @@ msgstr "per nazionalità"
 msgid "by Date"
 msgstr "per data"
 
-#: pysollib/pysolgtk/selectgame.py:88 pysollib/tile/selectgame.py:382
+#: pysollib/pysolgtk/selectgame.py:88 pysollib/tile/selectgame.py:383
 #: pysollib/tk/selectgame.py:383
 msgid "About game"
 msgstr "Caratteristiche"
 
-#: pysollib/pysolgtk/selectgame.py:115 pysollib/tile/selectgame.py:392
+#: pysollib/pysolgtk/selectgame.py:115 pysollib/tile/selectgame.py:393
 #: pysollib/tk/selectgame.py:393
 msgid "Alternate names:"
 msgstr "Nomi alternativi:"
 
-#: pysollib/pysolgtk/selectgame.py:116 pysollib/tile/selectgame.py:393
+#: pysollib/pysolgtk/selectgame.py:116 pysollib/tile/selectgame.py:394
 #: pysollib/tk/selectgame.py:394
 msgid "Category:"
 msgstr "Categoria:"
 
-#: pysollib/pysolgtk/selectgame.py:119 pysollib/tile/selectgame.py:396
+#: pysollib/pysolgtk/selectgame.py:119 pysollib/tile/selectgame.py:397
 #: pysollib/tk/selectgame.py:397
 msgid "Decks:"
 msgstr "Mazzi:"
 
-#: pysollib/pysolgtk/selectgame.py:120 pysollib/tile/selectgame.py:397
+#: pysollib/pysolgtk/selectgame.py:120 pysollib/tile/selectgame.py:398
 #: pysollib/tk/selectgame.py:398
 msgid "Redeals:"
 msgstr "Ridistribuzioni:"
 
-#: pysollib/pysolgtk/selectgame.py:122 pysollib/tile/selectgame.py:399
+msgid "Compatibility:"
+msgstr ""
+
+msgid "Inventor:"
+msgstr ""
+
+msgid "PySol Version:"
+msgstr ""
+
+msgid "Statistics:"
+msgstr ""
+
+#: pysollib/pysolgtk/selectgame.py:122 pysollib/tile/selectgame.py:400
 #: pysollib/tk/selectgame.py:400
 msgid "Played:"
 msgstr "Giocati:"
 
-#: pysollib/pysolgtk/selectgame.py:125 pysollib/tile/selectgame.py:402
+#: pysollib/pysolgtk/selectgame.py:125 pysollib/tile/selectgame.py:403
 #: pysollib/tile/tkstats.py:778 pysollib/tk/selectgame.py:403
 #: pysollib/tk/tkstats.py:741 data/pysolfc.glade:717
 msgid "Playing time:"
 msgstr "Tempo di gioco:"
 
-#: pysollib/pysolgtk/selectgame.py:126 pysollib/tile/selectgame.py:403
+#: pysollib/pysolgtk/selectgame.py:126 pysollib/tile/selectgame.py:404
 #: pysollib/tile/tkstats.py:785 pysollib/tk/selectgame.py:404
 #: pysollib/tk/tkstats.py:748 data/pysolfc.glade:813
 msgid "Moves:"
 msgstr "Mosse:"
 
-#: pysollib/pysolgtk/selectgame.py:127 pysollib/tile/selectgame.py:404
+msgid "Avg. win time:"
+msgstr ""
+
+msgid "Avg. win moves:"
+msgstr ""
+
+#: pysollib/pysolgtk/selectgame.py:127 pysollib/tile/selectgame.py:405
 #: pysollib/tk/selectgame.py:405
 msgid "% won:"
 msgstr "% vittorie:"
 
-#: pysollib/pysolgtk/selectgame.py:324 pysollib/tile/selectgame.py:436
+#: pysollib/pysolgtk/selectgame.py:324 pysollib/tile/selectgame.py:437
 #: pysollib/tk/selectgame.py:437 pysollib/ui/tktile/menubar.py:352
 msgid "&Select"
 msgstr "&Scegli"
 
-#: pysollib/pysolgtk/selectgame.py:324 pysollib/tile/selectgame.py:435
+#: pysollib/pysolgtk/selectgame.py:324 pysollib/tile/selectgame.py:436
 #: pysollib/tk/selectgame.py:436
 msgid "&Rules"
 msgstr "&Regole"
 
-#: pysollib/pysolgtk/selectgame.py:426 pysollib/tile/selectgame.py:516
-#: pysollib/tk/selectgame.py:517
+#: pysollib/pysolgtk/selectgame.py:425 pysollib/tile/selectgame.py:516
+#: pysollib/tk/selectgame.py:516
 #, python-format
 msgid "Playable Preview - %(game)s"
 msgstr "Anteprima giocabile - %(game)s"
 
-#: pysollib/pysolgtk/selectgame.py:481 pysollib/tile/selectgame.py:569
-#: pysollib/tk/selectgame.py:570
+msgid "Advanced search"
+msgstr ""
+
+msgid "Check alternate names"
+msgstr ""
+
+msgid "New in"
+msgstr ""
+
+msgid "Present in"
+msgstr ""
+
+msgid "New since"
+msgstr ""
+
+msgid "Games played"
+msgstr ""
+
+msgid "Games played and won"
+msgstr ""
+
+msgid "Games played and not won"
+msgstr ""
+
+msgid "Games not played"
+msgstr ""
+
+msgid "Popular"
+msgstr ""
+
+msgid "Children's"
+msgstr ""
+
+msgid "Scored"
+msgstr ""
+
+msgid "Stripped Deck"
+msgstr ""
+
+msgid "Separate Decks"
+msgstr ""
+
+msgid "Relaxed"
+msgstr ""
+
+msgid "Original"
+msgstr ""
+
+#: pysollib/pysolgtk/selectgame.py:480 pysollib/tile/selectgame.py:569
+#: pysollib/tk/selectgame.py:569
 msgid "variable"
 msgstr "variabile"
 
-#: pysollib/pysolgtk/selectgame.py:483 pysollib/tile/selectgame.py:571
-#: pysollib/tk/selectgame.py:572
+#: pysollib/pysolgtk/selectgame.py:482 pysollib/tile/selectgame.py:571
+#: pysollib/tk/selectgame.py:571
 msgid "unlimited"
 msgstr "illimitato"
 
@@ -3384,6 +3678,15 @@ msgstr "Tutti gli sfondi"
 #: pysollib/tk/selecttile.py:68
 msgid "(no tiles)"
 msgstr "(nessuna tessera)"
+
+msgid "Image scaling:"
+msgstr ""
+
+msgid "Tile"
+msgstr ""
+
+msgid "Stretch"
+msgstr ""
 
 #: pysollib/pysolgtk/selecttile.py:158 pysollib/tile/selecttile.py:153
 #: pysollib/tk/selecttile.py:152
@@ -3470,6 +3773,9 @@ msgstr "Gioco perduto"
 msgid "Perfect game"
 msgstr "Gioco perfetto"
 
+msgid "Other"
+msgstr ""
+
 #: pysollib/pysolgtk/statusbar.py:99 pysollib/tile/statusbar.py:155
 #: pysollib/tk/statusbar.py:152
 msgid "Moves/Total moves"
@@ -3479,6 +3785,12 @@ msgstr "Mosse/Mosse totali"
 #: pysollib/tk/statusbar.py:154
 msgid "Games played: won/lost"
 msgstr "Giocati: vinti/perduti"
+
+msgid "Number of cards"
+msgstr ""
+
+msgid "Help info"
+msgstr ""
 
 #: pysollib/pysolgtk/tkhtml.py:437 pysollib/ui/tktile/tkhtml.py:314
 #, python-format
@@ -3531,6 +3843,9 @@ msgstr "Evidenzia carte: "
 #: pysollib/tk/tkstats.py:611
 msgid "Highlight same rank: "
 msgstr "Evidenzia stesso valore: "
+
+msgid "Face-down peeks: "
+msgstr ""
 
 #: pysollib/pysolgtk/tkstats.py:533 pysollib/tile/tkstats.py:620
 #: pysollib/tk/tkstats.py:615
@@ -3689,15 +4004,15 @@ msgstr "Cambia..."
 msgid "Select font"
 msgstr "Scelta carattere"
 
-#: pysollib/tile/menubar.py:90 pysollib/tk/menubar.py:94
+#: pysollib/tile/menubar.py:91 pysollib/tk/menubar.py:94
 msgid "Select "
 msgstr "Scelta"
 
-#: pysollib/tile/menubar.py:106
+#: pysollib/tile/menubar.py:107
 msgid "Change theme"
 msgstr "Cambiare il tema"
 
-#: pysollib/tile/menubar.py:107
+#: pysollib/tile/menubar.py:108
 #, python-format
 msgid ""
 "These settings will take effect\n"
@@ -3706,38 +4021,64 @@ msgstr ""
 "L'impostazione avrà effetto\n"
 "al prossimo avvio %(app)s"
 
-#: pysollib/tile/menubar.py:114
+#: pysollib/tile/menubar.py:115
 msgid "Set t&heme"
 msgstr "Scelta t&ema"
 
-#: pysollib/tile/menubar.py:120
+#: pysollib/tile/menubar.py:121
 msgid "Classic"
 msgstr "Classico"
 
-#: pysollib/tile/menubar.py:121
+#: pysollib/tile/menubar.py:122
 msgid "Revitalized"
 msgstr "Rivitalizzato"
 
-#: pysollib/tile/menubar.py:122
-msgid "Windows native"
-msgstr "Windows native"
+msgid "Alt/Revitalized"
+msgstr ""
 
 #: pysollib/tile/menubar.py:123
+msgid "Windows Native"
+msgstr "Windows Native"
+
+#: pysollib/tile/menubar.py:124
 msgid "XP Native"
 msgstr "XP originale"
 
-#: pysollib/tile/menubar.py:124
+msgid "Windows XP Blue"
+msgstr ""
+
+#: pysollib/tile/menubar.py:125
 msgid "Aqua"
 msgstr "Acqua"
 
+msgid "ITFT1"
+msgstr ""
+
+msgid "Scid Blue"
+msgstr ""
+
+msgid "Scid Green"
+msgstr ""
+
+msgid "Scid Grey"
+msgstr ""
+
+msgid "Scid Mint"
+msgstr ""
+
+msgid "Scid Pink"
+msgstr ""
+
+msgid "Scid Purple"
+msgstr ""
+
+msgid "Scid Sand"
+msgstr ""
+
 #: pysollib/tile/playeroptionsdialog.py:50
 #: pysollib/tk/playeroptionsdialog.py:90
-msgid ""
-"\n"
-"Please enter your name"
-msgstr ""
-"\n"
-"Scrivi il tuo nome"
+msgid "Please enter your name"
+msgstr "Scrivi il tuo nome"
 
 #: pysollib/tile/selectcardset.py:138 pysollib/tk/selectcardset.py:137
 msgid "All Cardsets"
@@ -3768,9 +4109,15 @@ msgstr ""
 msgid "About cardset"
 msgstr "Descrizione dei mazzi"
 
+msgid "Style:"
+msgstr ""
+
 #: pysollib/tile/selectcardset.py:455 pysollib/tk/selectcardset.py:446
 msgid "Styles:"
 msgstr "Stili:"
+
+msgid "Date:"
+msgstr ""
 
 #: pysollib/tile/selectcardset.py:456 pysollib/tk/selectcardset.py:447
 msgid "Nationality:"
@@ -3804,6 +4151,12 @@ msgstr "Giochi Personali"
 #: pysollib/tile/selecttile.py:73 pysollib/tk/selecttile.py:72
 msgid "Solid Colors"
 msgstr "Colori pieni"
+
+msgid "Tiles"
+msgstr ""
+
+msgid "Images"
+msgstr ""
 
 #: pysollib/tile/solverdialog.py:54 pysollib/tk/solverdialog.py:62
 msgid "Show progress"
@@ -3839,6 +4192,9 @@ msgstr "Usare DirectX per il suono"
 #: pysollib/tk/soundoptionsdialog.py:108 data/pysolfc.glade:4233
 msgid "Sample volume:"
 msgstr "Volume dei campioni:"
+
+msgid "Music enabled"
+msgstr ""
 
 #: pysollib/tile/soundoptionsdialog.py:114
 #: pysollib/tk/soundoptionsdialog.py:116 data/pysolfc.glade:4257
@@ -4017,6 +4373,15 @@ msgstr "Giochi/giorno"
 msgid "Games/week"
 msgstr "Giochi/settimana"
 
+msgid "Date format"
+msgstr ""
+
+msgid "MM-DD"
+msgstr ""
+
+msgid "DD-MM"
+msgstr ""
+
 #: pysollib/tile/toolbar.py:179 pysollib/tk/toolbar.py:179
 msgid "Open"
 msgstr "Apri"
@@ -4065,12 +4430,12 @@ msgstr "Sto&rico sessione..."
 msgid "&Full log..."
 msgstr "Storico &completo..."
 
-#: pysollib/winsystems/common.py:60
+#: pysollib/winsystems/common.py:61
 #, fuzzy
 msgid "invalid theme name: "
 msgstr "ID non valido: "
 
-#: pysollib/winsystems/common.py:76
+#: pysollib/winsystems/common.py:77
 #, fuzzy
 msgid "invalid font name: "
 msgstr "ID non valido: "
@@ -4185,26 +4550,67 @@ msgid "Total: %d"
 msgstr "Totale: %d"
 
 #: pysollib/games/special/poker.py:72
+#, fuzzy
+#| msgid ""
+#| "Royal Flush\n"
+#| "Straight Flush\n"
+#| "Four of a Kind\n"
+#| "Full House\n"
+#| "Flush\n"
+#| "Straight\n"
+#| "Three of a Kind\n"
+#| "Two Pair\n"
+#| "One Pair"
 msgid ""
 "Royal Flush\n"
 "Straight Flush\n"
-"Four of a Kind\n"
+"4 of a Kind\n"
 "Full House\n"
 "Flush\n"
 "Straight\n"
-"Three of a Kind\n"
+"3 of a Kind\n"
 "Two Pair\n"
 "One Pair"
 msgstr ""
 "Royal Flush\n"
 "Straight Flush\n"
-"Four of a Kind\n"
+"4 of a Kind\n"
 "Full House\n"
 "Flush\n"
 "Straight\n"
-"Three of a Kind\n"
+"3 of a Kind\n"
 "Two Pair\n"
 "One Pair"
+
+msgid "Royal Flush"
+msgstr "Royal Flush"
+
+msgid "Straight Flush"
+msgstr "Straight Flush"
+
+msgid "4 of a Kind"
+msgstr "4 of a Kind"
+
+msgid "Full House"
+msgstr "Full House"
+
+msgid "Flush"
+msgstr "Flush"
+
+msgid "Straight"
+msgstr "Straight"
+
+msgid "3 of a Kind"
+msgstr "3 of a Kind"
+
+msgid "Two Pair"
+msgstr "Two Pair"
+
+msgid "Pair"
+msgstr "Pair"
+
+msgid "Nothing"
+msgstr ""
 
 #: pysollib/games/special/tarock.py:214
 msgid "Wand"
@@ -4318,6 +4724,54 @@ msgstr "Forte"
 msgid "Weak"
 msgstr "Debole"
 
+#: pysollib/games/ultra/hanafuda_common.py:40
+msgid "Pine"
+msgstr "Pino"
+
+#: pysollib/games/ultra/hanafuda_common.py:40
+msgid "Plum"
+msgstr "Prugna"
+
+#: pysollib/games/ultra/hanafuda_common.py:40
+msgid "Cherry"
+msgstr "Ciliegia"
+
+#: pysollib/games/ultra/hanafuda_common.py:40
+msgid "Wisteria"
+msgstr "Glicine"
+
+#: pysollib/games/ultra/hanafuda_common.py:41
+msgid "Iris"
+msgstr "Giaggiolo"
+
+#: pysollib/games/ultra/hanafuda_common.py:41
+msgid "Peony"
+msgstr "Peonia"
+
+#: pysollib/games/ultra/hanafuda_common.py:41
+msgid "Bush Clover"
+msgstr "Trifoglio"
+
+#: pysollib/games/ultra/hanafuda_common.py:41
+msgid "Eularia"
+msgstr "Eulalia"
+
+#: pysollib/games/ultra/hanafuda_common.py:42
+msgid "Chrysanthemum"
+msgstr "Crisantemo"
+
+#: pysollib/games/ultra/hanafuda_common.py:42
+msgid "Maple"
+msgstr "Acero"
+
+#: pysollib/games/ultra/hanafuda_common.py:42
+msgid "Willow"
+msgstr "Salice"
+
+#: pysollib/games/ultra/hanafuda_common.py:42
+msgid "Paulownia"
+msgstr "Paulonia"
+
 #: pysollib/games/ultra/hanafuda.py:382
 msgid "Rising"
 msgstr "Sorgente"
@@ -4381,54 +4835,6 @@ msgstr "SudEst"
 #: pysollib/games/ultra/hanafuda.py:576
 msgid "SW"
 msgstr "SudOvest"
-
-#: pysollib/games/ultra/hanafuda_common.py:40
-msgid "Pine"
-msgstr "Pino"
-
-#: pysollib/games/ultra/hanafuda_common.py:40
-msgid "Plum"
-msgstr "Prugna"
-
-#: pysollib/games/ultra/hanafuda_common.py:40
-msgid "Cherry"
-msgstr "Ciliegia"
-
-#: pysollib/games/ultra/hanafuda_common.py:40
-msgid "Wisteria"
-msgstr "Glicine"
-
-#: pysollib/games/ultra/hanafuda_common.py:41
-msgid "Iris"
-msgstr "Giaggiolo"
-
-#: pysollib/games/ultra/hanafuda_common.py:41
-msgid "Peony"
-msgstr "Peonia"
-
-#: pysollib/games/ultra/hanafuda_common.py:41
-msgid "Bush Clover"
-msgstr "Trifoglio"
-
-#: pysollib/games/ultra/hanafuda_common.py:41
-msgid "Eularia"
-msgstr "Eulalia"
-
-#: pysollib/games/ultra/hanafuda_common.py:42
-msgid "Chrysanthemum"
-msgstr "Crisantemo"
-
-#: pysollib/games/ultra/hanafuda_common.py:42
-msgid "Maple"
-msgstr "Acero"
-
-#: pysollib/games/ultra/hanafuda_common.py:42
-msgid "Willow"
-msgstr "Salice"
-
-#: pysollib/games/ultra/hanafuda_common.py:42
-msgid "Paulownia"
-msgstr "Paulonia"
 
 #: pysollib/games/ultra/mughal.py:259
 msgid "Crown"
@@ -4494,6 +4900,21 @@ msgstr "Evidenzia non corrispondenti:"
 msgid "Find card"
 msgstr "Trova carta"
 
+msgid "Icon Style"
+msgstr ""
+
+msgid "Icon Size"
+msgstr ""
+
+msgid "Small icons"
+msgstr ""
+
+msgid "Large icons"
+msgstr ""
+
+msgid "Extra large icons"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:35
 msgid "Compound"
 msgstr "Composto"
@@ -4531,6 +4952,9 @@ msgstr "Un gioco a &caso"
 msgid "&All games"
 msgstr "&Tutti i giochi"
 
+msgid "&Games played"
+msgstr "&Giocati"
+
 #: pysollib/ui/tktile/menubar.py:309
 msgid "Games played and &won"
 msgstr "Giocati e &vinti"
@@ -4546,6 +4970,9 @@ msgstr "Non gioca&ti"
 #: pysollib/ui/tktile/menubar.py:318
 msgid "Select game by nu&mber..."
 msgstr "Scelta per nu&mero..."
+
+msgid "Next game by num&ber"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:321
 msgid "Fa&vorite games"
@@ -4613,12 +5040,21 @@ msgid "&Clear bookmarks"
 msgstr "Ri&pulisci i segnalibri"
 
 #: pysollib/ui/tktile/menubar.py:391
-msgid "Solitaire &Wizard"
-msgstr "Costruzione &guidata"
+msgid "Solitaire &Wizard..."
+msgstr "Costruzione &guidata..."
 
 #: pysollib/ui/tktile/menubar.py:393
-msgid "&Edit current game"
-msgstr "Modifica il gioco corr&ente"
+msgid "&Edit current game..."
+msgstr "Modifica il gioco corr&ente..."
+
+msgid "&Delete current game"
+msgstr ""
+
+msgid "Delete game"
+msgstr ""
+
+msgid "Delete the game %s?"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:396
 msgid "&Game"
@@ -4653,8 +5089,8 @@ msgid "Log..."
 msgstr "Log..."
 
 #: pysollib/ui/tktile/menubar.py:427
-msgid "D&emo statistics"
-msgstr "Statistiche d&emo"
+msgid "D&emo statistics..."
+msgstr "Statistiche d&emo..."
 
 #: pysollib/ui/tktile/menubar.py:430
 #, fuzzy
@@ -4670,8 +5106,8 @@ msgid "Highlight p&iles"
 msgstr "Evidenzia p&ile"
 
 #: pysollib/ui/tktile/menubar.py:438
-msgid "&Find card"
-msgstr "&Trova carta"
+msgid "&Find card..."
+msgstr "&Trova carta..."
 
 #: pysollib/ui/tktile/menubar.py:442
 msgid "&Demo"
@@ -4682,8 +5118,8 @@ msgid "Demo (&all games)"
 msgstr "Demo (&tutti i giochi)"
 
 #: pysollib/ui/tktile/menubar.py:448 pysollib/ui/tktile/menubar.py:450
-msgid "&Solver"
-msgstr "&Solutore"
+msgid "&Solver..."
+msgstr "&Solutore..."
 
 #: pysollib/ui/tktile/menubar.py:453
 msgid "&Piles description"
@@ -4737,6 +5173,9 @@ msgstr "Abilita su&ggerimenti"
 msgid "Enable shu&ffle"
 msgstr "Abilita m&escola"
 
+msgid "Free hin&ts"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:491
 msgid "Enable highlight p&iles"
 msgstr "Abilita evidenzia p&ile"
@@ -4749,9 +5188,15 @@ msgstr "Abilita evidenzia &carte"
 msgid "Enable highlight same &rank"
 msgstr "Abilita evidenzia stesso valo&re"
 
+msgid "Enable face-down &peek"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:503
 msgid "Highlight &no matching"
 msgstr "Abilita non corrispondenti"
+
+msgid "Stuc&k notification"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:508
 msgid "&Show removed tiles (in Mahjongg games)"
@@ -4760,6 +5205,12 @@ msgstr "Mo&stra tessere tolte (in Mahjongg)"
 #: pysollib/ui/tktile/menubar.py:512
 msgid "Show hint &arrow (in Shisen-Sho games)"
 msgstr "Mostra suggerimenti e frecci&a (Shisen-Sho)"
+
+msgid "&Deal all cards (in Accordion type games)"
+msgstr ""
+
+msgid "A&uto-remove first card (in Pegged games)"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:516
 msgid "&Sound..."
@@ -4778,10 +5229,49 @@ msgstr ""
 msgid "&Decrease the card size"
 msgstr ""
 
+msgid "&Reset the card size"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:535
 #, fuzzy
 msgid "&Auto scaling"
 msgstr "Gira automatico"
+
+msgid "&Preserve aspect ratio"
+msgstr ""
+
+msgid "R&esampling"
+msgstr ""
+
+msgid "&Nearest Neighbor"
+msgstr ""
+
+msgid "&Bilinear"
+msgstr ""
+
+msgid "B&icubic"
+msgstr ""
+
+msgid "&Lanczos"
+msgstr ""
+
+msgid "&Antialiasing"
+msgstr ""
+
+msgid "B&ox"
+msgstr ""
+
+msgid "&Hamming"
+msgstr ""
+
+msgid "Card la&yout"
+msgstr ""
+
+msgid "&Spread stacks"
+msgstr ""
+
+msgid "&Center layout"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:540
 msgid "Cards&et..."
@@ -4815,6 +5305,12 @@ msgstr "Fondo carte in negativo"
 msgid "Shade &filled stacks"
 msgstr "Ombreggia pile piene"
 
+msgid "&Compact long stacks"
+msgstr ""
+
+msgid "&Randomize card placement"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:566
 msgid "A&nimations"
 msgstr "A&nimazioni"
@@ -4846,6 +5342,9 @@ msgstr "Molto le&nta"
 #: pysollib/ui/tktile/menubar.py:587
 msgid "&Redeal animation"
 msgstr "Animazione &ridistribuzione"
+
+msgid "F&lip animation"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:592
 msgid "&Winning animation"
@@ -4924,12 +5423,20 @@ msgid "&Contents"
 msgstr "&Contenuti"
 
 #: pysollib/ui/tktile/menubar.py:654
-msgid "&How to play"
+#, fuzzy
+#| msgid "&How to play"
+msgid "&How to use PySol"
 msgstr "Co&me giocare"
 
 #: pysollib/ui/tktile/menubar.py:657
 msgid "&Rules for this game"
 msgstr "&Regole di questo gioco"
+
+msgid "What's &new?"
+msgstr ""
+
+msgid "R&eport a Bug"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:660
 msgid "&License terms"
@@ -5080,6 +5587,9 @@ msgstr "Solo icone"
 msgid "Text below icons"
 msgstr "Testo sotto le icone"
 
+msgid "Text above icons"
+msgstr ""
+
 #: pysollib/ui/tktile/tkconst.py:55
 msgid "Text beside icons"
 msgstr "Testo a fianco delle icone"
@@ -5103,6 +5613,13 @@ msgstr "Mosse totali"
 #: data/pysolfc.glade:3145
 msgid "Set font"
 msgstr "Scegli carattere"
+
+#, fuzzy
+#~ msgid "How to play"
+#~ msgstr "Co&me giocare"
+
+#~ msgid "XLarge cardsets"
+#~ msgstr "Grandissime"
 
 #, fuzzy
 #~ msgid "This will take effect after the next restart of the app"

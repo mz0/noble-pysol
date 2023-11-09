@@ -29,6 +29,7 @@ from pysollib.hint import CautiousDefaultHint, DefaultHint
 from pysollib.layout import Layout
 from pysollib.mfxutil import kwdefault
 from pysollib.mygettext import _
+from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import \
         AC_RowStack, \
         BasicRowStack, \
@@ -46,7 +47,7 @@ from pysollib.stack import \
         WasteStack, \
         WasteTalonStack
 from pysollib.util import ACE, ANY_RANK, ANY_SUIT, JACK, KING, NO_RANK, \
-        UNLIMITED_ACCEPTS, \
+        RANKS, UNLIMITED_ACCEPTS, \
         UNLIMITED_CARDS
 
 
@@ -115,9 +116,9 @@ class Numerica(Game):
 
         # set window
         # (piles up to 20 cards are playable in default window size)
-        h = max(2*l.YS, 20*l.YOFFSET)
+        h = max(2.5 * l.YS, 20 * l.YOFFSET)
         max_rows = max(rows, foundations)
-        self.setSize(l.XM+(1.5+max_rows)*l.XS+l.XM, l.YM + l.YS + h)
+        self.setSize(l.XM + (1.5 + max_rows) * l.XS + l.XM, l.YM + l.YS + h)
 
         # create stacks
         x0 = l.XM + l.XS * 3 // 2
@@ -421,18 +422,20 @@ class Fanny(Frog):
 
 # ************************************************************************
 # * Gnat
+# * Housefly
 # ************************************************************************
 
 class Gnat(Game):
 
     Hint_Class = Numerica_Hint
 
-    def createGame(self):
+    def createGame(self, rows=4):
         # create layout
         l, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM + 8*l.XS, l.YM + 2*l.YS+16*l.YOFFSET)
+        self.setSize(l.XM + (4 + rows) * l.XS,
+                     l.YM + 2 * l.YS + 16 * l.YOFFSET)
 
         # create stacks
         x, y = l.XM, l.YM
@@ -446,11 +449,11 @@ class Gnat(Game):
             x += l.XS
 
         x, y = l.XM+2*l.XS, l.YM+l.YS
-        for i in range(4):
+        for i in range(rows):
             s.rows.append(
                 Numerica_RowStack(x, y, self, max_accept=UNLIMITED_ACCEPTS))
             x += l.XS
-        x = l.XM+6*l.XS
+        x = l.XM + (2 + rows) * l.XS
         for i in range(2):
             y = l.YM + l.YS//2
             for j in range(3):
@@ -470,6 +473,11 @@ class Gnat(Game):
         self.s.talon.dealRow(rows=self.s.foundations)
         self.s.talon.dealRow(rows=self.s.reserves)
         self.s.talon.dealCards()
+
+
+class Housefly(Gnat):
+    def createGame(self):
+        Gnat.createGame(self, rows=6)
 
 
 # ************************************************************************
@@ -744,25 +752,57 @@ class AnnoDomini_Hint(DefaultHint):
         pass
 
 
+class AnnoDomini_Foundation(RK_FoundationStack):
+    getBottomImage = RK_RowStack._getReserveBottomImage
+
+    def acceptsCards(self, from_stack, cards):
+        if len(cards) > 1:
+            return False
+
+        if len(self.cards) > 0:
+            return (self.cards[-1].suit == cards[0].suit and
+                    RK_FoundationStack.acceptsCards(self, from_stack, cards))
+
+        foundations = self.game.s.foundations
+        for i in range(4):
+            if (foundations[i].cards and
+                    foundations[i].cards[0].suit == cards[0].suit):
+                return False
+        if cards[0].rank != self.cap.base_rank:
+            return False
+        return True
+
+
 class AnnoDomini(Numerica):
     Hint_Class = AnnoDomini_Hint
 
-    Foundation_Class = StackWrapper(SS_FoundationStack, suit=ANY_SUIT, mod=13)
+    Foundation_Class = StackWrapper(AnnoDomini_Foundation,
+                                    suit=ANY_SUIT, mod=13)
     RowStack_Class = StackWrapper(AC_RowStack, mod=13)
+
+    GAME_VERSION = 2
 
     def createGame(self):
         lay = Numerica.createGame(
             self, max_rounds=3, waste_max_cards=UNLIMITED_CARDS)
-        year = str(time.localtime()[0])
+        self.year = str(time.localtime()[0])
         i = 0
+        font = self.app.getFont("canvas_default")
         for s in self.s.foundations:
-            # setup base_rank & base_suit
-            s.cap.suit = i
-            s.cap.base_suit = i
-            d = int(year[i])
+            d = int(self.year[i])
             if d == 0:
                 d = JACK
             s.cap.base_rank = d
+            if self.preview <= 1:
+                label = RANKS[d][0]
+                if label == "1":
+                    label = "10"
+                s.texts.misc = MfxCanvasText(self.canvas,
+                                             s.x + lay.CW // 2,
+                                             s.y + lay.CH // 2,
+                                             anchor="center",
+                                             font=font)
+                s.texts.misc.config(text=label)
             i += 1
         lay.createRoundText(self.s.talon, 'nn')
 
@@ -770,6 +810,28 @@ class AnnoDomini(Numerica):
         self.startDealSample()
         self.s.talon.dealRow()
         self.s.talon.dealCards()
+
+    def _restoreGameHook(self, game):
+        self.year = game.loadinfo.year
+        i = 0
+        for s in self.s.foundations:
+            d = int(self.year[i])
+            if d == 0:
+                d = JACK
+            s.cap.base_rank = i
+            if self.preview <= 1:
+                label = RANKS[d][0]
+                if label == "1":
+                    label = "10"
+                s.texts.misc.config(text=label)
+                i += 1
+
+    def _loadGameHook(self, p):
+        self.loadinfo.addattr(year=None)    # register extra load var.
+        self.loadinfo.year = p.load()
+
+    def _saveGameHook(self, p):
+        p.dump(self.year)
 
     shallHighlightMatch = Game._shallHighlightMatch_ACW
 
@@ -939,10 +1001,11 @@ class Aglet(Game):
 
         decks = self.gameinfo.decks
         l, s = Layout(self), self.s
-        self.setSize(l.XM+(reserves+0.5+rows)*l.XS,
-                     l.YM+max(2*l.YS+7*l.YOFFSET, l.YS+playcards*l.YOFFSET))
+        self.setSize(l.XM + (reserves + 0.5+rows) * l.XS,
+                     l.YM + max(2 * l.YS + 7 * l.YOFFSET,
+                                l.YS + playcards * l.YOFFSET))
 
-        x, y = self.width-l.XS, self.height-l.YS
+        x, y = l.XM, self.height-l.YS
         s.talon = InitialDealTalonStack(x, y, self)
 
         x, y = l.XM, l.YM
@@ -952,12 +1015,12 @@ class Aglet(Game):
             s.reserves.append(stack)
             x += l.XS
 
-        x, y = l.XM + (reserves+0.5+(rows-decks*4)/2.0)*l.XS, l.YM
+        x, y = l.XM + (reserves + 0.5 + (rows-decks * 4) / 2.0) * l.XS, l.YM
         for i in range(4):
             s.foundations.append(RK_FoundationStack(x, y, self, suit=ANY_SUIT))
             x += l.XS
 
-        x, y = l.XM+(reserves+0.5)*l.XS, l.YM+l.YS
+        x, y = l.XM+(reserves + 0.5) * l.XS, l.YM + l.YS
         for i in range(rows):
             s.rows.append(BasicRowStack(x, y, self, base_rank=NO_RANK))
             x += l.XS
@@ -976,17 +1039,173 @@ class Aglet(Game):
         self.s.talon.dealRowAvail()
 
 
+# ************************************************************************
+# * Ladybug
+# ************************************************************************
+
+class Ladybug_RowStack(Numerica_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        return Numerica_RowStack.acceptsCards(self, from_stack, cards) \
+               and self.game.isValidPlay(self.id, cards[0].rank)
+
+
+class Ladybug_Talon(WasteTalonStack):
+    def canDealCards(self):
+        if not self.game.used and len(self.game.s.waste.cards) > 0:
+            return False
+        return WasteTalonStack.canDealCards(self)
+
+    def dealCards(self, sound=False):
+        game = self.game
+        old_state = game.enterState(game.S_FILL)
+        game.saveStateMove(2 | 16)  # for undo
+        game.used = False
+        game.saveStateMove(1 | 16)  # for redo
+        game.leaveState(old_state)
+        return WasteTalonStack.dealCards(self, sound)
+
+
+class Ladybug_Waste(WasteStack):
+    def moveMove(self, ncards, to_stack, frames=-1, shadow=-1):
+        game = self.game
+        if to_stack in game.s.rows:
+            old_state = game.enterState(game.S_FILL)
+            game.saveStateMove(2 | 16)  # for undo
+            game.used = True
+            game.saveStateMove(1 | 16)  # for redo
+            game.leaveState(old_state)
+        WasteStack.moveMove(self, ncards, to_stack, frames, shadow)
+        game.s.talon.updateText(self)
+
+
+class Ladybug(Game):
+    used = False
+
+    def createGame(self, rows=7):
+        self.used = False
+        # create layout
+        l, s = Layout(self), self.s
+
+        # set window
+        # (piles up to 4 cards are playable in default window size)
+        h = max(2 * l.YS, (4 * l.YOFFSET) + l.TEXT_HEIGHT)
+        self.setSize(l.XM + (1.5 + rows) * l.XS + l.XM, l.YM + h)
+
+        # create stacks
+        x0 = l.XM + (l.XS * 1.5)
+        x = x0
+        y = l.YM + l.TEXT_HEIGHT
+
+        font = self.app.getFont("canvas_default")
+        for i in range(rows):
+            stack = Ladybug_RowStack(x, y, self, max_cards=4,
+                                     max_accept=1, max_move=0)
+            if self.preview <= 1:
+                tx, ty, ta, tf = l.getTextAttr(stack, anchor="n")
+                stack.texts.misc = MfxCanvasText(self.canvas,
+                                                 tx, ty,
+                                                 anchor=ta,
+                                                 font=font)
+            s.rows.append(stack)
+            x = x + l.XS
+        self.setRegion(s.rows, (x0-l.XS//2, y-l.CH//2, 999999, 999999))
+        x, y = l.XM, l.YM
+        s.talon = Ladybug_Talon(x, y, self, max_rounds=-2, num_deal=3)
+        l.createText(s.talon, 'ne')
+        y = y + l.YS
+        s.waste = Ladybug_Waste(x, y, self)
+        l.createText(s.waste, 'ne')
+
+        # define stack-groups
+        l.defaultStackGroups()
+
+        return l
+
+    def isValidPlay(self, row, playRank):
+        total = self.getTotal(self.s.rows[row], playRank)
+
+        if total > 10:
+            return False
+        if total < 10 and len(self.s.rows[row].cards) == 3:
+            return False
+        return True
+
+    def getTotal(self, row, extraRank=-1):
+        cards = row.cards
+        total = 0
+        hasTen = False
+
+        for card in cards:
+            if card.rank < 9:
+                total += card.rank + 1
+            elif card.rank == 9:
+                hasTen = True
+
+        if extraRank > -1:
+            if extraRank < 9:
+                total += extraRank + 1
+            elif extraRank == 9:
+                hasTen = True
+
+        if hasTen and total < 10:
+            return 10
+
+        return total
+
+    #
+    # game overrides
+    #
+
+    def startGame(self):
+        self.startDealSample()
+        self.s.talon.dealRow(rows=self.s.rows)
+        self.s.talon.dealCards()
+
+    shallHighlightMatch = Game._shallHighlightMatch_SS
+
+    def updateText(self):
+        if self.preview > 1:
+            return
+        for row in self.s.rows:
+            row.texts.misc.config(text=str(self.getTotal(row)))
+
+    def isGameWon(self):
+        for row in self.s.rows:
+            if len(row.cards) != 4:
+                return False
+        return True
+
+    def _restoreGameHook(self, game):
+        self.used = game.loadinfo.used
+
+    def _loadGameHook(self, p):
+        self.loadinfo.addattr(used=p.load())
+
+    def _saveGameHook(self, p):
+        p.dump(self.used)
+
+    def getHighlightPilesStacks(self):
+        return ()
+
+    def setState(self, state):
+        # restore saved vars (from undo/redo)
+        self.used = state[0]
+
+    def getState(self):
+        # save vars (for undo/redo)
+        return [self.used]
+
+
 # register the game
 registerGame(GameInfo(257, Numerica, "Numerica",
                       GI.GT_NUMERICA | GI.GT_CONTRIB, 1, 0, GI.SL_BALANCED,
-                      altnames=("Sir Tommy",)))
+                      altnames=("Sir Tommy", "Old Patience", "Try Again")))
 registerGame(GameInfo(171, LadyBetty, "Lady Betty",
                       GI.GT_NUMERICA, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(355, Frog, "Frog",
                       GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(356, Fly, "Fly",
-                      GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED,
-                      rules_filename='frog.html'))
+                      GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(357, Gnat, "Gnat",
                       GI.GT_NUMERICA, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(378, Gloaming, "Gloaming",
@@ -1003,7 +1222,7 @@ registerGame(GameInfo(435, Shifting, "Shifting",
                       GI.GT_NUMERICA, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(472, Strategerie, "Strategerie",
                       GI.GT_NUMERICA, 1, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(558, Numerica2Decks, "Numerica (2 decks)",
+registerGame(GameInfo(558, Numerica2Decks, "Numerica (2 Decks)",
                       GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(589, LastChance, "Last Chance",
                       GI.GT_NUMERICA, 1, 0, GI.SL_BALANCED))
@@ -1025,5 +1244,9 @@ registerGame(GameInfo(754, Amphibian, "Amphibian",
                       GI.GT_NUMERICA | GI.GT_ORIGINAL, 2, 0,
                       GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(760, Aglet, "Aglet",
-                      GI.GT_1DECK_TYPE | GI.GT_ORIGINAL, 1, 0,
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
                       GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(836, Ladybug, "Ladybug",
+                      GI.GT_1DECK_TYPE, 1, -2, GI.SL_BALANCED))
+registerGame(GameInfo(899, Housefly, "Housefly",
+                      GI.GT_NUMERICA, 1, 0, GI.SL_BALANCED))

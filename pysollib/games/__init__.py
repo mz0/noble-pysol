@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ---------------------------------------------------------------------------##
+from . import acesandkings  # noqa: F401
 from . import acesup  # noqa: F401
 from . import algerian  # noqa: F401
 from . import auldlangsyne  # noqa: F401
@@ -35,8 +36,10 @@ from . import calculation  # noqa: F401
 from . import camelot  # noqa: F401
 from . import canfield  # noqa: F401
 from . import capricieuse  # noqa: F401
+from . import crossword  # noqa: F401
 from . import curdsandwhey  # noqa: F401
 from . import daddylonglegs  # noqa: F401
+from . import demonsandthieves  # noqa: F401
 from . import dieboesesieben  # noqa: F401
 from . import diplomat  # noqa: F401
 from . import doublets  # noqa: F401
@@ -51,13 +54,16 @@ from . import grandfathersclock  # noqa: F401
 from . import gypsy  # noqa: F401
 from . import harp  # noqa: F401
 from . import headsandtails  # noqa: F401
+from . import hitormiss  # noqa: F401
 from . import katzenschwanz  # noqa: F401
 from . import klondike  # noqa: F401
+from . import knockout  # noqa: F401
 from . import labyrinth  # noqa: F401
 from . import larasgame  # noqa: F401
 from . import matriarchy  # noqa: F401
 from . import montana  # noqa: F401
 from . import montecarlo  # noqa: F401
+from . import moojub  # noqa: F401
 from . import napoleon  # noqa: F401
 from . import needle  # noqa: F401
 from . import numerica  # noqa: F401
@@ -66,6 +72,7 @@ from . import parallels  # noqa: F401
 from . import pasdedeux  # noqa: F401
 from . import picturegallery  # noqa: F401
 from . import pileon  # noqa: F401
+from . import precedence  # noqa: F401
 from . import pushpin  # noqa: F401
 from . import pyramid  # noqa: F401
 from . import royalcotillion  # noqa: F401

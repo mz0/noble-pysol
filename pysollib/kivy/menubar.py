@@ -344,7 +344,7 @@ class EditMenuDialog(LMenuDialog):  # Tools
         # und solitär wizard (-> custom games).
         '''
         tv.add_node(LTreeNode(
-            text='Solitaire &Wizard', command=self.menubar.mWizard))
+            text='Solitaire &Wizard...', command=self.menubar.mWizard))
         tv.add_node(LTreeNode(
                 text='Edit current game', command=self.menubar.mWizardEdit))
         '''
@@ -410,7 +410,7 @@ class GameMenuDialog(LMenuDialog):
         submenu.add_command(
             label=n_("Progression..."),
             command=lambda x: self.mPlayerStats(mode=107))
-        submenu = MfxMenu(menu, label=n_("D&emo statistics"))
+        submenu = MfxMenu(menu, label=n_("D&emo statistics..."))
         submenu.add_command(
             label=n_("Current game..."),
             command=lambda x: self.mPlayerStats(mode=1101))
@@ -450,9 +450,9 @@ class AssistMenuDialog(LMenuDialog):
         menu.add_command(
             label=n_("Demo (&all games)"), command=self.mMixedDemo)
         if USE_FREECELL_SOLVER:
-            menu.add_command(label=n_("&Solver"), command=self.mSolver)
+            menu.add_command(label=n_("&Solver..."), command=self.mSolver)
         else:
-            menu.add_command(label=n_("&Solver"), state='disabled')
+            menu.add_command(label=n_("&Solver..."), state='disabled')
         menu.add_separator()
         menu.add_command(
             label=n_("&Piles description"),
@@ -558,6 +558,11 @@ class OptionsMenuDialog(LMenuDialog):
                               self.menubar.mOptEnableShuffle)
 
             self.addCheckNode(tv, rg,
+                              _('Free hints'),
+                              self.menubar.tkopt.free_hint,
+                              self.menubar.mOptFreeHints)
+
+            self.addCheckNode(tv, rg,
                               _('Enable highlight piles'),
                               self.menubar.tkopt.highlight_piles,
                               self.menubar.mOptEnableHighlightPiles)
@@ -573,9 +578,19 @@ class OptionsMenuDialog(LMenuDialog):
                               self.menubar.mOptEnableHighlightSameRank)
 
             self.addCheckNode(tv, rg,
+                              _('Enable face-down peek'),
+                              self.menubar.tkopt.peek_facedown,
+                              self.menubar.mOptEnablePeekFacedown)
+
+            self.addCheckNode(tv, rg,
                               _('Highlight no matching'),
                               self.menubar.tkopt.highlight_not_matching,
                               self.menubar.mOptEnableHighlightNotMatching)
+
+            self.addCheckNode(tv, rg,
+                              _('Stuck notification'),
+                              self.menubar.tkopt.stuck_notification,
+                              self.menubar.mOptEnableStuckNotification)
 
             # submenu.add_separator()
 
@@ -588,6 +603,16 @@ class OptionsMenuDialog(LMenuDialog):
                               _('Show hint arrow (in Shisen-Sho games)'),
                               self.menubar.tkopt.shisen_show_hint,
                               self.menubar.mOptShisenShowHint)
+
+            self.addCheckNode(tv, rg,
+                              _('Deal all cards (in Accordion type games)'),
+                              self.menubar.tkopt.accordion_deal_all,
+                              self.menubar.mOptAccordionDealAll)
+
+            self.addCheckNode(tv, rg,
+                              _('Auto-remove first card (in Pegged games)'),
+                              self.menubar.tkopt.accordion_deal_all,
+                              self.menubar.mOptPeggedAutoRemove)
 
             # submenu.add_separator()
 
@@ -776,6 +801,12 @@ class OptionsMenuDialog(LMenuDialog):
                     _('game won'),
                     self.menubar.tkopt.sound_sample_vars[key],
                     self.make_vars_command(self.menubar.mOptSoundSample, key))
+                key = 'extra'
+                self.addCheckNode(
+                    tv, rg1,
+                    _('Other'),
+                    self.menubar.tkopt.sound_sample_vars[key],
+                    self.make_vars_command(self.menubar.mOptSoundSample, key))
 
         # -------------------------------------------
         # Cardsets and card backside options
@@ -829,13 +860,48 @@ class OptionsMenuDialog(LMenuDialog):
                 key = 'table'
                 self.addRadioNode(
                     tv, rg1,
-                    _('Blue'),
+                    _('Azure'),
                     self.menubar.tkopt.color_vars[key], '#0082df',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Black'),
+                    self.menubar.tkopt.color_vars[key], '#000000',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Blue'),
+                    self.menubar.tkopt.color_vars[key], '#0000ff',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Bright Green'),
+                    self.menubar.tkopt.color_vars[key], '#00ff00',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Brown'),
+                    self.menubar.tkopt.color_vars[key], '#684700',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Cyan'),
+                    self.menubar.tkopt.color_vars[key], '#00ffff',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Grey'),
+                    self.menubar.tkopt.color_vars[key], '#888888',
                     self.menubar.mOptTableColor)
                 self.addRadioNode(
                     tv, rg1,
                     _('Green'),
                     self.menubar.tkopt.color_vars[key], '#008200',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Magenta'),
+                    self.menubar.tkopt.color_vars[key], '#ff00ff',
                     self.menubar.mOptTableColor)
                 self.addRadioNode(
                     tv, rg1,
@@ -854,25 +920,59 @@ class OptionsMenuDialog(LMenuDialog):
                     self.menubar.mOptTableColor)
                 self.addRadioNode(
                     tv, rg1,
+                    _('Pink'),
+                    self.menubar.tkopt.color_vars[key], '#ff92fc',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Purple'),
+                    self.menubar.tkopt.color_vars[key], '#8300ff',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Red'),
+                    self.menubar.tkopt.color_vars[key], '#ff0000',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
                     _('Teal'),
                     self.menubar.tkopt.color_vars[key], '#008286',
                     self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('White'),
+                    self.menubar.tkopt.color_vars[key], '#ffffff',
+                    self.menubar.mOptTableColor)
+                self.addRadioNode(
+                    tv, rg1,
+                    _('Yellow'),
+                    self.menubar.tkopt.color_vars[key], '#ffff00',
+                    self.menubar.mOptTableColor)
 
             rg1 = tv.add_node(
-                LTreeNode(text=_('Tiles and Images')), rg)
+                LTreeNode(text=_('Tiles')), rg)
+            rg2 = tv.add_node(
+                LTreeNode(text=_('Images')), rg)
 
-            if rg1:
+            if rg1 or rg2:
                 tm = self.app.tabletile_manager
                 # cnt = tm.len()
                 i = 1
                 while True:
                     ti = tm.get(i)
+
                     if ti is None:
                         break
-                    self.addRadioNode(tv, rg1,
-                                      ti.name,
-                                      self.menubar.tkopt.tabletile, i,
-                                      self.menubar.mOptTileSet)
+                    if ti.save_aspect == 0 and ti.stretch == 0 and rg1:
+                        self.addRadioNode(tv, rg1,
+                                          ti.name,
+                                          self.menubar.tkopt.tabletile, i,
+                                          self.menubar.mOptTileSet)
+                    if (ti.save_aspect == 1 or ti.stretch == 1) and rg2:
+                        self.addRadioNode(tv, rg2,
+                                          ti.name,
+                                          self.menubar.tkopt.tabletile, i,
+                                          self.menubar.mOptTileSet)
                     i += 1
 
         # -------------------------------------------
@@ -1091,7 +1191,7 @@ class HelpMenuDialog(LMenuDialog):
                 command=self.make_help_command(self.menubar.mHelp)))
         tv.add_node(
             LTreeNode(
-                text=_('How to play'),
+                text=_('How to use PySol'),
                 command=self.make_help_command(self.menubar.mHelpHowToPlay)))
         tv.add_node(
             LTreeNode(
@@ -1225,13 +1325,17 @@ class PysolMenubarTk:
             undo=BooleanVar(),
             bookmarks=BooleanVar(),
             hint=BooleanVar(),
+            free_hint=BooleanVar(),
             shuffle=BooleanVar(),
             highlight_piles=BooleanVar(),
             highlight_cards=BooleanVar(),
             highlight_samerank=BooleanVar(),
             highlight_not_matching=BooleanVar(),
+            stuck_notification=BooleanVar(),
             mahjongg_show_removed=BooleanVar(),
             shisen_show_hint=BooleanVar(),
+            accordion_deal_all=BooleanVar(),
+            pegged_auto_remove=BooleanVar(),
             sound=BooleanVar(),
             sound_sample_volume=IntVar(),
             sound_music_volume=IntVar(),
@@ -1283,16 +1387,20 @@ class PysolMenubarTk:
         tkopt.quickplay.set(opt.quickplay)
         tkopt.undo.set(opt.undo)
         tkopt.hint.set(opt.hint)
+        tkopt.free_hint.set(opt.free_hint)
         tkopt.shuffle.set(opt.shuffle)
         tkopt.bookmarks.set(opt.bookmarks)
         tkopt.highlight_piles.set(opt.highlight_piles)
         tkopt.highlight_cards.set(opt.highlight_cards)
         tkopt.highlight_samerank.set(opt.highlight_samerank)
         tkopt.highlight_not_matching.set(opt.highlight_not_matching)
+        tkopt.stuck_notification.set(opt.stuck_notification)
         tkopt.shrink_face_down.set(opt.shrink_face_down)
         tkopt.shade_filled_stacks.set(opt.shade_filled_stacks)
         tkopt.mahjongg_show_removed.set(opt.mahjongg_show_removed)
         tkopt.shisen_show_hint.set(opt.shisen_show_hint)
+        tkopt.accordion_deal_all.set(opt.accordion_deal_all)
+        tkopt.pegged_auto_remove.set(opt.pegged_auto_remove)
         tkopt.sound.set(opt.sound)
         tkopt.sound_sample_volume.set(opt.sound_sample_volume)
         tkopt.sound_music_volume.set(opt.sound_music_volume)
@@ -1310,8 +1418,6 @@ class PysolMenubarTk:
         tkopt.toolbar_size.set(opt.toolbar_size)
         tkopt.toolbar_relief.set(opt.toolbar_relief)
         tkopt.statusbar.set(opt.statusbar)
-        tkopt.num_cards.set(opt.num_cards)
-        tkopt.helpbar.set(opt.helpbar)
         tkopt.save_games_geometry.set(opt.save_games_geometry)
         tkopt.demo_logo.set(opt.demo_logo)
         tkopt.splashscreen.set(opt.splashscreen)
@@ -2000,6 +2106,12 @@ the next time you restart the %(app)s""") % {'app': TITLE})
         self.app.opt.hint = self.tkopt.hint.get()
         self.game.updateMenus()
 
+    def mOptFreeHints(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.free_hint = self.tkopt.free_hint.get()
+        self.game.updateMenus()
+
     def mOptEnableShuffle(self, *args):
         if self._cancelDrag(break_pause=False):
             return
@@ -2029,6 +2141,12 @@ the next time you restart the %(app)s""") % {'app': TITLE})
             return
         self.app.opt.highlight_not_matching = \
             self.tkopt.highlight_not_matching.get()
+        # self.game.updateMenus()
+
+    def mOptEnableStuckNotification(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.stuck_notification = self.tkopt.stuck_notification.get()
         # self.game.updateMenus()
 
     def mOptAnimations(self, *args):
@@ -2088,6 +2206,18 @@ the next time you restart the %(app)s""") % {'app': TITLE})
         if self._cancelDrag(break_pause=False):
             return
         self.app.opt.shisen_show_hint = self.tkopt.shisen_show_hint.get()
+        # self.game.updateMenus()
+
+    def mOptAccordionDealAll(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.accordion_deal_all = self.tkopt.accordion_deal_all.get()
+        # self.game.updateMenus()
+
+    def mOptPeggedAutoRemove(self, *args):
+        if self._cancelDrag(break_pause=False):
+            return
+        self.app.opt.pegged_auto_remove = self.tkopt.pegged_auto_remove.get()
         # self.game.updateMenus()
 
     def mOptCardset(self, *event):

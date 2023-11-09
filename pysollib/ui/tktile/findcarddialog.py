@@ -24,6 +24,7 @@
 import os
 
 from pysollib.mygettext import _
+from pysollib.resource import CSI
 from pysollib.settings import TITLE
 from pysollib.ui.tktile.tkcanvas import MfxCanvas, MfxCanvasGroup
 from pysollib.ui.tktile.tkcanvas import MfxCanvasImage, MfxCanvasRectangle
@@ -38,21 +39,26 @@ SMALL_EMBLEMS_SIZE = (31, 21)
 
 
 class FindCardDialog(tkinter.Toplevel):
-    CARD_IMAGES = {}  # key: (rank, suit)
+    CARD_IMAGES = {}  # key: (type, rank, suit)
 
-    def __init__(self, parent, game, dir, size='large'):
+    def __init__(self, parent, game, dir):
         tkinter.Toplevel.__init__(self)
         title = TITLE + ' - ' + _('Find card')
         self.title(title)
         self.wm_resizable(False, False)
+        self.cardsettype = ''
+        self.dir = dir
         #
         # self.images_dir = dir
-        if size == 'large':
-            self.images_dir = os.path.join(dir, 'large')
-            self.label_width, self.label_height = LARGE_EMBLEMS_SIZE
-        else:
-            self.images_dir = os.path.join(dir, 'small')
-            self.label_width, self.label_height = SMALL_EMBLEMS_SIZE
+        self.images_dir = ''
+        self.label_width, self.label_height = LARGE_EMBLEMS_SIZE
+        # if size == 'large':
+        #     self.images_dir = os.path.join(dir, 'large', cs_type)
+        #     self.label_width, self.label_height = LARGE_EMBLEMS_SIZE
+        # else:
+        #     self.images_dir = os.path.join(dir, 'small')
+        #     self.label_width, self.label_height = SMALL_EMBLEMS_SIZE
+
         self.canvas = MfxCanvas(self, bg='white')
         # self.canvas = MfxCanvas(self, bg='black')
         self.canvas.pack(expand=True, fill='both')
@@ -77,13 +83,17 @@ class FindCardDialog(tkinter.Toplevel):
         canvas = self.canvas
         group = MfxCanvasGroup(canvas)
         #
-        im = FindCardDialog.CARD_IMAGES.get((rank, suit))
+        im = FindCardDialog.CARD_IMAGES.get((self.cardsettype, rank, suit))
         if im is None:
             r = '%02d' % (rank+1)
-            s = 'cshd'[suit]
+            suitletters = CSI.TYPE_SUITS[self.cardsettype]
+            if suit < len(suitletters):
+                s = suitletters[suit]
+            else:
+                s = "z"
             fn = os.path.join(dir, r+s+'.gif')
             im = makeImage(file=fn)
-            FindCardDialog.CARD_IMAGES[(rank, suit)] = im
+            FindCardDialog.CARD_IMAGES[(self.cardsettype, rank, suit)] = im
         cim = MfxCanvasImage(canvas, x0, y0, image=im, anchor='nw')
         cim.addtag(group)
         cim.lower()
@@ -107,10 +117,16 @@ class FindCardDialog(tkinter.Toplevel):
         self.groups.append(group)
 
     def connectGame(self, game):
+        self.cardsettype = game.gameinfo.category
+        cs_type = CSI.TYPE_ID[self.cardsettype]
+        #
+        # self.images_dir = dir
+        self.images_dir = os.path.join(self.dir, 'finder', cs_type)
         self.canvas.delete('all')
         self.game = game
         suits = game.gameinfo.suits
         ranks = game.gameinfo.ranks
+        trumps = game.gameinfo.trumps
         dx, dy = self.label_width, self.label_height
         uniq_suits = []
         i = 0
@@ -124,6 +140,23 @@ class FindCardDialog(tkinter.Toplevel):
                 self.createCardLabel(suit=suit, rank=rank, x0=x, y0=y)
                 j += 1
             i += 1
+
+        if len(trumps) > 0:
+            if len(ranks) == 0:
+                j = min(10, len(trumps))
+            else:
+                i += .5
+            k = 0
+            for trump in trumps:
+                x, y = dx * k + 2, dy * i + 2
+                self.createCardLabel(suit=len(suits), rank=trump, x0=x, y0=y)
+                k += 1
+                if k >= j:
+                    k = 0
+                    i += 1
+            if k > 0:
+                i += 1
+
         w, h = dx*j+2, dy*i+2
         self.canvas.config(width=w, height=h)
         self.wm_iconname(TITLE + " - " + game.getTitleName())

@@ -32,7 +32,7 @@ html_mode = None
 fix_gettext()
 
 
-def getGameRulesFilename(n):
+def _get_game_rules_filename(n):
     if n.startswith('Mahjongg'):
         return 'mahjongg.html'
     return latin1_normalize(n) + '.html'
@@ -62,6 +62,7 @@ GAME_BY_TYPE = {
     GI.GT_3DECK_TYPE: "Three-Deck game",
     GI.GT_4DECK_TYPE: "Four-Deck game",
 
+    GI.GT_LIGHTS_OUT: "Lights Out",
     GI.GT_MATRIX: "Matrix",
     GI.GT_MEMORY: "Memory",
     GI.GT_POKER_TYPE: "Poker",
@@ -73,7 +74,9 @@ GAME_BY_TYPE = {
     GI.GT_MAHJONGG: "Mahjongg",
     GI.GT_MUGHAL_GANJIFA: "Mughal Ganjifa",
     GI.GT_SHISEN_SHO: "Shisen-Sho",
-
+    GI.GT_HANOI: "Tower of Hanoi",
+    GI.GT_PEGGED: "Pegged",
+    GI.GT_CRIBBAGE_TYPE: "Cribbage",
 }
 
 
@@ -143,7 +146,7 @@ def all_games(sort_by='id'):
     for id in get_games_func():
         gi = GAME_DB.get(id)
         if not gi.rules_filename:
-            rules_fn = getGameRulesFilename(gi.name)
+            rules_fn = _get_game_rules_filename(gi.name)
         else:
             rules_fn = gi.rules_filename
         gt = CSI.TYPE_NAME[gi.category]

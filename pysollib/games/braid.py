@@ -300,6 +300,7 @@ class Backbone_BraidStack(OpenStack):
 
 
 class Backbone(Game):
+    RESERVE_CARDS = 11
 
     Hint_Class = CautiousDefaultHint
 
@@ -309,7 +310,8 @@ class Backbone(Game):
 
         # set window
         w, h = l.XM+(rows+2)*l.XS, max(
-            l.YM+3*l.XS+10*l.YOFFSET, l.YM+2*l.YS+11*l.YOFFSET+l.TEXT_HEIGHT)
+            l.YM + 3 * l.XS + 10 * l.YOFFSET,
+            l.YM + 2 * l.YS + self.RESERVE_CARDS * l.YOFFSET + l.TEXT_HEIGHT)
         self.setSize(w, h)
 
         # create stacks
@@ -324,7 +326,7 @@ class Backbone(Game):
         s.reserves.append(Backbone_BraidStack(x, y, self, max_accept=0))
         x += l.XS
         s.reserves.append(Backbone_BraidStack(x, y, self, max_accept=0))
-        x, y = l.XM+(rows+1)*l.XS//2, l.YM+11*l.YOFFSET
+        x, y = l.XM+(rows+1)*l.XS//2, l.YM+self.RESERVE_CARDS*l.YOFFSET
         s.reserves.append(BasicRowStack(x, y, self, max_accept=0))
 
         x, y = l.XM, l.YM+l.YS
@@ -347,7 +349,7 @@ class Backbone(Game):
         l.defaultStackGroups()
 
     def startGame(self):
-        for i in range(10):
+        for i in range(self.RESERVE_CARDS - 1):
             self.s.talon.dealRow(rows=self.s.reserves[:2], frames=0)
         self.s.talon.dealRow(rows=self.s.reserves, frames=0)
         self.startDealSample()
@@ -360,6 +362,10 @@ class Backbone(Game):
 class BackbonePlus(Backbone):
     def createGame(self):
         Backbone.createGame(self, rows=10)
+
+
+class SmallBackbone(Backbone):
+    RESERVE_CARDS = 9
 
 
 # ************************************************************************
@@ -539,14 +545,14 @@ class Well(Game):
         l, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM+6*l.XS, l.YM+6*l.YS+l.TEXT_HEIGHT)
+        self.setSize(3*l.XM+6*l.XS, l.YM+6*l.YS+3*l.TEXT_HEIGHT)
 
         # register extra stack variables
         s.addattr(wastes=[])
 
         # foundations
         suit = 0
-        x0, y0 = l.XM+1.5*l.XS, l.YM+1.5*l.YS+l.TEXT_HEIGHT
+        x0, y0 = l.XM+1.5*l.XS, l.YM+1.5*l.YS+2*l.TEXT_HEIGHT
         for xx, yy in ((3, 0),
                        (0, 3),
                        (3, 3),
@@ -558,19 +564,20 @@ class Well(Game):
             suit += 1
 
         # rows
-        x0, y0 = l.XM+l.XS, l.YM+l.YS+l.TEXT_HEIGHT
-        for xx, yy in ((0, 2),
-                       (2, 0),
-                       (4, 2),
-                       (2, 4)):
+        x0, y0 = l.XM+l.XS, l.YM+l.YS+2*l.TEXT_HEIGHT
+        for xx, yy, anchor in ((0, 2, 'w'),
+                               (2, 0, 'n'),
+                               (4, 2, 'e'),
+                               (2, 4, 's')):
             x, y = x0+xx*l.XS, y0+yy*l.YS
             stack = SS_RowStack(x, y, self, dir=1, mod=13, max_move=1)
             stack.getBottomImage = stack._getReserveBottomImage
             stack.CARD_YOFFSET = 0
+            l.createText(stack, anchor)
             s.rows.append(stack)
 
         # left stack
-        x, y = l.XM, l.YM+l.YS+l.TEXT_HEIGHT
+        x, y = l.XM, l.YM+l.YS+2*l.TEXT_HEIGHT
         stack = SS_RowStack(
             x, y, self, base_rank=ACE, dir=1, mod=13, max_move=1)
         stack.getBottomImage = stack._getReserveBottomImage
@@ -578,7 +585,7 @@ class Well(Game):
         s.rows.append(stack)
 
         # reserves
-        x0, y0 = l.XM+2*l.XS, l.YM+2*l.YS+l.TEXT_HEIGHT
+        x0, y0 = l.XM+2*l.XS, l.YM+2*l.YS+2*l.TEXT_HEIGHT
         for xx, yy, anchor in ((0, 1, 'e'),
                                (1, 0, 's'),
                                (2, 1, 'w'),
@@ -644,3 +651,5 @@ registerGame(GameInfo(694, Casket, "Casket",
                       GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(717, Well, "Well",
                       GI.GT_2DECK_TYPE, 2, 4, GI.SL_BALANCED))
+registerGame(GameInfo(824, SmallBackbone, "Small Backbone",
+                      GI.GT_NAPOLEON, 2, 0, GI.SL_BALANCED))

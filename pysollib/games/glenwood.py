@@ -275,20 +275,20 @@ class DoubleFives(Glenwood):
 
         # create stacks
         #
-        x, y = l.XM, self.height-l.YS
+        x, y = l.XM, self.height - l.YS - l.TEXT_HEIGHT
         s.talon = DoubleFives_Talon(x, y, self, max_rounds=2, num_deal=1)
-        l.createText(s.talon, "n")
-        l.createRoundText(self.s.talon, 'nnn')
+        l.createText(s.talon, "s")
+        l.createRoundText(self.s.talon, 'n')
         x += l.XS
         for i in range(5):
             s.reserves.append(DoubleFives_WasteStack(x, y, self))
             x += l.XS
-        l.createText(s.reserves[0], 'n')
+        l.createText(s.reserves[0], 's')
         #
         x = self.width-l.XS
         s.addattr(stock=None)      # register extra stack variable
         s.stock = DoubleFives_Stock(x, y, self)
-        l.createText(s.stock, "n")
+        l.createText(s.stock, "s")
         #
         x, y = l.XM, l.YM
         s.reserves.append(Glenwood_ReserveStack(x, y, self))
@@ -313,9 +313,8 @@ class DoubleFives(Glenwood):
         # define stack-groups
         l.defaultStackGroups()
 
-    def _shuffleHook(self, cards):
-        return self._shuffleHookMoveToTop(cards,
-                                          lambda c: (c.deck == 0, None))
+    def shuffle(self):
+        self.shuffleSeparateDecks()
 
     def startGame(self):
         self.base_rank = None
@@ -339,4 +338,5 @@ registerGame(GameInfo(282, Glenwood, "Dutchess",
                       GI.GT_CANFIELD, 1, 1, GI.SL_BALANCED,
                       altnames=("Duchess", "Glenwood",)))
 registerGame(GameInfo(587, DoubleFives, "Double Fives",
-                      GI.GT_2DECK_TYPE, 2, 1, GI.SL_BALANCED))
+                      GI.GT_2DECK_TYPE | GI.GT_SEPARATE_DECKS,
+                      2, 1, GI.SL_BALANCED))

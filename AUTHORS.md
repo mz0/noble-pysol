@@ -15,13 +15,15 @@ Main Authors
     * Added the Kivy toolkit
 * [Roderik Ploszek](https://github.com/Programator2)
     * Fixes and enhancements
+* [Joe R.](https://github.com/joeraz)
+    * Continued PySolFC maintenance and development.
 
 Games contributors
 ==================
 
 * Mark Andrews
 * Galen Brooks <galen@nine.com>
-* Andrew Csillag <drew_csillag@geocities.com>
+* Andrew Csillag <drew@thecsillags.com>
 * Michael Foord
 * Matthew Hohlfeld <hohlfeld@cs.ucsd.edu>
 * Nicola Larosa
