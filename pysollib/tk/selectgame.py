@@ -109,7 +109,7 @@ class SelectGameData(SelectDialogTreeData):
                                 select_mahjongg_game)
         g.append(gg)
         if g[0]:
-            s_by_type = SelectGameNode(None, _("French games"),
+            s_by_type = SelectGameNode(None, _("French Games"),
                                        tuple(g[0]), expanded=1)
         if g[1]:
             s_oriental = SelectGameNode(None, _("Oriental Games"),
@@ -230,9 +230,11 @@ class SelectGameData(SelectDialogTreeData):
                                    lambda gi: gi.si.redeals == 3),
                     SelectGameNode(None, _("Unlimited redeals"),
                                    lambda gi: gi.si.redeals == -1),
+                    SelectGameNode(None, _("Variable redeals"),
+                                   lambda gi: gi.si.redeals == -2),
                     SelectGameNode(
                         None, _("Other number of redeals"),
-                        lambda gi: gi.si.redeals not in (-1, 0, 1, 2, 3)),
+                        lambda gi: gi.si.redeals not in (-2, -1, 0, 1, 2, 3)),
                 )),
                 s_by_compatibility,
             )),
@@ -243,9 +245,14 @@ class SelectGameData(SelectDialogTreeData):
                                lambda gi: gi.si.game_flags & GI.GT_CHILDREN),
                 SelectGameNode(None, _("Games with Scoring"),
                                lambda gi: gi.si.game_flags & GI.GT_SCORE),
+                SelectGameNode(None, _("Games with Stripped Decks"),
+                               lambda gi: gi.si.game_flags & GI.GT_STRIPPED),
                 SelectGameNode(
                     None, _("Games with Separate Decks"),
                     lambda gi: gi.si.game_flags & GI.GT_SEPARATE_DECKS),
+                SelectGameNode(None, _("Games with Jokers"),
+                               lambda gi: gi.category == GI.GC_FRENCH and
+                               gi.subcategory == GI.GS_JOKER_DECK),
                 SelectGameNode(None, _("Open Games (all cards visible)"),
                                lambda gi: gi.si.game_flags & GI.GT_OPEN),
                 SelectGameNode(None, _("Relaxed Variants"),
@@ -487,7 +494,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
                 gamerandom=self.app.gamerandom,
                 gdb=self.app.gdb,
                 gimages=self.app.gimages,
-                images=self.app.subsampled_images,
+                images=None,
                 menubar=None,
                 miscrandom=self.app.miscrandom,
                 opt=self.app.opt.copy(),
@@ -503,6 +510,28 @@ class SelectGameDialogWithPreview(SelectGameDialog):
             self.preview_app.opt.shadow = 0
             self.preview_app.opt.shade = 0
         #
+
+        c = self.app.cardsets_cache.get(gi.category)
+        c2 = None
+        if c:
+            c2 = c.get(gi.subcategory)
+        if not c2:
+            cardset = self.app.cardset_manager.getByName(
+                self.app.opt.cardset[gi.category][gi.subcategory][0])
+            self.app.loadCardset(cardset, id=gi.category,
+                                 tocache=True, noprogress=True)
+            c = self.app.cardsets_cache.get(gi.category)
+            if c:
+                c2 = c.get(gi.subcategory)
+            if not c2:
+                c = self.app.cardsets_cache.get(cardset.type)
+                if c:
+                    c2 = c.get(cardset.subtype)
+        if c2:
+            self.preview_app.images = c2[2]
+        else:
+            self.preview_app.images = self.app.subsampled_images
+
         self.preview_app.audio = None    # turn off audio for initial dealing
         if animations >= 0:
             self.preview_app.opt.animations = animations
@@ -513,7 +542,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         # self.top.wm_title("Select Game - " +
         #   self.app.getGameTitleName(gameid))
         title = self.app.getGameTitleName(gameid)
-        self.top.wm_title(_("Playable Preview - %(game)s") % {'game': title})
+        self.top.wm_title(_("Select Game - %(game)s") % {'game': title})
         #
         self.preview_game = gi.gameclass(gi)
         self.preview_game.createPreview(self.preview_app)
@@ -557,14 +586,7 @@ class SelectGameDialogWithPreview(SelectGameDialog):
         type = ''
         if gi.si.game_type in GI.TYPE_NAMES:
             type = _(GI.TYPE_NAMES[gi.si.game_type])
-        sl = {
-            GI.SL_LUCK:         _('Luck only'),
-            GI.SL_MOSTLY_LUCK:  _('Mostly luck'),
-            GI.SL_BALANCED:     _('Balanced'),
-            GI.SL_MOSTLY_SKILL: _('Mostly skill'),
-            GI.SL_SKILL:        _('Skill only'),
-            }
-        skill_level = sl.get(gi.skill_level)
+        skill_level = GI.SKILL_LEVELS.get(gi.skill_level)
         if gi.redeals == -2:
             redeals = _('variable')
         elif gi.redeals == -1:

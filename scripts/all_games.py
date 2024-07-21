@@ -7,10 +7,9 @@ import sys
 import time
 
 # from pprint import pprint
-import pysollib.games
+import pysollib.games  # noqa: F401
 import pysollib.games.mahjongg  # noqa: F401
-import pysollib.games.special
-import pysollib.games.ultra  # noqa: F401
+import pysollib.games.special  # noqa: F401
 from pysollib.gamedb import GAME_DB
 from pysollib.gamedb import GI
 from pysollib.mfxutil import latin1_normalize
@@ -32,7 +31,7 @@ html_mode = None
 fix_gettext()
 
 
-def getGameRulesFilename(n):
+def _get_game_rules_filename(n):
     if n.startswith('Mahjongg'):
         return 'mahjongg.html'
     return latin1_normalize(n) + '.html'
@@ -52,6 +51,7 @@ GAME_BY_TYPE = {
     GI.GT_NAPOLEON: "Napoleon",
     GI.GT_NUMERICA: "Numerica",
     GI.GT_PAIRING_TYPE: "Pairing",
+    GI.GT_PICTURE_GALLERY: "Picture Gallery",
     GI.GT_RAGLAN: "Raglan",
     GI.GT_SIMPLE_TYPE: "Simple game",
     GI.GT_SPIDER: "Spider",
@@ -62,6 +62,7 @@ GAME_BY_TYPE = {
     GI.GT_3DECK_TYPE: "Three-Deck game",
     GI.GT_4DECK_TYPE: "Four-Deck game",
 
+    GI.GT_LIGHTS_OUT: "Lights Out",
     GI.GT_MATRIX: "Matrix",
     GI.GT_MEMORY: "Memory",
     GI.GT_POKER_TYPE: "Poker",
@@ -73,7 +74,11 @@ GAME_BY_TYPE = {
     GI.GT_MAHJONGG: "Mahjongg",
     GI.GT_MUGHAL_GANJIFA: "Mughal Ganjifa",
     GI.GT_SHISEN_SHO: "Shisen-Sho",
-
+    GI.GT_HANOI: "Tower of Hanoi",
+    GI.GT_PEGGED: "Pegged",
+    GI.GT_CRIBBAGE_TYPE: "Cribbage",
+    GI.GT_ISHIDO: "Ishido",
+    GI.GT_SAMEGAME: "Samegame",
 }
 
 
@@ -143,7 +148,7 @@ def all_games(sort_by='id'):
     for id in get_games_func():
         gi = GAME_DB.get(id)
         if not gi.rules_filename:
-            rules_fn = getGameRulesFilename(gi.name)
+            rules_fn = _get_game_rules_filename(gi.name)
         else:
             rules_fn = gi.rules_filename
         gt = CSI.TYPE_NAME[gi.category]

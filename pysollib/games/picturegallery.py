@@ -135,14 +135,15 @@ class PictureGallery_Hint(AbstractHint):
 class PictureGallery_Foundation(RK_FoundationStack):
     def __init__(self, x, y, game):
         RK_FoundationStack.__init__(
-            self, x, y, game, base_rank=ACE, dir=0, max_move=0, max_cards=8)
+            self, x, y, game, base_rank=ACE, dir=0, max_move=0,
+            max_cards=(4 * game.gameinfo.decks))
         self.CARD_YOFFSET = min(30, self.game.app.images.CARD_YOFFSET + 10)
 
     def getBottomImage(self):
         return self.game.app.images.getLetter(ACE)
 
     def closeStack(self):
-        if len(self.cards) == 8:
+        if len(self.cards) == (4 * self.game.gameinfo.decks):
             if self.game.moves.state not in \
                     (self.game.S_REDO, self.game.S_RESTORE):
                 self.game.flipAllMove(self)
@@ -152,10 +153,13 @@ class PictureGallery_Foundation(RK_FoundationStack):
 
 
 class PictureGallery_TableauStack(SS_RowStack):
+    max_accept = 1
+
     def __init__(self, x, y, game, base_rank, yoffset, dir=3, max_cards=4):
         SS_RowStack.__init__(
             self, x, y, game,
-            base_rank=base_rank, dir=dir, max_cards=max_cards, max_accept=1)
+            base_rank=base_rank, dir=dir, max_cards=max_cards,
+            max_accept=self.max_accept)
         self.CARD_YOFFSET = yoffset
 
     def acceptsCards(self, from_stack, cards):
@@ -200,48 +204,63 @@ class PictureGallery(Game):
     RowStack_Class = StackWrapper(PictureGallery_RowStack, max_accept=1)
     Talon_Class = DealRowTalonStack
 
+    NORMAL_OFFSET = False
+
     #
     # game layout
     #
 
-    def createGame(self, waste=False):
+    def createGame(self, waste=False, numstacks=8):
         rows = len(self.TableauStack_Classes)
         # create layout
         l, s = Layout(self), self.s
-        TABLEAU_YOFFSET = min(9, max(3, l.YOFFSET // 3))
+        numtableau = (4 * self.gameinfo.decks)
+        if not self.NORMAL_OFFSET:
+            TABLEAU_YOFFSET = min(numtableau + 1, max(3, l.YOFFSET // 3))
+        else:
+            TABLEAU_YOFFSET = l.YOFFSET
 
         # set window
-        th = l.YS + (12//rows-1) * TABLEAU_YOFFSET
-        # (set piles so that at least 2/3 of a card is visible with 10 cards)
-        h = (10-1)*l.YOFFSET + l.CH*2//3
-        self.setSize(10*l.XS+l.XM, l.YM + 3*th + l.YM + h)
+        th = l.YS + ((numtableau + 4) // rows - 1) * TABLEAU_YOFFSET
+        if self.Foundation_Class is None and self.RowStack_Class is None:
+            h = 0
+        else:
+            # (set piles so at least 2/3 of a card is visible with 10 cards)
+            h = ((numtableau + 2) - 1) * l.YOFFSET + l.CH * 2 // 3
+        self.setSize((numtableau + 2) * l.XS + l.XM, l.YM + 3 * th + l.YM + h)
 
         # create stacks
         s.addattr(tableaux=[])     # register extra stack variable
-        x = l.XM + 8 * l.XS + l.XS // 2
+        x = l.XM + numtableau * l.XS + l.XS // 2
         y = l.YM + l.CH // 2
-        s.foundations.append(self.Foundation_Class(x, y, self))
+        if self.Foundation_Class is not None:
+            s.foundations.append(self.Foundation_Class(x, y, self))
         y = l.YM
         for cl in self.TableauStack_Classes:
             x = l.XM
-            for j in range(8):
+            for j in range(numtableau):
                 s.tableaux.append(cl(x, y, self, yoffset=TABLEAU_YOFFSET))
                 x = x + l.XS
             y = y + th
+        if self.Foundation_Class is not None:
+            self.setRegion(s.foundations, (x - l.CW // 2, -999, 999999,
+                                           y - l.CH))
         x, y = l.XM, y + l.YM
-        for i in range(8):
-            s.rows.append(self.RowStack_Class(x, y, self))
-            x = x + l.XS
+        if self.RowStack_Class is not None:
+            for i in range(numstacks):
+                s.rows.append(self.RowStack_Class(x, y, self))
+                x = x + l.XS
         # self.setRegion(s.rows, (-999, -999, x - l.CW // 2, 999999))
-        x = l.XM + 8 * l.XS + l.XS // 2
+        x = l.XM + numstacks * l.XS + l.XS // 2
         y = self.height - l.YS
+        if self.RowStack_Class is None and self.Foundation_Class is None:
+            y = l.YM + l.YS + l.CH // 2
         s.talon = self.Talon_Class(x, y, self)
         l.createText(s.talon, "se")
         if waste:
             y -= l.YS
             s.waste = WasteStack(x, y, self)
             l.createText(s.waste, "se")
-        self.setRegion(s.foundations, (x - l.CW // 2, -999, 999999, y - l.CH))
 
         # define stack-groups
         if waste:
@@ -261,7 +280,7 @@ class PictureGallery(Game):
         self._startAndDealRow()
 
     def isGameWon(self):
-        if len(self.s.foundations[0].cards) != 8:
+        if len(self.s.foundations[0].cards) != (4 * self.gameinfo.decks):
             return False
         for stack in self.s.tableaux:
             if len(stack.cards) != 4:
@@ -283,8 +302,21 @@ class PictureGallery(Game):
         return ()
 
 
+class BigPictureGallery(PictureGallery):
+
+    def createGame(self):
+        PictureGallery.createGame(self, numstacks=12)
+
+
+class HugePictureGallery(PictureGallery):
+
+    def createGame(self):
+        PictureGallery.createGame(self, numstacks=16)
+
+
 # ************************************************************************
 # * Great Wheel
+# * Greater Wheel
 # ************************************************************************
 
 
@@ -329,7 +361,7 @@ class GreatWheel(PictureGallery):
     Talon_Class = StackWrapper(WasteTalonStack, max_rounds=1)
 
     def createGame(self):
-        PictureGallery.createGame(self, waste=True)
+        PictureGallery.createGame(self, waste=True, numstacks=8)
 
     def fillStack(self, stack):
         if stack is self.s.waste and not stack.cards:
@@ -337,7 +369,7 @@ class GreatWheel(PictureGallery):
         if self.s.talon.cards or self.s.waste.cards:
             if stack in self.s.rows and len(stack.cards) == 0:
                 old_state = self.enterState(self.S_FILL)
-                for i in range(4):
+                for i in range(2 + self.gameinfo.decks):
                     if not self.s.waste.cards:
                         self.s.talon.dealCards()
                     if self.s.waste.cards:
@@ -345,13 +377,14 @@ class GreatWheel(PictureGallery):
                 self.leaveState(old_state)
 
     def startGame(self):
+        for i in range(1 + self.gameinfo.decks):
+            self.s.talon.dealRow(frames=0)
         self.startDealSample()
-        for i in range(4):
-            self.s.talon.dealRow()
+        self.s.talon.dealRow()
         self.s.talon.dealCards()
 
     def isGameWon(self):
-        if len(self.s.foundations[0].cards) != 8:
+        if len(self.s.foundations[0].cards) != (4 * self.gameinfo.decks):
             return False
         if self.s.talon.cards or self.s.waste.cards:
             return False
@@ -365,6 +398,12 @@ class GreatWheel(PictureGallery):
             return False
         return (card1.suit == card2.suit and
                 (card1.rank + 2 == card2.rank or card2.rank + 2 == card1.rank))
+
+
+class GreaterWheel(GreatWheel):
+
+    def createGame(self):
+        PictureGallery.createGame(self, waste=True, numstacks=12)
 
 # ************************************************************************
 # * Mount Olympus
@@ -458,8 +497,8 @@ class Zeus(MountOlympus):
 
 # ************************************************************************
 # * Royal Parade
+# * Big Parade
 # ************************************************************************
-
 
 class RoyalParade_TableauStack(PictureGallery_TableauStack):
 
@@ -507,18 +546,26 @@ class RoyalParade(PictureGallery):
         ]
     RowStack_Class = StackWrapper(BasicRowStack, max_accept=0)
 
-    def createGame(self):
-        PictureGallery.createGame(self)
+    def createGame(self, waste=False, numstacks=8):
+        PictureGallery.createGame(self, waste=waste, numstacks=numstacks)
         self.s.internals.append(InvisibleStack(self))
 
     def startGame(self):
         self.startDealSample()
-        self.s.talon.dealRow(rows=self.s.tableaux)
+        self.s.talon.dealRow(rows=self.s.tableaux, frames=0)
         self.s.talon.dealRow()
+
+
+class BigParade(RoyalParade):
+
+    def createGame(self):
+        RoyalParade.createGame(self, numstacks=12)
 
 
 # ************************************************************************
 # * Virginia Reel
+# * Three Up
+# * Blue Jacket
 # ************************************************************************
 
 class VirginiaReel_Talon(DealRowTalonStack):
@@ -549,31 +596,144 @@ class VirginiaReel(RoyalParade):
         return cards+bottom_cards
 
     def startGame(self):
-        self.s.talon.dealRow(rows=self.s.tableaux[0::8], frames=0)
+        numdeal = (4 * self.gameinfo.decks)
+        self.s.talon.dealRow(rows=self.s.tableaux[0::numdeal], frames=0)
         self.startDealSample()
         for i in range(3):
-            rows = self.s.tableaux[i*8+1:i*8+8]
-            self.s.talon.dealRow(rows=rows)
+            rows = self.s.tableaux[i*numdeal+1:i*numdeal+numdeal]
+            self.s.talon.dealRow(rows=rows, frames=0)
         self.s.talon.dealRow()
 
     def fillStack(self, stack):
         pass
 
 
+class ThreeUp(VirginiaReel):
+
+    def createGame(self):
+        VirginiaReel.createGame(self, numstacks=12)
+
+
+class BlueJacket_RowStack(BasicRowStack):
+    def acceptsCards(self, from_stack, cards):
+        return len(self.cards) == 0 and len(cards) == 1
+
+
+class BlueJacket(VirginiaReel):
+    RowStack_Class = StackWrapper(BlueJacket_RowStack, max_accept=1)
+
+
+# ************************************************************************
+# * Devil's Grip
+# ************************************************************************
+
+class DevilsGrip_TableauStack(RoyalParade_TableauStack):
+    max_accept = 4
+
+    def _canSwapPair(self, from_stack):
+        if from_stack not in self.game.s.tableaux:
+            return False
+        if len(self.cards) == 0 or len(from_stack.cards) == 0:
+            return False
+        if self.cap.base_rank == from_stack.cap.base_rank:
+            return False
+        c0, c1 = from_stack.cards[0], self.cards[0]
+        return (c0.rank != c1.rank and
+                (c0.rank == self.cap.base_rank or
+                 c1.rank == from_stack.cap.base_rank))
+
+    def acceptsCards(self, from_stack, cards):
+        if self._canSwapPair(from_stack):
+            return True
+        return SS_RowStack.acceptsCards(
+            self, from_stack, cards)
+
+    def _swapPairMove(self, n, other_stack, frames=-1, shadow=-1):
+        game = self.game
+        old_state = game.enterState(game.S_FILL)
+        swap = game.s.internals[0]
+        game.moveMove(len(self.cards), self, swap, frames=0)
+        game.moveMove(len(other_stack.cards), other_stack, self,
+                      frames=frames, shadow=shadow)
+        game.moveMove(len(swap.cards), swap, other_stack, frames=0)
+        game.leaveState(old_state)
+
+
+class DevilsGrip(RoyalParade):
+    Foundation_Class = None
+    RowStack_Class = None
+    TableauStack_Classes = [
+        StackWrapper(DevilsGrip_TableauStack,
+                     base_rank=1, max_cards=4, dir=3),
+        StackWrapper(DevilsGrip_TableauStack,
+                     base_rank=2, max_cards=4, dir=3),
+        StackWrapper(DevilsGrip_TableauStack,
+                     base_rank=3, max_cards=4, dir=3),
+        ]
+    Talon_Class = StackWrapper(WasteTalonStack, max_rounds=1, num_deal=3)
+
+    NORMAL_OFFSET = True
+
+    def createGame(self):
+        RoyalParade.createGame(self, waste=True, numstacks=8)
+
+    def startGame(self):
+        self.startDealSample()
+        self.s.talon.dealRow(rows=self.s.tableaux, frames=0)
+        self.s.talon.dealCards()
+
+    def isGameWon(self):
+        for stack in self.s.tableaux:
+            if len(stack.cards) != 4 or \
+                    stack.cards[0].rank != stack.cap.base_rank:
+                return False
+        return True
+
+    def fillStack(self, stack):
+        if not stack.cards and stack in self.s.tableaux:
+            if self.s.waste.cards:
+                old_state = self.enterState(self.S_FILL)
+                self.s.waste.moveMove(1, stack)
+                self.leaveState(old_state)
+            elif self.s.talon.cards:
+                old_state = self.enterState(self.S_FILL)
+                self.s.talon.moveMove(1, stack)
+                self.leaveState(old_state)
+
+
 # register the game
 registerGame(GameInfo(7, PictureGallery, "Picture Gallery",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED,
+                      GI.GT_PICTURE_GALLERY, 2, 0, GI.SL_BALANCED,
                       altnames=("Die Bildgallerie", "Mod-3")))
 registerGame(GameInfo(397, GreatWheel, "Great Wheel",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED,
-                      ranks=list(range(12))  # without Kings
+                      GI.GT_PICTURE_GALLERY | GI.GT_STRIPPED, 2, 0,
+                      GI.SL_BALANCED, ranks=list(range(12))  # without Kings
                       ))
 registerGame(GameInfo(398, MountOlympus, "Mount Olympus",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
+                      GI.GT_PICTURE_GALLERY, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(399, Zeus, "Zeus",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_BALANCED))
+                      GI.GT_PICTURE_GALLERY, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(546, RoyalParade, "Royal Parade",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_SKILL,
-                      rules_filename='virginiareel.html'))
+                      GI.GT_PICTURE_GALLERY, 2, 0, GI.SL_MOSTLY_SKILL,
+                      altnames=("Hussars", "Financier")))
 registerGame(GameInfo(547, VirginiaReel, "Virginia Reel",
-                      GI.GT_2DECK_TYPE, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_PICTURE_GALLERY, 2, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(782, GreaterWheel, "Greater Wheel",
+                      GI.GT_PICTURE_GALLERY | GI.GT_STRIPPED, 4, 0,
+                      GI.SL_BALANCED, ranks=list(range(12))  # without Kings
+                      ))
+registerGame(GameInfo(803, BigParade, "Big Parade",
+                      GI.GT_PICTURE_GALLERY, 3, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(804, ThreeUp, "Three Up",
+                      GI.GT_PICTURE_GALLERY, 3, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(927, BigPictureGallery, "Big Picture Gallery",
+                      GI.GT_PICTURE_GALLERY, 3, 0, GI.SL_BALANCED))
+registerGame(GameInfo(928, HugePictureGallery, "Huge Picture Gallery",
+                      GI.GT_PICTURE_GALLERY, 4, 0, GI.SL_BALANCED))
+registerGame(GameInfo(932, DevilsGrip, "Devil's Grip",
+                      GI.GT_PICTURE_GALLERY | GI.GT_STRIPPED, 2, 0,
+                      GI.SL_MOSTLY_LUCK,
+                      ranks=list(range(1, 13))  # without Aces
+                      ))
+registerGame(GameInfo(944, BlueJacket, "Blue Jacket",
+                      GI.GT_PICTURE_GALLERY, 2, 0, GI.SL_MOSTLY_SKILL))

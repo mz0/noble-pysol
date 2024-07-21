@@ -122,8 +122,8 @@ class SelectGameDialogWithPreview(MfxDialog):
             ('played',      _('Played:'),           stats_frame,  0),
             ('won',         _('Won:'),              stats_frame,  1),
             ('lost',        _('Lost:'),             stats_frame,  2),
-            ('time',        _('Playing time:'),     stats_frame,  3),
-            ('moves',       _('Moves:'),            stats_frame,  4),
+            ('time',        _('Avg. win time:'),    stats_frame,  3),
+            ('moves',       _('Avg. win moves:'),   stats_frame,  4),
             ('percent',     _('% won:'),            stats_frame,  5),
                 ):
             title_label = gtk.Label()
@@ -271,9 +271,9 @@ class SelectGameDialogWithPreview(MfxDialog):
             (_("2 redeals"), lambda gi: gi.si.redeals == 2),
             (_("3 redeals"), lambda gi: gi.si.redeals == 3),
             (_("Unlimited redeals"), lambda gi: gi.si.redeals == -1),
-            # (_("Variable redeals"), lambda gi: gi.si.redeals == -2),
+            (_("Variable redeals"), lambda gi: gi.si.redeals == -2),
             (_("Other number of redeals"),
-                lambda gi: gi.si.redeals not in (-1, 0, 1, 2, 3)),)
+                lambda gi: gi.si.redeals not in (-2, -1, 0, 1, 2, 3)),)
         self._addGamesFromData(data, store, root_iter,
                                _("by Number of Redeals"), all_games)
 
@@ -301,6 +301,8 @@ class SelectGameDialogWithPreview(MfxDialog):
                 lambda gi: gi.si.game_flags & GI.GT_CHILDREN),
             (_("Games with Scoring"),
                 lambda gi: gi.si.game_flags & GI.GT_SCORE),
+            (_("Games with Stripped Decks"),
+                lambda gi: gi.si.game_flags & GI.GT_STRIPPED),
             (_("Games with Separate Decks"),
                 lambda gi: gi.si.game_flags & GI.GT_SEPARATE_DECKS),
             (_("Open Games (all cards visible)"),
@@ -396,7 +398,7 @@ class SelectGameDialogWithPreview(MfxDialog):
                 gamerandom=self.app.gamerandom,
                 gdb=self.app.gdb,
                 gimages=self.app.gimages,
-                images=self.app.subsampled_images,
+                images=None,
                 menubar=None,
                 miscrandom=self.app.miscrandom,
                 opt=self.app.opt.copy(),
@@ -412,6 +414,28 @@ class SelectGameDialogWithPreview(MfxDialog):
             self.preview_app.opt.shadow = 0
             self.preview_app.opt.shade = 0
         #
+
+        c = self.app.cardsets_cache.get(gi.category)
+        c2 = None
+        if c:
+            c2 = c.get(gi.subcategory)
+        if not c2:
+            cardset = self.app.cardset_manager.getByName(
+                self.app.opt.cardset[gi.category][gi.subcategory][0])
+            self.app.loadCardset(cardset, id=gi.category,
+                                 tocache=True, noprogress=True)
+            c = self.app.cardsets_cache.get(gi.category)
+            if c:
+                c2 = c.get(gi.subcategory)
+            if not c2:
+                c = self.app.cardsets_cache.get(cardset.type)
+                if c:
+                    c2 = c.get(cardset.subtype)
+        if c2:
+            self.preview_app.images = c2[2]
+        else:
+            self.preview_app.images = self.app.subsampled_images
+
         self.preview_app.audio = None    # turn off audio for initial dealing
         if animations >= 0:
             self.preview_app.opt.animations = animations
@@ -422,7 +446,7 @@ class SelectGameDialogWithPreview(MfxDialog):
         # self.top.wm_title(
         #   "Select Game - " + self.app.getGameTitleName(gameid))
         title = self.app.getGameTitleName(gameid)
-        self.set_title(_("Playable Preview - %(game)s") % {'game': title})
+        self.set_title(_("Select Game - %(game)s") % {'game': title})
         #
         self.preview_game = gi.gameclass(gi)
         self.preview_game.createPreview(self.preview_app)
@@ -468,14 +492,7 @@ class SelectGameDialogWithPreview(MfxDialog):
         type = ''
         if gi.si.game_type in GI.TYPE_NAMES:
             type = _(GI.TYPE_NAMES[gi.si.game_type])
-        sl = {
-            GI.SL_LUCK:         _('Luck only'),
-            GI.SL_MOSTLY_LUCK:  _('Mostly luck'),
-            GI.SL_BALANCED:     _('Balanced'),
-            GI.SL_MOSTLY_SKILL: _('Mostly skill'),
-            GI.SL_SKILL:        _('Skill only'),
-            }
-        skill_level = sl.get(gi.skill_level)
+        skill_level = GI.SKILL_LEVELS.get(gi.skill_level)
         if gi.redeals == -2:
             redeals = _('variable')
         elif gi.redeals == -1:

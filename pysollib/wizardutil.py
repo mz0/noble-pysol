@@ -23,12 +23,15 @@
 
 import os
 
-from pysollib.gamedb import GI, loadGame
+from pysollib.gamedb import GI, hideGame, loadGame
 from pysollib.layout import Layout
 from pysollib.mygettext import _, n_
 from pysollib.stack import AC_FoundationStack, \
         AC_RowStack, \
+        BO_FoundationStack, \
         BO_RowStack, \
+        BasicRowStack, \
+        DealFirstRowRedealTalonStack, \
         DealReserveRedealTalonStack, \
         DealRowRedealTalonStack, \
         GroundsForADivorceTalonStack, \
@@ -42,16 +45,23 @@ from pysollib.stack import AC_FoundationStack, \
         SpiderTalonStack, \
         Spider_AC_Foundation, \
         Spider_AC_RowStack, \
+        Spider_BO_Foundation, \
+        Spider_BO_RowStack, \
         Spider_RK_Foundation, \
+        Spider_SC_Foundation, \
+        Spider_SC_RowStack, \
         Spider_SS_Foundation, \
         Spider_SS_RowStack, \
         UD_AC_RowStack, \
+        UD_BO_RowStack, \
         UD_RK_RowStack, \
         UD_SC_RowStack, \
         UD_SS_RowStack, \
         WasteTalonStack, \
         Yukon_AC_RowStack, \
+        Yukon_BO_RowStack, \
         Yukon_RK_RowStack, \
+        Yukon_SC_RowStack, \
         Yukon_SS_RowStack
 from pysollib.util import ACE, ANY_RANK, KING, NO_RANK, UNLIMITED_MOVES
 from pysollib.wizardpresets import presets
@@ -139,6 +149,7 @@ TalonType = WizSetting(
     values_map=((n_('Deal all cards at the beginning'), InitialDealTalonStack),
                 (n_('Deal to waste'),         WasteTalonStack),
                 (n_('Deal to tableau'),       DealRowRedealTalonStack),
+                (n_('Deal to first tableau'), DealFirstRowRedealTalonStack),
                 (n_('Deal to reserves'),      DealReserveRedealTalonStack),
                 (n_('Spider'),                SpiderTalonStack),
                 (n_('Grounds for a Divorce'), GroundsForADivorceTalonStack),
@@ -173,13 +184,16 @@ TalonShuffle = WizSetting(
     widget='check',
     )
 FoundType = WizSetting(
-    values_map=((n_('Same suit'),              SS_FoundationStack),
-                (n_('Alternate color'),        AC_FoundationStack),
-                (n_('Same color'),             SC_FoundationStack),
-                (n_('Rank'),                   RK_FoundationStack),
-                (n_('Spider same suit'),       Spider_SS_Foundation),
-                (n_('Spider alternate color'), Spider_AC_Foundation),
-                (n_('Spider rank'),            Spider_RK_Foundation),
+    values_map=((n_('Same suit'),                       SS_FoundationStack),
+                (n_('Alternate color'),                 AC_FoundationStack),
+                (n_('Same color'),                      SC_FoundationStack),
+                (n_('Rank'),                            RK_FoundationStack),
+                (n_('Any suit but the same'),           BO_FoundationStack),
+                (n_('Spider same suit'),                Spider_SS_Foundation),
+                (n_('Spider alternate color'),          Spider_AC_Foundation),
+                (n_('Spider same color'),               Spider_SC_Foundation),
+                (n_('Spider rank'),                     Spider_RK_Foundation),
+                (n_('Spider any suit but the same'),    Spider_BO_Foundation),
                 ),
     default=n_('Same suit'),
     label=_('Type:'),
@@ -221,23 +235,30 @@ RowsNum = WizSetting(
     var_name='rows_num',
     )
 RowsType = WizSetting(
-    values_map=((n_('Same suit'),                     SS_RowStack),
-                (n_('Alternate color'),               AC_RowStack),
-                (n_('Same color'),                    SC_RowStack),
-                (n_('Rank'),                          RK_RowStack),
-                (n_('Any suit but the same'),         BO_RowStack),
+    values_map=((n_('No building'),                        BasicRowStack),
 
-                (n_('Up or down by same suit'),       UD_SS_RowStack),
-                (n_('Up or down by alternate color'), UD_AC_RowStack),
-                (n_('Up or down by rank'),            UD_RK_RowStack),
-                (n_('Up or down by same color'),      UD_SC_RowStack),
+                (n_('Same suit'),                          SS_RowStack),
+                (n_('Alternate color'),                    AC_RowStack),
+                (n_('Same color'),                         SC_RowStack),
+                (n_('Rank'),                               RK_RowStack),
+                (n_('Any suit but the same'),              BO_RowStack),
 
-                (n_('Spider same suit'),              Spider_SS_RowStack),
-                (n_('Spider alternate color'),        Spider_AC_RowStack),
+                (n_('Up or down by same suit'),            UD_SS_RowStack),
+                (n_('Up or down by alternate color'),      UD_AC_RowStack),
+                (n_('Up or down by same color'),           UD_SC_RowStack),
+                (n_('Up or down by rank'),                 UD_RK_RowStack),
+                (n_('Up or down by any suit but the same'), UD_BO_RowStack),
 
-                (n_('Yukon same suit'),               Yukon_SS_RowStack),
-                (n_('Yukon alternate color'),         Yukon_AC_RowStack),
-                (n_('Yukon rank'),                    Yukon_RK_RowStack),
+                (n_('Spider same suit'),                   Spider_SS_RowStack),
+                (n_('Spider alternate color'),             Spider_AC_RowStack),
+                (n_('Spider same color'),                  Spider_SC_RowStack),
+                (n_('Spider any suit but the same'),       Spider_BO_RowStack),
+
+                (n_('Yukon same suit'),                    Yukon_SS_RowStack),
+                (n_('Yukon alternate color'),              Yukon_AC_RowStack),
+                (n_('Yukon same color'),                   Yukon_SC_RowStack),
+                (n_('Yukon rank'),                         Yukon_RK_RowStack),
+                (n_('Yukon any suit but the same'),        Yukon_BO_RowStack),
                 ),
     default=n_('Alternate color'),
     label=_('Type:'),
@@ -254,7 +275,7 @@ RowsBaseCard = WizSetting(
     var_name='rows_base_card',
     )
 RowsDir = WizSetting(
-    values_map=((n_('Up'), 1), (n_('Down'), -1)),
+    values_map=((n_('Up'), 1), (n_('Down'), -1), (n_('Same rank'), 0)),
     default=n_('Down'),
     label=_('Direction:'),
     var_name='rows_dir',
@@ -296,6 +317,7 @@ ReservesMaxAccept = WizSetting(
 DealType = WizSetting(
     values_map=((n_('Triangle'),  'triangle'),
                 (n_('Rectangle'), 'rectangle'),
+                (n_('Pyramid'), 'pyramid')
                 ),
     default=n_('Rectangle'),
     label=_('Type:'),
@@ -429,11 +451,15 @@ class MyCustomGame(CustomGame):
                     # escape
                     v = v.replace('\\', '\\\\')
                     v = v.replace("'", "\\'")
-                    if isinstance(v, six.text_type):
-                        v = v.encode('utf-8')
+                    v = v.replace("\n", "\\n")
+                    v = v.replace("\r", "\\r")
+                    v = v.replace("\t", "\\t")
+                    # See: https://github.com/shlomif/PySolFC/issues/177
+                    # if isinstance(v, six.text_type):
+                    #     v = v.encode('utf-8')
                     if not v:
                         v = 'Invalid Game Name'
-                fd.write("        '%s': '%s',\n" % (w.var_name, v))
+                fd.write("        '{}': '{}',\n".format(w.var_name, v))
         fd.write("        'gameid': %i,\n" % gameid)
 
         fd.write('''\
@@ -445,6 +471,12 @@ registerCustomGame(MyCustomGame)
     loadGame(mn, fn, check_game=check_game)
 
     return gameid
+
+
+def delete_game(game):
+    hideGame(game)
+    fn = game.MODULE_FILENAME
+    os.remove(fn)
 
 
 def reset_wizard(game):

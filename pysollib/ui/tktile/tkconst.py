@@ -47,11 +47,11 @@ ANCHOR_W = tkinter.W
 ANCHOR_E = tkinter.E
 
 COMPOUNDS = (
-    # (tkinter.BOTTOM,  'bottom'),
     # (tkinter.CENTER,  'center'),
     # (tkinter.RIGHT,    'right'),
     (tkinter.NONE,   n_('Icons only')),
     (tkinter.TOP,    n_('Text below icons')),
+    (tkinter.BOTTOM, n_('Text above icons')),
     (tkinter.LEFT,   n_('Text beside icons')),
     ('text',         n_('Text only')),
     )
@@ -65,9 +65,20 @@ TOOLBAR_BUTTONS = (
     "redo",
     "autodrop",
     "shuffle",
+    "hint",
     "pause",
     "statistics",
     "rules",
     "quit",
     "player",
     )
+
+STATUSBAR_ITEMS = (
+            ('stuck', "'You Are Stuck' indicator"),
+            ('time',  'Playing time'),
+            ('moves', 'Moves/Total moves'),
+            ('gamenumber', 'Game number'),
+            ('stats', 'Games played: won/lost'),
+            ('info', 'Number of cards'),
+            ('help', 'Help info')
+)

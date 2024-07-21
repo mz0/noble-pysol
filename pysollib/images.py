@@ -24,8 +24,9 @@
 
 import os
 
-from pysollib.mfxutil import Image, ImageTk, USE_PIL
-from pysollib.pysoltk import copyImage, createBottom, createImage, loadImage
+from pysollib.mfxutil import Image, ImageTk, USE_PIL, print_err
+from pysollib.pysoltk import copyImage, createBottom, createImage, \
+        createImagePIL, loadImage
 from pysollib.pysoltk import shadowImage
 from pysollib.resource import CSI
 from pysollib.settings import TOOLKIT
@@ -52,6 +53,7 @@ class Images:
         self.reduced = r
         self._xfactor = 1.0
         self._yfactor = 1.0
+        self._resampling = 0
         if cs is None:
             return
         self._setSize()
@@ -73,6 +75,8 @@ class Images:
         self._highlight_index = 0       #
         self._highlighted_images = {}   # key: (suit, rank)
 
+        self.cardset_bottoms = False
+
     def destruct(self):
         pass
 
@@ -80,19 +84,14 @@ class Images:
         # print '__loadCard:', filename
         f = os.path.join(self.cs.dir, filename)
         if not os.path.exists(f):
-            print('card image path %s does not exist' % (f))
+            print_err('card image path %s does not exist' % f)
             return None
         try:
             img = loadImage(file=f)
         except Exception:
             return None
 
-        if TOOLKIT == 'kivy':
-            w = img.texture.size[0]
-            h = img.texture.size[1]
-        else:
-            w, h = img.width(), img.height()
-
+        w, h = img.width(), img.height()
         if self.CARDW < 0:
             self.CARDW, self.CARDH = w, h
         else:
@@ -109,14 +108,12 @@ class Images:
             imagedir = self.d.findDir(cs_type, d)
         except Exception:
             pass
-        if (not USE_PIL and TOOLKIT != 'kivy') or imagedir is None:
+        if ((not USE_PIL and TOOLKIT != 'kivy') or self.cardset_bottoms
+                or imagedir is None):
             # load image
             img = self.__loadCard(filename+self.cs.ext, check_w, check_h)
-            if USE_PIL and img is not None:
-                # we have no bottom images
-                # (data/images/cards/bottoms/<cs_type>)
-                img = img.resize(self._xfactor, self._yfactor)
             return img
+
         # create image
         d = os.path.join('images', 'cards', 'bottoms', cs_type)
         try:
@@ -136,7 +133,8 @@ class Images:
         cw, ch = self.getSize()
         # back
         if not self._back:
-            im = createImage(cw, ch, fill="#a0a0a0", outline="#000000")
+            im = self.createMissingImage(cw, ch, fill="#a0a0a0",
+                                         outline="#000000")
             name = ""
             self.__addBack(im, name)
             self.cs.backnames = tuple(self.cs.backnames) + (name,)
@@ -145,21 +143,32 @@ class Images:
         neg_bottom = None
         while len(self._bottom_positive) < max(7, self.cs.nbottoms):
             if bottom is None:
-                bottom = createImage(cw, ch, fill=None, outline="#000000")
+                bottom = self.createMissingImage(cw, ch, fill=None,
+                                                 outline="#000000")
             self._bottom_positive.append(bottom)
         while len(self._bottom_negative) < max(7, self.cs.nbottoms):
             if neg_bottom is None:
-                neg_bottom = createImage(cw, ch, fill=None, outline="#ffffff")
+                neg_bottom = self.createMissingImage(cw, ch, fill=None,
+                                                     outline="#ffffff")
             self._bottom_negative.append(neg_bottom)
         while len(self._letter_positive) < 4:
             if bottom is None:
-                bottom = createImage(cw, ch, fill=None, outline="#000000")
+                bottom = self.createMissingImage(cw, ch, fill=None,
+                                                 outline="#000000")
             self._letter_positive.append(bottom)
         while len(self._letter_negative) < 4:
             if neg_bottom is None:
-                neg_bottom = createImage(cw, ch, fill=None, outline="#ffffff")
+                neg_bottom = self.createMissingImage(cw, ch, fill=None,
+                                                     outline="#ffffff")
             self._letter_negative.append(neg_bottom)
-        self._blank_bottom = createImage(cw, ch, fill=None, outline=None)
+        self._blank_bottom = self.createMissingImage(cw, ch, fill=None,
+                                                     outline=None)
+
+    def createMissingImage(self, width, height, fill, outline=None):
+        if USE_PIL:
+            return createImagePIL(width, height, fill=fill, outline=outline)
+        else:
+            return createImage(width, height, fill=fill, outline=outline)
 
     def load(self, app, progress=None):
         ext = self.cs.ext[1:]
@@ -180,9 +189,15 @@ class Images:
         for name in self.cs.backnames:
             if name:
                 im = self.__loadCard(name)
-                self.__addBack(im, name)
+                if im:
+                    self.__addBack(im, name)
+                else:
+                    print_err('in {cs_dir}/config.txt: card back "{fname}" '
+                              'does not exist'.format(
+                                  cs_dir=self.cs.dir, fname=name))
         if progress:
             progress.update(step=1)
+
         # load bottoms
         for i in range(self.cs.nbottoms):
             name = "bottom%02d" % (i + 1)
@@ -201,16 +216,19 @@ class Images:
         # load letters
         for rank in range(self.cs.nletters):
             name = "l%02d" % (rank + 1)
-            self._letter_positive.append(
-                self.__loadBottom(name, color='black'))
+            bottom = self.__loadBottom(name, color='black')
+            if bottom is not None:
+                self._letter_positive.append(bottom)
             if progress:
                 progress.update(step=pstep)
             # load negative letters
             name = "l%02d-n" % (rank + 1)
-            self._letter_negative.append(
-                self.__loadBottom(name, color='white'))
+            bottom = self.__loadBottom(name, color='white')
+            if bottom is not None:
+                self._letter_negative.append(bottom)
             if progress:
                 progress.update(step=pstep)
+
         # shadow
         if not USE_PIL:
             for i in range(self.cs.nshadows):
@@ -373,8 +391,8 @@ class Images:
             return
         r = self.reduced
         if r > 1:
-            self.CARD_XOFFSET = max(10//r, cs.CARD_XOFFSET)
-            self.CARD_YOFFSET = max(10//r, cs.CARD_YOFFSET)
+            self.CARD_XOFFSET = max(10, cs.CARD_XOFFSET // r)
+            self.CARD_YOFFSET = max(10, cs.CARD_YOFFSET // r)
         else:
             self.CARD_XOFFSET = cs.CARD_XOFFSET
             self.CARD_YOFFSET = cs.CARD_YOFFSET
@@ -408,47 +426,53 @@ class Images:
         return (int(self.CARD_DX * self._xfactor),
                 int(self.CARD_DY * self._yfactor))
 
-    def resize(self, xf, yf):
+    def resize(self, xf, yf, resample=1):
         # print 'Images.resize:', xf, yf, self._card[0].width(), self.CARDW
-        if self._xfactor == xf and self._yfactor == yf:
+        if (self._xfactor == xf and self._yfactor == yf
+                and self._resampling == resample):
             # print 'no resize'
             return
         self._xfactor = xf
         self._yfactor = yf
+        self._resampling = resample
         # ???self._setSize(xf, yf)
         self.setOffsets()
         # cards
         cards = []
         for c in self._card:
-            c = c.resize(xf, yf)
+            c = c.resize(xf, yf, resample=resample)
             cards.append(c)
         self._card = cards
         # back
         for b in self._back:
-            b.image = b.image.resize(xf, yf)
+            b.image = b.image.resize(xf, yf, resample=resample)
+
         # stack bottom image
-        neg = self._bottom is self._bottom_negative
-        self._bottom_negative = []
-        self._bottom_positive = []
-        for i in range(self.cs.nbottoms):
-            name = "bottom%02d" % (i + 1)
-            bottom = self.__loadBottom(name, color='black')
-            if bottom is not None:
-                self._bottom_positive.append(bottom)
-            name = "bottom%02d-n" % (i + 1)
-            bottom = self.__loadBottom(name, color='white')
-            if bottom is not None:
-                self._bottom_negative.append(bottom)
+        neg = self._bottom is self._bottom_negative  # dont know
+
+        bottom_negative = []
+        bottom_positive = []
+        for c in self._bottom_negative:
+            c = c.resize(xf, yf, resample=resample)
+            bottom_negative.append(c)
+        self._bottom_negative = bottom_negative
+        for c in self._bottom_positive:
+            c = c.resize(xf, yf, resample=resample)
+            bottom_positive.append(c)
+        self._bottom_positive = bottom_positive
+
         # letters
-        self._letter_positive = []
-        self._letter_negative = []
-        for rank in range(self.cs.nletters):
-            name = "l%02d" % (rank + 1)
-            self._letter_positive.append(
-                self.__loadBottom(name, color='black'))
-            name = "l%02d-n" % (rank + 1)
-            self._letter_negative.append(
-                self.__loadBottom(name, color='white'))
+        letter_negative = []
+        letter_positive = []
+        for c in self._letter_negative:
+            c = c.resize(xf, yf, resample=resample)
+            letter_negative.append(c)
+        self._letter_negative = letter_negative
+        for c in self._letter_positive:
+            c = c.resize(xf, yf, resample=resample)
+            letter_positive.append(c)
+        self._letter_positive = letter_positive
+
         self._createMissingImages()
         self.setNegative(neg)
         #
@@ -469,6 +493,10 @@ class Images:
 
 class SubsampledImages(Images):
     def __init__(self, images, r=2):
+        size_cap = 100
+        if images.CARDW // r > size_cap or images.CARDH // r > size_cap:
+            r = max(images.CARDW, images.CARDH) // size_cap
+
         Images.__init__(self, None, images.cs, r=r)
         self._card = self._subsample(images._card, r)
         self._bottom_positive = self._subsample(images._bottom_positive, r)
@@ -477,6 +505,7 @@ class SubsampledImages(Images):
         self._letter_negative = self._subsample(images._letter_negative, r)
         self._bottom = self._bottom_positive
         self._letter = self._letter_positive
+
         #
         for _back in images._back:
             if _back is None:

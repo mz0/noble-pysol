@@ -21,9 +21,11 @@
 #
 # ---------------------------------------------------------------------------
 
+import os
 import re
 
-from pysollib.mfxutil import Image, ImageOps, ImageTk
+from pysollib.mfxutil import Image, ImageDraw, ImageOps, ImageTk, \
+    get_default_resampling
 from pysollib.settings import TITLE, WIN_SYSTEM
 
 from six.moves import tkinter
@@ -112,6 +114,7 @@ def make_help_toplevel(app, title=None):
     from pysollib.winsystems import init_root_window
     window = tkinter.Toplevel(class_=TITLE)
     init_root_window(window, app)
+    window.tkraise()
     return window
 
 
@@ -247,8 +250,20 @@ def after_cancel(t):
 if Image:
     class PIL_Image(ImageTk.PhotoImage):
         def __init__(self, file=None, image=None, pil_image_orig=None):
+
             if file:
                 image = Image.open(file).convert('RGBA')
+
+                basename = os.path.basename(file)
+                file_name = os.path.splitext(basename)[0]
+
+                findsum = findfile(file_name)
+
+                if findsum != -3:  # -1 for every check
+                    image = masking(image)
+
+                    image.filename = file_name
+
             ImageTk.PhotoImage.__init__(self, image)
             self._pil_image = image
             if pil_image_orig:
@@ -260,15 +275,67 @@ if Image:
             im = self._pil_image
             w, h = im.size
             w, h = int(float(w)/r), int(float(h)/r)
+
             im = im.resize((w, h))
+
+            try:
+                findsum = findfile(self._pil_image_orig.filename)
+                if findsum != -3:  # -1 for every check
+                    im = masking(im)
+            except Exception:
+                pass  # placeholder
+                #  im = masking(im)  # now don't mask images with no name
+
             im = PIL_Image(image=im)
             return im
 
-        def resize(self, xf, yf):
+        def resize(self, xf, yf, resample=-1):
+
+            if resample == -1:
+                resample = get_default_resampling()
+
             w, h = self._pil_image_orig.size
             w0, h0 = int(w*xf), int(h*yf)
-            im = self._pil_image_orig.resize((w0, h0), Image.ANTIALIAS)
+
+            im = self._pil_image_orig.resize((w0, h0), resample)
+
+            try:
+                findsum = findfile(self._pil_image_orig.filename)
+                if findsum != -3:  # -1 for every check
+                    im = masking(im)
+            except Exception:
+                pass  # placeholder
+                #  im = masking(im)  # now don't mask images with no name
+
             return PIL_Image(image=im, pil_image_orig=self._pil_image_orig)
+
+
+def masking(image):
+
+    # eliminates the 0 in alphachannel
+    # because PhotoImage and Rezising
+    # have problems with it
+
+    image = image.convert("RGBA")  # make sure it has alphachannel
+    mask = image.copy()
+    # important alpha must be bigger than 0
+    mask.putalpha(1)
+    mask.paste(image, (0, 0), image)
+    image = mask.copy()
+
+    return image
+
+
+def findfile(file_name):
+
+    find1 = file_name.find("bottom")
+    find2 = file_name.find("shad")
+    find3 = file_name.find("l0")
+    # find4 = file_name.find("back")
+
+    findsum = find1 + find2 + find3
+
+    return findsum
 
 
 def makeImage(file=None, data=None, dither=None, alpha=None):
@@ -349,6 +416,19 @@ def createImage(width, height, fill, outline=None):
     return image
 
 
+def createImagePIL(width, height, fill, outline=None):
+    if not fill:
+        image = Image.new('RGBA', (width, height))
+    else:
+        image = Image.new('RGBA', (width, height), color=fill)
+    if outline is not None:
+        draw = ImageDraw.Draw(image)
+        draw.rectangle([0, 0, width - 1, height - 1], fill=None,
+                       outline=outline, width=1)
+
+    return PIL_Image(image=image)
+
+
 def shadowImage(image, color='#3896f8', factor=0.3):
     if not hasattr(image, '_pil_image'):
         return None
@@ -380,7 +460,10 @@ def _createBottomImage(image, color='white', backfile=None):
     size = (w-th*2, h-th*2)
     tmp = Image.new('RGBA', size, color)
     tmp.putalpha(60)
-    mask = out.resize(size, Image.ANTIALIAS)
+
+    resampling = get_default_resampling()
+
+    mask = out.resize(size, resampling)
     out.paste(tmp, (th, th), mask)
     if backfile:
         back = Image.open(backfile).convert('RGBA')
@@ -389,7 +472,7 @@ def _createBottomImage(image, color='white', backfile=None):
         a = min(float(w1)/w0, float(h1)/h0)
         a = a*0.9
         w0, h0 = int(w0*a), int(h0*a)
-        back = back.resize((w0, h0), Image.ANTIALIAS)
+        back = back.resize((w0, h0), resampling)
         x, y = (w1 - w0) // 2, (h1 - h0) // 2
         out.paste(back, (x, y), back)
     return out
@@ -400,6 +483,7 @@ def createBottom(maskimage, color='white', backfile=None):
         return None
     maskimage = maskimage._pil_image
     out = _createBottomImage(maskimage, color, backfile)
+
     return PIL_Image(image=out)
 
 

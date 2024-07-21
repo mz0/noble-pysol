@@ -52,15 +52,16 @@ class TamOShanter(Game):
     Foundation_Class = RK_FoundationStack
     RowStack_Class = StackWrapper(BasicRowStack, max_move=1, max_accept=0)
 
-    def createGame(self, rows=4, texts=False, yoffset=None):
+    def createGame(self, rows=4, playcards=12, texts=False, yoffset=None):
         # create layout
         l, s = Layout(self), self.s
 
         # set window
         if yoffset is None:
             yoffset = l.YOFFSET
-        max_rows = max(rows, 4*self.gameinfo.decks)
-        self.setSize(l.XM+(2+max_rows)*l.XS, l.YM+2*l.YS+12*yoffset)
+        max_rows = max(rows, 4 * self.gameinfo.decks)
+        self.setSize(l.XM + (2 + max_rows) * l.XS,
+                     l.YM + 2 * l.YS + playcards * yoffset)
 
         # create stacks
         if texts:
@@ -99,6 +100,7 @@ class TamOShanter(Game):
 
 # ************************************************************************
 # * Auld Lang Syne
+# * Old Fashioned
 # ************************************************************************
 
 class AuldLangSyne(TamOShanter):
@@ -110,6 +112,12 @@ class AuldLangSyne(TamOShanter):
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
         self._startAndDealRow()
+
+
+class OldFashioned(AuldLangSyne):
+    def createGame(self):
+        TamOShanter.createGame(self, rows=6, playcards=8)
+
 
 # ************************************************************************
 # * Strategy
@@ -367,6 +375,8 @@ class Primrose(Interregnum):
 
 # ************************************************************************
 # * Colorado
+# * Double Line
+# * Grandfather
 # ************************************************************************
 
 class Colorado_RowStack(OpenStack):
@@ -386,12 +396,17 @@ class Colorado(Game):
     # game layout
     #
 
-    def createGame(self):
+    def createGame(self, waste_max=1, max_rounds=1, tableau_max=999999):
         # create layout
         l, s = Layout(self), self.s
 
+        roff = 0
         # set window
-        self.setSize(l.XM+10*l.XS, l.YM+4*l.YS+l.TEXT_HEIGHT)
+        if tableau_max < 10:
+            roff = l.YOFFSET * (tableau_max - 1)
+
+        self.setSize(l.XM + 10 * l.XS,
+                     l.YM + 4 * l.YS + (2 * l.TEXT_HEIGHT) + (2 * roff))
 
         # create stacks
         x, y, = l.XS, l.YM
@@ -399,28 +414,32 @@ class Colorado(Game):
             s.foundations.append(self.Foundation_Class(x, y, self,
                                  suit=i, max_move=0))
             x += l.XS
-        x += 2*l.XM
+        x += 2 * l.XM
         for i in range(4):
             s.foundations.append(self.Foundation_Class(x, y, self,
                                  suit=i, max_move=0, base_rank=KING, dir=-1))
             x += l.XS
 
-        y = l.YM+l.YS
+        y = l.YM + l.YS
         for i in range(2):
             x = l.XM
             for j in range(10):
                 stack = self.RowStack_Class(x, y, self,
-                                            max_move=1, max_accept=1)
-                s.rows.append(stack)
-                stack.CARD_XOFFSET = stack.CARD_YOFFSET = 0
-                x += l.XS
-            y += l.YS
+                                            max_move=1, max_accept=1,
+                                            max_cards=tableau_max)
 
-        x, y = l.XM + 9*l.XS, self.height - l.YS
-        s.talon = WasteTalonStack(x, y, self, max_rounds=1)
-        l.createText(s.talon, "n")
+                s.rows.append(stack)
+                x += l.XS
+            y += l.YS + roff
+
+        x, y = l.XM + 9 * l.XS, self.height - l.YS - l.TEXT_HEIGHT
+        s.talon = WasteTalonStack(x, y, self, max_rounds=max_rounds)
+        l.createText(s.talon, "s")
         x -= l.XS
-        s.waste = WasteStack(x, y, self, max_cards=1)
+        s.waste = WasteStack(x, y, self, max_cards=waste_max)
+        l.createText(s.waste, "s")
+        if max_rounds > 1:
+            l.createRoundText(s.talon, "n")
 
         # define stack-groups
         l.defaultStackGroups()
@@ -439,6 +458,36 @@ class Colorado(Game):
     def fillStack(self, stack):
         if stack in self.s.rows and not stack.cards and self.s.waste.cards:
             self.s.waste.moveMove(1, stack)
+
+
+class Grandfather_RowStack(BasicRowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not BasicRowStack.acceptsCards(self, from_stack, cards):
+            return False
+        # this stack accepts any one card from the Waste
+        return from_stack is self.game.s.waste and len(cards) == 1
+
+
+class Grandfather(Colorado):
+    RowStack_Class = Grandfather_RowStack
+
+    def createGame(self, max_rounds=2):
+        Colorado.createGame(self, waste_max=999999, max_rounds=max_rounds,
+                            tableau_max=2)
+
+    def startGame(self):
+        self.startDealSample()
+        self.s.talon.dealRow()
+        self.s.talon.dealCards()
+
+    def _shuffleHook(self, cards):
+        return cards
+
+
+class DoubleLine(Grandfather):
+
+    def createGame(self):
+        Grandfather.createGame(self, max_rounds=1)
 
 
 # ************************************************************************
@@ -475,7 +524,7 @@ class Amazons_Foundation(AbstractFoundationStack):
             return False
         if from_stack not in self.game.s.rows:
             return False
-        if cards[0].rank == ACE:
+        if cards[0].rank == ACE and not self.cards:
             return True
         if not self.cards:
             return False
@@ -493,7 +542,8 @@ class Amazons_Foundation(AbstractFoundationStack):
 
 class Amazons(AuldLangSyne):
     Talon_Class = StackWrapper(Amazons_Talon, max_rounds=-1)
-    Foundation_Class = StackWrapper(Amazons_Foundation, max_cards=7)
+    Foundation_Class = StackWrapper(Amazons_Foundation, max_cards=7,
+                                    suit=ANY_SUIT)
 
     def _shuffleHook(self, cards):
         return cards
@@ -616,7 +666,7 @@ registerGame(GameInfo(123, Interregnum, "Interregnum",
 registerGame(GameInfo(296, Colorado, "Colorado",
                       GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(406, Amazons, "Amazons",
-                      GI.GT_NUMERICA, 1, -1, GI.SL_LUCK,
+                      GI.GT_NUMERICA | GI.GT_STRIPPED, 1, -1, GI.SL_LUCK,
                       ranks=(0, 6, 7, 8, 9, 10, 11),
                       ))
 registerGame(GameInfo(490, Acquaintance, "Acquaintance",
@@ -626,8 +676,15 @@ registerGame(GameInfo(553, Scuffle, "Scuffle",
 registerGame(GameInfo(560, DoubleAcquaintance, "Double Acquaintance",
                       GI.GT_NUMERICA, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(569, Primrose, "Primrose",
-                      GI.GT_NUMERICA, 2, 8, GI.SL_BALANCED))
+                      GI.GT_NUMERICA | GI.GT_OPEN, 2, 8, GI.SL_BALANCED))
 registerGame(GameInfo(636, StrategyPlus, "Strategy +",
                       GI.GT_NUMERICA, 1, 0, GI.SL_SKILL))
-registerGame(GameInfo(688, Formic, "Formic",
-                      GI.GT_NUMERICA, 1, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(688, Formic, "Ants",
+                      GI.GT_GOLF, 1, 0, GI.SL_MOSTLY_SKILL,
+                      altnames=("Formic",)))
+registerGame(GameInfo(702, DoubleLine, "Double Line",
+                      GI.GT_NUMERICA, 2, 0, GI.SL_BALANCED))
+registerGame(GameInfo(853, Grandfather, "Grandfather",
+                      GI.GT_NUMERICA, 2, 1, GI.SL_BALANCED))
+registerGame(GameInfo(866, OldFashioned, "Old Fashioned",
+                      GI.GT_NUMERICA, 1, 0, GI.SL_LUCK))

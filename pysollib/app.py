@@ -33,6 +33,7 @@ from pysollib.actions import PysolMenubar
 from pysollib.actions import PysolToolbar
 from pysollib.app_stat_result import GameStatResult
 from pysollib.app_statistics import Statistics
+from pysollib.cardsetparser import read_cardset_config
 from pysollib.gamedb import GAME_DB, GI, loadGame
 from pysollib.help import destroy_help_html, help_about
 from pysollib.images import Images, SubsampledImages
@@ -43,22 +44,22 @@ from pysollib.mfxutil import latin1_normalize, print_err
 from pysollib.mfxutil import pickle, unpickle
 from pysollib.mygettext import _
 from pysollib.options import Options
-from pysollib.pysolrandom import PysolRandom, constructRandom
+from pysollib.pysolrandom import PysolRandom, construct_random
 from pysollib.pysoltk import HTMLViewer
-from pysollib.pysoltk import HelpStatusbar, PysolStatusbar
 from pysollib.pysoltk import MfxDialog, MfxExceptionDialog, MfxMessageDialog
 from pysollib.pysoltk import MfxScrolledCanvas, TclError
 from pysollib.pysoltk import PysolProgressBar
+from pysollib.pysoltk import PysolStatusbar
 from pysollib.pysoltk import SelectCardsetDialogWithPreview
 from pysollib.pysoltk import SelectDialogTreeData
 from pysollib.pysoltk import destroy_find_card_dialog
 from pysollib.pysoltk import loadImage, wm_withdraw
-from pysollib.resource import CSI, Cardset, CardsetConfig, CardsetManager
+from pysollib.resource import CSI, CardsetManager
 from pysollib.resource import Music, MusicManager
 from pysollib.resource import Sample, SampleManager
 from pysollib.resource import Tile, TileManager
 from pysollib.settings import DEBUG
-from pysollib.settings import PACKAGE, VERSION_TUPLE, WIN_SYSTEM
+from pysollib.settings import PACKAGE, VERSION_TUPLE  # , WIN_SYSTEM
 from pysollib.settings import TOOLKIT
 from pysollib.util import IMAGE_EXTENSIONS
 from pysollib.winsystems import TkSettings
@@ -131,6 +132,7 @@ class Application:
             config=config,
             plugins=os.path.join(config, "plugins"),
             savegames=os.path.join(config, "savegames"),
+            boards=os.path.join(config, "boards"),
             maint=os.path.join(config, "maint"),          # debug
         )
         for k, v in self.dn.__dict__.items():
@@ -311,9 +313,18 @@ class Application:
         except Exception:
             traceback.print_exc()
             pass
+
+        # Under normal circumstances, this won't trigger.
+        # But if the config has been incorrectly edited or
+        # otherwise corrupted, this can prevent a crash.
+        if 0 < self.opt.game_holded != self.opt.last_gameid:
+            self.opt.last_gameid = self.opt.game_holded
+
         # startup information
         if self.getGameClass(self.opt.last_gameid):
             self.nextgame.id = self.opt.last_gameid
+        elif self.opt.last_gameid in GI.PROTECTED_GAMES:
+            self.nextgame.id = GI.PROTECTED_GAMES.get(self.opt.last_gameid)
         # load a holded or saved game
         tmpgame = self.constructGame(self.gdb.getGamesIdSortedByName()[0])
         self._load_held_or_saved_game(tmpgame)
@@ -336,14 +347,13 @@ class Application:
                     self.nextgame.id = gameid
                     deal = self.commandline.deal
                     self.nextgame.random = \
-                        None if deal is None else constructRandom(deal)
+                        None if deal is None else construct_random(deal)
             elif self.commandline.gameid is not None:
                 self.nextgame.id, self.nextgame.random = \
                     self.commandline.gameid, None
         self.opt.game_holded = 0
         tmpgame.destruct()
         destruct(tmpgame)
-        tmpgame = None
         #
         # widgets
         #
@@ -355,10 +365,8 @@ class Application:
         # create the statusbar(s)
         self.statusbar = PysolStatusbar(self.top)
         self.statusbar.show(self.opt.statusbar)
-        self.statusbar.config('gamenumber', self.opt.statusbar_game_number)
-        self.statusbar.config('stuck', self.opt.statusbar_stuck)
-        self.helpbar = HelpStatusbar(self.top)
-        self.helpbar.show(self.opt.helpbar)
+        for w, v in self.opt.statusbar_vars.items():
+            self.statusbar.config(w, v)
         # create the canvas
         self.scrolled_canvas = MfxScrolledCanvas(self.top, propagate=True)
         self.canvas = self.scrolled_canvas.canvas
@@ -501,6 +509,7 @@ class Application:
     def loadImages1(self):
         # load dialog images
         dirname = os.path.join("images", "logos")
+        self.gimages.logos = []
         for f in ("joker07_40_774",
                   "joker08_40_774",
                   "joker07_50_774",
@@ -508,10 +517,7 @@ class Application:
                   "joker11_100_774",
                   "joker10_100",):
             self.gimages.logos.append(self.dataloader.findImage(f, dirname))
-        if WIN_SYSTEM == 'win32':
-            dirname = os.path.join('images', 'dialog', 'default')
-        else:
-            dirname = os.path.join('images', 'dialog', 'bluecurve')
+        dirname = os.path.join('images', 'dialog', self.opt.dialog_icon_style)
         for f in ('error', 'info', 'question', 'warning'):
             fn = self.dataloader.findImage(f, dirname)
             im = loadImage(fn)
@@ -531,16 +537,38 @@ class Application:
 
     def loadImages2(self):
         # load canvas images
-        dirname = "images"
+        dirname = os.path.join("images", "redealicons",
+                               self.opt.redeal_icon_style)
         # for f in ("noredeal", "redeal",):
+        self.gimages.redeal = []
         for f in ("stopsign", "redeal",):
             self.gimages.redeal.append(self.dataloader.findImage(f, dirname))
-        dirname = os.path.join("images", "demo")
-        for f in ("demo01", "demo02", "demo03", "demo04", "demo05",):
-            self.gimages.demo.append(self.dataloader.findImage(f, dirname))
-        dirname = os.path.join("images", "pause")
-        for f in ("pause01", "pause02", "pause03",):
-            self.gimages.pause.append(self.dataloader.findImage(f, dirname))
+        dirname = os.path.join("images", "demo", self.opt.demo_logo_style)
+        self.gimages.demo = []
+        foundall = False
+        count = 0
+        while not foundall:
+            count += 1
+            try:
+                self.gimages.demo.append(self.dataloader.findImage("demo" +
+                                                                   ("%02d" %
+                                                                    (count,)),
+                                                                   dirname))
+            except OSError:
+                foundall = True
+        dirname = os.path.join("images", "pause", self.opt.pause_text_style)
+        self.gimages.pause = []
+        foundall = False
+        count = 0
+        while not foundall:
+            count += 1
+            try:
+                self.gimages.pause.append(self.dataloader.findImage("pause" +
+                                                                    ("%02d" %
+                                                                     (count,)),
+                                                                    dirname))
+            except OSError:
+                foundall = True
         # dirname = os.path.join("images", "stats")
         # for f in ("barchart",):
         #     self.gimages.stats.append(self.dataloader.findImage(f, dirname))
@@ -548,7 +576,7 @@ class Application:
     def loadImages3(self):
         # load treeview images
         SelectDialogTreeData.img = []
-        dirname = os.path.join('images', 'tree')
+        dirname = os.path.join('images', 'tree', self.opt.tree_icon_style)
         for f in ('folder', 'openfolder', 'node', 'emptynode'):
             fn = self.dataloader.findImage(f, dirname)
             im = loadImage(fn)
@@ -584,21 +612,25 @@ class Application:
         return self._getImagesDir('cards')
 
     def getToolbarImagesDir(self):
-        if self.opt.toolbar_size:
+        if self.opt.toolbar_size == 2:
+            size = 'xlarge'
+        elif self.opt.toolbar_size == 1:
             size = 'large'
         else:
             size = 'small'
         style = self.opt.toolbar_style
         if TOOLKIT == 'kivy':
             size = 'xlarge'
-            style = 'bluecurve'
+            style = 'remix light'
         d = self._getImagesDir('toolbar', style, size)
         if d:
             return d
         return self._getImagesDir('toolbar', 'default', size, check=False)
 
-    def setTile(self, i, force=0):
-        if self.scrolled_canvas.setTile(self, i, force):
+    def setTile(self, i, scaling=-1, force=0):
+        if scaling == -1:
+            scaling = self.opt.tabletile_scale_method
+        if self.scrolled_canvas.setTile(self, i, scaling, force):
             tile = self.tabletile_manager.get(i)
             if i == 0:
                 self.opt.colors['table'] = tile.color
@@ -614,6 +646,19 @@ class Application:
         return self.opt.fonts.get(name)
 
     #
+    # search logic
+    #
+
+    def checkSearchString(self, search_string, check_string):
+        terms = search_string.split()
+        if len(terms) == 0:
+            return True
+        for term in terms:
+            if term.upper() not in check_string.upper():
+                return False
+        return True
+
+    #
     # cardset
     #
 
@@ -627,46 +672,54 @@ class Application:
         self.images.setNegative(self.opt.negative_bottom)
         self.subsampled_images.setNegative(self.opt.negative_bottom)
         if update & 1:
-            self.opt.cardset[0] = (cs.name, cs.backname)
+            self.opt.cardset[0][0] = (cs.name, cs.backname)
         if update & 2:
-            self.opt.cardset[cs.si.type] = (cs.name, cs.backname)
+            self.opt.cardset[cs.si.type][cs.si.subtype] = (cs.name,
+                                                           cs.backname)
         gi = self.getGameInfo(id)
         if gi:
             if update & 256:
                 try:
-                    del self.opt.cardset[(1, gi.id)]
+                    del self.opt.cardset[(1, gi.id)][gi.subcategory]
                 except KeyError:
                     pass
             t = self.checkCompatibleCardsetType(gi, cs)
             if not t[1]:
                 if update & 4:
-                    self.opt.cardset[gi.category] = (cs.name, cs.backname)
+                    self.opt.cardset[gi.category][gi.subcategory] = \
+                        (cs.name, cs.backname)
                 if update & 8:
-                    self.opt.cardset[(1, gi.id)] = (cs.name, cs.backname)
+                    self.opt.cardset[(1, gi.id)][gi.subcategory] = \
+                        (cs.name, cs.backname)
         # from pprint import pprint; pprint(self.opt.cardset)
 
-    def loadCardset(self, cs, id=0, update=7, progress=None):
+    def loadCardset(self, cs, id=0, update=7, progress=None,
+                    tocache=False, noprogress=False):
         # print 'loadCardset', cs.ident
         r = 0
         if cs is None or cs.error:
             return 0
         if cs is self.cardset:
-            self.updateCardset(id, update=update)
+            if not tocache:
+                self.updateCardset(id, update=update)
             return 1
         # cache carsets
         # self.cardsets_cache:
         #   key: Cardset.type
         #   value: (Cardset.ident, Images, SubsampledImages)
         c = self.cardsets_cache.get(cs.type)
-        if c and c[0] == cs.ident:
-            # print 'load from cache', c
-            self.images, self.subsampled_images = c[1], c[2]
-            self.updateCardset(id, update=update)
-            if self.menubar is not None:
-                self.menubar.updateBackgroundImagesMenu()
-            return 1
+        if c:
+            c2 = c.get(cs.subtype)
+            if c2 and c2[0] == cs.ident:
+                # print 'load from cache', c
+                self.images, self.subsampled_images = c2[1], c2[2]
+                if not tocache:
+                    self.updateCardset(id, update=update)
+                    if self.menubar is not None:
+                        self.menubar.updateBackgroundImagesMenu()
+                return 1
         #
-        if progress is None:
+        if progress is None and not noprogress:
             self.wm_save_state()
             self.wm_withdraw()
             title = _("Loading cardset %s...") % cs.name
@@ -677,29 +730,40 @@ class Application:
                                         color=color,
                                         images=self.progress_images)
         images = Images(self.dataloader, cs)
+        images.cardset_bottoms = self.opt.use_cardset_bottoms
         try:
             if not images.load(app=self, progress=progress):
                 raise Exception("Invalid or damaged cardset")
             simages = SubsampledImages(images)
-            if self.opt.save_cardsets:
-                c = self.cardsets_cache.get(cs.type)
-                if c:
-                    # c[1].destruct()
-                    destruct(c[1])
-                self.cardsets_cache[cs.type] = (cs.ident, images, simages)
-            elif self.images is not None:
-                # self.images.destruct()
-                destruct(self.images)
-            #
-            if self.cardset:
-                if self.cardset.ident != cs.ident:
-                    if self.cardset.type == cs.type:
-                        # clear saved games geometry
-                        self.opt.games_geometry = {}
-            # update
-            self.images = images
-            self.subsampled_images = simages
-            self.updateCardset(id, update=update)
+            if tocache:
+                simages.setNegative(self.opt.negative_bottom)
+            # The save cardsets option is deprecated, and its existence
+            # directly conflicts with the ability to allow previews of
+            # other cardset types.
+            # if self.opt.save_cardsets:
+            c = self.cardsets_cache.get(cs.type)
+            if c:
+                c2 = c.get(cs.subtype)
+                if c2:
+                    # c2[1].destruct()
+                    destruct(c2[1])
+            self.cardsets_cache[cs.type] = {}
+            self.cardsets_cache[cs.type][cs.subtype] = (cs.ident, images,
+                                                        simages)
+            if not tocache:
+                # elif self.images is not None:
+                #    # self.images.destruct()
+                #    destruct(self.images)
+                #
+                if self.cardset:
+                    if self.cardset.ident != cs.ident:
+                        if self.cardset.type == cs.type:
+                            # clear saved games geometry
+                            self.opt.games_geometry = {}
+                # update
+                self.images = images
+                self.subsampled_images = simages
+                self.updateCardset(id, update=update)
             r = 1
         except (Exception, TclError, UnpicklingError) as ex:
             traceback.print_exc()
@@ -714,7 +778,7 @@ class Application:
                 self.top, ex, title=_("Cardset load error"),
                 text=_("Error while loading cardset"))
         self.intro.progress = progress
-        if r and self.menubar is not None:
+        if r and not tocache and self.menubar is not None:
             self.menubar.updateBackgroundImagesMenu()
         return r
 
@@ -722,13 +786,18 @@ class Application:
         assert gi is not None
         assert cs is not None
         gc = gi.category
+        gs = gi.subcategory
         cs_type = cs.si.type
+        cs_subtype = cs.si.subtype
         t0, t1 = None, None
         if gc == GI.GC_FRENCH:
             t0 = "French"
             if cs_type not in (CSI.TYPE_FRENCH,
                                # CSI.TYPE_TAROCK,
                                ):
+                t1 = t0
+            if (cs_subtype == CSI.SUBTYPE_NONE
+                    and gs == CSI.SUBTYPE_JOKER_DECK):
                 t1 = t0
         elif gc == GI.GC_HANAFUDA:
             t0 = "Hanafuda"
@@ -767,60 +836,79 @@ class Application:
                 t1 = t0
             elif len(cs.trumps) < gi.ncards:    # not enough cards
                 t1 = t0
+        elif gc == GI.GC_MATCHING:
+            t0 = "Matching"
+            if cs.ncards < (gi.ncards / 2):    # not enough cards
+                t1 = t0
+        elif gc == GI.GC_PUZZLE:
+            t0 = "Puzzle"
+            if cs_type not in (CSI.TYPE_PUZZLE,) or cs_subtype != gs:
+                t1 = t0
+        elif gc == GI.GC_ISHIDO:
+            t0 = "Ishido"
+            if cs_type not in (CSI.TYPE_ISHIDO,):
+                t1 = t0
         else:
             # we should not come here
             t0 = t1 = "Unknown"
         return t0, t1
 
-    def getCompatibleCardset(self, gi, cs):
+    def getCompatibleCardset(self, gi, cs, trychange=True):
         if gi is None:
-            return cs, 1
+            return cs, 1, None
+        t = self.checkCompatibleCardsetType(gi, cs)
         # try current
         if cs:
-            t = self.checkCompatibleCardsetType(gi, cs)
             if not t[1]:
-                return cs, 1
-        # try by gameid / category
-        for key, flag in (((1, gi.id), 8), (gi.category, 4)):
-            c = self.opt.cardset.get(key)
-            if not c or len(c) != 2:
-                continue
-            cs = self.cardset_manager.getByName(c[0])
-            if not cs:
-                continue
-            t = self.checkCompatibleCardsetType(gi, cs)
-            if not t[1]:
-                cs.updateCardback(backname=c[1])
-                return cs, flag
+                return cs, 1, t
+        if trychange:
+            # try by gameid / category
+            for key, flag in (((1, gi.id), 8), (gi.category, 4)):
+                c = self.opt.cardset.get(key)
+                c2 = None
+                if c:
+                    c2 = c.get(gi.subcategory)
+                if not c2 or len(c2) != 2:
+                    continue
+                cs = self.cardset_manager.getByName(c2[0])
+                if not cs:
+                    continue
+                t = self.checkCompatibleCardsetType(gi, cs)
+                if not t[1]:
+                    cs.updateCardback(backname=c2[1])
+                    return cs, flag, t
         # ask
-        return None, 0
+        return None, 0, t
 
     def requestCompatibleCardsetType(self, id):
         gi = self.getGameInfo(id)
         #
-        cs, cs_update_flag = self.getCompatibleCardset(gi, self.cardset)
+        cs, cs_update_flag, t = self.getCompatibleCardset(gi, self.cardset)
         if cs is self.cardset:
             return 0
         if cs is not None:
             self.loadCardset(cs, update=1)
             return 1
-        #
-        t = self.checkCompatibleCardsetType(gi, self.cardset)
-        MfxMessageDialog(
-            self.top, title=_("Incompatible cardset"),
-            bitmap="warning",
-            text=_('''The currently selected cardset %(cardset)s
-is not compatible with the game
-%(game)s
 
-Please select a %(correct_type)s type cardset.
-''') % {'cardset': self.cardset.name, 'game': gi.name, 'correct_type': t[0]},
-            strings=(_("&OK"),), default=0)
+        self.requestCompatibleCardsetTypeDialog(self.cardset, gi, t)
+
         cs = self.__selectCardsetDialog(t)
         if cs is None:
             return -1
         self.loadCardset(cs, id=id)
         return 1
+
+    def requestCompatibleCardsetTypeDialog(self, cardset, gi, t):
+        MfxMessageDialog(
+            self.top, title=_("Incompatible cardset"),
+            bitmap="warning",
+            text=_('''The currently selected cardset %(cardset)s
+        is not compatible with the game
+        %(game)s
+
+        Please select a %(correct_type)s type cardset.
+        ''') % {'cardset': cardset.name, 'game': gi.name,
+                'correct_type': t[0]}, strings=(_("&OK"),), default=0)
 
     def selectCardset(self, title, key):
         d = SelectCardsetDialogWithPreview(
@@ -832,7 +920,8 @@ Please select a %(correct_type)s type cardset.
         changed = False
         if USE_PIL:
             if (self.opt.scale_x, self.opt.scale_y,
-                self.opt.auto_scale, self.opt.preserve_aspect_ratio) != \
+                self.opt.auto_scale, self.opt.spread_stacks,
+                self.opt.preserve_aspect_ratio) != \
                 d.scale_values or \
                     (cs.CARD_XOFFSET, cs.CARD_YOFFSET) != d.cardset_values:
                 changed = True
@@ -842,9 +931,11 @@ Please select a %(correct_type)s type cardset.
             (self.opt.scale_x,
              self.opt.scale_y,
              self.opt.auto_scale,
+             self.opt.spread_stacks,
              self.opt.preserve_aspect_ratio) = d.scale_values
             if not self.opt.auto_scale:
-                self.images.resize(self.opt.scale_x, self.opt.scale_y)
+                self.images.resize(self.opt.scale_x, self.opt.scale_y,
+                                   resample=self.opt.resampling)
             if d.cardset_values:
                 cs.CARD_XOFFSET, cs.CARD_YOFFSET = d.cardset_values
                 self.opt.offsets[cs.ident] = d.cardset_values
@@ -1070,176 +1161,56 @@ Please select a %(correct_type)s type cardset.
 
     # read & parse a cardset config.txt file - see class Cardset in resource.py
     def _readCardsetConfig(self, dirname, filename):
-        with open(filename, "r") as f:
-            lines = f.readlines()
-        lines = [line.strip() for line in lines]
-        if not lines[0].startswith("PySol"):
-            return None
-        config = CardsetConfig()
-        if not self._parseCardsetConfig(config, lines):
-            # print filename, 'invalid config'
-            return None
-        if config.CARDD > self.top.winfo_screendepth():
-            return None
-        cs = Cardset()
-        cs.dir = dirname
-        cs.update(config.__dict__)
-        return cs
-
-    def _parseCardsetConfig(self, cs, line):
-        def perr(line, field=None, msg=''):
-            if not DEBUG:
-                return
-            if field:
-                print_err('_parseCardsetConfig error: line #%d, field #%d %s'
-                          % (line, field, msg))
-            else:
-                print_err('_parseCardsetConfig error: line #%d: %s'
-                          % (line, msg))
-        if len(line) < 6:
-            perr(1, msg='number of lines')
-            return 0
-        # line[0]: magic identifier, possible version information
-        fields = [f.strip() for f in line[0].split(';')]
-        if len(fields) >= 2:
-            m = re.search(r"^(\d+)$", fields[1])
-            if m:
-                cs.version = int(m.group(1))
-        if cs.version >= 3:
-            if len(fields) < 5:
-                perr(1, msg='number of fields')
-                return 0
-            cs.ext = fields[2]
-            m = re.search(r"^(\d+)$", fields[3])
-            if not m:
-                perr(1, 3, 'not integer')
-                return 0
-            cs.type = int(m.group(1))
-            m = re.search(r"^(\d+)$", fields[4])
-            if not m:
-                perr(1, 4, 'not integer')
-                return 0
-            cs.ncards = int(m.group(1))
-        if cs.version >= 4:
-            if len(fields) < 6:
-                perr(1, msg='number of fields')
-                return 0
-            styles = fields[5].split(",")
-            for s in styles:
-                m = re.search(r"^\s*(\d+)\s*$", s)
-                if not m:
-                    perr(1, 5, 'not integer')
-                    return 0
-                s = int(m.group(1))
-                if s not in cs.styles:
-                    cs.styles.append(s)
-        if cs.version >= 5:
-            if len(fields) < 7:
-                perr(1, msg='number of fields')
-                return 0
-            m = re.search(r"^(\d+)$", fields[6])
-            if not m:
-                perr(1, 6, 'not integer')
-                return 0
-            cs.year = int(m.group(1))
-        if len(cs.ext) < 2 or cs.ext[0] != ".":
-            perr(1, msg='invalid extention')
-            return 0
-        # line[1]: identifier/name
-        if not line[1]:
-            perr(2, msg='empty line')
-            return 0
-        cs.ident = line[1]
-        m = re.search(r"^(.*;)?([^;]+)$", cs.ident)
-        if not m:
-            perr(2, msg='invalid format')
-            return 0
-        cs.name = m.group(2).strip()
-        # line[2]: CARDW, CARDH, CARDD
-        m = re.search(r"^(\d+)\s+(\d+)\s+(\d+)", line[2])
-        if not m:
-            perr(3, msg='invalid format')
-            return 0
-        cs.CARDW, cs.CARDH, cs.CARDD = \
-            int(m.group(1)), int(m.group(2)), int(m.group(3))
-        # line[3]: CARD_UP_YOFFSET, CARD_DOWN_YOFFSET,
-        # SHADOW_XOFFSET, SHADOW_YOFFSET
-        m = re.search(r"^(\d+)\s+(\d+)\s+(\d+)\s+(\d+)", line[3])
-        if not m:
-            perr(4, msg='invalid format')
-            return 0
-        cs.CARD_XOFFSET = int(m.group(1))
-        cs.CARD_YOFFSET = int(m.group(2))
-        cs.SHADOW_XOFFSET = int(m.group(3))
-        cs.SHADOW_YOFFSET = int(m.group(4))
-        # line[4]: default background
-        back = line[4]
-        if not back:
-            perr(5, msg='empty line')
-            return 0
-        # line[5]: all available backgrounds
-        cs.backnames = [f.strip() for f in line[5].split(';')]
-        if back in cs.backnames:
-            cs.backindex = cs.backnames.index(back)
-        else:
-            cs.backnames.insert(0, back)
-            cs.backindex = 0
+        cs = read_cardset_config(dirname, filename)
         # set offsets from options.cfg
         if cs.ident in self.opt.offsets:
             cs.CARD_XOFFSET, cs.CARD_YOFFSET = self.opt.offsets[cs.ident]
-        # if cs.type != 1: print cs.type, cs.name
-        return 1
+        return cs
 
     def initCardsets(self):
+        """Load all valid cardset config.txt files and ignore invalid ones.
+        """
+        screendepth = self.top.winfo_screendepth()
         manager = self.cardset_manager
         # find all available cardsets
         dirs = manager.getSearchDirs(self, ("cardsets", ""), "PYSOL_CARDSETS")
         if DEBUG:
             dirs += manager.getSearchDirs(self, "cardsets-*")
-        # print dirs
-        found, t = [], {}
-        fnames = {}  # (to check for duplicates)
+        found = []
+        found_names = []  # (to check for duplicates)
         for dirname in dirs:
-            dirname = dirname.strip()
             try:
-                names = []
-                if dirname and os.path.isdir(dirname) and dirname not in t:
-                    t[dirname] = 1
-                    names = os.listdir(dirname)
-                    names.sort()
-                for name in names:
-                    if not name.startswith('cardset-'):
-                        continue
-                    d = os.path.join(dirname, name)
-                    if not os.path.isdir(d):
-                        continue
-                    f = os.path.join(d, "config.txt")
-                    if os.path.isfile(f):
-                        try:
-                            cs = self._readCardsetConfig(d, f)
-                            if cs:
-                                # from pprint import pprint
-                                # print cs.name
-                                # pprint(cs.__dict__)
-                                back = cs.backnames[cs.backindex]
-                                f1 = os.path.join(d, back)
-                                f2 = os.path.join(d, "shade" + cs.ext)
-                                if (cs.ext in IMAGE_EXTENSIONS and
-                                        cs.name not in fnames and
-                                        os.path.isfile(f1) and
-                                        os.path.isfile(f2)):
-                                    found.append(cs)
-                                    # print '+', cs.name
-                                    fnames[cs.name] = 1
-                            else:
-                                print_err('fail _readCardsetConfig: %s %s'
-                                          % (d, f))
-                                pass
-                        except Exception:
-                            # traceback.print_exc()
-                            pass
+                subdirs = [os.path.join(dirname, subdir)
+                           for subdir in os.listdir(dirname)
+                           if subdir.startswith('cardset-')]
             except EnvironmentError:
-                pass
+                traceback.print_exc()
+                continue
+            subdirs.sort()
+            for d in subdirs:
+                config_txt_path = os.path.join(d, "config.txt")
+                if not os.path.isfile(config_txt_path):
+                    continue
+                try:
+                    cs = self._readCardsetConfig(d, config_txt_path)
+                except Exception:
+                    traceback.print_exc()
+                    cs = None
+                if not cs:
+                    print_err('failed to parse cardset file: %s'
+                              % config_txt_path)
+                    continue
+                back = cs.backnames[cs.backindex]
+                back_im_path = os.path.join(d, back)
+                shade_im_path = os.path.join(d, "shade" + cs.ext)
+                if (cs.name not in found_names and
+                        cs.ext in IMAGE_EXTENSIONS and
+                        cs.CARDD <= screendepth and
+                        os.path.isfile(back_im_path) and
+                        os.path.isfile(shade_im_path)):
+                    found.append(cs)
+                    found_names.append(cs.name)
+
         # register cardsets
         for obj in found:
             if not manager.getByName(obj.name):
@@ -1263,9 +1234,10 @@ Please select a %(correct_type)s type cardset.
             tile = Tile()
             tile.filename = f
             n = image_ext_re.sub("", name)
-            if os.path.split(dirname)[-1] == 'stretch':
+            subdir = os.path.split(dirname)[-1]
+            if subdir == 'stretch' or subdir == 'stretch-4k':
                 tile.stretch = 1
-            if os.path.split(dirname)[-1] == 'save-aspect':
+            if subdir == 'save-aspect' or subdir == 'save-aspect-4k':
                 tile.stretch = 1
                 tile.save_aspect = 1
             # n = re.sub("[-_]", " ", n)
@@ -1283,7 +1255,9 @@ Please select a %(correct_type)s type cardset.
             self,
             ("tiles-*",
                 os.path.join("tiles", "stretch"),
-                os.path.join("tiles", "save-aspect")),
+                os.path.join("tiles", "stretch-4k"),
+                os.path.join("tiles", "save-aspect"),
+                os.path.join("tiles", "save-aspect-4k")),
             "PYSOL_TILES")
         # print dirs
         found, t = [], set()
@@ -1356,9 +1330,9 @@ Please select a %(correct_type)s type cardset.
         self.initResource(manager, dirs, ext_re, Sample)
 
     def initMusic(self):
-        manager = self.music_manager
+        music_manager = self.music_manager
         # find all available music songs
-        dirs = manager.getSearchDirs(self, "music-*", "PYSOL_MUSIC")
-        # print dirs
+        dirs = music_manager.getSearchDirs(self, "music-*", "PYSOL_MUSIC")
+        # print('dirs =', dirs)
         ext_re = re.compile(self.audio.EXTENSIONS)
-        self.initResource(manager, dirs, ext_re, Music)
+        self.initResource(music_manager, dirs, ext_re, Music)

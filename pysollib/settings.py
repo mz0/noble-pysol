@@ -30,9 +30,9 @@ def n_(x):                        # for gettext
 
 PACKAGE = 'PySolFC'
 TITLE = 'PySol'
-PACKAGE_URL = 'http://pysolfc.sourceforge.net/'
+PACKAGE_URL = 'http://pysolfc.sourceforge.io/'
 
-VERSION_TUPLE = (2, 10, 1)
+VERSION_TUPLE = (3, 0, 0)
 VERSION = '.'.join(map(str, VERSION_TUPLE))
 
 # Tk windowing system (auto set up in init.py)
@@ -61,6 +61,7 @@ DATA_DIRS = []
 # you can add your extra directories here
 if os.name == 'posix':
     DATA_DIRS = [
+        '/app/share/PySolFC',
         '/usr/share/PySolFC',
         '/usr/local/share/PySolFC',
         '/usr/share/games/PySolFC',

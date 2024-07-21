@@ -25,6 +25,9 @@ from pysollib.mygettext import _, n_
 from pysollib.settings import TITLE
 from pysollib.ui.tktile.findcarddialog import connect_game_find_card_dialog
 from pysollib.ui.tktile.findcarddialog import destroy_find_card_dialog
+from pysollib.ui.tktile.fullpicturedialog import \
+    connect_game_full_picture_dialog
+from pysollib.ui.tktile.fullpicturedialog import destroy_full_picture_dialog
 from pysollib.ui.tktile.menubar import MfxMenu, PysolMenubarTkCommon
 from pysollib.ui.tktile.solverdialog import connect_game_solver_dialog
 from pysollib.util import CARDSET
@@ -57,6 +60,12 @@ class PysolMenubarTk(PysolMenubarTkCommon):
 
     def _destroy_find_card_dialog(self):
         return destroy_find_card_dialog()
+
+    def _connect_game_full_picture_dialog(self, game):
+        return connect_game_full_picture_dialog(game)
+
+    def _destroy_full_picture_dialog(self):
+        return destroy_full_picture_dialog()
 
     def _connect_game_solver_dialog(self, game):
         return connect_game_solver_dialog(game)
@@ -95,6 +104,7 @@ class PysolMenubarTk(PysolMenubarTkCommon):
         self._cancelDrag()
         self.game.endGame(bookmark=1)
         self.game.quitGame(bookmark=1)
+        self.updateMenus()
 
     #
     # Tile (ttk)
@@ -113,16 +123,29 @@ the next time you restart %(app)s""") % {'app': TITLE},
 
     def createThemesMenu(self, menu):
         submenu = MfxMenu(menu, label=n_("Set t&heme"))
-        all_themes = list(ttk.Style(self.top).theme_names())
+
+        try:
+            from ttkthemes import themed_style
+            style_path = themed_style.ThemedStyle(self.top)
+        except ImportError:
+            style_path = ttk.Style(self.top)
+        all_themes = list(style_path.theme_names())
+
         all_themes.sort()
         #
         tn = {
-            'default':     n_('Default'),
-            'classic':     n_('Classic'),
-            'alt':         n_('Revitalized'),
-            'winnative':   n_('Windows native'),
+            'alt':         n_('Alt/Revitalized'),
+            'itft1':       n_('ITFT1'),
+            'scidblue':    n_('Scid Blue'),
+            'scidgreen':   n_('Scid Green'),
+            'scidgrey':    n_('Scid Grey'),
+            'scidmint':    n_('Scid Mint'),
+            'scidpink':    n_('Scid Pink'),
+            'scidpurple':  n_('Scid Purple'),
+            'scidsand':    n_('Scid Sand'),
+            'winnative':   n_('Windows Native'),
+            'winxpblue':   n_('Windows XP Blue'),
             'xpnative':    n_('XP Native'),
-            'aqua':        n_('Aqua'),
             }
         for t in all_themes:
             try:

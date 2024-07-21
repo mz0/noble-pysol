@@ -44,7 +44,8 @@ from pysollib.stack import \
         UD_SS_RowStack, \
         WasteStack, \
         WasteTalonStack
-from pysollib.util import ACE, ANY_RANK, KING, NO_RANK, QUEEN, RANKS
+from pysollib.util import ACE, ANY_RANK, KING, NO_RANK, QUEEN, RANKS, \
+        UNLIMITED_ACCEPTS, UNLIMITED_MOVES
 
 
 class BeleagueredCastleType_Hint(CautiousDefaultHint):
@@ -374,6 +375,8 @@ class CastlesEnd(Bastion):
 
 # ************************************************************************
 # * Chessboard
+# * Lasker
+# * Morphy
 # ************************************************************************
 
 class Chessboard_Foundation(SS_FoundationStack):
@@ -423,10 +426,39 @@ class Chessboard(Fortress):
         self.texts.info.config(text=t)
 
 
+class Lasker(Chessboard):
+    RowStack_Class = StackWrapper(Chessboard_RowStack, mod=13,
+                                  max_move=UNLIMITED_MOVES,
+                                  max_accept=UNLIMITED_ACCEPTS)
+
+
+class Morphy_RowStack(UD_AC_RowStack):
+    def canDropCards(self, stacks):
+        if self.game.demo:
+            return UD_AC_RowStack.canDropCards(self, stacks)
+        for s in self.game.s.foundations:
+            if s.cards:
+                return UD_AC_RowStack.canDropCards(self, stacks)
+        return (None, 0)
+
+
+class Morphy(Chessboard):
+    RowStack_Class = StackWrapper(Morphy_RowStack, mod=13)
+
+
 # ************************************************************************
+# * Siegecraft
 # * Stronghold
-# * Fastness
+# * Private Lane
 # ************************************************************************
+
+class Siegecraft(BeleagueredCastle):
+    Hint_Class = FreeCellType_Hint
+    Solver_Class = FreeCellSolverWrapper(sbb='rank')
+
+    def createGame(self):
+        BeleagueredCastle.createGame(self, reserves=1)
+
 
 class Stronghold(StreetsAndAlleys):
     Hint_Class = FreeCellType_Hint
@@ -436,7 +468,7 @@ class Stronghold(StreetsAndAlleys):
         StreetsAndAlleys.createGame(self, reserves=1)
 
 
-class Fastness(StreetsAndAlleys):
+class PrivateLane(StreetsAndAlleys):
     Hint_Class = FreeCellType_Hint
     Solver_Class = FreeCellSolverWrapper(sbb='rank')
 
@@ -864,10 +896,11 @@ registerGame(GameInfo(146, StreetsAndAlleys, "Streets and Alleys",
                       GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(34, BeleagueredCastle, "Beleaguered Castle",
                       GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
-                      GI.SL_MOSTLY_SKILL))
+                      GI.SL_MOSTLY_SKILL,
+                      altnames=("Laying Siege", "Sham Battle",)))
 registerGame(GameInfo(145, Citadel, "Citadel",
                       GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
-                      GI.SL_MOSTLY_SKILL))
+                      GI.SL_MOSTLY_SKILL, altnames=('Under Siege',)))
 registerGame(GameInfo(147, Fortress, "Fortress",
                       GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
                       GI.SL_SKILL))
@@ -877,9 +910,9 @@ registerGame(GameInfo(148, Chessboard, "Chessboard",
 registerGame(GameInfo(300, Stronghold, "Stronghold",
                       GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
                       GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(301, Fastness, "Fastness",
-                      GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN | GI.GT_ORIGINAL,
-                      1, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(301, PrivateLane, "Private Lane",
+                      GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
+                      GI.SL_MOSTLY_SKILL, altnames=('Fastness',)))
 registerGame(GameInfo(306, Zerline, "Zerline",
                       GI.GT_BELEAGUERED_CASTLE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(324, Bastion, "Bastion",
@@ -892,7 +925,7 @@ registerGame(GameInfo(351, Chequers, "Chequers",
                       GI.GT_BELEAGUERED_CASTLE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(393, CastleOfIndolence, "Castle of Indolence",
                       GI.GT_BELEAGUERED_CASTLE, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(395, Zerline3Decks, "Zerline (3 decks)",
+registerGame(GameInfo(395, Zerline3Decks, "Zerline (3 Decks)",
                       GI.GT_BELEAGUERED_CASTLE | GI.GT_ORIGINAL, 3, 0,
                       GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(400, Rittenhouse, "Rittenhouse",
@@ -919,3 +952,12 @@ registerGame(GameInfo(650, CastlesEnd, "Castles End",
 registerGame(GameInfo(665, PenelopesWeb, "Penelope's Web",
                       GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
                       GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(831, Siegecraft, "Siegecraft",
+                      GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(881, Lasker, "Lasker",
+                      GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
+                      GI.SL_SKILL))
+registerGame(GameInfo(951, Morphy, "Morphy",
+                      GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
+                      GI.SL_SKILL))

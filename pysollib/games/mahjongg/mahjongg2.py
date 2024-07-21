@@ -100,7 +100,7 @@ r(5202, "Big Mountain", layout="0aaaaaqaeihfiagh" +
     "yiayjhziaAiaGaaG" +
     "q")
 #
-r(5203, "Bridge", layout="0aaaaacaaeaagaai" +
+r(5203, "Bridge 1", layout="0aaaaacaaeaagaai" +
     "hbahbchbehbghbio" +
     "caoccoceocgociwd" +
     "avdcvdevdgwdioeb" +
@@ -246,7 +246,7 @@ r(5210, "Empty Pyramids", layout="0aaiabghbiabkacc" +
     "aCcaCehCgoCihCka" +
     "CmaCoaDghDiaDkaE" +
     "i")
-r(5211, "Fish face", layout="0bajbciocjbckvdj" +
+r(5211, "Fish Face", layout="0bajbciocjbckvdj" +
     "behoeibejoekbelc" +
     "ggcgmchichkcifci" +
     "ncjhcjlckebkjcko" +
@@ -286,60 +286,7 @@ r(5212, "Floating City", layout="0oagoaiocdocfoch" +
     "nhzahzchzmhzooAd" +
     "oAfoAhoAjoAloApo" +
     "CgoCi")
-# r(5213, "Flowers 2", layout="0aaiacgbciackadc" +
-#    "adoaeiafabfcafea" +
-#    "fmbfoafqahcahoai" +
-#    "haijhjiakfakhakj" +
-#    "aklhlghlihlkamda" +
-#    "mfamhomhamjomjam" +
-#    "lamnhnehnghnivni" +
-#    "hnkhnmaobaodaofo" +
-#    "ofaohoohaojoojao" +
-#    "loolaonaophpchpe" +
-#    "hpgvpghpivpihpkv" +
-#    "pkhpmhpoaqbaqdoq" +
-#    "daqfoqfaqhoqhCqh" +
-#    "aqjoqjCqjaqloqla" +
-#    "qnoqnaqphrchrehr" +
-#    "gvrghrivrihrkvrk" +
-#    "hrmhroasbasdasfo" +
-#    "sfashoshasjosjas" +
-#    "loslasnasphtehtg" +
-#    "htivtihtkhtmauda" +
-#    "ufauhouhaujoujau" +
-#    "launhvghvihvkawf" +
-#    "awhawjawlhxiayha" +
-#    "yjazcazoaBabBcaB" +
-#    "eaBmbBoaBqaCiaDc" +
-#    "aDoaEgbEiaEkaGi")
-# r(5214, "Full Vision 3", layout="0aaeaagaaihbehbi" +
-#    "acbhccacdacfhcga" +
-#    "chacjhckaclacnhc" +
-#    "oacpaeahebaecaee" +
-#    "aegaeiaekhelaema" +
-#    "gbhgcagdagfhggag" +
-#    "hagjhgkaglagnhgo" +
-#    "agphhehhiaieaiga" +
-#    "iiainhioaiphjgak" +
-#    "eakgakiaknhkoakp" +
-#    "hlehliambhmcamda" +
-#    "mfhmgamhamjhmkam" +
-#    "lamnhmoampaoahob" +
-#    "aocaoehofaogaoia" +
-#    "okholaomaqbhqcaq" +
-#    "daqfhqgaqhaqjhqk" +
-#    "aqlaqnhqoaqphreh" +
-#    "riaseasgasiasnhs" +
-#    "oasphtgaueaugaui" +
-#    "aunhuoauphvehvia" +
-#    "wbhwcawdawfhwgaw" +
-#    "hawjhwkawlawnhwo" +
-#    "awpayahybaycayea" +
-#    "ygayiaykhylaymaA" +
-#    "bhAcaAdaAfhAgaAh" +
-#    "aAjhAkaAlaAnhAoa" +
-#    "AphBehBiaCeaCgaC" +
-#    "i")
+
 r(5215, "Hidden Words", layout="0haahachaehaghal" +
     "abaabcobdabeabga" +
     "bjablbbnabphcahc" +
@@ -434,7 +381,7 @@ r(5218, "Tornado", layout="0babaadaambaoabi" +
     "zlbzmoznbAgbAkaD" +
     "ibEbaEdaEmbEo")
 #
-r(5219, "IloveU", layout="0caddafcahdaldan" +
+r(5219, "I Love U", layout="0caddafcahdaldan" +
     "dapdcbcciceacejc" +
     "gacgkdibcilckdck" +
     "mcmecmndngdnpcoe" +
@@ -796,33 +743,7 @@ r(5237, "Lattice", layout="0aaiacebciacmaec" +
     "ecAiaAmaCcbCeaCg" +
     "bCiaCkbCmaCoaEeb" +
     "EiaEmaGi")
-#
-# r(5238, "Leo", layout="0aapabiablhbphcf" +
-#    "acghchhclacnocpa" +
-#    "djodladpvdpheeae" +
-#    "fheiaelvelhepCep" +
-#    "ofihflCflafnofph" +
-#    "gdagevgiagjoglag" +
-#    "pvgphhiChiahlvhl" +
-#    "hhpChphicaidoiih" +
-#    "ilCilainoipvjiaj" +
-#    "jojlajpvjpbkabkc" +
-#    "hkiCkiaklvklhkpC" +
-#    "kpolbolihllalnol" +
-#    "pbmabmcvmiamjoml" +
-#    "ampvmphnianlhnpo" +
-#    "oiholaonoophpfap" +
-#    "hapjappaqfhqiaql" +
-#    "hqphrdarnasehsqh" +
-#    "tcatpaudbumhuphv" +
-#    "bcvgavqawccwlhwq" +
-#    "hxbcxjaxpayccylh" +
-#    "yphzbczgazqaAdbA" +
-#    "mhAqhBcaBpaCehCp" +
-#    "hDeaDgaDohEgaEia" +
-#    "EmhEohFiaFkhFmhG" +
-#    "k")
-#
+
 r(5239, "Loose Ends", layout="0aaaoabaaioapaaq" +
     "hbahbihbqacbocca" +
     "chociacjocoacphd" +
@@ -901,27 +822,7 @@ r(5243, "Multi X", layout="0aaaaaiaaqhbbhbh" +
     "vzdvzfvzlvznoAco" +
     "AgoAkoAohBbhBhhB" +
     "jhBpaCaaCiaCq")
-# r(5244, "New Layout 2", layout="0CabCadCafacapca" +
-#    "hccvccacepcehcgv" +
-#    "cgheaveaaecpeche" +
-#    "eveeaegpegCfaCfc" +
-#    "CfeCfgagapgahgcv" +
-#    "gcagepgehggvggCh" +
-#    "aChcCheChghiavia" +
-#    "aicpichievieaigp" +
-#    "igakaqkahkcwkcak" +
-#    "eqkehkgwkghmawma" +
-#    "amcqmchmewmeamgq" +
-#    "mgaoaqoahocwocao" +
-#    "eqoehogwoghqavqa" +
-#    "aqcpqchqevqeaqgp" +
-#    "qgCraCrcCreCrgas" +
-#    "apsahscvscasepse" +
-#    "hsgvsgCtaCtcCteC" +
-#    "tghuavuaaucpuchu" +
-#    "evueaugpugawapwa" +
-#    "hwcvwcawepwehwgv" +
-#    "wgCybCydCyf")
+
 r(5245, "Okie's Nitemare", layout="0aaoaaqbbeabmhbp" +
     "acoacqcddbdgadmh" +
     "dpaeoaeqbfccffaf" +
@@ -1344,7 +1245,7 @@ r(5267, "Sukis", layout="0aaaaacaaeaagaai" +
     "GgaGiaGkaGmaGoaG" +
     "q")
 #
-r(5268, "Temple 1", layout="0aaaaaeaaiabchbd" +
+r(5268, "Temple 3", layout="0aaaaaeaaiabchbd" +
     "abghbhacahcbocca" +
     "cehcfocgaciadchd" +
     "dodeadghdhaeaheb" +
@@ -1372,7 +1273,7 @@ r(5268, "Temple 1", layout="0aaaaaeaaiabchbd" +
     "ougauiavchvdavgh" +
     "vhawaaweawi")
 #
-r(5269, "Temple 2", layout="0aacaagaakabahbb" +
+r(5269, "Temple 4", layout="0aacaagaakabahbb" +
     "abehbfabihbjacco" +
     "cchcdacgocghchac" +
     "kadahdbadeodehdf" +
@@ -1521,7 +1422,7 @@ r(5274, "Vagues", layout="0aacCaeaagCaiaak" +
     "htevtghtivtkhtmC" +
     "ucaueCugauiCukau" +
     "m")
-r(5275, "Well2", layout="0aaaaacaaeaagaai" +
+r(5275, "Well 2", layout="0aaaaacaaeaagaai" +
     "aakaamaaoacacccc" +
     "ceccgccicckccmac" +
     "oaeadecdeedegdei" +

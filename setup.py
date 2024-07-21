@@ -8,9 +8,6 @@ from pysollib.settings import VERSION
 
 from setuptools import setup
 
-if os.name == 'nt':
-    import py2exe  # noqa: F401
-
 
 def get_data_files(source, destination):
     """Iterates over all files under the given tree, to install them to the
@@ -60,7 +57,7 @@ if os.name == 'posix':
 # import sys; sys.exit()
 
 long_description = '''\
-PySolFC is a collection of more than 1000 solitaire card games.
+PySolFC is a collection of more than 1200 solitaire card games.
 Its features include modern look and feel (uses Tile widget set), multiple
 cardsets and tableau backgrounds, sound, unlimited undo, player statistics,
 a hint system, demo games, a solitaire wizard, support for user written
@@ -75,9 +72,8 @@ kw = {
     'author_email': 'skomoroh@gmail.com',
     'description': 'a Python solitaire game collection',
     'install_requires': [
-        'attrs',
+        'attrs>=18.2.0',
         'configobj',
-        'pycotap',
         'pysol_cards',
         'random2',
         'six',
@@ -86,7 +82,6 @@ kw = {
     'license': 'GPL',
     'scripts': ['pysol.py'],
     'packages': ['pysollib',
-                 'pysollib.macosx',
                  'pysollib.winsystems',
                  'pysollib.tk',
                  'pysollib.tile',
@@ -97,14 +92,11 @@ kw = {
                  'pysollib.game',
                  'pysollib.games',
                  'pysollib.games.special',
-                 'pysollib.games.ultra',
                  'pysollib.games.mahjongg'],
     'data_files': data_files,
     }
 
 if os.name == 'nt':
-    kw['windows'] = [{'script': 'pysol.py',
-                      'icon_resources': [(1, 'data/pysol.ico')], }]
     kw['packages'].remove('pysollib.pysolgtk')
 
 setup(**kw)

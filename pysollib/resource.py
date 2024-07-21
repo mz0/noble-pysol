@@ -123,6 +123,8 @@ class ResourceManager:
             pass
 
     def getSearchDirs(self, app, search, env=None):
+        """Get a list of normalized directory paths. The returned list has no
+        duplicates."""
         if isinstance(search, str):
             search = (search,)
         result = []
@@ -166,6 +168,7 @@ class CSI:
     SIZE_MEDIUM = 3
     SIZE_LARGE = 4
     SIZE_XLARGE = 5
+    SIZE_HIRES = 6
 
     # cardset types
     TYPE_FRENCH = 1
@@ -177,9 +180,24 @@ class CSI:
     TYPE_NAVAGRAHA_GANJIFA = 7
     TYPE_DASHAVATARA_GANJIFA = 8
     TYPE_TRUMP_ONLY = 9
+    TYPE_MATCHING = 10
+    TYPE_PUZZLE = 11
+    TYPE_ISHIDO = 12
+
+    # cardset subtypes
+    SUBTYPE_NONE = 0
+    SUBTYPE_JOKER_DECK = 1
+    SUBTYPE_3X3 = 3
+    SUBTYPE_4X4 = 4
+    SUBTYPE_5X5 = 5
+    SUBTYPE_6X6 = 6
+    SUBTYPE_7X7 = 7
+    SUBTYPE_8X8 = 8
+    SUBTYPE_9X9 = 9
+    SUBTYPE_10X10 = 10
 
     TYPE = {
-        1:  _("French type (52 cards)"),
+        1:  _("French type (52-54 cards)"),
         2:  _("Hanafuda type (48 cards)"),
         3:  _("Tarock type (78 cards)"),
         4:  _("Mahjongg type (42 tiles)"),
@@ -188,6 +206,9 @@ class CSI:
         7:  _("Navagraha Ganjifa type (108 cards)"),
         8:  _("Dashavatara Ganjifa type (120 cards)"),
         9:  _("Trumps only type (variable cards)"),
+        10: _("Matching type (variable cards)"),
+        11: _("Puzzle type (variable pieces)"),
+        12: _("Ishido type (36 tiles)")
     }
 
     TYPE_NAME = {
@@ -200,38 +221,107 @@ class CSI:
         7:  _("Navagraha Ganjifa"),
         8:  _("Dashavatara Ganjifa"),
         9:  _("Trumps only"),
+        10: _("Matching"),
+        11: _("Puzzle"),
+        12: _("Ishido")
+    }
+
+    SUBTYPE_NAME = {
+        1:  {0: _("No Jokers"), 1: _("Joker Deck")},
+        11: {3: _("3x3"),
+             4: _("4x4"),
+             5: _("5x5"),
+             6: _("6x6"),
+             7: _("7x7"),
+             8: _("8x8"),
+             9: _("9x9"),
+             10: _("10x10")}
     }
 
     TYPE_ID = {
-        1: "french",
-        2: "hanafuda",
-        3: "tarock",
-        4: "mahjongg",
-        5: "hex-a-deck",
-        6: "mughal-ganjifa",
-        7: "navagraha-ganjifa",
-        8: "dashavatara-ganjifa",
-        9: "trumps-only",
+        1:  "french",
+        2:  "hanafuda",
+        3:  "tarock",
+        4:  "mahjongg",
+        5:  "hex-a-deck",
+        6:  "mughal-ganjifa",
+        7:  "navagraha-ganjifa",
+        8:  "dashavatara-ganjifa",
+        9:  "trumps-only",
+        10: "matching",
+        11: "puzzle",
+        12: "ishido"
+    }
+
+    TYPE_SUITS = {
+        1:  "cshd",
+        2:  "abcdefghijkl",
+        3:  "cshd",
+        4:  "abc",
+        5:  "cshd",
+        6:  "abcdefgh",
+        7:  "abcdefghi",
+        8:  "abcdefghij",
+        9:  "",
+        10: "",
+        11: "",
+        12: "abcdef"
+    }
+
+    TYPE_RANKS = {
+        1:  list(range(13)),
+        2:  list(range(4)),
+        3:  list(range(14)),
+        4:  list(range(10)),
+        5:  list(range(16)),
+        6:  list(range(12)),
+        7:  list(range(12)),
+        8:  list(range(12)),
+        9:  list(range(0)),
+        10: list(range(0)),
+        11: list(range(0)),
+        12: list(range(6))
+    }
+
+    TYPE_TRUMPS = {
+        1:  (),
+        2:  (),
+        3:  list(range(22)),
+        4:  list(range(12)),
+        5:  list(range(4)),
+        6:  (),
+        7:  (),
+        8:  (),
+        9:  (),
+        10: (),
+        11: (),
+        12: ()
     }
 
     # cardset styles
     STYLE = {
+        35: _("Abstract"),              #
         1:  _("Adult"),                #
         2:  _("Animals"),              #
         3:  _("Anime"),                #
         4:  _("Art"),                  #
         5:  _("Cartoons"),             #
         6:  _("Children"),             #
-        7:  _("Classic look"),         #
+        7:  _("Classic Look"),         #
         8:  _("Collectors"),           # scanned collectors cardsets
         9:  _("Computers"),            #
+        36: _("Divination"),            # e.g. fortunetelling decks
         10:  _("Engines"),              #
         11:  _("Fantasy"),              #
+        37:  _("Four Color"),           #
         30:  _("Ganjifa"),              #
         12:  _("Hanafuda"),             #
         29:  _("Hex A Deck"),           #
         13:  _("Holiday"),              #
+        34:  _("Ishido"),               #
         28:  _("Mahjongg"),             #
+        32:  _("Matching"),             #
+        38:  _("Monochrome"),           #
         14:  _("Movies"),               #
         31:  _("Matrix"),               #
         15:  _("Music"),                #
@@ -241,11 +331,12 @@ class CSI:
         20:  _("Places"),               #
         21:  _("Plain"),                #
         22:  _("Products"),             #
-        18:  _("Round cardsets"),       #
+        33:  _("Puzzle"),               #
+        18:  _("Round Cardsets"),       #
         23:  _("Science Fiction"),      #
         24:  _("Sports"),               #
         27:  _("Tarock"),               #
-        25:  _("Vehicels"),             #
+        25:  _("Vehicles"),             #
         26:  _("Video Games"),          #
     }
 
@@ -267,6 +358,7 @@ class CSI:
         1005:  _("Italy"),             #
         1016:  _("Japan"),             #
         1002:  _("Netherlands"),       #
+        1022:  _("Portugal"),          #
         1007:  _("Russia"),            #
         1008:  _("Spain"),             #
         1017:  _("Sweden"),            #
@@ -304,6 +396,8 @@ class CardsetConfig(Struct):
             ncards=-1,
             styles=[],
             year=0,
+            subtype=0,
+            mahjongg3d=False,
             # line[1]
             ident="",
             name="",
@@ -333,7 +427,8 @@ class Cardset(Resource):
         kw = KwStruct(config.__dict__, **kw)
         # si is the SelectionInfo struct that will be queried by
         # the "select cardset" dialogs. It can be freely modified.
-        si = Struct(type=0, size=0, styles=[], nationalities=[], dates=[])
+        si = Struct(type=0, subtype=0, size=0, styles=[],
+                    nationalities=[], dates=[])
         kw = KwStruct(
             kw,
             # essentials
@@ -395,54 +490,47 @@ class CardsetManager(ResourceManager):
     def __init__(self):
         ResourceManager.__init__(self)
         self.registered_types = {}
+        self.registered_subtypes = {}
+        self.type_max_cards = {}
         self.registered_sizes = {}
         self.registered_styles = {}
         self.registered_nationalities = {}
         self.registered_dates = {}
+
+        self.uncategorized_styles = False
+        self.uncategorized_nationalities = False
+        self.uncategorized_dates = False
 
     def _check(self, cs):
         s = cs.type
         if s not in CSI.TYPE:
             return 0
         cs.si.type = s
+        cs.si.subtype = cs.subtype
+        cs.suits = CSI.TYPE_SUITS[s]
+        cs.ranks = CSI.TYPE_RANKS[s]
+        cs.trumps = CSI.TYPE_TRUMPS[s]
         if s == CSI.TYPE_FRENCH:
-            cs.ranks = list(range(13))
-            cs.suits = "cshd"
+            if cs.subtype == 1:
+                cs.trumps = list(range(2))
+                cs.nbottoms = 8
         elif s == CSI.TYPE_HANAFUDA:
             cs.nbottoms = 15
-            cs.ranks = list(range(4))
-            cs.suits = "abcdefghijkl"
         elif s == CSI.TYPE_TAROCK:
             cs.nbottoms = 8
-            cs.ranks = list(range(14))
-            cs.suits = "cshd"
-            cs.trumps = list(range(22))
         elif s == CSI.TYPE_MAHJONGG:
-            cs.ranks = list(range(10))
-            cs.suits = "abc"
-            cs.trumps = list(range(12))
-            #
             cs.nbottoms = 0
             cs.nletters = 0
             cs.nshadows = 0
         elif s == CSI.TYPE_HEXADECK:
             cs.nbottoms = 8
-            cs.ranks = list(range(16))
-            cs.suits = "cshd"
-            cs.trumps = list(range(4))
         elif s == CSI.TYPE_MUGHAL_GANJIFA:
             cs.nbottoms = 11
-            cs.ranks = list(range(12))
-            cs.suits = "abcdefgh"
         elif s == CSI.TYPE_NAVAGRAHA_GANJIFA:
             # ???return 0                            ## FIXME
             cs.nbottoms = 12
-            cs.ranks = list(range(12))
-            cs.suits = "abcdefghi"
         elif s == CSI.TYPE_DASHAVATARA_GANJIFA:
             cs.nbottoms = 13
-            cs.ranks = list(range(12))
-            cs.suits = "abcdefghij"
         elif s == CSI.TYPE_TRUMP_ONLY:
             # ???return 0                            ## FIXME
             # cs.nbottoms = 7
@@ -452,10 +540,31 @@ class CardsetManager(ResourceManager):
             cs.nbottoms = 1
             cs.nletters = 0
             cs.nshadows = 0
-            cs.ranks = ()
-            cs.suits = ""
             cs.trumps = list(range(cs.ncards))
-
+        elif s == CSI.TYPE_MATCHING:
+            # ???return 0                            ## FIXME
+            # cs.nbottoms = 7
+            # cs.ranks = ()
+            # cs.suits = ""
+            # cs.trumps = range(cs.ncards)
+            cs.nbottoms = 1
+            cs.nletters = 0
+            cs.nshadows = 0
+            cs.trumps = list(range(cs.ncards))
+        elif s == CSI.TYPE_PUZZLE:
+            # ???return 0                            ## FIXME
+            # cs.nbottoms = 7
+            # cs.ranks = ()
+            # cs.suits = ""
+            # cs.trumps = range(cs.ncards)
+            cs.nbottoms = 1
+            cs.nletters = 0
+            cs.nshadows = 0
+            cs.trumps = list(range(cs.ncards))
+        elif s == CSI.TYPE_ISHIDO:
+            cs.nbottoms = 1
+            cs.nletters = 0
+            cs.nshadows = 0
         else:
             return 0
         return 1
@@ -464,7 +573,7 @@ class CardsetManager(ResourceManager):
         if not self._check(cs):
             return
         cs.ncards = len(cs.ranks) * len(cs.suits) + len(cs.trumps)
-        cs.name = cs.name[:25]
+        cs.name = cs.name[:30]
         if not (1 <= cs.si.size <= 5):
             CW, CH = cs.CARDW, cs.CARDH
             if CW <= 55 and CH <= 72:
@@ -475,17 +584,25 @@ class CardsetManager(ResourceManager):
                 cs.si.size = CSI.SIZE_MEDIUM
             elif CW <= 90 and CH <= 125:
                 cs.si.size = CSI.SIZE_LARGE
-            else:
+            elif CW <= 150 and CH <= 210:
                 cs.si.size = CSI.SIZE_XLARGE
+            else:
+                cs.si.size = CSI.SIZE_HIRES
         #
         keys = cs.styles[:]
         cs.si.styles = tuple([s for s in keys if s in CSI.STYLE])
+        if len(cs.si.styles) == 0:
+            self.uncategorized_styles = True
         for s in cs.si.styles:
             self.registered_styles[s] = self.registered_styles.get(s, 0) + 1
         cs.si.nationalities = tuple([s for s in keys if s in CSI.NATIONALITY])
+        if len(cs.si.nationalities) == 0:
+            self.uncategorized_nationalities = True
         for s in cs.si.nationalities:
             self.registered_nationalities[s] = \
                 self.registered_nationalities.get(s, 0) + 1
+        if cs.year == 0:
+            self.uncategorized_dates = True
         keys = (cs.year // 100,)
         cs.si.dates = tuple([s for s in keys if s in CSI.DATE])
         for s in cs.si.dates:
@@ -493,10 +610,65 @@ class CardsetManager(ResourceManager):
         #
         s = cs.si.type
         self.registered_types[s] = self.registered_types.get(s, 0) + 1
+        if self.registered_types[s] == 1:
+            self.registered_subtypes[s] = {}
+        ss = cs.si.subtype
+        self.registered_subtypes[s][ss] = \
+            self.registered_subtypes.get(s, 0).get(ss, 0) + 1
+        if s not in self.type_max_cards or self.type_max_cards[s] < cs.ncards:
+            self.type_max_cards[s] = cs.ncards
         s = cs.si.size
         self.registered_sizes[s] = self.registered_sizes.get(s, 0) + 1
         cs.updateCardback()
         ResourceManager.register(self, cs)
+
+    def identify_missing_cardsets(self):
+        missing = []
+        # This object should list the bare minimum cardset requirements
+        # for a PySol install that can play all games.
+        required_types = {
+            CSI.TYPE_FRENCH: {
+                CSI.SUBTYPE_JOKER_DECK
+            },
+            CSI.TYPE_HANAFUDA: {},
+            CSI.TYPE_TAROCK: {},
+            CSI.TYPE_MAHJONGG: {},
+            CSI.TYPE_HEXADECK: {},
+            CSI.TYPE_MUGHAL_GANJIFA: {},
+            CSI.TYPE_DASHAVATARA_GANJIFA: {},
+            CSI.TYPE_TRUMP_ONLY: {},
+            CSI.TYPE_PUZZLE: {
+                CSI.SUBTYPE_3X3,
+                CSI.SUBTYPE_4X4,
+                CSI.SUBTYPE_5X5,
+                CSI.SUBTYPE_6X6,
+                CSI.SUBTYPE_7X7,
+                CSI.SUBTYPE_8X8,
+                CSI.SUBTYPE_9X9,
+                CSI.SUBTYPE_10X10
+            },
+            CSI.TYPE_ISHIDO: {}
+        }
+        required_cards_needed = {
+            CSI.TYPE_TRUMP_ONLY: 100
+        }
+        for t in required_types.keys():
+            if t not in self.registered_types:
+                missing.append(CSI.TYPE_NAME[t])
+            else:
+                if len(required_types[t]) > 0:
+                    for tt in required_types[t]:
+                        if tt not in self.registered_subtypes[t]:
+                            missing.append(CSI.TYPE_NAME[t] + " (" +
+                                           CSI.SUBTYPE_NAME[t][tt] + ")")
+                if t in required_cards_needed:
+                    if self.type_max_cards[t] < required_cards_needed[t]:
+                        missing.append(CSI.TYPE_NAME[t] + " (" +
+                                       _("With %(cards)d or more cards" + ")")
+                                       % {'cards': required_cards_needed[t]})
+
+        missing.sort()
+        return missing
 
 
 # ************************************************************************

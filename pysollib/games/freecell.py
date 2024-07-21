@@ -123,6 +123,90 @@ class ForeCell(FreeCell):
 
 
 # ************************************************************************
+# * Obstruction
+# ************************************************************************
+
+class Obstruction_RowStack(SuperMoveAC_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not self.basicAcceptsCards(from_stack, cards):
+            return 0
+        if cards[0].suit == 4:
+            return 0
+        stackcards = self.cards
+        if stackcards:
+            if stackcards[-1].suit == 4:
+                return 0
+        return AC_RowStack.acceptsCards(self, from_stack, cards)
+
+
+class Obstruction_Foundation(SS_FoundationStack):
+    def acceptsCards(self, from_stack, cards):
+        if self.cap.suit == 4 and cards[0].suit == 4:
+            for s in self.game.s.foundations[:3]:
+                if len(s.cards) != 13:
+                    return 0
+            return 1
+        return SS_FoundationStack.acceptsCards(self, from_stack, cards)
+
+
+class Obstruction(FreeCell):
+    Foundation_Class = Obstruction_Foundation
+    RowStack_Class = Obstruction_RowStack
+    Solver_Class = None
+
+    def startGame(self):
+        self._startDealNumRows(5)
+        self.s.talon.dealRow()
+        r = self.s.rows
+        self.s.talon.dealRow(rows=r[:6])
+
+
+# ************************************************************************
+# * Petal
+# ************************************************************************
+
+class Petal(FreeCell):
+    Foundation_Class = StackWrapper(SS_FoundationStack, mod=13)
+
+    def _shuffleHook(self, cards):
+        # move base cards to top of the Talon (i.e. first cards to be dealt)
+        return self._shuffleHookMoveToTop(
+            cards,
+            lambda c, rank=cards[-1].rank: (c.rank == rank, 0))
+
+    def _updateStacks(self):
+        for s in self.s.foundations:
+            s.cap.base_rank = self.base_card.rank
+
+    def startGame(self):
+        self.base_card = self.s.talon.cards[-4]
+        self._updateStacks()
+        # deal base cards to Foundations
+        for i in range(4):
+            c = self.s.talon.getCard()
+            assert c.rank == self.base_card.rank
+            to_stack = self.s.foundations[c.suit * self.gameinfo.decks]
+            self.flipMove(self.s.talon)
+            self.moveMove(1, self.s.talon, to_stack, frames=0)
+        self._startDealNumRows(4)
+        self.s.talon.dealRow()
+        r = self.s.rows
+        self.s.talon.dealRow(rows=r[:4])
+        self.s.talon.dealRow(rows=self.s.reserves)
+
+    def _restoreGameHook(self, game):
+        self.base_card = self.cards[game.loadinfo.base_card_id]
+        self._updateStacks()
+
+    def _loadGameHook(self, p):
+        self.loadinfo.addattr(base_card_id=None)    # register extra load var.
+        self.loadinfo.base_card_id = p.load()
+
+    def _saveGameHook(self, p):
+        p.dump(self.base_card.id)
+
+
+# ************************************************************************
 # * Challenge FreeCell
 # * Super Challenge FreeCell
 # ************************************************************************
@@ -265,6 +349,17 @@ class TripleFreecell(FreeCell):
 
     def startGame(self):
         self._startDealNumRowsAndDealSingleRow(11)
+
+
+class DoubleFreecellTd(TripleFreecell):
+    def createGame(self):
+        TripleFreecell.createGame(self, reserves=8, rows=10, playcards=20)
+
+    def startGame(self):
+        self._startDealNumRows(9)
+        self.s.talon.dealRow()
+        r = self.s.rows
+        self.s.talon.dealRow(rows=r[:4])
 
 
 class Cell11(TripleFreecell):
@@ -648,10 +743,11 @@ registerGame(GameInfo(5, RelaxedFreeCell, "Relaxed FreeCell",
                       GI.GT_FREECELL | GI.GT_RELAXED | GI.GT_OPEN, 1, 0,
                       GI.SL_SKILL))
 registerGame(GameInfo(8, FreeCell, "FreeCell",
+                      GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL,
+                      altnames=("Four Free")))
+registerGame(GameInfo(1901, ZeroFcFreeCell, "FreeCell (No Reserve)",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
-registerGame(GameInfo(1901, ZeroFcFreeCell, "FreeCell with Zero Reserves",
-                      GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
-registerGame(GameInfo(1900, PairFcFreeCell, "FreeCell with Two Reserves",
+registerGame(GameInfo(1900, PairFcFreeCell, "FreeCell (2 Reserves)",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(46, ForeCell, "ForeCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
@@ -663,8 +759,7 @@ registerGame(GameInfo(264, DoubleFreecell, "Double FreeCell",
 registerGame(GameInfo(265, TripleFreecell, "Triple FreeCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 3, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(336, ChallengeFreeCell, "Challenge FreeCell",
-                      GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL,
-                      rules_filename='freecell.html'))
+                      GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(337, SuperChallengeFreeCell, "Super Challenge FreeCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(363, Spidercells, "Spidercells",
@@ -687,9 +782,9 @@ registerGame(GameInfo(464, FourColours, "Four Colours",
 registerGame(GameInfo(509, BigCell, "Big Cell",
                       GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 3, 0,
                       GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(513, OceanTowers, "Ocean Towers",
-                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
-                      GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(513, OceanTowers, "Double Seahaven Towers",
+                      GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
+                      altnames=("Ocean Towers")))
 registerGame(GameInfo(520, GermanFreeCell, "German FreeCell",
                       GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
 registerGame(GameInfo(542, KingCell, "KingCell",
@@ -700,5 +795,13 @@ registerGame(GameInfo(648, Headquarters, "Headquarters",
 registerGame(GameInfo(698, CanCan, "Can Can",
                       GI.GT_RAGLAN | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(746, Limpopo, "Limpopo",
-                      GI.GT_FREECELL | GI.GT_ORIGINAL, 2, 0,
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 2, 0,
                       GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(813, DoubleFreecellTd, "Double FreeCell (Traditional)",
+                      GI.GT_FREECELL | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(953, Petal, "Petal",
+                      GI.GT_FREECELL | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(960, Obstruction, "Obstruction",
+                      GI.GT_FREECELL | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL,
+                      subcategory=GI.GS_JOKER_DECK, trumps=list(range(2))))

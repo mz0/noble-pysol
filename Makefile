@@ -43,14 +43,14 @@ pot:
 	xgettext --keyword=n_ --add-comments=TRANSLATORS: -o po/pysol.pot \
 		pysollib/*.py pysollib/*/*.py pysollib/*/*/*.py data/pysolfc.glade
 	set -e; \
-	for lng in ru de pl it; do \
+	for lng in de fr pl it ru pt_BR; do \
 		msgmerge --update --quiet --backup=none po/$${lng}_pysol.po po/pysol.pot; \
 		msgmerge --update --quiet --backup=none po/$${lng}_games.po po/games.pot; \
 	done
 
 mo:
 	set -e; \
-	for lang in ru de pl it; do \
+	for lang in de fr pl it ru pt_BR; do \
 		mkdir -p locale/$${lang}/LC_MESSAGES; \
 		msgcat --use-first po/$${lang}_games.po po/$${lang}_pysol.po > po/$${lang}.po; \
 		msgfmt --check -o locale/$${lang}/LC_MESSAGES/pysol.mo po/$${lang}.po; \
@@ -61,9 +61,8 @@ pretest:
 	python3 scripts/gen_individual_importing_tests.py
 
 TEST_ENV_PATH = $(CURDIR)$(path_sep)$(CURDIR)/tests/lib
-TEST_FILES = tests/style/*.t tests/unit-generated/*.py tests/individually-importing/*.py
+TEST_FILES = tests/style/*.t tests/t/*.py tests/individually-importing/*.py
 
-test runtest: export PYTHONPATH := $(PYTHONPATH)$(path_sep)$(TEST_ENV_PATH)
 test runtest: export PERL5LIB := $(PERL5LIB)$(path_sep)$(TEST_ENV_PATH)
 
 test: pretest

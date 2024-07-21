@@ -5,47 +5,27 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PySol 0.0.1\n"
-"POT-Creation-Date: Thu Jul 18 18:43:59 2019\n"
-"PO-Revision-Date: 2007-09-05 17:43+0400\n"
+"POT-Creation-Date: Sun Mar 31 11:56:38 2024\n"
+"PO-Revision-Date: 2024-03-31 12:00-0400\n"
 "Last-Translator: Скоморох <skomoroh@gmail.com>\n"
 "Language-Team: Russian <ru@li.org>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: utf-8\n"
-"Generated-By: ./scripts/all_games.py 0.1\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Generated-By: ./scripts/all_games.py 0.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
-msgid " 3x3 Matrix"
-msgstr "Матрица 3x3"
-
-msgid " 4x4 Matrix"
-msgstr "Матрица 4x4"
-
-msgid " 5x5 Matrix"
-msgstr "Матрица 5x5"
-
-msgid " 6x6 Matrix"
-msgstr "Матрица 6x6"
-
-msgid " 7x7 Matrix"
-msgstr "Матрица 7x7"
-
-msgid " 8x8 Matrix"
-msgstr "Матрица 8x8"
-
-msgid " 9x9 Matrix"
-msgstr "Матрица 9x9"
-
-msgid " Pyramid's Stones"
-msgstr "Камни пирамид"
+msgid "1-2-3-4"
+msgstr ""
 
 msgid "10 x 8"
 msgstr "10 x 8"
 
-msgid "10x10 Matrix"
-msgstr "Матрица 10x10"
+msgid "23 Skidoo"
+msgstr ""
 
 msgid "8 x 8"
 msgstr "8 x 8"
@@ -53,17 +33,41 @@ msgstr "8 x 8"
 msgid "Abacus"
 msgstr "Абак"
 
+msgid "Abandon Hope"
+msgstr ""
+
+msgid "Abstract"
+msgstr ""
+
 msgid "Accordion"
 msgstr "Аккордеон"
 
+msgid "Accordion's Revenge"
+msgstr ""
+
+msgid "Ace Through King"
+msgstr ""
+
 msgid "Aces High"
 msgstr "Тузы сверху"
+
+msgid "Aces Square"
+msgstr ""
 
 msgid "Aces Up"
 msgstr "Тузы вверх"
 
 msgid "Aces Up 5"
 msgstr "Тузы вверх 5"
+
+msgid "Aces and Kings"
+msgstr ""
+
+msgid "Acey and Kingsley"
+msgstr ""
+
+msgid "Acht Karten"
+msgstr ""
 
 msgid "Achtmal Acht"
 msgstr "Achtmal Acht"
@@ -74,8 +78,20 @@ msgstr "Высшая точка"
 msgid "Acquaintance"
 msgstr "Знакомство"
 
+msgid "Add Up Tens"
+msgstr ""
+
+msgid "Addiction"
+msgstr ""
+
 msgid "Adela"
 msgstr "Адела"
+
+msgid "Admiral's Patience"
+msgstr ""
+
+msgid "Affinity"
+msgstr ""
 
 #, fuzzy
 msgid "Aglet"
@@ -87,6 +103,9 @@ msgstr "Агнесса Берно"
 msgid "Agnes Sorel"
 msgstr "Агнесса Сорел"
 
+msgid "Agnes Two"
+msgstr ""
+
 msgid "Akbar's Conquest"
 msgstr ""
 
@@ -96,10 +115,13 @@ msgstr ""
 msgid "Alaska"
 msgstr "Аляска"
 
+msgid "Alexander the Great"
+msgstr ""
+
 msgid "Algerian Patience"
 msgstr "Алжирский пасьянс"
 
-msgid "Algerian Patience (3 decks)"
+msgid "Algerian Patience (3 Decks)"
 msgstr "Алжирский пасьянс (3 колоды)"
 
 msgid "Alhambra"
@@ -110,6 +132,9 @@ msgstr "Али Баба"
 
 msgid "All in a Row"
 msgstr "Всё в ряд"
+
+msgid "All in a Row II"
+msgstr ""
 
 msgid "Altar"
 msgstr "Алтарь"
@@ -123,6 +148,9 @@ msgstr "Амазонки"
 msgid "American Canister"
 msgstr "Американская коробочка"
 
+msgid "American Patience"
+msgstr ""
+
 msgid "American Toad"
 msgstr "Американская жаба"
 
@@ -135,6 +163,9 @@ msgstr "Anno Domini"
 msgid "Another Round"
 msgstr "Другой Раунд"
 
+msgid "Ants"
+msgstr ""
+
 msgid "Apophis"
 msgstr ""
 
@@ -142,6 +173,9 @@ msgid "Appachan's Waterfall"
 msgstr "Апачианский водопад"
 
 msgid "Applegate"
+msgstr ""
+
+msgid "Appreciate"
 msgstr ""
 
 msgid "Aqab's"
@@ -153,7 +187,10 @@ msgstr "Арабелла"
 msgid "Arachnida"
 msgstr "Арахнида"
 
-msgid "Arena"
+msgid "Archway"
+msgstr ""
+
+msgid "Arena 1"
 msgstr "Арена"
 
 msgid "Arena 2"
@@ -184,6 +221,9 @@ msgstr ""
 msgid "Assembly"
 msgstr "Ассамблея"
 
+msgid "Astrocyte"
+msgstr ""
+
 msgid "Athena"
 msgstr "Афины"
 
@@ -195,6 +235,15 @@ msgstr "Тётя Мери"
 
 msgid "Australian Patience"
 msgstr "Австралийский пасьянс"
+
+msgid "Autumn Leaves"
+msgstr ""
+
+msgid "Auxiliary Sequences"
+msgstr ""
+
+msgid "Axis"
+msgstr ""
 
 msgid "Baby Spiderette"
 msgstr "Крошка Паучок"
@@ -210,6 +259,9 @@ msgstr "Плохая семёрка"
 
 msgid "Baker's Dozen"
 msgstr "Чёртова дюжина"
+
+msgid "Baker's Dozen (2 Decks)"
+msgstr ""
 
 #, fuzzy
 msgid "Baker's Game"
@@ -262,11 +314,20 @@ msgstr "Основа"
 msgid "Beak and Flipper"
 msgstr "Клюв и ласты"
 
-msgid "Beatle"
-msgstr "Жук"
+msgid "Bear River"
+msgstr ""
+
+msgid "Beautiful Lutecia"
+msgstr ""
 
 msgid "Bebop"
 msgstr "Бибоп"
+
+msgid "Beehive"
+msgstr ""
+
+msgid "Beeswax"
+msgstr ""
 
 msgid "Beetle"
 msgstr "Жук"
@@ -277,8 +338,17 @@ msgstr "Осаждённый замок"
 msgid "Belvedere"
 msgstr "Бельведер"
 
+msgid "Betrothal"
+msgstr ""
+
 msgid "Betsy Ross"
 msgstr "Бетси Росс"
+
+msgid "Bezique"
+msgstr ""
+
+msgid "Big Alhambra"
+msgstr ""
 
 msgid "Big Ben"
 msgstr "Большой Бен"
@@ -288,6 +358,9 @@ msgstr "Большая Берта"
 
 msgid "Big Braid"
 msgstr "Большая коса"
+
+msgid "Big Castle"
+msgstr "Большой замок"
 
 msgid "Big Cell"
 msgstr "Большая Ячейка"
@@ -304,9 +377,6 @@ msgstr "Большой разрыв"
 msgid "Big Easy"
 msgstr "Большая лёгкая"
 
-msgid "Big Flying Dragon"
-msgstr "Большой Летящий Дракон"
-
 msgid "Big Forty"
 msgstr "Большие сорок"
 
@@ -319,14 +389,23 @@ msgstr "Большая дыра"
 msgid "Big Mountain"
 msgstr "Большая гора"
 
+msgid "Big Parade"
+msgstr ""
+
+msgid "Big Picture Gallery"
+msgstr ""
+
 msgid "Big Spider"
 msgstr "Большой Паук"
 
-msgid "Big Spider (1 suit)"
+msgid "Big Spider (1 Suit)"
 msgstr "Большой Паук (1 масть)"
 
-msgid "Big Spider (2 suits)"
+msgid "Big Spider (2 Suits)"
 msgstr "Большой Паук (2 масти)"
+
+msgid "Big Square"
+msgstr ""
 
 msgid "Big Streets"
 msgstr "Большие Улицы"
@@ -334,13 +413,29 @@ msgstr "Большие Улицы"
 msgid "Big Sumo"
 msgstr "Большое Сумо"
 
+msgid "Big Terrace"
+msgstr ""
+
+msgid "Big Traditional"
+msgstr ""
+
+msgid "Big X"
+msgstr ""
+
 msgid "Big York"
 msgstr "Большой Йорк"
 
 msgid "Bim Bom"
 msgstr "Бим-Бом"
 
+msgid "Binary Star"
+msgstr ""
+
 msgid "Bisley"
+msgstr "Бисли"
+
+#, fuzzy
+msgid "Bisley 13"
 msgstr "Бисли"
 
 msgid "Bits n Bytes"
@@ -352,6 +447,9 @@ msgstr "Причудливый"
 msgid "Black Hole"
 msgstr "Чёрная дыра"
 
+msgid "Black Holes"
+msgstr ""
+
 msgid "Black Widow"
 msgstr "Чёрная вдова"
 
@@ -361,11 +459,17 @@ msgstr "Тёмные аллеи"
 msgid "Blind Patience"
 msgstr "Слепой пасьянс"
 
+msgid "Block Ten"
+msgstr ""
+
 msgid "Blockade"
 msgstr "Блокада"
 
 msgid "Blondes and Brunettes"
 msgstr "Блондинки и Брюнетки"
+
+msgid "Blue Jacket"
+msgstr ""
 
 msgid "Blue Moon"
 msgstr "Голубая луна"
@@ -378,6 +482,9 @@ msgstr "Полочный пасьянс"
 
 msgid "Boat"
 msgstr "Лодка"
+
+msgid "Bobby"
+msgstr ""
 
 msgid "Bonaparte"
 msgstr "Бонапарт"
@@ -412,7 +519,7 @@ msgstr "Волнолом"
 msgid "Bridesmaids"
 msgstr "Подружки невесты"
 
-msgid "Bridge"
+msgid "Bridge 1"
 msgstr "Мост"
 
 msgid "Bridge 2"
@@ -445,6 +552,9 @@ msgstr "Британская конституция"
 msgid "British Square"
 msgstr "Британский квадрат"
 
+msgid "Broken Intervals"
+msgstr ""
+
 msgid "Brunswick"
 msgstr "Брюнсвик"
 
@@ -463,7 +573,7 @@ msgstr "Занятые тузы"
 msgid "Busy Cards"
 msgstr "Занятые карты"
 
-msgid "Butterfly"
+msgid "Butterfly 1"
 msgstr "Бабочка"
 
 msgid "Butterfly 2"
@@ -478,6 +588,9 @@ msgstr "Камелот"
 msgid "Can Can"
 msgstr "Канкан"
 
+msgid "Canberra"
+msgstr ""
+
 msgid "Canfield"
 msgstr "Кенфилд"
 
@@ -490,8 +603,14 @@ msgstr "Коробочка"
 msgid "Capricieuse"
 msgstr "Каприз"
 
+msgid "Capricious"
+msgstr ""
+
 msgid "Captive Queens"
 msgstr "Пленённые королевы"
+
+msgid "Carcassonne"
+msgstr ""
 
 msgid "Carlton"
 msgstr "Карлтон"
@@ -507,6 +626,12 @@ msgstr "Каре Наполеона"
 
 msgid "Carthage"
 msgstr "Карфаген"
+
+msgid "Cascade"
+msgstr ""
+
+msgid "Casino Canfield"
+msgstr ""
 
 msgid "Casino Klondike"
 msgstr "Казино Клондайк"
@@ -543,6 +668,9 @@ msgstr ""
 
 msgid "Cavalier"
 msgstr "Рыцарь"
+
+msgid "Ceiling Fan"
+msgstr ""
 
 msgid "Cell 11"
 msgstr "Ячейка 11"
@@ -602,6 +730,9 @@ msgstr "Щепка"
 msgid "Choice"
 msgstr "Выбор"
 
+msgid "Churchill"
+msgstr ""
+
 msgid "Cicely"
 msgstr "Кервель"
 
@@ -614,6 +745,12 @@ msgstr "Девять в круг"
 msgid "Citadel"
 msgstr "Цитадель"
 
+msgid "Classic Solitaire"
+msgstr ""
+
+msgid "Clear the Dungeon"
+msgstr ""
+
 msgid "Clink"
 msgstr "Застенок"
 
@@ -623,7 +760,14 @@ msgstr "Часы"
 msgid "Clover Leaf"
 msgstr "Лепесток клевера"
 
+#: pysollib/util.py:45
+msgid "Club"
+msgstr "Треф"
+
 msgid "Cluitjar's Lair"
+msgstr ""
+
+msgid "Cobweb"
 msgstr ""
 
 msgid "Cockroach"
@@ -656,17 +800,26 @@ msgstr "Контрданс"
 msgid "Convolution"
 msgstr "Виток"
 
+msgid "Coquette"
+msgstr ""
+
 msgid "Corkscrew"
 msgstr "Штопор"
 
 msgid "Corner Card"
 msgstr "Угловая карта"
 
+msgid "Corner Patience"
+msgstr ""
+
 msgid "Corner Suite"
 msgstr "Угловые масти"
 
 msgid "Corners"
 msgstr "Углы"
+
+msgid "Cornerstones"
+msgstr ""
 
 msgid "Corona"
 msgstr "Корона"
@@ -683,14 +836,44 @@ msgstr "Конверт"
 msgid "Crescent"
 msgstr "Полумесяц"
 
+msgid "Cribbage Patience"
+msgstr ""
+
+msgid "Cribbage Shuffle"
+msgstr ""
+
+msgid "Cribbage Square"
+msgstr ""
+
+msgid "Cribbage Square (1 Reserve)"
+msgstr ""
+
+msgid "Cribbage Square (2 Reserves)"
+msgstr ""
+
+msgid "Cribbage Square (Waste)"
+msgstr ""
+
 msgid "Cringle"
 msgstr "Люверс"
+
+msgid "Crispy"
+msgstr ""
+
+msgid "Cromwell"
+msgstr ""
 
 msgid "Cross"
 msgstr "Крест"
 
+msgid "Cross Currents"
+msgstr ""
+
 msgid "Crossroads"
 msgstr "Перекрестки"
+
+msgid "Crossword"
+msgstr ""
 
 msgid "Crown"
 msgstr "Корона"
@@ -727,6 +910,12 @@ msgstr "Дашаватара Круги"
 msgid "Dead King Golf"
 msgstr "Гольф Смертельный Король"
 
+msgid "Deauville"
+msgstr ""
+
+msgid "Decade"
+msgstr ""
+
 msgid "Deck"
 msgstr "Колода"
 
@@ -744,6 +933,9 @@ msgstr "Демон"
 
 msgid "Demon Fan"
 msgstr "Демонический веер"
+
+msgid "Demons and Thieves"
+msgstr ""
 
 msgid "Der Katzenschwanz"
 msgstr "Der Katzenschwanz"
@@ -769,6 +961,12 @@ msgstr "Необитаемый остров"
 msgid "Deuces"
 msgstr "Двойки"
 
+msgid "Deuces and Queens"
+msgstr ""
+
+msgid "Devil's Grip"
+msgstr ""
+
 msgid "Devil's Solitaire"
 msgstr "Дьявольский пасьянс"
 
@@ -790,14 +988,23 @@ msgstr "Die Bildgallerie"
 msgid "Die Koenigsbergerin"
 msgstr "Die Koenigsbergerin"
 
+msgid "Die Pyramide"
+msgstr ""
+
 msgid "Die Russische"
 msgstr "Die Russische"
 
 msgid "Die Schlange"
 msgstr "Die Schlange"
 
+msgid "Die Uhr"
+msgstr ""
+
 msgid "Die boese Sieben"
 msgstr "Die boese Sieben"
+
+msgid "Die grosse Harfe"
+msgstr ""
 
 msgid "Die kleine Harfe"
 msgstr "Die kleine Harfe"
@@ -805,8 +1012,20 @@ msgstr "Die kleine Harfe"
 msgid "Dieppe"
 msgstr "Dieppe"
 
+msgid "Dimensions"
+msgstr ""
+
 msgid "Diplomat"
 msgstr "Дипломат"
+
+msgid "Display"
+msgstr ""
+
+msgid "Dnieper"
+msgstr ""
+
+msgid "Dnipro"
+msgstr ""
 
 msgid "Dog"
 msgstr "Пёс"
@@ -852,17 +1071,29 @@ msgstr "Двойной разводной мост"
 msgid "Double Easthaven"
 msgstr "Двойной кузнечик"
 
+msgid "Double Fan"
+msgstr ""
+
 msgid "Double Fives"
 msgstr "Двойные пятёрки"
 
 msgid "Double Footling"
 msgstr "Двойной Пустяковый"
 
+msgid "Double Fourteen"
+msgstr ""
+
 msgid "Double FreeCell"
 msgstr "Двойная свободная ячейка"
 
+msgid "Double FreeCell (Traditional)"
+msgstr ""
+
 msgid "Double Gold Mine"
 msgstr "Двойной Золотой рудник"
+
+msgid "Double Golf"
+msgstr ""
 
 msgid "Double Grasshopper"
 msgstr "Двойной кузнечик"
@@ -874,8 +1105,8 @@ msgstr "Двойной Бисли"
 msgid "Double Klondike"
 msgstr "Двойной Клондайк"
 
-msgid "Double Klondike by Threes"
-msgstr "Двойной Клондайк по три"
+msgid "Double Klondike (Draw 3)"
+msgstr ""
 
 msgid "Double Line"
 msgstr "Двойной ряд"
@@ -883,8 +1114,11 @@ msgstr "Двойной ряд"
 msgid "Double Mahjongg Big Castle"
 msgstr "Двойной Маджонг Большой замок"
 
-msgid "Double Mahjongg Big Flying Dragon"
-msgstr "Двойной Маджонг Большой Летящий Дракон"
+msgid "Double Mahjongg Big Square"
+msgstr ""
+
+msgid "Double Mahjongg Big Traditional"
+msgstr ""
 
 msgid "Double Mahjongg Eight Squares"
 msgstr "Двойной Маджонг Восемь квадратов"
@@ -894,6 +1128,9 @@ msgstr "Двойной Маджонг Фараон"
 
 msgid "Double Mahjongg Roost"
 msgstr "Двойной Маджонг Насест"
+
+msgid "Double Mahjongg Rows"
+msgstr ""
 
 msgid "Double Mahjongg Sphere"
 msgstr "Двойной Маджонг Сфера"
@@ -910,6 +1147,12 @@ msgstr "Двойная Мера"
 #, fuzzy
 msgid "Double Montana"
 msgstr "Двоеточие"
+
+msgid "Double Nestor"
+msgstr ""
+
+msgid "Double Putt"
+msgstr ""
 
 msgid "Double Pyramid"
 msgstr "Двойная пирамида"
@@ -933,6 +1176,15 @@ msgstr "Двойной самурай"
 msgid "Double Scorpion"
 msgstr "Двойной Скорпион"
 
+msgid "Double Seahaven Towers"
+msgstr ""
+
+msgid "Double Trigon"
+msgstr ""
+
+msgid "Double Uintah"
+msgstr ""
+
 msgid "Double Your Fun"
 msgstr "Двойное удовольствие"
 
@@ -951,7 +1203,7 @@ msgstr "Дубликаты II"
 msgid "Dover"
 msgstr "Довер"
 
-msgid "Dragon"
+msgid "Dragon 1"
 msgstr "Дракон"
 
 msgid "Dragon 2"
@@ -969,6 +1221,9 @@ msgstr "Бессмыслица"
 msgid "Duchess"
 msgstr "Герцогиня"
 
+msgid "Duchess de Luynes"
+msgstr ""
+
 msgid "Dude"
 msgstr "Пижон"
 
@@ -984,6 +1239,9 @@ msgstr "Голландский пасьянс"
 #, fuzzy
 msgid "Dutchess"
 msgstr "Герцогиня"
+
+msgid "Eagle"
+msgstr ""
 
 msgid "Eagle Wing"
 msgstr "Крыло орла"
@@ -1009,6 +1267,9 @@ msgstr "Египетский пасьянс"
 msgid "Eiffel Tower"
 msgstr "Эйфелева башня"
 
+msgid "Eight Cards"
+msgstr ""
+
 msgid "Eight Legions"
 msgstr "Восемь легионов"
 
@@ -1031,11 +1292,20 @@ msgstr "Восемь раз по восемь"
 msgid "Eight by Eight"
 msgstr "Восемь на восемь"
 
+msgid "Eighteens"
+msgstr ""
+
+msgid "Eighty Thieves"
+msgstr ""
+
 msgid "Elba"
 msgstr "Ельба"
 
 msgid "Elevator"
 msgstr "Лифт"
+
+msgid "Eleven Away"
+msgstr ""
 
 msgid "Elevens"
 msgstr "По одиннадцать"
@@ -1043,8 +1313,17 @@ msgstr "По одиннадцать"
 msgid "Elevens Too"
 msgstr "Тоже по одиннадцать"
 
+msgid "Eliminator"
+msgstr ""
+
 msgid "Emperor"
 msgstr "Император"
+
+msgid "Emperor of Germany"
+msgstr ""
+
+msgid "Empress of Italy"
+msgstr ""
 
 msgid "Empty Pyramids"
 msgstr "Пустые пирамиды"
@@ -1085,6 +1364,9 @@ msgstr "Королева фей"
 msgid "Fair Lucy"
 msgstr "Честная Люси"
 
+msgid "Fair Maids"
+msgstr ""
+
 #, fuzzy
 msgid "Fairest"
 msgstr "Ковёр"
@@ -1097,6 +1379,9 @@ msgstr "Славные пятьдесят"
 
 msgid "Fan"
 msgstr "Веер"
+
+msgid "Fan Fifteen"
+msgstr ""
 
 msgid "Fanny"
 msgstr "Корма"
@@ -1128,18 +1413,27 @@ msgstr "Пасьянс Фехтера"
 msgid "Fifteen"
 msgstr "Пятнадцать"
 
+msgid "Fifteen Plus"
+msgstr "Пятнадцать плюс"
+
 #, fuzzy
 msgid "Fifteen Puzzle"
 msgstr "Пятнашки"
 
-msgid "Fifteen plus"
-msgstr "Пятнадцать плюс"
+msgid "Fifteen Puzzle Cell"
+msgstr ""
 
 msgid "Fifteens"
 msgstr "По пятнадцать"
 
 msgid "Final Battle"
 msgstr "Последняя битва"
+
+msgid "Financier"
+msgstr ""
+
+msgid "Fire and Ice"
+msgstr ""
 
 msgid "Firecracker"
 msgstr "Петарда"
@@ -1153,7 +1447,7 @@ msgstr "Фундаментальный закон"
 msgid "Fish"
 msgstr "Рыба"
 
-msgid "Fish face"
+msgid "Fish Face"
 msgstr "Рыбья голова"
 
 msgid "Five Aces"
@@ -1162,13 +1456,16 @@ msgstr "Пять тузов"
 msgid "Five Piles"
 msgstr "Пять кучек"
 
-msgid "Five Pyramids"
-msgstr "Пять пирамид"
+msgid "Five Pyramids 1"
+msgstr ""
+
+msgid "Five Pyramids 2"
+msgstr ""
 
 msgid "Flake"
 msgstr "Хлопья"
 
-msgid "Flake (2 decks)"
+msgid "Flake (2 Decks)"
 msgstr "Хлопья (2 колоды)"
 
 msgid "Flamenco"
@@ -1189,6 +1486,9 @@ msgstr "Флорентийский пасьянс"
 msgid "Flourish"
 msgstr "Завиток"
 
+msgid "Flow"
+msgstr ""
+
 msgid "Flower Arrangement"
 msgstr "Аранжировка цветов"
 
@@ -1198,14 +1498,20 @@ msgstr "Цветочные часы"
 msgid "Flower Garden"
 msgstr "Цветочный сад"
 
-msgid "Flowers"
-msgstr "Цветы"
+msgid "Flowers 1"
+msgstr ""
+
+msgid "Flowers 2"
+msgstr ""
 
 msgid "Fly"
 msgstr "Полёт"
 
-msgid "Flying Dragon"
-msgstr "Летящий дракон"
+msgid "Following"
+msgstr ""
+
+msgid "Fool's Up"
+msgstr ""
 
 #, fuzzy
 msgid "Foothold"
@@ -1239,8 +1545,8 @@ msgstr "Любимец фортуны"
 msgid "Fortunes"
 msgstr "Судьба"
 
-msgid "Forty Nine"
-msgstr "Сорок девять"
+msgid "Forty Bandits"
+msgstr ""
 
 msgid "Forty Thieves"
 msgstr "Сорок разбойников"
@@ -1248,8 +1554,17 @@ msgstr "Сорок разбойников"
 msgid "Forty and Eight"
 msgstr "Сорок и восемь"
 
+msgid "Forty-Nine"
+msgstr "Сорок девять"
+
 msgid "Four Colours"
 msgstr "Четыре цвета"
+
+msgid "Four Corners"
+msgstr ""
+
+msgid "Four Free"
+msgstr ""
 
 msgid "Four Kings"
 msgstr "Четыре короля"
@@ -1259,6 +1574,24 @@ msgstr "Четырёхлистный клевер"
 
 msgid "Four Packs"
 msgstr "Четыре пакета"
+
+msgid "Four Rivers (No Gravity) 14x6"
+msgstr ""
+
+msgid "Four Rivers (No Gravity) 18x8"
+msgstr ""
+
+msgid "Four Rivers (No Gravity) 24x12"
+msgstr ""
+
+msgid "Four Rivers 14x6"
+msgstr ""
+
+msgid "Four Rivers 18x8"
+msgstr ""
+
+msgid "Four Rivers 24x12"
+msgstr ""
 
 msgid "Four Seasons"
 msgstr "Четыре сезона"
@@ -1278,38 +1611,56 @@ msgstr "По четыре"
 msgid "Fourteen"
 msgstr "Четырнадцать"
 
+msgid "Fourteen Out"
+msgstr ""
+
+msgid "Fourteen Puzzle"
+msgstr ""
+
 msgid "Frames"
 msgstr "Рамки"
 
 msgid "Fred's Spider"
 msgstr "Паук Фреда"
 
-msgid "Fred's Spider (3 decks)"
+msgid "Fred's Spider (3 Decks)"
 msgstr "Паук Фреда (3 колоды)"
 
 msgid "Free Fan"
 msgstr "Свободный веер"
 
+msgid "Free Ishido"
+msgstr ""
+
+msgid "Free Ishido Relaxed"
+msgstr ""
+
 msgid "Free Napoleon"
 msgstr "Свободный Наполеон"
+
+msgid "Free Parking"
+msgstr ""
 
 msgid "FreeCell"
 msgstr "Свободная ячейка"
 
-msgid "FreeCell with Two Reserves"
+msgid "FreeCell (2 Reserves)"
 msgstr ""
 
-msgid "FreeCell with Zero Reserves"
+msgid "FreeCell (No Reserve)"
 msgstr ""
 
 msgid "Frog"
 msgstr "Лягушка"
 
-msgid "Full Vision"
-msgstr "Полностью видимый"
+msgid "Full Vision 1"
+msgstr "Полностью видимый 1"
 
 msgid "Full Vision 2"
 msgstr "Полностью видимый 2"
+
+msgid "Full Vision 3"
+msgstr ""
 
 msgid "Future"
 msgstr "Будущее"
@@ -1341,6 +1692,9 @@ msgstr "Garhpati"
 msgid "Gate"
 msgstr "Ворота"
 
+msgid "Gay Gordons"
+msgstr ""
+
 #, fuzzy
 msgid "Gayle's"
 msgstr "Маджонг Gayle's"
@@ -1356,6 +1710,9 @@ msgstr "Происхождение +"
 
 msgid "Geoffrey"
 msgstr "Джефри"
+
+msgid "German Clock"
+msgstr ""
 
 msgid "German FreeCell"
 msgstr "Немецкая Свободная ячейка"
@@ -1406,6 +1763,9 @@ msgstr "Гольф"
 msgid "Good Measure"
 msgstr "Полная мера"
 
+msgid "Good Thirteen"
+msgstr ""
+
 msgid "Gotham"
 msgstr "Простак"
 
@@ -1451,11 +1811,17 @@ msgstr "Великое Колесо"
 msgid "Greater Queue"
 msgstr "Длинная коса"
 
+msgid "Greater Wheel"
+msgstr ""
+
 msgid "Griffon"
 msgstr "Грифон"
 
 msgid "Grounds for a Divorce"
 msgstr "Основание для развода"
+
+msgid "Guardian"
+msgstr ""
 
 msgid "Gypsy"
 msgstr "Цыганский"
@@ -1464,8 +1830,20 @@ msgstr "Цыганский"
 msgid "H for Haga"
 msgstr "Маджонг H for Haga"
 
+msgid "H for Haga Traditional"
+msgstr ""
+
+msgid "Half Klondike"
+msgstr ""
+
+msgid "Half Mahjongg Abstract"
+msgstr ""
+
 msgid "Half Mahjongg Happy New Year"
 msgstr "Половинный Маджонг С Новым Годом"
+
+msgid "Half Mahjongg K 2"
+msgstr ""
 
 msgid "Half Mahjongg Smile"
 msgstr "Половинный Маджонг Улыбка"
@@ -1479,6 +1857,9 @@ msgstr "Ханафуда Четыре сезона"
 msgid "Hanafuda Four Winds"
 msgstr "Ханафуда Четыре ветра"
 
+msgid "Hanoi Puzzle 3"
+msgstr ""
+
 msgid "Hanoi Puzzle 4"
 msgstr "Ханойская головоломка 4"
 
@@ -1487,6 +1868,12 @@ msgstr "Ханойская головоломка 5"
 
 msgid "Hanoi Puzzle 6"
 msgstr "Ханойская головоломка 6"
+
+msgid "Hanoi Puzzle 7"
+msgstr ""
+
+msgid "Hanoi Puzzle 8"
+msgstr ""
 
 msgid "Hanoi Sequence"
 msgstr ""
@@ -1518,17 +1905,26 @@ msgstr "Головы и хвосты"
 msgid "Helios"
 msgstr "Гелиос"
 
+msgid "Helsinki"
+msgstr ""
+
 msgid "Hemispheres"
 msgstr "Полушария"
+
+msgid "Herz zu Herz"
+msgstr ""
 
 msgid "Hex A Klon"
 msgstr "Шестнадцатиричный Клондайк"
 
-msgid "Hex A Klon by Threes"
-msgstr "Шестнадцатиричный Клондайк по три"
+msgid "Hex A Klon (Draw 3)"
+msgstr ""
 
 msgid "Hex Labyrinth"
 msgstr "Шестнадцатеричный лабиринт"
+
+msgid "Hex Yukon"
+msgstr ""
 
 msgid "Hidden Passages"
 msgstr "Тайные ходы"
@@ -1542,6 +1938,18 @@ msgstr "Верхний и нижний"
 msgid "Hiranyaksha"
 msgstr "Hiranyaksha"
 
+msgid "Hit or Miss"
+msgstr ""
+
+msgid "Hit or Miss Unlimited"
+msgstr ""
+
+msgid "Hope"
+msgstr ""
+
+msgid "Hope Deferred"
+msgstr ""
+
 msgid "Hopscotch"
 msgstr "Классы"
 
@@ -1551,11 +1959,23 @@ msgstr "Конь"
 msgid "Hospital Patience"
 msgstr "Больничный пасьянс"
 
+msgid "Hot Coffee"
+msgstr ""
+
+msgid "Hourglass"
+msgstr ""
+
 msgid "House in the Wood"
 msgstr "Дом в лесу"
 
+msgid "House of Commons"
+msgstr ""
+
 msgid "House on the Hill"
 msgstr "Дом на холме"
+
+msgid "Housefly"
+msgstr ""
 
 msgid "Hovercraft"
 msgstr "Ховеркрафт"
@@ -1563,14 +1983,26 @@ msgstr "Ховеркрафт"
 msgid "How They Run"
 msgstr "Как они бегут"
 
+msgid "Huge Picture Gallery"
+msgstr ""
+
+msgid "Hunter"
+msgstr ""
+
 msgid "Hurdles"
 msgstr "Барьеры"
 
 msgid "Hurricane"
 msgstr "Ураган"
 
+msgid "Hussars"
+msgstr ""
+
 msgid "Hypotenuse"
 msgstr "Гипотенуза"
+
+msgid "I Love U"
+msgstr "I Love U"
 
 msgid "Idiot's Delight"
 msgstr "Дурацкое удовольствие"
@@ -1581,11 +2013,14 @@ msgstr "Свободные тузы"
 msgid "Idle Year"
 msgstr "Свободный год"
 
-msgid "IloveU"
-msgstr "IloveU"
+msgid "Imaginary Thirteen"
+msgstr ""
 
 msgid "Imperial Guards"
 msgstr "Императорская гвардия"
+
+msgid "Imperial Trump Yukon"
+msgstr ""
 
 msgid "Imperial Trumps"
 msgstr "Имперские козыри"
@@ -1624,6 +2059,9 @@ msgstr "Смекалка +"
 msgid "Interchange"
 msgstr "Перестановка"
 
+msgid "Interlock"
+msgstr ""
+
 msgid "Interment"
 msgstr "Погребение"
 
@@ -1639,7 +2077,22 @@ msgstr "Ирис"
 msgid "Irmgard"
 msgstr ""
 
+msgid "Isabel"
+msgstr ""
+
+msgid "Ishido"
+msgstr ""
+
+msgid "Ishido Relaxed"
+msgstr ""
+
+msgid "Ishido Scored"
+msgstr ""
+
 msgid "JPs"
+msgstr ""
+
+msgid "Jacks in the Box"
 msgstr ""
 
 msgid "Jamestown"
@@ -1659,6 +2112,12 @@ msgstr "Японский сад II"
 
 msgid "Japanese Garden III"
 msgstr "Японский сад III"
+
+msgid "Joke Klon"
+msgstr ""
+
+msgid "Joke Klon (Draw 3)"
+msgstr ""
 
 msgid "Joker"
 msgstr "Джокер"
@@ -1681,9 +2140,21 @@ msgstr "Джунгли"
 msgid "Just For Fun"
 msgstr "Просто для удовольствия"
 
+msgid "Juvenile"
+msgstr ""
+
+msgid "K 2"
+msgstr ""
+
 #, fuzzy
 msgid "K for Kyodai"
 msgstr "Маджонг K for Kyodai"
+
+msgid "K for Kyodai Traditional"
+msgstr ""
+
+msgid "K.C."
+msgstr ""
 
 msgid "Kali's Game"
 msgstr "Пасьянс Кали"
@@ -1709,11 +2180,20 @@ msgstr "Облегчённый Пасьянс Катрины"
 msgid "Kentish"
 msgstr ""
 
+msgid "Kettle Hill"
+msgstr ""
+
 msgid "Khadga"
 msgstr "Khadga"
 
 msgid "Khedive"
 msgstr "Хедив"
+
+msgid "Kiev"
+msgstr ""
+
+msgid "Kilowatt"
+msgstr ""
 
 msgid "King Albert"
 msgstr "Король Альберт"
@@ -1727,6 +2207,15 @@ msgstr "Королевский Шестнадцатиричный Клондай
 msgid "King Tut"
 msgstr "Король Тут"
 
+msgid "King's Audience"
+msgstr ""
+
+msgid "King's Plume"
+msgstr ""
+
+msgid "King's Secrets"
+msgstr ""
+
 msgid "KingCell"
 msgstr "Королевская Ячейка"
 
@@ -1735,6 +2224,9 @@ msgstr "Королевство"
 
 msgid "Kings"
 msgstr "Короли"
+
+msgid "Kings in the Corners"
+msgstr ""
 
 msgid "Kingsdown Eights"
 msgstr ""
@@ -1746,13 +2238,28 @@ msgstr "Короли"
 msgid "Klondike"
 msgstr "Клондайк"
 
+msgid "Klondike (Draw 3)"
+msgstr ""
+
+msgid "Klondike Mini"
+msgstr ""
+
+msgid "Klondike Nouveau"
+msgstr ""
+
 msgid "Klondike Plus 16"
 msgstr "Клондайк Плюс 16"
 
-msgid "Klondike by Threes"
-msgstr "Клондайк по три"
+msgid "Klondike Territory"
+msgstr ""
 
 msgid "Km"
+msgstr ""
+
+msgid "Knockout"
+msgstr ""
+
+msgid "Knockout +"
 msgstr ""
 
 msgid "Knotty Nines"
@@ -1769,6 +2276,9 @@ msgid "Kumo"
 msgstr "Гигант"
 
 msgid "Kurma"
+msgstr ""
+
+msgid "Kyiv"
 msgstr ""
 
 msgid "Kyodai 14"
@@ -1813,6 +2323,12 @@ msgstr "Прекрасная Люси"
 msgid "La Chatelaine"
 msgstr "La Chatelaine"
 
+msgid "La Demi-Lune"
+msgstr ""
+
+msgid "La Francaise"
+msgstr ""
+
 msgid "La Nivernaise"
 msgstr "La Nivernaise"
 
@@ -1838,6 +2354,9 @@ msgstr "Леди Полк"
 msgid "Lady of the Manor"
 msgstr "Госпожа поместья"
 
+msgid "Ladybug"
+msgstr ""
+
 msgid "Lafayette"
 msgstr "Лафайет"
 
@@ -1856,11 +2375,17 @@ msgstr "Двойной Пасьянс Лары"
 msgid "Lara's Game Relaxed"
 msgstr "Облегчённый Пасьянс Лары"
 
+msgid "Lasker"
+msgstr ""
+
 msgid "Last Chance"
 msgstr "Последний шанс"
 
 msgid "Lattice"
 msgstr "Решётка"
+
+msgid "Laying Siege"
+msgstr ""
 
 msgid "Le Cadran"
 msgstr "Le Cadran"
@@ -1868,11 +2393,20 @@ msgstr "Le Cadran"
 msgid "Le Grande Teton"
 msgstr "Le Grande Teton"
 
+msgid "Le Parterre"
+msgstr ""
+
 msgid "Legion"
 msgstr "Легион"
 
+msgid "Leoni's Own"
+msgstr ""
+
 msgid "Leprechaun"
 msgstr "Лепрехун"
+
+msgid "Les Deux"
+msgstr ""
 
 msgid "Les Quatre Coins"
 msgstr "Les Quatre Coins"
@@ -1882,6 +2416,27 @@ msgstr "Короткая коса"
 
 msgid "Lexington Harp"
 msgstr "Лексингтонская арфа"
+
+msgid "Lights Out 10x10"
+msgstr ""
+
+msgid "Lights Out 4x4"
+msgstr ""
+
+msgid "Lights Out 5x5"
+msgstr ""
+
+msgid "Lights Out 6x6"
+msgstr ""
+
+msgid "Lights Out 7x7"
+msgstr ""
+
+msgid "Lights Out 8x8"
+msgstr ""
+
+msgid "Lights Out 9x9"
+msgstr ""
 
 msgid "Lightweight"
 msgstr "Лёгкий"
@@ -1895,8 +2450,11 @@ msgstr "Ограниченный"
 msgid "Limpopo"
 msgstr "Лимпопо"
 
-msgid "Lion"
-msgstr "Лев"
+msgid "Lion 1"
+msgstr ""
+
+msgid "Lion 2"
+msgstr ""
 
 msgid "Little Billie"
 msgstr "Малыш Билли"
@@ -1934,8 +2492,18 @@ msgstr "Долгий путь"
 msgid "Loose Ends"
 msgstr "Свободные концы"
 
-msgid "Lost "
-msgstr "Потеря"
+msgid "Lords and Ladies"
+msgstr ""
+
+#: pysollib/stats.py:43 pysollib/stats.py:148 pysollib/pysolgtk/tkstats.py:425
+msgid "Lost"
+msgstr "Проиграл"
+
+msgid "Love a Duck"
+msgstr ""
+
+msgid "Lovely Lucy"
+msgstr ""
 
 msgid "Lucas"
 msgstr "Лукас"
@@ -1952,6 +2520,9 @@ msgstr "Мадам"
 msgid "Mage's Game"
 msgstr "Пасьянс Меги"
 
+msgid "Magic Montana"
+msgstr ""
+
 msgid "Mahjongg Altar"
 msgstr "Маджонг Алтарь"
 
@@ -1961,7 +2532,7 @@ msgstr "Маджонг Другой раунд"
 msgid "Mahjongg Aqab's"
 msgstr "Маджонг Aqab's"
 
-msgid "Mahjongg Arena"
+msgid "Mahjongg Arena 1"
 msgstr "Маджонг Арена"
 
 msgid "Mahjongg Arena 2"
@@ -1973,20 +2544,26 @@ msgstr "Маджонг Стрела"
 msgid "Mahjongg Art Moderne"
 msgstr "Маджонг Современное искусство"
 
+msgid "Mahjongg Axis"
+msgstr ""
+
 msgid "Mahjongg Balance"
 msgstr "Маджонг Баланс"
 
 msgid "Mahjongg Bat"
 msgstr "Маджонг Летучая мышь"
 
-msgid "Mahjongg Beatle"
-msgstr "Маджонг Жук"
+msgid "Mahjongg Beetle"
+msgstr ""
 
 msgid "Mahjongg Big Hole"
 msgstr "Маджонг Большая дыра"
 
 msgid "Mahjongg Big Mountain"
 msgstr "Маджонг Большая гора"
+
+msgid "Mahjongg Big X"
+msgstr ""
 
 msgid "Mahjongg Bizarre"
 msgstr "Маджонг Причудливый"
@@ -1997,7 +2574,7 @@ msgstr "Маджонг Боров"
 msgid "Mahjongg Boat"
 msgstr "Маджонг Лодка"
 
-msgid "Mahjongg Bridge"
+msgid "Mahjongg Bridge 1"
 msgstr "Маджонг Мост"
 
 msgid "Mahjongg Bridge 2"
@@ -2006,8 +2583,8 @@ msgstr "Маджонг Мост 2"
 msgid "Mahjongg Bug"
 msgstr "Маджонг Клоп"
 
-msgid "Mahjongg Butterfly"
-msgstr "Маджонг Бабочка"
+msgid "Mahjongg Butterfly 1"
+msgstr "Маджонг Бабочка 1"
 
 msgid "Mahjongg Butterfly 2"
 msgstr "Маджонг Бабочка 2"
@@ -2029,6 +2606,9 @@ msgstr "Маджонг ChessMania"
 
 msgid "Mahjongg Chip"
 msgstr "Маджонг Щепка"
+
+msgid "Mahjongg Cobweb"
+msgstr ""
 
 msgid "Mahjongg Columns"
 msgstr "Маджонг Столбцы"
@@ -2054,14 +2634,17 @@ msgstr "Маджонг Алмаз"
 msgid "Mahjongg Dog"
 msgstr "Маджонг Пёс"
 
-msgid "Mahjongg Dragon"
-msgstr "Маджонг Дракон"
+msgid "Mahjongg Dragon 1"
+msgstr "Маджонг Дракон 1"
 
 msgid "Mahjongg Dragon 2"
 msgstr "Маджонг Дракон 2"
 
 msgid "Mahjongg Dude"
 msgstr "Маджонг Пижон"
+
+msgid "Mahjongg Eagle"
+msgstr ""
 
 msgid "Mahjongg Empty Pyramids"
 msgstr "Маджонг Пустые пирамиды"
@@ -2081,29 +2664,35 @@ msgstr "Маджонг Фарандола"
 msgid "Mahjongg Fish"
 msgstr "Маджонг Рыба"
 
-msgid "Mahjongg Fish face"
+msgid "Mahjongg Fish Face"
 msgstr "Маджонг Рыбья голова"
 
-msgid "Mahjongg Five Pyramids"
-msgstr "Маджонг Пять пирамид"
+msgid "Mahjongg Five Pyramids 1"
+msgstr ""
+
+msgid "Mahjongg Five Pyramids 2"
+msgstr ""
 
 msgid "Mahjongg Floating City"
 msgstr "Маджонг Плавающий город"
 
-msgid "Mahjongg Flowers"
-msgstr "Маджонг Цветы"
+msgid "Mahjongg Flowers 1"
+msgstr ""
 
-msgid "Mahjongg Flying Dragon"
-msgstr "Маджонг Летящий Дракон"
+msgid "Mahjongg Flowers 2"
+msgstr ""
 
 msgid "Mahjongg Fortress Towers"
 msgstr "Маджонг Крепостные башни"
 
-msgid "Mahjongg Full Vision"
-msgstr "Маджонг Полностью видимый"
+msgid "Mahjongg Full Vision 1"
+msgstr "Маджонг Полностью видимый 1"
 
 msgid "Mahjongg Full Vision 2"
 msgstr "Маджонг Полностью видимый 2"
+
+msgid "Mahjongg Full Vision 3"
+msgstr ""
 
 msgid "Mahjongg Future"
 msgstr "Маджонг Будущее"
@@ -2120,6 +2709,9 @@ msgstr "Маджонг Поляна"
 msgid "Mahjongg H for Haga"
 msgstr "Маджонг H for Haga"
 
+msgid "Mahjongg H for Haga Traditional"
+msgstr ""
+
 msgid "Mahjongg Hare"
 msgstr "Маджонг Заяц"
 
@@ -2135,14 +2727,20 @@ msgstr "Маджонг Верхний и нижний"
 msgid "Mahjongg Horse"
 msgstr "Маджонг Лошадь"
 
+msgid "Mahjongg Hot Coffee"
+msgstr ""
+
+msgid "Mahjongg Hourglass"
+msgstr ""
+
 msgid "Mahjongg Hovercraft"
 msgstr "Маджонг Ховеркрафт"
 
 msgid "Mahjongg Hurdles"
 msgstr "Маджонг Барьеры"
 
-msgid "Mahjongg IloveU"
-msgstr "Маджонг IloveU"
+msgid "Mahjongg I Love U"
+msgstr "Маджонг I Love U"
 
 msgid "Mahjongg Inazuma"
 msgstr "Маджонг Inazuma"
@@ -2164,6 +2762,9 @@ msgstr "Маджонг Джокер"
 
 msgid "Mahjongg K for Kyodai"
 msgstr "Маджонг K for Kyodai"
+
+msgid "Mahjongg K for Kyodai Traditional"
+msgstr ""
 
 msgid "Mahjongg Km"
 msgstr "Маджонг Km"
@@ -2219,14 +2820,17 @@ msgstr "Маджонг Лабиринт"
 msgid "Mahjongg Lattice"
 msgstr "Маджонг Решётка"
 
-msgid "Mahjongg Lion"
-msgstr "Маджонг Лион"
+msgid "Mahjongg Lion 1"
+msgstr ""
+
+msgid "Mahjongg Lion 2"
+msgstr ""
 
 msgid "Mahjongg Loose Ends"
 msgstr "Маджонг Свободные концы"
 
-msgid "Mahjongg Lost "
-msgstr "Маджонг Потеря"
+msgid "Mahjongg Lost"
+msgstr ""
 
 msgid "Mahjongg Maya"
 msgstr "Маджонг Майя"
@@ -2255,8 +2859,11 @@ msgstr "Маджонг Multi X"
 msgid "Mahjongg N for Namida"
 msgstr "Маджонг N for Namida"
 
-msgid "Mahjongg New Layout"
-msgstr "Маджонг Новый расклад"
+msgid "Mahjongg N for Namida Traditional"
+msgstr ""
+
+msgid "Mahjongg Naoki Haga Traditional"
+msgstr ""
 
 msgid "Mahjongg Okie's Nitemare"
 msgstr "Маджонг Okie's Nitemare"
@@ -2282,6 +2889,9 @@ msgstr "Маджонг Папильотка"
 msgid "Mahjongg Pattern"
 msgstr "Маджонг Образец"
 
+msgid "Mahjongg Phoenix"
+msgstr ""
+
 msgid "Mahjongg Portal"
 msgstr "Маджонг Портал"
 
@@ -2290,6 +2900,9 @@ msgstr "Маджонг Пирамида 1"
 
 msgid "Mahjongg Pyramid 2"
 msgstr "Маджонг Пирамида 2"
+
+msgid "Mahjongg Pyramids"
+msgstr ""
 
 msgid "Mahjongg Quad"
 msgstr "Маджонг Quad"
@@ -2354,6 +2967,9 @@ msgstr "Маджонг Космический мост"
 msgid "Mahjongg Space Shuttle"
 msgstr "Маджонг Космический челнок"
 
+msgid "Mahjongg Spider"
+msgstr ""
+
 msgid "Mahjongg Square"
 msgstr "Маджонг Квадрат"
 
@@ -2369,8 +2985,8 @@ msgstr "Маджонг Stage 1"
 msgid "Mahjongg Stage 2"
 msgstr "Маджонг Stage 2"
 
-msgid "Mahjongg Stairs"
-msgstr "Маджонг Ступени"
+msgid "Mahjongg Stairs 1"
+msgstr "Маджонг Ступени 1"
 
 msgid "Mahjongg Stairs 2"
 msgstr "Маджонг Ступени 2"
@@ -2394,20 +3010,26 @@ msgstr "Маджонг Стоунхендж"
 msgid "Mahjongg Sukis"
 msgstr "Маджонг Sukis"
 
-msgid "Mahjongg SunMoon"
-msgstr "Маджонг SunMoon"
+msgid "Mahjongg Sun and Moon"
+msgstr "Маджонг Солнце и Луна"
 
 msgid "Mahjongg Taipei"
 msgstr "Маджонг Тайпей"
-
-msgid "Mahjongg Temple"
-msgstr "Маджонг Храм"
 
 msgid "Mahjongg Temple 1"
 msgstr "Маджонг Храм 1"
 
 msgid "Mahjongg Temple 2"
 msgstr "Маджонг Храм 2"
+
+msgid "Mahjongg Temple 3"
+msgstr "Маджонг Храм 3"
+
+msgid "Mahjongg Temple 4"
+msgstr ""
+
+msgid "Mahjongg Teotihucan"
+msgstr ""
 
 msgid "Mahjongg The Door"
 msgstr "Маджонг Дверь"
@@ -2439,6 +3061,12 @@ msgstr "Маджонг Торнадо"
 msgid "Mahjongg Totally Random-Made"
 msgstr "Маджонг Totally Random-Made"
 
+msgid "Mahjongg Tower and Walls"
+msgstr ""
+
+msgid "Mahjongg Traditional"
+msgstr ""
+
 msgid "Mahjongg Traditional Reviewed"
 msgstr "Маджонг Traditional Reviewed"
 
@@ -2469,17 +3097,26 @@ msgstr "Маджонг Victory Arrow"
 msgid "Mahjongg Wavelets"
 msgstr "Маджонг Волны"
 
+msgid "Mahjongg Waves"
+msgstr ""
+
 msgid "Mahjongg Wedges"
 msgstr "Маджонг Клинья"
 
-msgid "Mahjongg Well"
+msgid "Mahjongg Well 1"
 msgstr "Маджонг Well"
 
-msgid "Mahjongg Well2"
-msgstr "Маджонг Well2"
+msgid "Mahjongg Well 2"
+msgstr "Маджонг Well 2"
+
+msgid "Mahjongg What a Pyramid"
+msgstr ""
 
 msgid "Mahjongg Whatever"
 msgstr "Маджонг Нечто"
+
+msgid "Mahjongg Wicker"
+msgstr ""
 
 msgid "Mahjongg Win"
 msgstr "Маджонг Win"
@@ -2493,6 +3130,9 @@ msgstr "Маджонг X-Shape"
 msgid "Mahjongg Yummy"
 msgstr "Маджонг Приятный"
 
+msgid "Mahjongg Zigzag"
+msgstr ""
+
 #, fuzzy
 msgid "Maine Coon"
 msgstr "Луна на ущербе"
@@ -2500,6 +3140,9 @@ msgstr "Луна на ущербе"
 #, fuzzy
 msgid "Makara"
 msgstr "Мария"
+
+msgid "Malmaison"
+msgstr ""
 
 msgid "Mamy Susan"
 msgstr "Мамочка Сюзи"
@@ -2509,6 +3152,9 @@ msgstr "Манчестерский"
 
 msgid "Manx"
 msgstr "Бесхвостая кошка"
+
+msgid "Marechal Saxe"
+msgstr ""
 
 msgid "Maria"
 msgstr "Мария"
@@ -2528,11 +3174,38 @@ msgstr "Марта"
 msgid "Master"
 msgstr "Мастер"
 
+msgid "Mathematics"
+msgstr ""
+
 msgid "Matriarchy"
 msgstr "Матриархат"
 
 msgid "Matrimony"
 msgstr "Супружество"
+
+msgid "Matrix 10x10"
+msgstr "Матрица 10x10"
+
+msgid "Matrix 3x3"
+msgstr "Матрица 3x3"
+
+msgid "Matrix 4x4"
+msgstr "Матрица 4x4"
+
+msgid "Matrix 5x5"
+msgstr "Матрица 5x5"
+
+msgid "Matrix 6x6"
+msgstr "Матрица 6x6"
+
+msgid "Matrix 7x7"
+msgstr "Матрица 7x7"
+
+msgid "Matrix 8x8"
+msgstr "Матрица 8x8"
+
+msgid "Matrix 9x9"
+msgstr "Матрица 9x9"
 
 msgid "MatsuKiri"
 msgstr "MatsuKiri"
@@ -2543,14 +3216,23 @@ msgstr "Строгий MatsuKiri"
 msgid "Matsya"
 msgstr "Матся"
 
+msgid "Maverick"
+msgstr ""
+
 msgid "Maya"
 msgstr "Майя"
 
 msgid "Maze"
 msgstr "Путаница"
 
+msgid "McClellan"
+msgstr ""
+
 msgid "Measure"
 msgstr "Мера"
+
+msgid "Memory 16"
+msgstr ""
 
 msgid "Memory 24"
 msgstr "Запоминание 24"
@@ -2560,6 +3242,12 @@ msgstr "Запоминание 30"
 
 msgid "Memory 40"
 msgstr "Запоминание 40"
+
+msgid "Memory 52"
+msgstr ""
+
+msgid "Memory Sequence"
+msgstr ""
 
 msgid "Merlin's Meander"
 msgstr "Орнамент Мерлина"
@@ -2585,6 +3273,9 @@ msgstr "Ячейка Миллиган"
 msgid "Milligan Harp"
 msgstr "Арфа Миллиган"
 
+msgid "Milligan Yukon"
+msgstr ""
+
 msgid "Minerva"
 msgstr "Минерва"
 
@@ -2607,6 +3298,9 @@ msgstr "Миссия невыполнима"
 msgid "Mississippi"
 msgstr "Миссисипи"
 
+msgid "Mixtures"
+msgstr ""
+
 msgid "Mod-3"
 msgstr "Mod-3"
 
@@ -2619,8 +3313,11 @@ msgstr "Монтана"
 msgid "Monte Carlo"
 msgstr "Монте-Карло"
 
-msgid "Monte Carlo (2 decks)"
+msgid "Monte Carlo (2 Decks)"
 msgstr "Монте-Карло (2 колоды)"
+
+msgid "Moojub"
+msgstr ""
 
 msgid "Moonlight"
 msgstr "Лунный свет"
@@ -2630,6 +3327,9 @@ msgid "Moosehide"
 msgstr "Джозефина"
 
 msgid "Morehead"
+msgstr ""
+
+msgid "Morphy"
 msgstr ""
 
 msgid "Moth"
@@ -2668,6 +3368,12 @@ msgstr "Мистика"
 msgid "N for Namida"
 msgstr "Маджонг N for Namida"
 
+msgid "N for Namida Traditional"
+msgstr ""
+
+msgid "Naoki Haga Traditional"
+msgstr ""
+
 msgid "Napoleon"
 msgstr "Наполеон"
 
@@ -2677,8 +3383,11 @@ msgstr "Наполеон бежит из Москвы"
 msgid "Napoleon Takes Moscow"
 msgstr "Наполеон идет на Москву"
 
-msgid "Napoleon at St.Helena"
-msgstr "Наполеон на острове св.Елена"
+msgid "Napoleon at Friedland"
+msgstr ""
+
+msgid "Napoleon at St. Helena"
+msgstr "Наполеон на острове св. Елена"
 
 msgid "Napoleon's Exile"
 msgstr "Изгнание Наполеона"
@@ -2689,6 +3398,9 @@ msgstr "Фаворит Наполеона"
 msgid "Napoleon's Flank"
 msgstr "Фланг Наполеона"
 
+msgid "Napoleon's Shoulder"
+msgstr ""
+
 msgid "Napoleon's Square"
 msgstr "Квадрат Наполеона"
 
@@ -2697,6 +3409,9 @@ msgstr "Гробница Наполеона"
 
 msgid "Narasimha"
 msgstr "Нарасимха"
+
+msgid "Narcotic"
+msgstr ""
 
 #, fuzzy
 msgid "Narpati"
@@ -2714,17 +3429,23 @@ msgstr "Иголка"
 msgid "Neighbour"
 msgstr "Соседи"
 
+msgid "Neptune"
+msgstr ""
+
 msgid "Nestor"
 msgstr "Нестор"
 
 msgid "New British Constitution"
 msgstr "Новая Британская конституция"
 
-msgid "New Layout"
-msgstr "Новый расклад"
-
 msgid "New York"
 msgstr "Нью-Йорк"
+
+msgid "Nine Across"
+msgstr ""
+
+msgid "Ninety-One"
+msgstr ""
 
 msgid "Nomad"
 msgstr "Бродяга"
@@ -2753,8 +3474,11 @@ msgstr "Номер двенадцать"
 msgid "Numerica"
 msgstr "Числовой"
 
-msgid "Numerica (2 decks)"
+msgid "Numerica (2 Decks)"
 msgstr "Числовой (2 колоды)"
+
+msgid "Obstruction"
+msgstr ""
 
 msgid "Ocean Towers"
 msgstr "Океанские башни"
@@ -2775,8 +3499,23 @@ msgstr "Одесса"
 msgid "Okie's Nitemare"
 msgstr "Маджонг Okie's Nitemare"
 
+msgid "Old Fashioned"
+msgstr ""
+
 msgid "Old Mole"
 msgstr "Старая дамба"
+
+msgid "Old Patience"
+msgstr ""
+
+msgid "One Away Three Away"
+msgstr ""
+
+msgid "One Foundation"
+msgstr ""
+
+msgid "One-Handed"
+msgstr ""
 
 msgid "One234"
 msgstr "Раз234"
@@ -2796,11 +3535,20 @@ msgstr ""
 msgid "Oonsoo Too"
 msgstr ""
 
+msgid "Open Gargantua"
+msgstr ""
+
 msgid "Open Jumbo"
 msgstr "Открытый гигант"
 
+msgid "Open Osmium"
+msgstr ""
+
 msgid "Open Peek"
 msgstr "Открытый взгляд"
+
+msgid "Open Proils"
+msgstr ""
 
 msgid "Open Sly Fox"
 msgstr "Открытая Хитрая лиса"
@@ -2817,6 +3565,15 @@ msgstr "Орбитальный"
 msgid "Order"
 msgstr "Порядок"
 
+msgid "Order of Precedence"
+msgstr ""
+
+msgid "Osmium"
+msgstr ""
+
+msgid "Osmium II"
+msgstr ""
+
 msgid "Osmosis"
 msgstr "Осмос"
 
@@ -2831,6 +3588,9 @@ msgstr "Бык"
 
 msgid "Paganini"
 msgstr "Паганини"
+
+msgid "Paganini II"
+msgstr ""
 
 #, fuzzy
 msgid "Pagat"
@@ -2863,8 +3623,14 @@ msgstr "Парижский"
 msgid "Parisienne"
 msgstr ""
 
+msgid "Park and Ride"
+msgstr ""
+
 msgid "Parliament"
 msgstr "Парламент"
+
+msgid "Partners"
+msgstr ""
 
 msgid "Pas Seul"
 msgstr "Сольный танец"
@@ -2874,6 +3640,12 @@ msgstr "Па-де-де"
 
 msgid "Patience"
 msgstr "Пасьянс"
+
+msgid "Patient Pairs"
+msgstr ""
+
+msgid "Patient Pairs (Open)"
+msgstr ""
 
 msgid "Patriarchs"
 msgstr "Патриархи"
@@ -2888,12 +3660,6 @@ msgstr "Павловния"
 msgid "Peek"
 msgstr "Взгляд"
 
-msgid "Peek II"
-msgstr "Взгляд II"
-
-msgid "Pegged"
-msgstr ""
-
 msgid "Pegged 6x6"
 msgstr ""
 
@@ -2906,10 +3672,25 @@ msgstr ""
 msgid "Pegged Cross 2"
 msgstr ""
 
+msgid "Pegged Diamond"
+msgstr ""
+
+msgid "Pegged Hexagon"
+msgstr ""
+
+msgid "Pegged Octagon"
+msgstr ""
+
+msgid "Pegged Star"
+msgstr ""
+
 msgid "Pegged Triangle 1"
 msgstr ""
 
 msgid "Pegged Triangle 2"
+msgstr ""
+
+msgid "Pelmanism"
 msgstr ""
 
 msgid "Penelope's Web"
@@ -2930,6 +3711,9 @@ msgstr "Настойчивость"
 msgid "Persian Patience"
 msgstr "Персидский пасьянс"
 
+msgid "Petal"
+msgstr ""
+
 msgid "Phalanx"
 msgstr "Фаланга"
 
@@ -2945,6 +3729,30 @@ msgstr "Феникс"
 msgid "Picture Gallery"
 msgstr "Картинная галерея"
 
+msgid "Picture Matrix 10x10"
+msgstr ""
+
+msgid "Picture Matrix 3x3"
+msgstr ""
+
+msgid "Picture Matrix 4x4"
+msgstr ""
+
+msgid "Picture Matrix 5x5"
+msgstr ""
+
+msgid "Picture Matrix 6x6"
+msgstr ""
+
+msgid "Picture Matrix 7x7"
+msgstr ""
+
+msgid "Picture Matrix 8x8"
+msgstr ""
+
+msgid "Picture Matrix 9x9"
+msgstr ""
+
 msgid "Picture Patience"
 msgstr "Картинный пасьянс"
 
@@ -2957,8 +3765,14 @@ msgstr ""
 msgid "Pine"
 msgstr "Сосна"
 
+msgid "Pirate Gold"
+msgstr ""
+
 msgid "Pitchfork"
 msgstr "Камертон"
+
+msgid "Pitt the Younger"
+msgstr ""
 
 msgid "Plait"
 msgstr "Плетёнка"
@@ -2966,11 +3780,23 @@ msgstr "Плетёнка"
 msgid "Plus Belle"
 msgstr ""
 
+msgid "Pluto"
+msgstr ""
+
 msgid "Poker Shuffle"
 msgstr "Покер с тасованием"
 
 msgid "Poker Square"
 msgstr "Покер-квадрат"
+
+msgid "Poker Square (1 Reserve)"
+msgstr ""
+
+msgid "Poker Square (2 Reserves)"
+msgstr ""
+
+msgid "Poker Square (Waste)"
+msgstr ""
 
 msgid "Ponytail"
 msgstr "Конский хвост"
@@ -2981,14 +3807,38 @@ msgstr "Портал"
 msgid "Portuguese Solitaire"
 msgstr "Португальский пасьянс"
 
+msgid "Precedence"
+msgstr ""
+
+msgid "Precedence (No King)"
+msgstr ""
+
+msgid "Preference"
+msgstr ""
+
+msgid "President's Cabinet"
+msgstr ""
+
+msgid "Pretzel"
+msgstr ""
+
+msgid "Prime Minister"
+msgstr ""
+
 msgid "Primrose"
 msgstr "Первоцвет"
 
 msgid "Princess Patience"
 msgstr "Княжеский пасьянс"
 
+msgid "Private Lane"
+msgstr ""
+
 msgid "Progression"
 msgstr "Прогресс"
+
+msgid "Propeller"
+msgstr ""
 
 msgid "Provisions"
 msgstr "Припасы"
@@ -3011,8 +3861,23 @@ msgstr "Пирамида 1"
 msgid "Pyramid 2"
 msgstr "Пирамида 2"
 
+msgid "Pyramid Clear"
+msgstr ""
+
+msgid "Pyramid Dozen"
+msgstr ""
+
 msgid "Pyramid Golf"
 msgstr "Пирамидальный Гольф"
+
+msgid "Pyramid's Stones"
+msgstr "Камни пирамид"
+
+msgid "Pyramids"
+msgstr ""
+
+msgid "Pythagor"
+msgstr ""
 
 msgid "Q.C."
 msgstr "Q.C."
@@ -3030,6 +3895,18 @@ msgstr "Четырёхугольник"
 msgid "Quadruple Alliance"
 msgstr "Четырёхсторонний альянс"
 
+msgid "Quadruple Canfield"
+msgstr ""
+
+msgid "Quadruple Klondike"
+msgstr ""
+
+msgid "Quadruple Klondike (Draw 3)"
+msgstr ""
+
+msgid "Quadruple Yukon"
+msgstr ""
+
 msgid "Quads"
 msgstr "Четвёрки"
 
@@ -3040,13 +3917,25 @@ msgstr "Четвёрки"
 msgid "Quartets"
 msgstr "Квартеты"
 
+msgid "Quasar"
+msgstr ""
+
+msgid "Quatorze"
+msgstr ""
+
 msgid "Queen Victoria"
 msgstr "Королева Виктория"
 
 msgid "Queen of Italy"
 msgstr "Королева Италии"
 
+msgid "Queen's Audience"
+msgstr ""
+
 msgid "Queenie"
+msgstr ""
+
+msgid "Queens"
 msgstr ""
 
 msgid "Queensland"
@@ -3058,11 +3947,17 @@ msgstr "Одеяло"
 msgid "Rachel"
 msgstr "Рашель"
 
+msgid "Racing Aces"
+msgstr ""
+
 msgid "Raglan"
 msgstr "Реглан"
 
 msgid "Rainbow"
 msgstr "Радуга"
+
+msgid "Rainbow Fan"
+msgstr ""
 
 msgid "Rainfall"
 msgstr "Ливень"
@@ -3100,8 +3995,14 @@ msgstr "Красное и Чёрное"
 msgid "Regal Family"
 msgstr "Царская семья"
 
+msgid "Regiment"
+msgstr ""
+
 msgid "Reindeer"
 msgstr "Северный олень"
+
+msgid "Reinforcements"
+msgstr ""
 
 msgid "Relax"
 msgstr "Смягчённый"
@@ -3110,14 +4011,26 @@ msgstr "Смягчённый"
 msgid "Relaxed Accordion"
 msgstr "Аккордеон"
 
+msgid "Relaxed Clock"
+msgstr ""
+
+msgid "Relaxed Exit"
+msgstr ""
+
 msgid "Relaxed FreeCell"
 msgstr "Смягчённая Свободная ячейка"
 
 msgid "Relaxed Golf"
 msgstr "Смягчённый Гольф"
 
+msgid "Relaxed PileOn"
+msgstr ""
+
 msgid "Relaxed Pyramid"
 msgstr "Смягчённая Пирамида"
+
+msgid "Relaxed Raglan"
+msgstr ""
 
 msgid "Relaxed Seahaven Towers"
 msgstr "Смягчённые Приморские башни"
@@ -3129,6 +4042,9 @@ msgstr "Смягчённый Паук"
 msgid "Relaxed Three Fir-trees"
 msgstr "Три елки"
 
+msgid "Reno"
+msgstr ""
+
 msgid "Repair"
 msgstr "Ремонт"
 
@@ -3137,6 +4053,12 @@ msgstr "Резервные ячейки"
 
 msgid "Retinue"
 msgstr "Свита"
+
+msgid "Retinue of Kings"
+msgstr ""
+
+msgid "Ricochet"
+msgstr ""
 
 msgid "Right Triangle"
 msgstr "Правый треугольник"
@@ -3156,6 +4078,9 @@ msgstr "Риттенхаус"
 msgid "River Bridge"
 msgstr "Мост через реку"
 
+msgid "Roaming Proils"
+msgstr ""
+
 msgid "Robert"
 msgstr "Роберт"
 
@@ -3165,11 +4090,17 @@ msgstr "Робин"
 msgid "Rocket"
 msgstr "Ракета"
 
+msgid "Roll Call"
+msgstr ""
+
 msgid "Roman Arena"
 msgstr "Римская арена"
 
 msgid "Roosevelt"
 msgstr "Рузвельт"
+
+msgid "Roosevelt at San Juan"
+msgstr ""
 
 msgid "Roost"
 msgstr "Насест"
@@ -3177,18 +4108,36 @@ msgstr "Насест"
 msgid "Rooster"
 msgstr "Петух"
 
+msgid "Rosamund"
+msgstr ""
+
+msgid "Rosamund's Bower"
+msgstr ""
+
 #, fuzzy
 msgid "Roslin"
 msgstr "Робин"
 
+msgid "Roslyn"
+msgstr ""
+
 msgid "Rouge et Noir"
 msgstr "Rouge et Noir"
+
+msgid "Round Dozen"
+msgstr ""
+
+msgid "Rows"
+msgstr ""
 
 msgid "Rows of Four"
 msgstr "Четыре в ряд"
 
 msgid "Royal Aids"
 msgstr "Королевская помощь"
+
+msgid "Royal Appointment"
+msgstr ""
 
 msgid "Royal Cotillion"
 msgstr "Королевский котильон"
@@ -3207,6 +4156,9 @@ msgstr "Королевский парад"
 
 msgid "Royal Rendezvous"
 msgstr "Королевское рандеву"
+
+msgid "Royal Secrets"
+msgstr ""
 
 msgid "Rugby"
 msgstr "Регби"
@@ -3235,6 +4187,42 @@ msgstr "S-пасьянс"
 msgid "Salic Law"
 msgstr "Салический закон"
 
+msgid "Samegame 3 Colors 15x10"
+msgstr ""
+
+msgid "Samegame 3 Colors 20x10"
+msgstr ""
+
+msgid "Samegame 3 Colors 25x15"
+msgstr ""
+
+msgid "Samegame 4 Colors 15x10"
+msgstr ""
+
+msgid "Samegame 4 Colors 20x10"
+msgstr ""
+
+msgid "Samegame 4 Colors 25x15"
+msgstr ""
+
+msgid "Samegame 5 Colors 15x10"
+msgstr ""
+
+msgid "Samegame 5 Colors 20x10"
+msgstr ""
+
+msgid "Samegame 5 Colors 25x15"
+msgstr ""
+
+msgid "Samegame 6 Colors 15x10"
+msgstr ""
+
+msgid "Samegame 6 Colors 20x10"
+msgstr ""
+
+msgid "Samegame 6 Colors 25x15"
+msgstr ""
+
 msgid "Samuri"
 msgstr "Самурай"
 
@@ -3246,6 +4234,9 @@ msgstr "Санибел"
 
 msgid "Saratoga"
 msgstr "Саратога"
+
+msgid "Sarlacc"
+msgstr ""
 
 msgid "Saxony"
 msgstr "Саксония"
@@ -3273,6 +4264,9 @@ msgstr "Скорпион II"
 
 msgid "Scorpion Tail"
 msgstr "Хвост скорпиона"
+
+msgid "Scorpion Towers"
+msgstr ""
 
 msgid "Scotch Patience"
 msgstr "Шотландский пасьянс"
@@ -3313,14 +4307,23 @@ msgstr "Семь чертей"
 msgid "Seven Pyramids"
 msgstr "Семь пирамид"
 
+msgid "Seven Up"
+msgstr ""
+
 msgid "Seven by Five"
 msgstr "Семь по пять"
 
 msgid "Seven by Four"
 msgstr "Семь по четыре"
 
+msgid "Seventh Wonder"
+msgstr ""
+
 msgid "Shady Lanes"
 msgstr "Тенистые аллеи"
+
+msgid "Sham Battle"
+msgstr ""
 
 msgid "Shamrocks"
 msgstr "Трилистники"
@@ -3371,6 +4374,9 @@ msgstr "Сиам"
 msgid "Sieben bis As"
 msgstr "Sieben bis As"
 
+msgid "Siegecraft"
+msgstr ""
+
 msgid "Signora"
 msgstr "Синьора"
 
@@ -3386,6 +4392,12 @@ msgstr "Простые пары"
 msgid "Simple Simon"
 msgstr "Симон-простофиля"
 
+msgid "Simple Spark"
+msgstr ""
+
+msgid "Simple Tens"
+msgstr ""
+
 msgid "Simplex"
 msgstr "Симплекс"
 
@@ -3394,6 +4406,9 @@ msgstr "Простота"
 
 msgid "Single Rail"
 msgstr "Одинарные рельсы"
+
+msgid "Single Spark"
+msgstr ""
 
 msgid "Sir Tommy"
 msgstr "Сэр Томми"
@@ -3405,8 +4420,14 @@ msgstr "Шесть мудрецов"
 msgid "Six Tengus"
 msgstr "Шесть мудрецов"
 
+msgid "Six by Six"
+msgstr ""
+
 msgid "Sixes and Sevens"
 msgstr "Шестёрки и семёрки"
+
+msgid "Sixty Thieves"
+msgstr ""
 
 msgid "Skippy"
 msgstr "Попрыгунчик"
@@ -3417,14 +4438,23 @@ msgstr ""
 msgid "Sly Fox"
 msgstr "Хитрая лиса"
 
+msgid "Small Backbone"
+msgstr ""
+
 msgid "Small Harp"
 msgstr "Малая арфа"
 
 msgid "Small PileOn"
 msgstr ""
 
+msgid "Small Triangle"
+msgstr ""
+
 msgid "Smile"
 msgstr "Улыбка"
+
+msgid "Smokey"
+msgstr ""
 
 msgid "Snake"
 msgstr "Хвост"
@@ -3473,13 +4503,13 @@ msgstr "Сфера"
 msgid "Spider"
 msgstr "Паук"
 
-msgid "Spider (1 suit)"
+msgid "Spider (1 Suit)"
 msgstr "Паук (1 масть)"
 
-msgid "Spider (2 suits)"
+msgid "Spider (2 Suits)"
 msgstr "Паук (2 масти)"
 
-msgid "Spider (4 decks)"
+msgid "Spider (4 Decks)"
 msgstr "Паук (4 колоды)"
 
 msgid "Spider 3x3"
@@ -3526,8 +4556,8 @@ msgstr "Звёздные врата"
 msgid "Stage 2"
 msgstr "Ступени 2"
 
-msgid "Stairs"
-msgstr "Ступени"
+msgid "Stairs 1"
+msgstr "Ступени 1"
 
 msgid "Stairs 2"
 msgstr "Ступени 2"
@@ -3544,6 +4574,12 @@ msgstr "Космический корабль"
 msgid "Stargate"
 msgstr "Звёздные врата"
 
+msgid "Station"
+msgstr ""
+
+msgid "Steel Wheels"
+msgstr ""
+
 #, fuzzy
 msgid "Step-Up"
 msgstr "Шаги"
@@ -3557,6 +4593,12 @@ msgstr "Семь пирамид"
 
 msgid "Steve"
 msgstr "Стив"
+
+msgid "Stewart"
+msgstr ""
+
+msgid "Sticko"
+msgstr ""
 
 msgid "Stonehenge"
 msgstr "Стоунхендж"
@@ -3589,14 +4631,23 @@ msgstr "Улицы"
 msgid "Streets and Alleys"
 msgstr "Улицы и аллеи"
 
+msgid "Strip"
+msgstr ""
+
 msgid "Striptease"
 msgstr "Стриптиз"
 
 msgid "Stronghold"
 msgstr "Твердыня"
 
+msgid "Succession"
+msgstr ""
+
 msgid "Suit Elevens"
 msgstr "Одиннадцать в масть"
+
+msgid "Suits Up"
+msgstr ""
 
 msgid "Sukis"
 msgstr ""
@@ -3613,8 +4664,11 @@ msgstr "Турецкий султан"
 msgid "Sumo"
 msgstr "Сумо"
 
-msgid "SunMoon"
-msgstr "СолнцеЛуна"
+msgid "Sun and Moon"
+msgstr "Солнце и Луна"
+
+msgid "Sundial"
+msgstr ""
 
 msgid "Super Challenge FreeCell"
 msgstr "Очень Сложная Свободная ячейка"
@@ -3637,6 +4691,9 @@ msgstr ""
 msgid "Sweet Sixteen"
 msgstr "Приятные шестнадцать"
 
+msgid "Swiss Patience"
+msgstr ""
+
 msgid "Tabby Cat"
 msgstr "Полосатая кошка"
 
@@ -3646,14 +4703,26 @@ msgstr "Тайпей"
 msgid "Take Away"
 msgstr "Удаление"
 
+msgid "Take Away 8"
+msgstr ""
+
+msgid "Take Fourteen"
+msgstr ""
+
+msgid "Take Ten"
+msgstr ""
+
+msgid "Taking Silk"
+msgstr ""
+
 msgid "Tam O'Shanter"
 msgstr "Там О'Шантер"
 
 msgid "Tarantula"
 msgstr "Тарантул"
 
-msgid "Temple"
-msgstr "Храм"
+msgid "Tasmanian Patience"
+msgstr ""
 
 msgid "Temple 1"
 msgstr "Храм 1"
@@ -3661,17 +4730,35 @@ msgstr "Храм 1"
 msgid "Temple 2"
 msgstr "Храм 2"
 
+msgid "Temple 3"
+msgstr "Храм 3"
+
+msgid "Temple 4"
+msgstr ""
+
 msgid "Ten Across"
 msgstr "Десять в ширину"
 
 msgid "Ten Avatars"
 msgstr "Десять аватар"
 
+msgid "Ten Twenty Thirty"
+msgstr ""
+
 msgid "Ten by One"
 msgstr "Десять по одному"
 
+msgid "Tens"
+msgstr ""
+
+msgid "Teotihucan"
+msgstr ""
+
 msgid "Terrace"
 msgstr "Терраса"
+
+msgid "The Bogey"
+msgstr ""
 
 msgid "The Bouquet"
 msgstr "Букет"
@@ -3703,8 +4790,20 @@ msgstr "Последний Монарх II"
 msgid "The Little Corporal"
 msgstr "Маленький Капрал"
 
+msgid "The Lucky Number"
+msgstr ""
+
+msgid "The Magic Seven"
+msgstr ""
+
+msgid "The Plot"
+msgstr ""
+
 msgid "The Red and the Black"
 msgstr "Красное и Чёрное II"
+
+msgid "The Reserve"
+msgstr ""
 
 msgid "The Spark"
 msgstr "Вспышка"
@@ -3712,14 +4811,20 @@ msgstr "Вспышка"
 msgid "The Wish"
 msgstr "Желание"
 
-msgid "The Wish (open)"
+msgid "The Wish (Open)"
 msgstr "Желание (открытое)"
 
 msgid "Theater"
 msgstr "Театр"
 
+msgid "Thieves"
+msgstr ""
+
 msgid "Thieves of Egypt"
 msgstr "Египетский вор"
+
+msgid "Thirteen Down"
+msgstr ""
 
 #, fuzzy
 msgid "Thirteen Packs"
@@ -3734,14 +4839,26 @@ msgstr "По тринадцать"
 msgid "Thirty"
 msgstr "Тридцать"
 
-msgid "Thirty Six"
+msgid "Thirty-Nine Steps"
+msgstr ""
+
+msgid "Thirty-Six"
 msgstr "Тридцать шесть"
 
-msgid "Thirty Two Cards"
+msgid "Thirty-Six Card Tableau"
+msgstr ""
+
+msgid "Thirty-Two Cards"
 msgstr "Тридцать две карты"
+
+msgid "Thoughtful"
+msgstr ""
 
 msgid "Three Blind Mice"
 msgstr "Три слепые мышки"
+
+msgid "Three Card Fan"
+msgstr ""
 
 msgid "Three Fir-trees"
 msgstr "Три елки"
@@ -3749,13 +4866,22 @@ msgstr "Три елки"
 msgid "Three Peaks"
 msgstr "Три вершины"
 
-msgid "Three Peaks Non-scoring"
-msgstr "Три вершины без подсчёта очков"
+msgid "Three Peaks (Open)"
+msgstr ""
+
+msgid "Three Peaks (Scored)"
+msgstr ""
+
+msgid "Three Peaks (Scored/Open)"
+msgstr ""
 
 msgid "Three Pirates"
 msgstr "Три пирата"
 
 msgid "Three Shuffles and a Draw"
+msgstr ""
+
+msgid "Three Up"
 msgstr ""
 
 msgid "Thumb and Pouch"
@@ -3767,6 +4893,30 @@ msgstr "Тигр"
 #, fuzzy
 msgid "Tile Fighter"
 msgstr "Маджонг Tile Fighter"
+
+msgid "Tile Puzzle 10x10"
+msgstr ""
+
+msgid "Tile Puzzle 3x3"
+msgstr ""
+
+msgid "Tile Puzzle 4x4"
+msgstr ""
+
+msgid "Tile Puzzle 5x5"
+msgstr ""
+
+msgid "Tile Puzzle 6x6"
+msgstr ""
+
+msgid "Tile Puzzle 7x7"
+msgstr ""
+
+msgid "Tile Puzzle 8x8"
+msgstr ""
+
+msgid "Tile Puzzle 9x9"
+msgstr ""
 
 #, fuzzy
 msgid "Tilepiles"
@@ -3782,6 +4932,9 @@ msgstr "Тайпей"
 
 msgid "Toad"
 msgstr "Жаба"
+
+msgid "Toad in the Hole"
+msgstr ""
 
 msgid "Tomb"
 msgstr "Гробница"
@@ -3802,14 +4955,26 @@ msgstr "Маджонг Totally Random-Made"
 msgid "Tournament"
 msgstr "Турнир"
 
+msgid "Tours du Alice"
+msgstr ""
+
+msgid "Tower and Walls"
+msgstr ""
+
 msgid "Tower of Babel"
 msgstr "Вавилонская башня"
+
+msgid "Tower of Hanoi"
+msgstr ""
 
 msgid "Tower of Hanoy"
 msgstr "Ханойская башня"
 
 msgid "Towers"
 msgstr "Башни"
+
+msgid "Traditional"
+msgstr ""
 
 #, fuzzy
 msgid "Traditional Reviewed"
@@ -3823,6 +4988,9 @@ msgstr "Люк Паука"
 
 msgid "Travellers"
 msgstr "Путешественники"
+
+msgid "Treasure Hunt"
+msgstr ""
 
 msgid "Treasure Trove"
 msgstr "Клад"
@@ -3840,6 +5008,9 @@ msgstr "Три вершины"
 msgid "Triangle"
 msgstr "Треугольник"
 
+msgid "Trigon"
+msgstr ""
+
 msgid "Trika"
 msgstr ""
 
@@ -3848,6 +5019,9 @@ msgstr "Триллиум"
 
 msgid "Triple Alliance"
 msgstr "Тройной альянс"
+
+msgid "Triple Alliance (2 Decks)"
+msgstr ""
 
 msgid "Triple Canfield"
 msgstr "Тройной Кенфилд"
@@ -3864,11 +5038,14 @@ msgstr "Тройная Перестановка"
 msgid "Triple Klondike"
 msgstr "Тройной Клондайк"
 
-msgid "Triple Klondike by Threes"
-msgstr "Тройной Клондайк по три"
+msgid "Triple Klondike (Draw 3)"
+msgstr ""
 
 msgid "Triple Line"
 msgstr "Тройная линия"
+
+msgid "Triple Rail"
+msgstr ""
 
 msgid "Triple Russian Solitaire"
 msgstr "Тройной Русский солитер"
@@ -3879,17 +5056,32 @@ msgstr "Тройной Скорпион"
 msgid "Triple Yukon"
 msgstr "Тройной Юкон"
 
+msgid "Triplets"
+msgstr ""
+
 msgid "Troika"
 msgstr "Тройка"
+
+msgid "Trumps Row"
+msgstr ""
 
 msgid "Trusty Twelve"
 msgstr "Верные двенадцать"
 
+msgid "Try Again"
+msgstr ""
+
 msgid "Turncoats"
 msgstr "Перебежчики"
 
+msgid "Tut's Tomb"
+msgstr ""
+
 msgid "Tuxedo"
 msgstr "Смокинг"
+
+msgid "Tvete's Grandfather"
+msgstr ""
 
 msgid "Twelve Sleeping Maids"
 msgstr "Двенадцать спящих дев"
@@ -3928,8 +5120,20 @@ msgstr "Два кольца"
 msgid "Two Squares"
 msgstr "Два квадрата"
 
+msgid "Twos"
+msgstr ""
+
+msgid "Uintah"
+msgstr ""
+
 msgid "Ukrainian Solitaire"
 msgstr "Украинский пасьянс"
+
+msgid "Uncle Walter's"
+msgstr ""
+
+msgid "Under Siege"
+msgstr ""
 
 msgid "Union Square"
 msgstr "Объединённый квадрата"
@@ -3937,10 +5141,19 @@ msgstr "Объединённый квадрата"
 msgid "Unlimited"
 msgstr "Неограниченный"
 
+msgid "Unusual"
+msgstr ""
+
 msgid "Up and Down"
 msgstr "Вверх и вниз"
 
+msgid "Up and Up"
+msgstr ""
+
 msgid "Usk"
+msgstr ""
+
+msgid "Vacancies"
 msgstr ""
 
 #, fuzzy
@@ -3951,6 +5164,9 @@ msgid "Vagues"
 msgstr "Смутный"
 
 msgid "Vajra"
+msgstr ""
+
+msgid "Valentine"
 msgstr ""
 
 msgid "Vamana"
@@ -3985,18 +5201,27 @@ msgstr ""
 msgid "Victory Arrow"
 msgstr "Маджонг Victory Arrow"
 
+msgid "Vincent"
+msgstr ""
+
+msgid "Vineyard"
+msgstr ""
+
 msgid "Virginia Reel"
 msgstr "Виргинский Рил"
 
 msgid "Voracious"
 msgstr "Ненасытный"
 
+msgid "Wading Pool"
+msgstr ""
+
 #, fuzzy
 msgid "Wake-Robin"
 msgstr "Робин"
 
 #, fuzzy
-msgid "Wake-Robin (3 decks)"
+msgid "Wake-Robin (3 Decks)"
 msgstr "Церлин (3 колоды)"
 
 msgid "Wall"
@@ -4014,6 +5239,9 @@ msgstr "Фаворит Вашингтона"
 msgid "Wasp"
 msgstr "Оса"
 
+msgid "Watch"
+msgstr ""
+
 msgid "Waterfall"
 msgstr "Водопад"
 
@@ -4029,6 +5257,12 @@ msgstr "Волновое движение"
 msgid "Wavelets"
 msgstr "Волны"
 
+msgid "Waves"
+msgstr ""
+
+msgid "Weavers"
+msgstr ""
+
 msgid "Weddings"
 msgstr "Свадьбы"
 
@@ -4038,14 +5272,20 @@ msgstr "Клинья"
 msgid "Well"
 msgstr "Колодец"
 
+msgid "Well 1"
+msgstr ""
+
 #, fuzzy
-msgid "Well2"
+msgid "Well 2"
 msgstr "Стена"
 
 msgid "Westcliff"
 msgstr ""
 
 msgid "Westhaven"
+msgstr ""
+
+msgid "What a Pyramid"
 msgstr ""
 
 msgid "Whatever"
@@ -4066,6 +5306,15 @@ msgstr "Уайтхорс"
 msgid "Wicked"
 msgstr "Злой"
 
+msgid "Wicker"
+msgstr ""
+
+msgid "Wildcards"
+msgstr ""
+
+msgid "Wildflower"
+msgstr ""
+
 msgid "Will o' the Wisp"
 msgstr ""
 
@@ -4078,6 +5327,9 @@ msgstr "Ветряная мельница"
 msgid "Wisteria"
 msgstr "Глициния"
 
+msgid "Wolfpack"
+msgstr ""
+
 msgid "Wood"
 msgstr "Дерево"
 
@@ -4089,11 +5341,29 @@ msgstr "Маджонг X-Files"
 msgid "X-Shape"
 msgstr "Маджонг X-Shape"
 
+msgid "Yeast Dough"
+msgstr ""
+
+msgid "Yield"
+msgstr ""
+
 msgid "York"
 msgstr "Йорк"
 
 msgid "Yukon"
 msgstr "Юкон"
+
+msgid "Yukon Cells"
+msgstr ""
+
+msgid "Yukon Kings"
+msgstr ""
+
+msgid "Yukon Nouveau"
+msgstr ""
+
+msgid "Yukonic Plague"
+msgstr ""
 
 msgid "Yummy"
 msgstr "Приятный"
@@ -4104,11 +5374,14 @@ msgstr "Зебра"
 msgid "Zerline"
 msgstr "Церлин"
 
-msgid "Zerline (3 decks)"
+msgid "Zerline (3 Decks)"
 msgstr "Церлин (3 колоды)"
 
 msgid "Zeus"
 msgstr "Зевс"
+
+msgid "Zigzag"
+msgstr ""
 
 msgid "Zigzag Course"
 msgstr "Зигзагообразный курс"
@@ -4155,19 +5428,19 @@ msgstr ""
 "Введите номер новой игры"
 
 #: pysollib/actions.py:293 pysollib/app.py:524 pysollib/app.py:818
-#: pysollib/game/__init__.py:1317 pysollib/game/__init__.py:2538
+#: pysollib/game/__init__.py:1341 pysollib/game/__init__.py:2562
 #: pysollib/kivy/tkhtml.py:691 pysollib/kivy/tkstats.py:254
 #: pysollib/kivy/tkwidget.py:97 pysollib/pysolgtk/playeroptionsdialog.py:79
 #: pysollib/pysolgtk/selecttile.py:158 pysollib/pysolgtk/tkhtml.py:542
 #: pysollib/pysolgtk/tkstats.py:557 pysollib/pysolgtk/tkwidget.py:151
 #: pysollib/tile/fontsdialog.py:140 pysollib/tile/fontsdialog.py:202
-#: pysollib/tile/menubar.py:111 pysollib/tile/playeroptionsdialog.py:89
+#: pysollib/tile/menubar.py:112 pysollib/tile/playeroptionsdialog.py:89
 #: pysollib/tile/selectcardset.py:321 pysollib/tile/selectcardset.py:545
 #: pysollib/tile/selecttile.py:154 pysollib/tile/soundoptionsdialog.py:149
 #: pysollib/tile/soundoptionsdialog.py:188 pysollib/tile/timeoutsdialog.py:92
 #: pysollib/tile/tkstats.py:101 pysollib/tile/tkstats.py:541
 #: pysollib/tile/tkstats.py:646 pysollib/tile/tkstats.py:727
-#: pysollib/tile/tkwidget.py:138 pysollib/tile/tkwidget.py:359
+#: pysollib/tile/tkwidget.py:137 pysollib/tile/tkwidget.py:358
 #: pysollib/tile/wizarddialog.py:143 pysollib/tk/fontsdialog.py:134
 #: pysollib/tk/fontsdialog.py:200 pysollib/tk/playeroptionsdialog.py:64
 #: pysollib/tk/playeroptionsdialog.py:138 pysollib/tk/selectcardset.py:313
@@ -4189,9 +5462,9 @@ msgstr "&ОК"
 msgid "&Next number"
 msgstr "&Следующий номер"
 
-#: pysollib/actions.py:293 pysollib/app.py:525 pysollib/game/__init__.py:1317
-#: pysollib/game/__init__.py:1991 pysollib/game/__init__.py:2007
-#: pysollib/game/__init__.py:2015 pysollib/game/__init__.py:2022
+#: pysollib/actions.py:293 pysollib/app.py:525 pysollib/game/__init__.py:1341
+#: pysollib/game/__init__.py:2015 pysollib/game/__init__.py:2031
+#: pysollib/game/__init__.py:2039 pysollib/game/__init__.py:2046
 #: pysollib/kivy/menubar.py:2110 pysollib/kivy/menubar.py:2113
 #: pysollib/kivy/selectcardset.py:57
 #: pysollib/pysolgtk/playeroptionsdialog.py:79
@@ -4199,9 +5472,9 @@ msgstr "&Следующий номер"
 #: pysollib/pysolgtk/selecttile.py:158 pysollib/tile/fontsdialog.py:140
 #: pysollib/tile/fontsdialog.py:202 pysollib/tile/playeroptionsdialog.py:89
 #: pysollib/tile/selectcardset.py:321 pysollib/tile/selectcardset.py:543
-#: pysollib/tile/selectgame.py:306 pysollib/tile/selectgame.py:436
+#: pysollib/tile/selectgame.py:306 pysollib/tile/selectgame.py:437
 #: pysollib/tile/selecttile.py:154 pysollib/tile/soundoptionsdialog.py:149
-#: pysollib/tile/timeoutsdialog.py:92 pysollib/tile/tkwidget.py:359
+#: pysollib/tile/timeoutsdialog.py:92 pysollib/tile/tkwidget.py:358
 #: pysollib/tile/wizarddialog.py:143 pysollib/tk/fontsdialog.py:134
 #: pysollib/tk/fontsdialog.py:200 pysollib/tk/menubar.py:89
 #: pysollib/tk/menubar.py:90 pysollib/tk/playeroptionsdialog.py:64
@@ -4300,70 +5573,70 @@ msgstr ""
 "\n"
 "%(filename)s"
 
-#: pysollib/actions.py:581
+#: pysollib/actions.py:585
 #, fuzzy, python-format
 msgid "%(app)s Demo Statistics for %(game)s"
 msgstr "Статистика игры %(game)s"
 
-#: pysollib/actions.py:582
+#: pysollib/actions.py:586
 #, python-format
 msgid "Statistics for %(game)s"
 msgstr "Статистика игры %(game)s"
 
-#: pysollib/actions.py:587
+#: pysollib/actions.py:591
 #, fuzzy, python-format
 msgid "%(app)s Demo Statistics"
 msgstr "Статистика демо"
 
-#: pysollib/actions.py:588 pysollib/stats.py:202
+#: pysollib/actions.py:592 pysollib/stats.py:202
 #, fuzzy, python-format
 msgid "Statistics for %(player)s"
 msgstr "Статистика игры %(game)s"
 
-#: pysollib/actions.py:592
+#: pysollib/actions.py:596
 #, fuzzy, python-format
 msgid "%(app)s Demo Full log"
 msgstr "Д&емо лого"
 
-#: pysollib/actions.py:593 pysollib/stats.py:235
+#: pysollib/actions.py:597 pysollib/stats.py:235
 #, python-format
 msgid "Full log for %(player)s"
 msgstr "Полный лог для %(player)s"
 
-#: pysollib/actions.py:596
+#: pysollib/actions.py:600
 #, fuzzy, python-format
 msgid "%(app)s Demo Session log"
 msgstr "Лог сессии"
 
-#: pysollib/actions.py:597 pysollib/stats.py:242
+#: pysollib/actions.py:601 pysollib/stats.py:242
 #, python-format
 msgid "Session log for %(player)s"
 msgstr "Лог сессии для %(player)s"
 
 #. TRANSLATORS: eg. top 10 or top 5 results for a certain game
-#: pysollib/actions.py:601
+#: pysollib/actions.py:605
 #, fuzzy, python-format
 msgid "%(app)s Demo Top %(tops)d for %(game)s"
 msgstr "Статистика игры %(game)s"
 
-#: pysollib/actions.py:602
+#: pysollib/actions.py:606
 #, python-format
 msgid "Top %(tops)d for %(game)s"
 msgstr ""
 
-#: pysollib/actions.py:606
+#: pysollib/actions.py:610
 msgid "Game Info"
 msgstr "Информация об игре"
 
-#: pysollib/actions.py:609
+#: pysollib/actions.py:613
 msgid "Statistics progression"
 msgstr "Прогресс статистики"
 
-#: pysollib/actions.py:627
+#: pysollib/actions.py:631
 msgid "Reset all statistics"
 msgstr "Очистить всю статистику"
 
-#: pysollib/actions.py:628
+#: pysollib/actions.py:632
 #, python-format
 msgid ""
 "Reset ALL statistics and logs for player\n"
@@ -4372,11 +5645,11 @@ msgstr ""
 "Очистить всю статистику и лог для игрока\n"
 "%(player)s?"
 
-#: pysollib/actions.py:638
+#: pysollib/actions.py:642
 msgid "Reset game statistics"
 msgstr "Очистить статистику игры"
 
-#: pysollib/actions.py:639
+#: pysollib/actions.py:643
 #, python-format
 msgid ""
 "Reset statistics and logs for player\n"
@@ -4389,23 +5662,23 @@ msgstr ""
 "и игры\n"
 "%(game)s?"
 
-#: pysollib/actions.py:704
+#: pysollib/actions.py:711
 msgid "Play demo"
 msgstr "Показать демо"
 
-#: pysollib/actions.py:716
+#: pysollib/actions.py:723
 msgid "Set player options"
 msgstr "Установить настройки игрока"
 
-#: pysollib/actions.py:732 data/pysolfc.glade:1986
+#: pysollib/actions.py:739 data/pysolfc.glade:1986
 msgid "Set colors"
 msgstr "Настроить цвета"
 
-#: pysollib/actions.py:750
+#: pysollib/actions.py:757
 msgid "Set fonts"
 msgstr "Настроить шрифт"
 
-#: pysollib/actions.py:760 data/pysolfc.glade:1493
+#: pysollib/actions.py:767 data/pysolfc.glade:1493
 msgid "Set timeouts"
 msgstr "Настроить таймауты"
 
@@ -4414,11 +5687,14 @@ msgstr "Настроить таймауты"
 msgid "can't find game: %(game)s"
 msgstr ""
 
-#: pysollib/app.py:526 pysollib/game/__init__.py:1991
-#: pysollib/game/__init__.py:2007 pysollib/game/__init__.py:2015
-#: pysollib/game/__init__.py:2022 pysollib/ui/tktile/menubar.py:300
+#: pysollib/app.py:526 pysollib/game/__init__.py:2015
+#: pysollib/game/__init__.py:2031 pysollib/game/__init__.py:2039
+#: pysollib/game/__init__.py:2046 pysollib/ui/tktile/menubar.py:300
 msgid "&New game"
 msgstr "&Новая игра"
+
+msgid "&Back to game"
+msgstr ""
 
 #: pysollib/app.py:672
 #, fuzzy, python-format
@@ -4489,6 +5765,37 @@ msgstr "Игры с тремя колодами"
 msgid "Four-Deck games"
 msgstr "Игры с четырьмя колодами"
 
+msgid "Cribbage"
+msgstr ""
+
+msgid "Lights Out"
+msgstr ""
+
+#: pysollib/resource.py:236
+msgid "Matrix"
+msgstr "Мозаика"
+
+msgid "Memory"
+msgstr ""
+
+msgid "Pegged"
+msgstr ""
+
+msgid "Poker"
+msgstr ""
+
+msgid "Puzzle"
+msgstr ""
+
+msgid "Samegame"
+msgstr ""
+
+msgid "Shisen-Sho"
+msgstr ""
+
+msgid "Custom"
+msgstr ""
+
 #: pysollib/gamedb.py:142
 msgid "Baker's Dozen type"
 msgstr "Игры типа Чёртова Дюжина (Baker's Dozen)"
@@ -4541,6 +5848,9 @@ msgstr "Игры числового типа (Numerica)"
 msgid "Pairing type"
 msgstr "Парные игры"
 
+msgid "Picture Gallery type"
+msgstr ""
+
 #: pysollib/gamedb.py:164
 msgid "Raglan type"
 msgstr "Игры типа Реглан (Raglan)"
@@ -4590,7 +5900,9 @@ msgid "Navagraha Ganjifa type"
 msgstr "Игры типа Наваграха Ганджифа"
 
 #: pysollib/gamedb.py:231
-msgid "Shisen-Sho"
+#, fuzzy
+#| msgid "Shisen-Sho"
+msgid "Shisen-Sho type"
 msgstr "Шисен-Сё"
 
 #: pysollib/gamedb.py:234
@@ -4609,6 +5921,24 @@ msgstr "Покер"
 msgid "Puzzle type"
 msgstr "Пазлы"
 
+msgid "Cribbage type"
+msgstr ""
+
+msgid "Lights Out type"
+msgstr ""
+
+msgid "Pegged type"
+msgstr ""
+
+msgid "Tower of Hanoi type"
+msgstr ""
+
+msgid "Ishido type"
+msgstr ""
+
+msgid "Samegame type"
+msgstr ""
+
 #: pysollib/help.py:43
 msgid "A Python Solitaire Game Collection"
 msgstr "Коллекция питоновских пасьянсов"
@@ -4622,12 +5952,15 @@ msgid "&Nice"
 msgstr "&Отлично"
 
 #: pysollib/help.py:46
-msgid "&Credits..."
-msgstr "&Благодарности..."
+msgid "&Credits"
+msgstr "&Благодарности"
 
 #: pysollib/help.py:48
 msgid "&Enjoy"
 msgstr "&Наслаждайтесь"
+
+msgid "Show this on startup"
+msgstr ""
 
 #: pysollib/help.py:49
 #, python-format
@@ -4649,6 +5982,7 @@ msgid ""
 "Copyright (C) 1998 - 2003 Markus F.X.J. Oberhumer.\n"
 "Copyright (C) 2003 Mt. Hood Playing Card Co.\n"
 "Copyright (C) 2005 - 2009 Skomoroh.\n"
+"Copyright (C) 2020 - 2024 PySolFC.\n"
 "All Rights Reserved.\n"
 "\n"
 "PySol is free software distributed under the terms\n"
@@ -4663,6 +5997,7 @@ msgstr ""
 "Copyright (C) 1998 - 2003 Markus F.X.J. Oberhumer.\n"
 "Copyright (C) 2003 Mt. Hood Playing Card Co.\n"
 "Copyright (C) 2005 - 2009 Skomoroh.\n"
+"Copyright (C) 2020 - 2024 PySolFC.\n"
 "All Rights Reserved.\n"
 "\n"
 "PySol свободное программное обеспечение,\n"
@@ -4731,6 +6066,12 @@ msgstr ""
 "%(dir)s\n"
 "\n"
 "Пожалуйста проверьте установку %(app)s.\n"
+
+msgid "PySol cannot find cardsets of the following types:"
+msgstr ""
+
+msgid "\\"
+msgstr ""
 
 #: pysollib/main.py:66 pysollib/main.py:78 pysollib/main.py:313
 #: pysollib/ui/tktile/menubar.py:346
@@ -4832,13 +6173,22 @@ msgstr ""
 "\n"
 "Пожалуйста проверьте установку %(app)s.\n"
 
+#, python-format
+msgid ""
+"\n"
+"The cardset \"%(cs)s\" was not found.\n"
+"\n"
+"Please ensure that this cardset has been installed, and that your\n"
+"Cardsets package is up to date.\n"
+msgstr ""
+
 #: pysollib/options.py:270
 msgid "Unknown"
 msgstr "Неизвестный"
 
 #: pysollib/resource.py:182
-msgid "French type (52 cards)"
-msgstr "Классические (52 карты)"
+msgid "French type (52-54 cards)"
+msgstr "Классические (52-54 карты)"
 
 #: pysollib/resource.py:183
 msgid "Hanafuda type (48 cards)"
@@ -4871,6 +6221,15 @@ msgstr "Дашаватара Ганджифа (120 карт)"
 #: pysollib/resource.py:190
 msgid "Trumps only type (variable cards)"
 msgstr "Без мастей (переменное количество карт)"
+
+msgid "Matching type (variable cards)"
+msgstr ""
+
+msgid "Puzzle type (variable pieces)"
+msgstr ""
+
+msgid "Ishido type (36 tiles)"
+msgstr ""
 
 #: pysollib/resource.py:194
 msgid "French"
@@ -4908,6 +6267,42 @@ msgstr "Дашаватара Ганджифа"
 msgid "Trumps only"
 msgstr "Без мастей"
 
+msgid "Matching"
+msgstr ""
+
+msgid "No Jokers"
+msgstr ""
+
+msgid "Joker Deck"
+msgstr ""
+
+msgid "3x3"
+msgstr ""
+
+msgid "4x4"
+msgstr ""
+
+msgid "5x5"
+msgstr ""
+
+msgid "6x6"
+msgstr ""
+
+msgid "7x7"
+msgstr ""
+
+msgid "8x8"
+msgstr ""
+
+msgid "9x9"
+msgstr ""
+
+msgid "10x10"
+msgstr ""
+
+msgid "With %(cards)d or more cards"
+msgstr ""
+
 #: pysollib/resource.py:219
 msgid "Adult"
 msgstr "Для взрослых"
@@ -4933,7 +6328,7 @@ msgid "Children"
 msgstr "Дети"
 
 #: pysollib/resource.py:225
-msgid "Classic look"
+msgid "Classic Look"
 msgstr "Классический вид"
 
 #: pysollib/resource.py:226
@@ -4944,6 +6339,9 @@ msgstr "Коллекционные"
 msgid "Computers"
 msgstr "Компьютеры"
 
+msgid "Divination"
+msgstr ""
+
 #: pysollib/resource.py:228
 msgid "Engines"
 msgstr "Машины"
@@ -4951,6 +6349,9 @@ msgstr "Машины"
 #: pysollib/resource.py:229
 msgid "Fantasy"
 msgstr "Фэнтези"
+
+msgid "Four Color"
+msgstr ""
 
 #: pysollib/resource.py:230
 msgid "Ganjifa"
@@ -4960,13 +6361,12 @@ msgstr "Ганджифа"
 msgid "Holiday"
 msgstr "Праздники"
 
+msgid "Monochrome"
+msgstr ""
+
 #: pysollib/resource.py:235
 msgid "Movies"
 msgstr "Фильмы"
-
-#: pysollib/resource.py:236
-msgid "Matrix"
-msgstr "Мозаика"
 
 #: pysollib/resource.py:237
 msgid "Music"
@@ -4997,7 +6397,7 @@ msgid "Products"
 msgstr "Продукты"
 
 #: pysollib/resource.py:244
-msgid "Round cardsets"
+msgid "Round Cardsets"
 msgstr "Закруглённые"
 
 #: pysollib/resource.py:245
@@ -5009,7 +6409,7 @@ msgid "Sports"
 msgstr "Спорт"
 
 #: pysollib/resource.py:248
-msgid "Vehicels"
+msgid "Vehicles"
 msgstr "Транспортные средства"
 
 #: pysollib/resource.py:249
@@ -5076,6 +6476,9 @@ msgstr "Италия"
 msgid "Netherlands"
 msgstr "Голландия"
 
+msgid "Portugal"
+msgstr ""
+
 #: pysollib/resource.py:270
 msgid "Russia"
 msgstr "Россия"
@@ -5100,48 +6503,48 @@ msgstr "США"
 msgid "Top 10"
 msgstr "Top 10"
 
-#: pysollib/stack.py:1589 pysollib/games/terrace.py:65
+#: pysollib/stack.py:1591 pysollib/games/terrace.py:65
 #: pysollib/games/terrace.py:85
 #, python-format
 msgid "Base card - %s."
 msgstr "Базовая карта - %s."
 
-#: pysollib/stack.py:1591
+#: pysollib/stack.py:1593
 msgid "Empty row cannot be filled."
 msgstr "Пустой ряд не заполняется."
 
-#: pysollib/stack.py:1593 pysollib/games/terrace.py:65
+#: pysollib/stack.py:1595 pysollib/games/terrace.py:65
 #: pysollib/games/terrace.py:85
 msgid "any card"
 msgstr "любая карта"
 
-#: pysollib/stack.py:1595 pysollib/util.py:50
+#: pysollib/stack.py:1597 pysollib/util.py:50
 msgid "Jack"
 msgstr "Валет"
 
-#: pysollib/stack.py:1597 pysollib/util.py:50 pysollib/games/canfield.py:529
+#: pysollib/stack.py:1599 pysollib/util.py:50 pysollib/games/canfield.py:529
 #: pysollib/games/special/tarock.py:216
 msgid "Queen"
 msgstr "Дама"
 
-#: pysollib/stack.py:1599 pysollib/util.py:50 pysollib/wizardutil.py:190
+#: pysollib/stack.py:1601 pysollib/util.py:50 pysollib/wizardutil.py:190
 #: pysollib/wizardutil.py:248 pysollib/games/canfield.py:524
 #: pysollib/games/special/tarock.py:216
 msgid "King"
 msgstr "Король"
 
-#: pysollib/stack.py:1601 pysollib/util.py:49 pysollib/wizardutil.py:189
+#: pysollib/stack.py:1603 pysollib/util.py:49 pysollib/wizardutil.py:189
 #: pysollib/wizardutil.py:193 pysollib/wizardutil.py:247
 #: pysollib/games/special/tarock.py:215 pysollib/games/ultra/dashavatara.py:359
 #: pysollib/games/ultra/hexadeck.py:275 pysollib/games/ultra/mughal.py:261
 msgid "Ace"
 msgstr "Туз"
 
-#: pysollib/stack.py:1610
+#: pysollib/stack.py:1612
 msgid "No cards"
 msgstr "Нет карт"
 
-#: pysollib/stack.py:1612
+#: pysollib/stack.py:1614
 #, python-format
 msgid "%d card"
 msgid_plural "%d cards"
@@ -5149,28 +6552,28 @@ msgstr[0] "%d карта"
 msgstr[1] "%d карты"
 msgstr[2] "%d карт"
 
-#: pysollib/stack.py:1832 pysollib/games/larasgame.py:159
+#: pysollib/stack.py:1834 pysollib/games/larasgame.py:159
 #, python-format
 msgid "Round %d"
 msgstr "Раунд %d"
 
-#: pysollib/stack.py:1841 pysollib/stack.py:1843 pysollib/stack.py:1893
+#: pysollib/stack.py:1843 pysollib/stack.py:1845 pysollib/stack.py:1895
 msgid "Redeal"
 msgstr "Сдать"
 
-#: pysollib/stack.py:1843
+#: pysollib/stack.py:1845
 msgid "Stop"
 msgstr "Стоп"
 
-#: pysollib/stack.py:1943
+#: pysollib/stack.py:1945
 msgid "Variable redeals."
 msgstr "Переменное количество пересдач."
 
-#: pysollib/stack.py:1945
+#: pysollib/stack.py:1947
 msgid "Unlimited redeals."
 msgstr "Неограниченное количество пересдач."
 
-#: pysollib/stack.py:1948
+#: pysollib/stack.py:1950
 #, fuzzy, python-format
 msgid "%d redeal"
 msgid_plural "%d redeals"
@@ -5178,108 +6581,114 @@ msgstr[0] "%d пересдача"
 msgstr[1] "%d пересдачи"
 msgstr[2] "%d пересдач"
 
-#: pysollib/stack.py:1950
+#: pysollib/stack.py:1952
 msgid "Talon."
 msgstr "Колода."
 
-#: pysollib/stack.py:2223 pysollib/stack.py:2983
+#: pysollib/stack.py:2228 pysollib/stack.py:2992
 msgid "Reserve. No building."
 msgstr "Резерв. Без выкладывания."
 
-#: pysollib/stack.py:2269
+#: pysollib/stack.py:2274
 msgid "Foundation."
 msgstr "Базовая ячейка"
 
-#: pysollib/stack.py:2309
+#: pysollib/stack.py:2314
 msgid "Foundation. Build up by suit."
 msgstr "Базовая ячейка. Складывать по возрастанию в соответствии с мастью."
 
-#: pysollib/stack.py:2311
+#: pysollib/stack.py:2316
 msgid "Foundation. Build down by suit."
 msgstr "Базовая ячейка. Складывать по убыванию в соответствии с мастью."
 
-#: pysollib/stack.py:2313 pysollib/stack.py:2327 pysollib/stack.py:2352
-#: pysollib/stack.py:2377
+#: pysollib/stack.py:2318 pysollib/stack.py:2332 pysollib/stack.py:2357
+#: pysollib/stack.py:2382
 msgid "Foundation. Build by same rank."
 msgstr "Базовая ячейка. Складывать в соответствии с достоинством."
 
-#: pysollib/stack.py:2323 pysollib/games/golf.py:405
+#: pysollib/stack.py:2328 pysollib/games/golf.py:408
 #: pysollib/games/pileon.py:253
 msgid "Foundation. Build up regardless of suit."
 msgstr "Базовая ячейка. Складывать по возрастанию не считаясь с мастью."
 
-#: pysollib/stack.py:2325
+#: pysollib/stack.py:2330
 msgid "Foundation. Build down regardless of suit."
 msgstr "Базовая ячейка. Складывать по убыванию не считаясь с мастью."
 
-#: pysollib/stack.py:2348
+#: pysollib/stack.py:2353
 msgid "Foundation. Build up by alternate color."
 msgstr "Базовая ячейка. Складывать по возрастанию чередуя цвет."
 
-#: pysollib/stack.py:2350
+#: pysollib/stack.py:2355
 msgid "Foundation. Build down by alternate color."
 msgstr "Базовая ячейка. Складывать по убыванию чередуя цвет."
 
-#: pysollib/stack.py:2373 pysollib/games/numerica.py:267
+#: pysollib/stack.py:2378 pysollib/games/numerica.py:267
 #: pysollib/games/royalcotillion.py:932
 msgid "Foundation. Build up by color."
 msgstr "Базовая ячейка. Складывать по возрастанию в соответствии с цветом."
 
-#: pysollib/stack.py:2375
+#: pysollib/stack.py:2380
 msgid "Foundation. Build down by color."
 msgstr "Базовая ячейка. Складывать по убыванию в соответствии с цветом."
 
-#: pysollib/stack.py:2454 pysollib/games/golf.py:126 pysollib/games/golf.py:319
+msgid "Foundation. Build up in any suit but the same."
+msgstr ""
+
+msgid "Foundation. Build down in any suit but the same."
+msgstr ""
+
+#: pysollib/stack.py:2459 pysollib/games/golf.py:126 pysollib/games/golf.py:322
 msgid "Tableau. No building."
 msgstr "Игровой стол. Без выкладывания."
 
-#: pysollib/stack.py:2502
+#: pysollib/stack.py:2508
 msgid "Tableau. Build up by alternate color."
 msgstr "Игровой стол. Складывать по возрастанию чередуя цвет."
 
-#: pysollib/stack.py:2504
+#: pysollib/stack.py:2510
 msgid "Tableau. Build down by alternate color."
 msgstr "Игровой стол. Складывать по убыванию чередуя цвет."
 
-#: pysollib/stack.py:2506 pysollib/stack.py:2521 pysollib/stack.py:2535
-#: pysollib/stack.py:2549 pysollib/stack.py:2563 pysollib/stack.py:2603
-#: pysollib/stack.py:2622
+#: pysollib/stack.py:2512 pysollib/stack.py:2527 pysollib/stack.py:2541
+#: pysollib/stack.py:2555 pysollib/stack.py:2569 pysollib/stack.py:2609
+#: pysollib/stack.py:2628
 msgid "Tableau. Build by same rank."
 msgstr "Игровой стол. Складывать в соответствии с достоинством."
 
-#: pysollib/stack.py:2517
+#: pysollib/stack.py:2523
 msgid "Tableau. Build up by color."
 msgstr "Игровой стол. Складывать по возрастанию в соответствии с цветом."
 
-#: pysollib/stack.py:2519
+#: pysollib/stack.py:2525
 msgid "Tableau. Build down by color."
 msgstr "Игровой стол. Складывать по убыванию в соответствии с цветом."
 
-#: pysollib/stack.py:2531
+#: pysollib/stack.py:2537
 msgid "Tableau. Build up by suit."
 msgstr "Игровой стол. Складывать по возрастанию в соответствии с мастью."
 
-#: pysollib/stack.py:2533
+#: pysollib/stack.py:2539
 msgid "Tableau. Build down by suit."
 msgstr "Игровой стол. Складывать по убыванию в соответствии с мастью."
 
-#: pysollib/stack.py:2545
+#: pysollib/stack.py:2551
 msgid "Tableau. Build up regardless of suit."
 msgstr "Игровой стол. Складывать по возрастанию не считаясь с мастью."
 
-#: pysollib/stack.py:2547
+#: pysollib/stack.py:2553
 msgid "Tableau. Build down regardless of suit."
 msgstr "Игровой стол. Складывать по убыванию не считаясь с мастью."
 
-#: pysollib/stack.py:2559
+#: pysollib/stack.py:2565
 msgid "Tableau. Build up in any suit but the same."
 msgstr "Игровой стол. Складывать по возрастанию в любую масть кроме такой же."
 
-#: pysollib/stack.py:2561
+#: pysollib/stack.py:2567
 msgid "Tableau. Build down in any suit but the same."
 msgstr "Игровой стол. Складывать по убыванию в любую масть кроме такой же."
 
-#: pysollib/stack.py:2595
+#: pysollib/stack.py:2601
 msgid ""
 "Tableau. Build up regardless of suit. Sequences of cards in alternate color "
 "can be moved as a unit."
@@ -5287,7 +6696,7 @@ msgstr ""
 "Игровой стол. Складывать по возрастанию не считаясь с мастью. Можно "
 "перемещать серии карт чередующихся цветом."
 
-#: pysollib/stack.py:2599
+#: pysollib/stack.py:2605
 msgid ""
 "Tableau. Build down regardless of suit. Sequences of cards in alternate "
 "color can be moved as a unit."
@@ -5295,7 +6704,7 @@ msgstr ""
 "Игровой стол. Складывать по убыванию не считаясь с мастью. Можно перемещать "
 "серии карт чередующихся цветом."
 
-#: pysollib/stack.py:2614
+#: pysollib/stack.py:2620
 msgid ""
 "Tableau. Build up regardless of suit. Sequences of cards in the same suit "
 "can be moved as a unit."
@@ -5303,7 +6712,7 @@ msgstr ""
 "Игровой стол. Складывать по возрастанию не считаясь с мастью. Можно "
 "перемещать серии карт одинаковой масти."
 
-#: pysollib/stack.py:2618
+#: pysollib/stack.py:2624
 msgid ""
 "Tableau. Build down regardless of suit. Sequences of cards in the same suit "
 "can be moved as a unit."
@@ -5311,7 +6720,22 @@ msgstr ""
 "Игровой стол. Складывать по убыванию не считаясь с мастью. Можно перемещать "
 "серии карт одинаковой масти."
 
-#: pysollib/stack.py:2646
+msgid ""
+"Tableau. Build up regardless of suit. Sequences of cards in the same color "
+"can be moved as a unit."
+msgstr ""
+
+msgid ""
+"Tableau. Build up regardless of suit. Sequences of cards in any suit but the "
+"same can be moved as a unit."
+msgstr ""
+
+msgid ""
+"Tableau. Build down regardless of suit. Sequences of cards in any suit but "
+"the same can be moved as a unit."
+msgstr ""
+
+#: pysollib/stack.py:2654
 msgid ""
 "Tableau. Build up by alternate color, can move any face-up cards regardless "
 "of sequence."
@@ -5319,7 +6743,7 @@ msgstr ""
 "Игровой стол. Складывать по возрастанию чередуя цвет, можно перемещать любую "
 "серию открытых карт."
 
-#: pysollib/stack.py:2649
+#: pysollib/stack.py:2657
 msgid ""
 "Tableau. Build down by alternate color, can move any face-up cards "
 "regardless of sequence."
@@ -5327,7 +6751,7 @@ msgstr ""
 "Игровой стол. Складывать по убыванию чередуя цвет, можно перемещать любую "
 "серию открытых карт."
 
-#: pysollib/stack.py:2652 pysollib/stack.py:2674 pysollib/stack.py:2692
+#: pysollib/stack.py:2660 pysollib/stack.py:2682 pysollib/stack.py:2700
 msgid ""
 "Tableau. Build by same rank, can move any face-up cards regardless of "
 "sequence."
@@ -5335,14 +6759,14 @@ msgstr ""
 "Игровой стол. Складывать в соответствии с достоинством, можно перемещать "
 "любую серию открытых карт."
 
-#: pysollib/stack.py:2668
+#: pysollib/stack.py:2676
 msgid ""
 "Tableau. Build up by suit, can move any face-up cards regardless of sequence."
 msgstr ""
 "Игровой стол. Складывать по возрастанию в соответствии с мастью, можно "
 "перемещать любую серию открытых карт."
 
-#: pysollib/stack.py:2671
+#: pysollib/stack.py:2679
 msgid ""
 "Tableau. Build down by suit, can move any face-up cards regardless of "
 "sequence."
@@ -5350,7 +6774,27 @@ msgstr ""
 "Игровой стол. Складывать по убыванию в соответствии с мастью, можно "
 "перемещать любую серию открытых карт."
 
-#: pysollib/stack.py:2686 pysollib/stack.py:2689
+msgid ""
+"Tableau. Build up by color, can move any face-up cards regardless of "
+"sequence."
+msgstr ""
+
+msgid ""
+"Tableau. Build down by color, can move any face-up cards regardless of "
+"sequence."
+msgstr ""
+
+msgid ""
+"Tableau. Build up by any suit but the same, can move any face-up cards "
+"regardless of sequence."
+msgstr ""
+
+msgid ""
+"Tableau. Build down by any suit but the same, can move any face-up cards "
+"regardless of sequence."
+msgstr ""
+
+#: pysollib/stack.py:2694 pysollib/stack.py:2697
 msgid ""
 "Tableau. Build up regardless of suit, can move any face-up cards regardless "
 "of sequence."
@@ -5358,32 +6802,48 @@ msgstr ""
 "Игровой стол. Складывать по возрастанию не считаясь с мастью, можно "
 "перемещать любую серию открытых карт."
 
-#: pysollib/stack.py:2730
+#: pysollib/stack.py:2738
 msgid "Tableau. Build up or down by color."
 msgstr ""
 "Игровой стол. Складывать по возрастанию или убыванию в соответствии с цветом."
 
-#: pysollib/stack.py:2744
+#: pysollib/stack.py:2752
 msgid "Tableau. Build up or down by alternate color."
 msgstr "Игровой стол. Складывать по возрастанию или убыванию чередуя цвет."
 
-#: pysollib/stack.py:2758
+#: pysollib/stack.py:2766
 msgid "Tableau. Build up or down by suit."
 msgstr ""
 "Игровой стол. Складывать по возрастанию или убыванию в соответствии с мастью."
 
-#: pysollib/stack.py:2772
+#: pysollib/stack.py:2780
 msgid "Tableau. Build up or down regardless of suit."
 msgstr ""
 "Игровой стол. Складывать по возрастанию или убыванию не считаясь с мастью."
 
-#: pysollib/stack.py:2866
+msgid "Tableau. Build up or down in any suit but the same."
+msgstr ""
+
+#: pysollib/stack.py:2874
 msgid "Waste."
 msgstr "Сброс."
 
-#: pysollib/stack.py:2984
+#: pysollib/stack.py:2993
 msgid "Free cell."
 msgstr "Свободная ячейка."
+
+msgid ""
+"Talon. Unlimited redeals, until running through the deck twice with no hits."
+msgstr ""
+
+msgid "Foundation. Place cards here that match the declared rank."
+msgstr ""
+
+msgid "Devil's Six. Must be played directly to Foundations."
+msgstr ""
+
+msgid "Bastille. Can be dealt to reserve, once it's empty."
+msgstr ""
 
 #: pysollib/stats.py:40 pysollib/stats.py:108 pysollib/pysolgtk/tkstats.py:422
 #: pysollib/pysolgtk/tkstats.py:459 pysollib/tile/tkstats.py:675
@@ -5404,10 +6864,6 @@ msgstr "Играл"
 msgid "Won"
 msgstr "Выиграл"
 
-#: pysollib/stats.py:43 pysollib/stats.py:148 pysollib/pysolgtk/tkstats.py:425
-msgid "Lost"
-msgstr "Проиграл"
-
 #: pysollib/stats.py:44 pysollib/pysolgtk/statusbar.py:98
 #: pysollib/pysolgtk/tkstats.py:426 pysollib/tile/statusbar.py:154
 #: pysollib/tk/statusbar.py:151 data/pysolfc.glade:1133
@@ -5418,6 +6874,12 @@ msgstr "Время игры"
 #: data/pysolfc.glade:1178
 msgid "Moves"
 msgstr "Ходов"
+
+msgid "Avg. win time"
+msgstr ""
+
+msgid "Avg. win moves"
+msgstr ""
 
 #: pysollib/stats.py:46 pysollib/pysolgtk/tkstats.py:428
 #: pysollib/tile/tkstats.py:921 pysollib/tile/tkstats.py:951
@@ -5477,16 +6939,24 @@ msgid "Total (%(played)d out of %(total)d games)"
 msgstr "Всего (%(played)d из %(total)d игр)"
 
 #: pysollib/util.py:45
-msgid "Club"
-msgstr "Треф"
-
-#: pysollib/util.py:45
 msgid "Spade"
 msgstr "Пики"
 
 #: pysollib/util.py:45
 msgid "Heart"
 msgstr "Черви"
+
+msgid "Clubs"
+msgstr ""
+
+msgid "Spades"
+msgstr ""
+
+msgid "Hearts"
+msgstr ""
+
+msgid "Diamonds"
+msgstr ""
 
 #: pysollib/util.py:46
 msgid "black"
@@ -5537,48 +7007,48 @@ msgid "Initial setting:"
 msgstr "Предварительные установки:"
 
 #: pysollib/wizardutil.py:105 pysollib/pysolgtk/selectgame.py:114
-#: pysollib/tile/selectgame.py:391 pysollib/tk/selectgame.py:392
+#: pysollib/tile/selectgame.py:392 pysollib/tk/selectgame.py:392
 msgid "Name:"
 msgstr "Имя:"
 
 #: pysollib/wizardutil.py:109 pysollib/kivy/selectgame.py:202
-#: pysollib/pysolgtk/selectgame.py:236 pysollib/pysolgtk/selectgame.py:473
+#: pysollib/pysolgtk/selectgame.py:236 pysollib/pysolgtk/selectgame.py:472
 #: pysollib/tile/selectgame.py:179 pysollib/tile/selectgame.py:561
-#: pysollib/tk/selectgame.py:179 pysollib/tk/selectgame.py:562
+#: pysollib/tk/selectgame.py:179 pysollib/tk/selectgame.py:561
 msgid "Luck only"
 msgstr "Только на везение"
 
 #: pysollib/wizardutil.py:110 pysollib/kivy/selectgame.py:204
-#: pysollib/pysolgtk/selectgame.py:237 pysollib/pysolgtk/selectgame.py:474
+#: pysollib/pysolgtk/selectgame.py:237 pysollib/pysolgtk/selectgame.py:473
 #: pysollib/tile/selectgame.py:181 pysollib/tile/selectgame.py:562
-#: pysollib/tk/selectgame.py:181 pysollib/tk/selectgame.py:563
+#: pysollib/tk/selectgame.py:181 pysollib/tk/selectgame.py:562
 msgid "Mostly luck"
 msgstr "В основном на везение"
 
 #: pysollib/wizardutil.py:111 pysollib/wizardutil.py:115
 #: pysollib/kivy/selectgame.py:206 pysollib/pysolgtk/selectgame.py:238
-#: pysollib/pysolgtk/selectgame.py:475 pysollib/tile/selectgame.py:183
+#: pysollib/pysolgtk/selectgame.py:474 pysollib/tile/selectgame.py:183
 #: pysollib/tile/selectgame.py:563 pysollib/tk/selectgame.py:183
-#: pysollib/tk/selectgame.py:564
+#: pysollib/tk/selectgame.py:563
 msgid "Balanced"
 msgstr "Сбалансированные"
 
 #: pysollib/wizardutil.py:112 pysollib/kivy/selectgame.py:208
-#: pysollib/pysolgtk/selectgame.py:239 pysollib/pysolgtk/selectgame.py:476
+#: pysollib/pysolgtk/selectgame.py:239 pysollib/pysolgtk/selectgame.py:475
 #: pysollib/tile/selectgame.py:186 pysollib/tile/selectgame.py:564
-#: pysollib/tk/selectgame.py:186 pysollib/tk/selectgame.py:565
+#: pysollib/tk/selectgame.py:186 pysollib/tk/selectgame.py:564
 msgid "Mostly skill"
 msgstr "В основном на мастерство"
 
 #: pysollib/wizardutil.py:113 pysollib/kivy/selectgame.py:210
-#: pysollib/pysolgtk/selectgame.py:240 pysollib/pysolgtk/selectgame.py:477
+#: pysollib/pysolgtk/selectgame.py:240 pysollib/pysolgtk/selectgame.py:476
 #: pysollib/tile/selectgame.py:188 pysollib/tile/selectgame.py:565
-#: pysollib/tk/selectgame.py:188 pysollib/tk/selectgame.py:566
+#: pysollib/tk/selectgame.py:188 pysollib/tk/selectgame.py:565
 msgid "Skill only"
 msgstr "Только на мастерство"
 
 #: pysollib/wizardutil.py:116 pysollib/pysolgtk/selectgame.py:118
-#: pysollib/tile/selectgame.py:395 pysollib/tk/selectgame.py:396
+#: pysollib/tile/selectgame.py:396 pysollib/tk/selectgame.py:396
 msgid "Skill level:"
 msgstr "Уровень мастерства:"
 
@@ -5622,6 +7092,9 @@ msgstr "Сдавать на сброс"
 msgid "Deal to tableau"
 msgstr "Сдавать на игровой стол"
 
+msgid "Deal to first tableau"
+msgstr ""
+
 #: pysollib/wizardutil.py:142
 msgid "Deal to reserves"
 msgstr "Сдавать на резервные ячейки"
@@ -5629,10 +7102,13 @@ msgstr "Сдавать на резервные ячейки"
 #: pysollib/wizardutil.py:147 pysollib/wizardutil.py:185
 #: pysollib/wizardutil.py:243 pysollib/wizardutil.py:301
 #: pysollib/pysolgtk/selectgame.py:117 pysollib/tile/selectcardset.py:454
-#: pysollib/tile/selectgame.py:394 pysollib/tk/selectcardset.py:445
+#: pysollib/tile/selectgame.py:395 pysollib/tk/selectcardset.py:445
 #: pysollib/tk/selectgame.py:395
 msgid "Type:"
 msgstr "Тип:"
+
+msgid "Subtype:"
+msgstr ""
 
 #: pysollib/wizardutil.py:151 pysollib/wizardutil.py:157
 msgid "No redeals"
@@ -5668,6 +7144,9 @@ msgstr "Кол-во карт сдающихся на сброс:"
 msgid "Shuffle during redeal:"
 msgstr "Тасовать при пересдаче:"
 
+msgid "No building"
+msgstr ""
+
 #: pysollib/wizardutil.py:176 pysollib/wizardutil.py:184
 #: pysollib/wizardutil.py:224
 msgid "Same suit"
@@ -5698,6 +7177,12 @@ msgstr "Паук чередуя цвет"
 msgid "Spider rank"
 msgstr "Паук в соответствии с достоинством"
 
+msgid "Spider same color"
+msgstr ""
+
+msgid "Spider any suit but the same"
+msgstr ""
+
 #: pysollib/wizardutil.py:191 pysollib/wizardutil.py:249
 #: pysollib/wizardutil.py:252
 msgid "Any"
@@ -5716,6 +7201,9 @@ msgstr "Вверх"
 #: pysollib/wizardutil.py:258
 msgid "Down"
 msgstr "Вниз"
+
+msgid "Same rank"
+msgstr ""
 
 #: pysollib/wizardutil.py:200 pysollib/wizardutil.py:259
 msgid "Direction:"
@@ -5763,6 +7251,9 @@ msgstr "По возрастанию или убыванию в соответс�
 msgid "Up or down by same color"
 msgstr "По возрастанию или убыванию в соответствии с цветом"
 
+msgid "Up or down by any suit but the same"
+msgstr ""
+
 #: pysollib/wizardutil.py:238
 msgid "Yukon same suit"
 msgstr "Юкон в соответствии с мастью"
@@ -5774,6 +7265,12 @@ msgstr "Юкон чередуя цвет"
 #: pysollib/wizardutil.py:240
 msgid "Yukon rank"
 msgstr "Юкон в соответствии с достоинством"
+
+msgid "Yukon same color"
+msgstr ""
+
+msgid "Yukon any suit but the same"
+msgstr ""
 
 #: pysollib/wizardutil.py:263 pysollib/wizardutil.py:264
 msgid "Sequence"
@@ -5835,16 +7332,16 @@ msgstr "Игровой стол"
 msgid "Opening deal"
 msgstr "Начальная раздача"
 
-#: pysollib/game/__init__.py:141 pysollib/game/__init__.py:147
+#: pysollib/game/__init__.py:148 pysollib/game/__init__.py:154
 msgid "Player\n"
 msgstr "Игрок\n"
 
-#: pysollib/game/__init__.py:1313
+#: pysollib/game/__init__.py:1337
 #, fuzzy
 msgid "Discard current game?"
 msgstr "Завершить текущую игру?"
 
-#: pysollib/game/__init__.py:1934
+#: pysollib/game/__init__.py:1958
 #, fuzzy, python-format
 msgid ""
 "\n"
@@ -5857,7 +7354,7 @@ msgstr ""
 "#%d в %s игрового времени\n"
 "и #%d в %s количества ходов."
 
-#: pysollib/game/__init__.py:1942
+#: pysollib/game/__init__.py:1966
 #, fuzzy, python-format
 msgid ""
 "\n"
@@ -5868,7 +7365,7 @@ msgstr ""
 "Вы достигли\n"
 "#%d в %s игрового времени."
 
-#: pysollib/game/__init__.py:1948
+#: pysollib/game/__init__.py:1972
 #, fuzzy, python-format
 msgid ""
 "\n"
@@ -5879,7 +7376,7 @@ msgstr ""
 "Вы достигли\n"
 "#%d в %s количества ходов."
 
-#: pysollib/game/__init__.py:1983 pysollib/game/__init__.py:1999
+#: pysollib/game/__init__.py:2007 pysollib/game/__init__.py:2023
 #, fuzzy, python-format
 msgid ""
 "Your playing time is %(time)s\n"
@@ -5897,7 +7394,7 @@ msgstr[2] ""
 "Ваше игровое время: %s\n"
 "Количество ходов: %s"
 
-#: pysollib/game/__init__.py:1987
+#: pysollib/game/__init__.py:2011
 msgid ""
 "Congratulations, this\n"
 "was a truly perfect game!"
@@ -5906,25 +7403,25 @@ msgstr ""
 "Это была действительно\n"
 "великолепная игра!"
 
-#: pysollib/game/__init__.py:1989 pysollib/game/__init__.py:2005
+#: pysollib/game/__init__.py:2013 pysollib/game/__init__.py:2029
 #: pysollib/kivy/tkwidget.py:170 pysollib/pysolgtk/soundoptionsdialog.py:71
 #: pysollib/tile/soundoptionsdialog.py:83 pysollib/tk/soundoptionsdialog.py:85
 msgid "Game won"
 msgstr "Игра выиграна"
 
-#: pysollib/game/__init__.py:2003
+#: pysollib/game/__init__.py:2027
 msgid "Congratulations, you did it!"
 msgstr ""
 "Поздравляем!\n"
 "Вы сделали это!"
 
-#: pysollib/game/__init__.py:2013 pysollib/game/__init__.py:2020
+#: pysollib/game/__init__.py:2037 pysollib/game/__init__.py:2044
 #: pysollib/kivy/tkwidget.py:173 pysollib/pysolgtk/soundoptionsdialog.py:69
 #: pysollib/tile/soundoptionsdialog.py:81 pysollib/tk/soundoptionsdialog.py:83
 msgid "Game finished"
 msgstr "Игра закончена"
 
-#: pysollib/game/__init__.py:2014 pysollib/game/__init__.py:2539
+#: pysollib/game/__init__.py:2038 pysollib/game/__init__.py:2563
 msgid ""
 "\n"
 "Game finished\n"
@@ -5932,40 +7429,47 @@ msgstr ""
 "\n"
 "Игра закончена\n"
 
-#: pysollib/game/__init__.py:2021
+#: pysollib/game/__init__.py:2045
+msgid "Game finished, but not without my help..."
+msgstr "Игра закончена, но не без моей помощи..."
+
+msgid "You used %(h)s hint(s) during this game."
+msgstr ""
+
+msgid "You are Stuck"
+msgstr ""
+
 msgid ""
 "\n"
-"Game finished, but not without my help...\n"
+"There are no moves left...\n"
 msgstr ""
-"\n"
-"Игра закончена, но не без моей помощи...\n"
 
-#: pysollib/game/__init__.py:2022
+#: pysollib/game/__init__.py:2046
 msgid "&Restart"
 msgstr "&Начало"
 
-#: pysollib/game/__init__.py:2418
+#: pysollib/game/__init__.py:2442
 #, python-format
 msgid "Score %6d"
 msgstr "Счёт %6d"
 
-#: pysollib/game/__init__.py:2522
+#: pysollib/game/__init__.py:2546
 msgid "&Great"
 msgstr "&Здорово"
 
-#: pysollib/game/__init__.py:2522
+#: pysollib/game/__init__.py:2546
 msgid "&Cool"
 msgstr "&Отлично"
 
-#: pysollib/game/__init__.py:2523
+#: pysollib/game/__init__.py:2547
 msgid "&Yeah"
 msgstr "&Ага"
 
-#: pysollib/game/__init__.py:2523
+#: pysollib/game/__init__.py:2547
 msgid "&Wow"
 msgstr "&Ура"
 
-#: pysollib/game/__init__.py:2524
+#: pysollib/game/__init__.py:2548
 #, python-format
 msgid ""
 "\n"
@@ -5983,25 +7487,25 @@ msgstr[2] ""
 "\n"
 "Игра решена за %d ходов\n"
 
-#: pysollib/game/__init__.py:2529 pysollib/game/__init__.py:2544
-#: pysollib/game/__init__.py:2559
+#: pysollib/game/__init__.py:2553 pysollib/game/__init__.py:2568
+#: pysollib/game/__init__.py:2583
 #, python-format
 msgid "%s Autopilot"
 msgstr "%s Автопилот"
 
-#: pysollib/game/__init__.py:2556
+#: pysollib/game/__init__.py:2580
 msgid "&Oh well"
 msgstr "&Ох"
 
-#: pysollib/game/__init__.py:2556
+#: pysollib/game/__init__.py:2580
 msgid "&That's life"
 msgstr "&Такова жизнь"
 
-#: pysollib/game/__init__.py:2556
+#: pysollib/game/__init__.py:2580
 msgid "&Hmm"
 msgstr "&Хмм"
 
-#: pysollib/game/__init__.py:2560
+#: pysollib/game/__init__.py:2584
 msgid ""
 "\n"
 "This won't come out...\n"
@@ -6009,34 +7513,34 @@ msgstr ""
 "\n"
 "Не удалось...\n"
 
-#: pysollib/game/__init__.py:3007
+#: pysollib/game/__init__.py:3031
 msgid "Set bookmark"
 msgstr "Установить закладку"
 
-#: pysollib/game/__init__.py:3008
+#: pysollib/game/__init__.py:3032
 #, fuzzy, python-format
 msgid "Replace existing bookmark %d?"
 msgstr "Заменить существующую закладку %d ?"
 
-#: pysollib/game/__init__.py:3029
+#: pysollib/game/__init__.py:3053
 msgid "Goto bookmark"
 msgstr "Перейти к закладке"
 
-#: pysollib/game/__init__.py:3030
+#: pysollib/game/__init__.py:3054
 #, fuzzy, python-format
 msgid "Goto bookmark %d?"
 msgstr "Перейти к закладке %d ?"
 
-#: pysollib/game/__init__.py:3056
+#: pysollib/game/__init__.py:3080
 msgid "Open game"
 msgstr "Открыть игру"
 
-#: pysollib/game/__init__.py:3069 pysollib/game/__init__.py:3078
-#: pysollib/game/__init__.py:3084
+#: pysollib/game/__init__.py:3093 pysollib/game/__init__.py:3102
+#: pysollib/game/__init__.py:3108
 msgid "Load game error"
 msgstr "Ошибка при загрузке игры"
 
-#: pysollib/game/__init__.py:3071
+#: pysollib/game/__init__.py:3095
 msgid ""
 "Error while loading game.\n"
 "\n"
@@ -6048,11 +7552,11 @@ msgstr ""
 "Возможно повреждён файл,\n"
 "или ошибка в программе."
 
-#: pysollib/game/__init__.py:3079
+#: pysollib/game/__init__.py:3103
 msgid "Error while loading game"
 msgstr "Ошибка при загрузке игры"
 
-#: pysollib/game/__init__.py:3086
+#: pysollib/game/__init__.py:3110
 msgid ""
 "Internal error while loading game.\n"
 "\n"
@@ -6062,27 +7566,27 @@ msgstr ""
 "\n"
 "Пожалуйста сообщите об этой ошибке."
 
-#: pysollib/game/__init__.py:3112 pysollib/ui/tktile/menubar.py:1677
+#: pysollib/game/__init__.py:3136 pysollib/ui/tktile/menubar.py:1677
 msgid "Save game error"
 msgstr "Ошибка при сохранении игры"
 
-#: pysollib/game/__init__.py:3113
+#: pysollib/game/__init__.py:3137
 msgid "Error while saving game"
 msgstr "Ошибка при сохранении игры"
 
-#: pysollib/game/__init__.py:3132
+#: pysollib/game/__init__.py:3156
 #, python-format
 msgid "Invalid or damaged %s save file"
 msgstr ""
 
-#: pysollib/game/__init__.py:3152
+#: pysollib/game/__init__.py:3181
 #, python-format
 msgid ""
 "Cannot load games saved with\n"
 "%(app)s version %(ver)s"
 msgstr ""
 
-#: pysollib/game/__init__.py:3171
+#: pysollib/game/__init__.py:3200
 #, python-format
 msgid ""
 "Cannot load this game from version %s\n"
@@ -6097,7 +7601,7 @@ msgstr ""
 msgid "Tableau. Build regardless of rank and suit."
 msgstr "Игровой стол. Складывать не считаясь с мастью и достоинством."
 
-#: pysollib/games/auldlangsyne.py:563 pysollib/games/golf.py:311
+#: pysollib/games/auldlangsyne.py:563 pysollib/games/golf.py:314
 #: pysollib/games/takeaway.py:58
 msgid "Foundation. Build up or down regardless of suit."
 msgstr ""
@@ -6128,6 +7632,19 @@ msgstr ""
 "2:  4  6  8 10  Д  Т  3  5  7  9  В  К\n"
 "3:  6  9  Д  2  5  8  В  Т  4  7 10  К\n"
 "4:  8  Д  3  7  В  2  6 10  Т  5  9  К"
+
+msgid ""
+"\n"
+"5: T 2 7 Q 4 9 A 6 J 3 8 K\n"
+"6: Q 5 J 4 T 3 9 2 8 A 7 K\n"
+"7: A 8 2 9 3 T 4 J 5 Q 6 K\n"
+"8: 3 J 6 A 9 4 Q 7 2 T 5 K"
+msgstr ""
+"\n"
+"5: 10  2  7  Д  4  9  A  6  В  3  8  K\n"
+"6:  Д  5  В  4 10  3  9  2  8  A  7  K\n"
+"7:  A  8  2  9  3 10  4  В  5  Д  6  K\n"
+"8:  3  В  6  A  9  4  Д  7  2 10  5  K"
 
 #: pysollib/games/curdsandwhey.py:76
 msgid "Tableau. Build down by suit or of the same rank."
@@ -6163,6 +7680,9 @@ msgstr ""
 "Игровой стол. Складывать по убыванию в соответствии с цветом. Можно "
 "перемещать серии карт одинаковой масти."
 
+msgid "Reserve."
+msgstr "Резерв."
+
 #: pysollib/games/klondike.py:461
 msgid "Reserve. Only Kings are acceptable."
 msgstr "Резерв. Только для королей."
@@ -6191,7 +7711,7 @@ msgstr "Сброс. Складывать по возрастанию или уб
 msgid "Tableau. Empty piles can be filled with any card."
 msgstr "Игровой стол. Пустой ряд заполняется любой картой."
 
-#: pysollib/games/spider.py:1133
+#: pysollib/games/spider.py:1134
 msgid ""
 "Tableau. Build down regardless of suit. Sequences of cards in the same color "
 "can be moved as a unit."
@@ -6210,6 +7730,9 @@ msgstr "        Эта игра:  "
 #: pysollib/games/tournament.py:224
 msgid "Reserve. Build down by suit."
 msgstr "Резерв. Складывать по убыванию в соответствии с мастью."
+
+msgid "Reserve. Build up regardless of suit."
+msgstr "Резерв. Складывать по возрастанию не считаясь с мастью."
 
 #: pysollib/games/yukon.py:108
 msgid ""
@@ -6271,7 +7794,7 @@ msgstr "Панель инструментов"
 
 #: pysollib/kivy/menubar.py:193 pysollib/kivy/menubar.py:1647
 #: pysollib/pysolgtk/selectgame.py:100 pysollib/pysolgtk/tkstats.py:177
-#: pysollib/tile/selectgame.py:385 pysollib/tile/tkstats.py:51
+#: pysollib/tile/selectgame.py:386 pysollib/tile/tkstats.py:51
 #: pysollib/tile/toolbar.py:188 pysollib/tk/selectgame.py:384
 #: pysollib/tk/toolbar.py:188
 msgid "Statistics"
@@ -6431,6 +7954,9 @@ msgstr "Разрешить &подсказки"
 msgid "Enable shuffle"
 msgstr "Разрешить перемешивание &фишек"
 
+msgid "Free hints"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:561
 #, fuzzy
 msgid "Enable highlight piles"
@@ -6446,10 +7972,16 @@ msgstr "Разрешить показывать &карты"
 msgid "Enable highlight same rank"
 msgstr "Разрешить показывать карты &одного достоинства"
 
+msgid "Enable face-down peek"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:576
 #, fuzzy
 msgid "Highlight no matching"
 msgstr "Подсветка отсутствия &совпадения"
+
+msgid "Stuck notification"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:583
 #, fuzzy
@@ -6461,11 +7993,17 @@ msgstr "Показывать удалённые (в Маджонг)"
 msgid "Show hint arrow (in Shisen-Sho games)"
 msgstr "Показывать стрелку (в Шисен-Сё)"
 
+msgid "Deal all cards (in Accordion type games)"
+msgstr ""
+
+msgid "Auto-remove first card (in Pegged games)"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:598
 msgid "Language"
 msgstr ""
 
-#: pysollib/kivy/menubar.py:601 pysollib/tile/menubar.py:119
+#: pysollib/kivy/menubar.py:601 pysollib/tile/menubar.py:120
 msgid "Default"
 msgstr ""
 
@@ -6638,16 +8176,28 @@ msgstr "Игровой стол"
 msgid "Solid colors"
 msgstr "Монотонный цвет"
 
+msgid "Azure"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:832 pysollib/pysolgtk/selecttile.py:105
 #: pysollib/tile/selecttile.py:74 pysollib/tk/selecttile.py:73
 msgid "Blue"
 msgstr "Голубой"
+
+msgid "Bright Green"
+msgstr ""
+
+msgid "Cyan"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:837 pysollib/pysolgtk/selecttile.py:106
 #: pysollib/tile/selecttile.py:75 pysollib/tk/selecttile.py:74
 #: pysollib/games/ultra/dashavatara.py:361 pysollib/games/ultra/mughal.py:264
 msgid "Green"
 msgstr "Зелёный"
+
+msgid "Magenta"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:842 pysollib/pysolgtk/selecttile.py:107
 #: pysollib/tile/selecttile.py:76 pysollib/tk/selecttile.py:75
@@ -6665,6 +8215,12 @@ msgstr "Оливковый"
 #: pysollib/games/ultra/dashavatara.py:362 pysollib/games/ultra/mughal.py:264
 msgid "Orange"
 msgstr "Оранжевый"
+
+msgid "Pink"
+msgstr ""
+
+msgid "Purple"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:857 pysollib/pysolgtk/selecttile.py:110
 #: pysollib/tile/selecttile.py:79 pysollib/tk/selecttile.py:78
@@ -6773,6 +8329,18 @@ msgstr "Слева"
 msgid "Right"
 msgstr "Справа"
 
+msgid "Other graphics"
+msgstr ""
+
+msgid "Demo logo"
+msgstr ""
+
+msgid "Pause text"
+msgstr ""
+
+msgid "Redeal icons"
+msgstr ""
+
 #: pysollib/kivy/menubar.py:1062
 #, fuzzy
 msgid "Startup splash screen"
@@ -6787,8 +8355,8 @@ msgid "Contents"
 msgstr "Содержание"
 
 #: pysollib/kivy/menubar.py:1094
-msgid "How to play"
-msgstr "Как играть"
+msgid "How to use PySol"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:1098 pysollib/kivy/toolbar.py:204
 #: pysollib/tile/toolbar.py:189 pysollib/tk/toolbar.py:189
@@ -6883,7 +8451,7 @@ msgstr "Игры маджонг"
 
 #: pysollib/kivy/selectgame.py:108 pysollib/pysolgtk/selectgame.py:233
 #: pysollib/tile/selectgame.py:112 pysollib/tk/selectgame.py:112
-msgid "French games"
+msgid "French Games"
 msgstr "Классические игры"
 
 #: pysollib/kivy/selectgame.py:111 pysollib/pysolgtk/selectgame.py:229
@@ -7062,10 +8630,16 @@ msgstr "Игры для детей (очень лёгкие)"
 msgid "Games with Scoring"
 msgstr "Игры со счётом"
 
+msgid "Games with Stripped Decks"
+msgstr ""
+
 #: pysollib/kivy/selectgame.py:269 pysollib/pysolgtk/selectgame.py:304
 #: pysollib/tile/selectgame.py:247 pysollib/tk/selectgame.py:247
 msgid "Games with Separate Decks"
 msgstr "Игры с раздельными колодами"
+
+msgid "Games with Jokers"
+msgstr ""
 
 #: pysollib/kivy/selectgame.py:271 pysollib/pysolgtk/selectgame.py:306
 #: pysollib/tile/selectgame.py:249 pysollib/tk/selectgame.py:249
@@ -7125,7 +8699,7 @@ msgid ""
 msgstr ""
 
 #: pysollib/kivy/tkstats.py:225 pysollib/pysolgtk/selectgame.py:123
-#: pysollib/tile/selectgame.py:400 pysollib/tile/tkstats.py:182
+#: pysollib/tile/selectgame.py:401 pysollib/tile/tkstats.py:182
 #: pysollib/tile/tkstats.py:234 pysollib/tk/selectgame.py:401
 #: pysollib/tk/tkstats.py:87 pysollib/tk/tkstats.py:141 data/pysolfc.glade:241
 #: data/pysolfc.glade:519
@@ -7133,7 +8707,7 @@ msgid "Won:"
 msgstr "Выиграл:"
 
 #: pysollib/kivy/tkstats.py:227 pysollib/pysolgtk/selectgame.py:124
-#: pysollib/tile/selectgame.py:401 pysollib/tile/tkstats.py:183
+#: pysollib/tile/selectgame.py:402 pysollib/tile/tkstats.py:183
 #: pysollib/tile/tkstats.py:236 pysollib/tk/selectgame.py:402
 #: pysollib/tk/tkstats.py:88 pysollib/tk/tkstats.py:143 data/pysolfc.glade:307
 #: data/pysolfc.glade:544
@@ -7244,7 +8818,7 @@ msgstr "Выбрать фоновое изображение"
 #: pysollib/pysolgtk/playeroptionsdialog.py:62
 #: pysollib/tile/playeroptionsdialog.py:61
 #: pysollib/tk/playeroptionsdialog.py:102
-msgid "Confirm quit"
+msgid "Confirm discard game"
 msgstr "Подтверждение выхода"
 
 #: pysollib/pysolgtk/playeroptionsdialog.py:68
@@ -7252,6 +8826,18 @@ msgstr "Подтверждение выхода"
 #: pysollib/tk/playeroptionsdialog.py:106
 msgid "Update statistics and logs"
 msgstr "Обновлять статистику и лог"
+
+msgid "Tree View"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Card Size"
+msgstr "Размер карт"
+
+msgid "Search:"
+msgstr ""
 
 #: pysollib/pysolgtk/selectcardset.py:142 pysollib/tile/selectcardset.py:98
 #: pysollib/tile/selectcardset.py:115 pysollib/tile/selectcardset.py:132
@@ -7293,8 +8879,11 @@ msgstr "Большие колоды"
 
 #: pysollib/pysolgtk/selectcardset.py:164 pysollib/tile/selectcardset.py:155
 #: pysollib/tk/selectcardset.py:153
-msgid "XLarge cardsets"
+msgid "Extra Large cardsets"
 msgstr "Очень большие колоды"
+
+msgid "Hi-Res cardsets"
+msgstr ""
 
 #: pysollib/pysolgtk/selectcardset.py:170 pysollib/tile/selectcardset.py:84
 #: pysollib/tile/selectcardset.py:181 pysollib/tk/selectcardset.py:83
@@ -7317,76 +8906,151 @@ msgstr "По национальности"
 msgid "by Date"
 msgstr "По дате"
 
-#: pysollib/pysolgtk/selectgame.py:88 pysollib/tile/selectgame.py:382
+#: pysollib/pysolgtk/selectgame.py:88 pysollib/tile/selectgame.py:383
 #: pysollib/tk/selectgame.py:383
 msgid "About game"
 msgstr "Об игре "
 
-#: pysollib/pysolgtk/selectgame.py:115 pysollib/tile/selectgame.py:392
+#: pysollib/pysolgtk/selectgame.py:115 pysollib/tile/selectgame.py:393
 #: pysollib/tk/selectgame.py:393
 msgid "Alternate names:"
 msgstr "Другие имена:"
 
-#: pysollib/pysolgtk/selectgame.py:116 pysollib/tile/selectgame.py:393
+#: pysollib/pysolgtk/selectgame.py:116 pysollib/tile/selectgame.py:394
 #: pysollib/tk/selectgame.py:394
 msgid "Category:"
 msgstr "Категория:"
 
-#: pysollib/pysolgtk/selectgame.py:119 pysollib/tile/selectgame.py:396
+msgid "Subcategory:"
+msgstr ""
+
+#: pysollib/pysolgtk/selectgame.py:119 pysollib/tile/selectgame.py:397
 #: pysollib/tk/selectgame.py:397
 msgid "Decks:"
 msgstr "Колод:"
 
-#: pysollib/pysolgtk/selectgame.py:120 pysollib/tile/selectgame.py:397
+#: pysollib/pysolgtk/selectgame.py:120 pysollib/tile/selectgame.py:398
 #: pysollib/tk/selectgame.py:398
 msgid "Redeals:"
 msgstr "Пересдач:"
 
-#: pysollib/pysolgtk/selectgame.py:122 pysollib/tile/selectgame.py:399
+msgid "Compatibility:"
+msgstr ""
+
+msgid "Inventor:"
+msgstr ""
+
+msgid "PySol Version:"
+msgstr ""
+
+msgid "Statistics:"
+msgstr ""
+
+#: pysollib/pysolgtk/selectgame.py:122 pysollib/tile/selectgame.py:400
 #: pysollib/tk/selectgame.py:400
 msgid "Played:"
 msgstr "Играл:"
 
-#: pysollib/pysolgtk/selectgame.py:125 pysollib/tile/selectgame.py:402
+#: pysollib/pysolgtk/selectgame.py:125 pysollib/tile/selectgame.py:403
 #: pysollib/tile/tkstats.py:778 pysollib/tk/selectgame.py:403
 #: pysollib/tk/tkstats.py:741 data/pysolfc.glade:717
 msgid "Playing time:"
 msgstr "Игровое время:"
 
-#: pysollib/pysolgtk/selectgame.py:126 pysollib/tile/selectgame.py:403
+#: pysollib/pysolgtk/selectgame.py:126 pysollib/tile/selectgame.py:404
 #: pysollib/tile/tkstats.py:785 pysollib/tk/selectgame.py:404
 #: pysollib/tk/tkstats.py:748 data/pysolfc.glade:813
 msgid "Moves:"
 msgstr "Ходов:"
 
-#: pysollib/pysolgtk/selectgame.py:127 pysollib/tile/selectgame.py:404
+msgid "Avg. win time:"
+msgstr ""
+
+msgid "Avg. win moves:"
+msgstr ""
+
+#: pysollib/pysolgtk/selectgame.py:127 pysollib/tile/selectgame.py:405
 #: pysollib/tk/selectgame.py:405
 msgid "% won:"
 msgstr "% побед:"
 
-#: pysollib/pysolgtk/selectgame.py:324 pysollib/tile/selectgame.py:436
+#: pysollib/pysolgtk/selectgame.py:324 pysollib/tile/selectgame.py:437
 #: pysollib/tk/selectgame.py:437 pysollib/ui/tktile/menubar.py:352
 msgid "&Select"
 msgstr "&Выбрать"
 
-#: pysollib/pysolgtk/selectgame.py:324 pysollib/tile/selectgame.py:435
+#: pysollib/pysolgtk/selectgame.py:324 pysollib/tile/selectgame.py:436
 #: pysollib/tk/selectgame.py:436
 msgid "&Rules"
 msgstr "&Правила"
 
-#: pysollib/pysolgtk/selectgame.py:426 pysollib/tile/selectgame.py:516
-#: pysollib/tk/selectgame.py:517
+#: pysollib/pysolgtk/selectgame.py:425 pysollib/tile/selectgame.py:516
+#: pysollib/tk/selectgame.py:516
 #, python-format
 msgid "Playable Preview - %(game)s"
 msgstr "Играемый предпросмотр - %(game)s"
 
-#: pysollib/pysolgtk/selectgame.py:481 pysollib/tile/selectgame.py:569
-#: pysollib/tk/selectgame.py:570
+msgid "Advanced search"
+msgstr ""
+
+msgid "Check alternate names"
+msgstr ""
+
+msgid "New in"
+msgstr ""
+
+msgid "Present in"
+msgstr ""
+
+msgid "New since"
+msgstr ""
+
+msgid "Games played"
+msgstr ""
+
+msgid "Games played and won"
+msgstr ""
+
+msgid "Games played and not won"
+msgstr ""
+
+msgid "Games not played"
+msgstr ""
+
+msgid "Popular"
+msgstr ""
+
+msgid "Recent"
+msgstr ""
+
+msgid "Favorite"
+msgstr ""
+
+msgid "Children's"
+msgstr ""
+
+msgid "Scored"
+msgstr ""
+
+msgid "Stripped Deck"
+msgstr ""
+
+msgid "Separate Decks"
+msgstr ""
+
+msgid "Relaxed"
+msgstr ""
+
+msgid "Original"
+msgstr ""
+
+#: pysollib/pysolgtk/selectgame.py:480 pysollib/tile/selectgame.py:569
+#: pysollib/tk/selectgame.py:569
 msgid "variable"
 msgstr "переменное кол-во"
 
-#: pysollib/pysolgtk/selectgame.py:483 pysollib/tile/selectgame.py:571
-#: pysollib/tk/selectgame.py:572
+#: pysollib/pysolgtk/selectgame.py:482 pysollib/tile/selectgame.py:571
+#: pysollib/tk/selectgame.py:571
 msgid "unlimited"
 msgstr "неограниченное кол-во"
 
@@ -7403,6 +9067,15 @@ msgstr "Все фоновые изображения"
 #: pysollib/tk/selecttile.py:68
 msgid "(no tiles)"
 msgstr "(нет плитки)"
+
+msgid "Image scaling:"
+msgstr ""
+
+msgid "Tile"
+msgstr ""
+
+msgid "Stretch"
+msgstr ""
 
 #: pysollib/pysolgtk/selecttile.py:158 pysollib/tile/selecttile.py:153
 #: pysollib/tk/selecttile.py:152
@@ -7489,6 +9162,9 @@ msgstr "Игра проиграна"
 msgid "Perfect game"
 msgstr "Великолепная игра"
 
+msgid "Other"
+msgstr ""
+
 #: pysollib/pysolgtk/statusbar.py:99 pysollib/tile/statusbar.py:155
 #: pysollib/tk/statusbar.py:152
 msgid "Moves/Total moves"
@@ -7498,6 +9174,12 @@ msgstr "Ходов/Всего ходов"
 #: pysollib/tk/statusbar.py:154
 msgid "Games played: won/lost"
 msgstr "Игр: выиграно/проиграно"
+
+msgid "Number of cards"
+msgstr ""
+
+msgid "Help info"
+msgstr ""
 
 #: pysollib/pysolgtk/tkhtml.py:437 pysollib/ui/tktile/tkhtml.py:314
 #, python-format
@@ -7550,6 +9232,9 @@ msgstr "Подсветка карт: "
 #: pysollib/tk/tkstats.py:611
 msgid "Highlight same rank: "
 msgstr "Подсветка карт одного достоинства: "
+
+msgid "Face-down peeks: "
+msgstr ""
 
 #: pysollib/pysolgtk/tkstats.py:533 pysollib/tile/tkstats.py:620
 #: pysollib/tk/tkstats.py:615
@@ -7708,15 +9393,15 @@ msgstr "Изменить..."
 msgid "Select font"
 msgstr "Выбрать шрифт"
 
-#: pysollib/tile/menubar.py:90 pysollib/tk/menubar.py:94
+#: pysollib/tile/menubar.py:91 pysollib/tk/menubar.py:94
 msgid "Select "
 msgstr "Выбрать "
 
-#: pysollib/tile/menubar.py:106
+#: pysollib/tile/menubar.py:107
 msgid "Change theme"
 msgstr "Изменение темы"
 
-#: pysollib/tile/menubar.py:107
+#: pysollib/tile/menubar.py:108
 #, python-format
 msgid ""
 "These settings will take effect\n"
@@ -7725,38 +9410,64 @@ msgstr ""
 "Эта установка вступит в силу\n"
 "при следующем запуске %(app)s"
 
-#: pysollib/tile/menubar.py:114
+#: pysollib/tile/menubar.py:115
 msgid "Set t&heme"
 msgstr "Установить &тему"
 
-#: pysollib/tile/menubar.py:120
+#: pysollib/tile/menubar.py:121
 msgid "Classic"
 msgstr ""
 
-#: pysollib/tile/menubar.py:121
+#: pysollib/tile/menubar.py:122
 msgid "Revitalized"
 msgstr ""
 
-#: pysollib/tile/menubar.py:122
-msgid "Windows native"
+msgid "Alt/Revitalized"
 msgstr ""
 
 #: pysollib/tile/menubar.py:123
-msgid "XP Native"
+msgid "Windows Native"
 msgstr ""
 
 #: pysollib/tile/menubar.py:124
+msgid "XP Native"
+msgstr ""
+
+msgid "Windows XP Blue"
+msgstr ""
+
+#: pysollib/tile/menubar.py:125
 msgid "Aqua"
+msgstr ""
+
+msgid "ITFT1"
+msgstr ""
+
+msgid "Scid Blue"
+msgstr ""
+
+msgid "Scid Green"
+msgstr ""
+
+msgid "Scid Grey"
+msgstr ""
+
+msgid "Scid Mint"
+msgstr ""
+
+msgid "Scid Pink"
+msgstr ""
+
+msgid "Scid Purple"
+msgstr ""
+
+msgid "Scid Sand"
 msgstr ""
 
 #: pysollib/tile/playeroptionsdialog.py:50
 #: pysollib/tk/playeroptionsdialog.py:90
-msgid ""
-"\n"
-"Please enter your name"
-msgstr ""
-"\n"
-"Пожалуйста введите Ваше имя"
+msgid "Please enter your name"
+msgstr "Пожалуйста введите Ваше имя"
 
 #: pysollib/tile/selectcardset.py:138 pysollib/tk/selectcardset.py:137
 msgid "All Cardsets"
@@ -7786,9 +9497,15 @@ msgstr ""
 msgid "About cardset"
 msgstr "О наборе карт"
 
+msgid "Style:"
+msgstr ""
+
 #: pysollib/tile/selectcardset.py:455 pysollib/tk/selectcardset.py:446
 msgid "Styles:"
 msgstr "Стиль:"
+
+msgid "Date:"
+msgstr ""
 
 #: pysollib/tile/selectcardset.py:456 pysollib/tk/selectcardset.py:447
 msgid "Nationality:"
@@ -7822,6 +9539,12 @@ msgstr "Самодельные игры"
 #: pysollib/tile/selecttile.py:73 pysollib/tk/selecttile.py:72
 msgid "Solid Colors"
 msgstr "Монотонный цвет"
+
+msgid "Tiles"
+msgstr ""
+
+msgid "Images"
+msgstr ""
 
 #: pysollib/tile/solverdialog.py:54 pysollib/tk/solverdialog.py:62
 msgid "Show progress"
@@ -7857,6 +9580,9 @@ msgstr "Использовать DirectX для вывода звука"
 #: pysollib/tk/soundoptionsdialog.py:108 data/pysolfc.glade:4233
 msgid "Sample volume:"
 msgstr "Уровень звуков:"
+
+msgid "Music enabled"
+msgstr ""
 
 #: pysollib/tile/soundoptionsdialog.py:114
 #: pysollib/tk/soundoptionsdialog.py:116 data/pysolfc.glade:4257
@@ -8031,6 +9757,15 @@ msgstr "Игр за день"
 msgid "Games/week"
 msgstr "Игр за неделю"
 
+msgid "Date format"
+msgstr ""
+
+msgid "MM-DD"
+msgstr ""
+
+msgid "DD-MM"
+msgstr ""
+
 #: pysollib/tile/toolbar.py:179 pysollib/tk/toolbar.py:179
 msgid "Open"
 msgstr "Открыть"
@@ -8079,12 +9814,12 @@ msgstr "&Лог сессии..."
 msgid "&Full log..."
 msgstr "&Полный лог..."
 
-#: pysollib/winsystems/common.py:60
+#: pysollib/winsystems/common.py:61
 #, fuzzy
 msgid "invalid theme name: "
 msgstr "неправильный номер игры: "
 
-#: pysollib/winsystems/common.py:76
+#: pysollib/winsystems/common.py:77
 #, fuzzy
 msgid "invalid font name: "
 msgstr "неправильный номер игры: "
@@ -8213,14 +9948,25 @@ msgid "Total: %d"
 msgstr "Всего: %d"
 
 #: pysollib/games/special/poker.py:72
+#, fuzzy
+#| msgid ""
+#| "Royal Flush\n"
+#| "Straight Flush\n"
+#| "Four of a Kind\n"
+#| "Full House\n"
+#| "Flush\n"
+#| "Straight\n"
+#| "Three of a Kind\n"
+#| "Two Pair\n"
+#| "One Pair"
 msgid ""
 "Royal Flush\n"
 "Straight Flush\n"
-"Four of a Kind\n"
+"4 of a Kind\n"
 "Full House\n"
 "Flush\n"
 "Straight\n"
-"Three of a Kind\n"
+"3 of a Kind\n"
 "Two Pair\n"
 "One Pair"
 msgstr ""
@@ -8233,6 +9979,36 @@ msgstr ""
 "Три одинаковых\n"
 "Две пары\n"
 "Пара"
+
+msgid "Royal Flush"
+msgstr "Флешь Ройал"
+
+msgid "Straight Flush"
+msgstr "Флешь Стрит"
+
+msgid "4 of a Kind"
+msgstr "Четыре одинаковых"
+
+msgid "Full House"
+msgstr "Полный дом"
+
+msgid "Flush"
+msgstr "Флешь"
+
+msgid "Straight"
+msgstr "Стрит"
+
+msgid "3 of a Kind"
+msgstr "Три одинаковых"
+
+msgid "Two Pair"
+msgstr "Две пары"
+
+msgid "Pair"
+msgstr "Пара"
+
+msgid "Nothing"
+msgstr ""
 
 #: pysollib/games/special/tarock.py:214
 msgid "Wand"
@@ -8326,6 +10102,30 @@ msgstr "Сильный"
 msgid "Weak"
 msgstr "Слабый"
 
+#: pysollib/games/ultra/hanafuda_common.py:40
+msgid "Plum"
+msgstr "Слива"
+
+#: pysollib/games/ultra/hanafuda_common.py:40
+msgid "Cherry"
+msgstr "Вишня"
+
+#: pysollib/games/ultra/hanafuda_common.py:41
+msgid "Bush Clover"
+msgstr "Клевер"
+
+#: pysollib/games/ultra/hanafuda_common.py:42
+msgid "Chrysanthemum"
+msgstr "Хризантема"
+
+#: pysollib/games/ultra/hanafuda_common.py:42
+msgid "Maple"
+msgstr "Клён"
+
+#: pysollib/games/ultra/hanafuda_common.py:42
+msgid "Willow"
+msgstr "Ива"
+
 #: pysollib/games/ultra/hanafuda.py:382
 msgid "Rising"
 msgstr "Вверх"
@@ -8390,30 +10190,6 @@ msgstr "ЮВ"
 msgid "SW"
 msgstr "ЮЗ"
 
-#: pysollib/games/ultra/hanafuda_common.py:40
-msgid "Plum"
-msgstr "Слива"
-
-#: pysollib/games/ultra/hanafuda_common.py:40
-msgid "Cherry"
-msgstr "Вишня"
-
-#: pysollib/games/ultra/hanafuda_common.py:41
-msgid "Bush Clover"
-msgstr "Клевер"
-
-#: pysollib/games/ultra/hanafuda_common.py:42
-msgid "Chrysanthemum"
-msgstr "Хризантема"
-
-#: pysollib/games/ultra/hanafuda_common.py:42
-msgid "Maple"
-msgstr "Клён"
-
-#: pysollib/games/ultra/hanafuda_common.py:42
-msgid "Willow"
-msgstr "Ива"
-
 #: pysollib/games/ultra/mughal.py:259
 msgid "Silver"
 msgstr "Серебро"
@@ -8474,6 +10250,24 @@ msgstr "Подсветка отсутствия совпадения:"
 msgid "Find card"
 msgstr "Найти карту"
 
+msgid "Full picture"
+msgstr ""
+
+msgid "Icon Style"
+msgstr ""
+
+msgid "Icon Size"
+msgstr ""
+
+msgid "Small icons"
+msgstr "Маленькие пиктограммы"
+
+msgid "Large icons"
+msgstr "Большие пиктограммы"
+
+msgid "Extra large icons"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:35
 msgid "Compound"
 msgstr "Компоновка"
@@ -8503,6 +10297,15 @@ msgstr "&Файл"
 msgid "R&ecent games"
 msgstr "Выбрать н&едавнюю игру"
 
+msgid "&Clear recent games"
+msgstr ""
+
+msgid "Clear recent games"
+msgstr ""
+
+msgid "Clear the recent games list?"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:304
 msgid "Select &random game"
 msgstr "С&лучайная игра"
@@ -8510,6 +10313,9 @@ msgstr "С&лучайная игра"
 #: pysollib/ui/tktile/menubar.py:306
 msgid "&All games"
 msgstr "&Все игры"
+
+msgid "&Games played"
+msgstr "&Играли игры"
 
 #: pysollib/ui/tktile/menubar.py:309
 msgid "Games played and &won"
@@ -8526,6 +10332,9 @@ msgstr "Не&сыгранные игры"
 #: pysollib/ui/tktile/menubar.py:318
 msgid "Select game by nu&mber..."
 msgstr "Выбрать игру по &номеру..."
+
+msgid "Next game by num&ber"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:321
 msgid "Fa&vorite games"
@@ -8593,12 +10402,21 @@ msgid "&Clear bookmarks"
 msgstr "О&чистить закладки"
 
 #: pysollib/ui/tktile/menubar.py:391
-msgid "Solitaire &Wizard"
-msgstr "Конструктор пасьянсов"
+msgid "Solitaire &Wizard..."
+msgstr "Конструктор пасьянсов..."
 
 #: pysollib/ui/tktile/menubar.py:393
-msgid "&Edit current game"
-msgstr "Редактировать текущую игру"
+msgid "&Edit current game..."
+msgstr "Редактировать текущую игру..."
+
+msgid "&Delete current game"
+msgstr ""
+
+msgid "Delete game"
+msgstr ""
+
+msgid "Delete the game %s?"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:396
 msgid "&Game"
@@ -8633,8 +10451,8 @@ msgid "Log..."
 msgstr "Лог..."
 
 #: pysollib/ui/tktile/menubar.py:427
-msgid "D&emo statistics"
-msgstr "Статистика демо"
+msgid "D&emo statistics..."
+msgstr "Статистика демо..."
 
 #: pysollib/ui/tktile/menubar.py:430
 msgid "&Assist"
@@ -8649,8 +10467,11 @@ msgid "Highlight p&iles"
 msgstr "П&оказать группы"
 
 #: pysollib/ui/tktile/menubar.py:438
-msgid "&Find card"
-msgstr "&Найти карту"
+msgid "&Find card..."
+msgstr "&Найти карту..."
+
+msgid "Sh&ow full picture..."
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:442
 msgid "&Demo"
@@ -8662,8 +10483,8 @@ msgstr "Демо (&все игры)"
 
 #: pysollib/ui/tktile/menubar.py:448 pysollib/ui/tktile/menubar.py:450
 #, fuzzy
-msgid "&Solver"
-msgstr "Серебро"
+msgid "&Solver..."
+msgstr "Серебро..."
 
 #: pysollib/ui/tktile/menubar.py:453
 msgid "&Piles description"
@@ -8717,6 +10538,9 @@ msgstr "Разрешить &подсказки"
 msgid "Enable shu&ffle"
 msgstr "Разрешить перемешивание &фишек"
 
+msgid "Free hin&ts"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:491
 msgid "Enable highlight p&iles"
 msgstr "Разрешить показывать к&учи"
@@ -8729,9 +10553,15 @@ msgstr "Разрешить показывать &карты"
 msgid "Enable highlight same &rank"
 msgstr "Разрешить показывать карты &одного достоинства"
 
+msgid "Enable face-down &peek"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:503
 msgid "Highlight &no matching"
 msgstr "Подсветка отсутствия &совпадения"
+
+msgid "Stuc&k notification"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:508
 msgid "&Show removed tiles (in Mahjongg games)"
@@ -8740,6 +10570,12 @@ msgstr "Показывать удалённые (в Маджонг)"
 #: pysollib/ui/tktile/menubar.py:512
 msgid "Show hint &arrow (in Shisen-Sho games)"
 msgstr "Показывать стрелку (в Шисен-Сё)"
+
+msgid "&Deal all cards (in Accordion type games)"
+msgstr ""
+
+msgid "A&uto-remove first card (in Pegged games)"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:516
 msgid "&Sound..."
@@ -8757,9 +10593,52 @@ msgstr "&Увеличить размер карт"
 msgid "&Decrease the card size"
 msgstr "У&меньшить размер карт"
 
+#, fuzzy
+#| msgid "&Increase the card size"
+msgid "&Reset the card size"
+msgstr "&Увеличить размер карт"
+
 #: pysollib/ui/tktile/menubar.py:535
 msgid "&Auto scaling"
 msgstr "Автоматическое изменение размера"
+
+#, fuzzy
+#| msgid "Preserve aspect ratio"
+msgid "&Preserve aspect ratio"
+msgstr "Сохранять соотношение сторон"
+
+msgid "R&esampling"
+msgstr ""
+
+msgid "&Nearest Neighbor"
+msgstr ""
+
+msgid "&Bilinear"
+msgstr ""
+
+msgid "B&icubic"
+msgstr ""
+
+msgid "&Lanczos"
+msgstr ""
+
+msgid "&Antialiasing"
+msgstr ""
+
+msgid "B&ox"
+msgstr ""
+
+msgid "&Hamming"
+msgstr ""
+
+msgid "Card la&yout"
+msgstr ""
+
+msgid "&Spread stacks"
+msgstr ""
+
+msgid "&Center layout"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:540
 msgid "Cards&et..."
@@ -8793,6 +10672,12 @@ msgstr "&Негативные контуры карты"
 msgid "Shade &filled stacks"
 msgstr "Затемнять заполненные ячейки"
 
+msgid "&Compact long stacks"
+msgstr ""
+
+msgid "&Randomize card placement"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:566
 msgid "A&nimations"
 msgstr "Анимаци&я"
@@ -8824,6 +10709,9 @@ msgstr "&Очень медленная"
 #: pysollib/ui/tktile/menubar.py:587
 msgid "&Redeal animation"
 msgstr "Анимация пере&сдачи"
+
+msgid "F&lip animation"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:592
 msgid "&Winning animation"
@@ -8885,9 +10773,24 @@ msgstr "Показывать панель помощи"
 msgid "Save games &geometry"
 msgstr "Сохранение &геометрии игры"
 
+msgid "Othe&r graphics"
+msgstr ""
+
 #: pysollib/ui/tktile/menubar.py:637
 msgid "&Demo logo"
 msgstr "Д&емо лого"
+
+msgid "D&ialog icons"
+msgstr ""
+
+msgid "&Pause text"
+msgstr ""
+
+msgid "&Redeal icons"
+msgstr ""
+
+msgid "&Tree icons"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:640
 msgid "Startup splash sc&reen"
@@ -8902,12 +10805,20 @@ msgid "&Contents"
 msgstr "&Содержание"
 
 #: pysollib/ui/tktile/menubar.py:654
-msgid "&How to play"
+#, fuzzy
+#| msgid "&How to play"
+msgid "&How to use PySol"
 msgstr "Как &играть"
 
 #: pysollib/ui/tktile/menubar.py:657
 msgid "&Rules for this game"
 msgstr "&Правила текущей игры"
+
+msgid "What's &new?"
+msgstr ""
+
+msgid "R&eport a Bug"
+msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:660
 msgid "&License terms"
@@ -9059,6 +10970,9 @@ msgstr "Только пиктограммы"
 msgid "Text below icons"
 msgstr "Текст под пиктограммами"
 
+msgid "Text above icons"
+msgstr ""
+
 #: pysollib/ui/tktile/tkconst.py:55
 msgid "Text beside icons"
 msgstr "Текст рядом с пиктограммами"
@@ -9083,8 +10997,86 @@ msgstr "Всего ходов"
 msgid "Set font"
 msgstr "Настроить шрифт"
 
+#~ msgid "Beatle"
+#~ msgstr "Жук"
+
+#~ msgid "Big Flying Dragon"
+#~ msgstr "Большой Летящий Дракон"
+
+#~ msgid "Double Klondike by Threes"
+#~ msgstr "Двойной Клондайк по три"
+
+#~ msgid "Double Mahjongg Big Flying Dragon"
+#~ msgstr "Двойной Маджонг Большой Летящий Дракон"
+
+#~ msgid "Five Pyramids"
+#~ msgstr "Пять пирамид"
+
+#~ msgid "Flowers"
+#~ msgstr "Цветы"
+
+#~ msgid "Flying Dragon"
+#~ msgstr "Летящий дракон"
+
+#~ msgid "Hex A Klon by Threes"
+#~ msgstr "Шестнадцатиричный Клондайк по три"
+
+#~ msgid "Klondike by Threes"
+#~ msgstr "Клондайк по три"
+
+#~ msgid "Lion"
+#~ msgstr "Лев"
+
+#~ msgid "Lost "
+#~ msgstr "Потеря"
+
+#~ msgid "Mahjongg Beatle"
+#~ msgstr "Маджонг Жук"
+
+#~ msgid "Mahjongg Five Pyramids"
+#~ msgstr "Маджонг Пять пирамид"
+
+#~ msgid "Mahjongg Flowers"
+#~ msgstr "Маджонг Цветы"
+
+#~ msgid "Mahjongg Flying Dragon"
+#~ msgstr "Маджонг Летящий Дракон"
+
+#~ msgid "Mahjongg Lion"
+#~ msgstr "Маджонг Лион"
+
+#~ msgid "Mahjongg Lost "
+#~ msgstr "Маджонг Потеря"
+
+#~ msgid "Mahjongg New Layout"
+#~ msgstr "Маджонг Новый расклад"
+
+#~ msgid "New Layout"
+#~ msgstr "Новый расклад"
+
+#~ msgid "Triple Klondike by Threes"
+#~ msgstr "Тройной Клондайк по три"
+
+#~ msgid "Mahjongg Temple"
+#~ msgstr "Маджонг Храм"
+
+#~ msgid "Peek II"
+#~ msgstr "Взгляд II"
+
+#~ msgid "Temple"
+#~ msgstr "Храм"
+
+#~ msgid "Three Peaks Non-scoring"
+#~ msgstr "Три вершины без подсчёта очков"
+
 #~ msgid "Monaco"
 #~ msgstr "Монако"
+
+#~ msgid "How to play"
+#~ msgstr "Как играть"
+
+#~ msgid "XLarge cardsets"
+#~ msgstr "Очень большие колоды"
 
 #, fuzzy
 #~ msgid "This will take effect after the next restart of the app"
@@ -9153,9 +11145,3 @@ msgstr "Настроить шрифт"
 
 #~ msgid "Style"
 #~ msgstr "Стиль"
-
-#~ msgid "Small icons"
-#~ msgstr "Маленькие пиктограммы"
-
-#~ msgid "Large icons"
-#~ msgstr "Большие пиктограммы"

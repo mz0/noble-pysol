@@ -269,22 +269,35 @@ class Stack:
         if self.is_visible:
             self.initBindings()
 
+    def _calcMouseBind(self, binding_format):
+        return self.game.app.opt.calcCustomMouseButtonsBinding(binding_format)
+
     # bindings {view widgets bind to controller}
     def initBindings(self):
         group = self.group
-        bind(group, "<1>", self.__clickEventHandler)
+        bind(group, self._calcMouseBind("<{mouse_button1}>"),
+             self.__clickEventHandler)
         # bind(group, "<B1-Motion>", self.__motionEventHandler)
         bind(group, "<Motion>", self.__motionEventHandler)
-        bind(group, "<ButtonRelease-1>", self.__releaseEventHandler)
-        bind(group, "<Control-1>", self.__controlclickEventHandler)
-        bind(group, "<Shift-1>", self.__shiftclickEventHandler)
-        bind(group, "<Double-1>", self.__doubleclickEventHandler)
-        bind(group, "<3>", self.__rightclickEventHandler)
-        bind(group, "<2>", self.__middleclickEventHandler)
-        bind(group, "<Control-3>", self.__middleclickEventHandler)
-        # bind(group, "<Control-2>", self.__controlmiddleclickEventHandler)
-        # bind(group, "<Shift-3>", self.__shiftrightclickEventHandler)
-        # bind(group, "<Double-2>", "")
+        bind(group, self._calcMouseBind("<ButtonRelease-{mouse_button1}>"),
+             self.__releaseEventHandler)
+        bind(group, self._calcMouseBind("<Control-{mouse_button1}>"),
+             self.__controlclickEventHandler)
+        bind(group, self._calcMouseBind("<Shift-{mouse_button1}>"),
+             self.__shiftclickEventHandler)
+        bind(group, self._calcMouseBind("<Double-{mouse_button1}>"),
+             self.__doubleclickEventHandler)
+        bind(group, self._calcMouseBind("<{mouse_button3}>"),
+             self.__rightclickEventHandler)
+        bind(group, self._calcMouseBind("<{mouse_button2}>"),
+             self.__middleclickEventHandler)
+        bind(group, self._calcMouseBind("<Control-{mouse_button3}>"),
+             self.__middleclickEventHandler)
+        # bind(group, self._calcMouseBind(
+        # "<Control-{mouse_button2}>"), self.__controlmiddleclickEventHandler)
+        # bind(group, self._calcMouseBind("<Shift-{mouse_button3}>"),
+        # self.__shiftrightclickEventHandler)
+        # bind(group, self._calcMouseBind("<Double-{mouse_button2}>"), "")
         bind(group, "<Enter>", self.__enterEventHandler)
         bind(group, "<Leave>", self.__leaveEventHandler)
 
@@ -838,11 +851,15 @@ class Stack:
             return True
         return False
 
-    def resize(self, xf, yf):
+    def resize(self, xf, yf, widthpad=0, heightpad=0):
         # resize and move stack
         # xf, yf - a multiplicative factor (from the original values)
         # print 'Stack.resize:', self, self.is_visible, xf, yf
         x0, y0 = self.init_coord
+        if (x0 > 0):
+            x0 += widthpad
+        if (y0 > 0):
+            y0 += heightpad
         x, y = int(round(x0*xf)), int(round(y0*yf))
         self.x, self.y = x, y
         # offsets
@@ -880,8 +897,8 @@ class Stack:
         # move the items
         def move(item):
             ix, iy = item.init_coord
-            x = int(round(ix*xf))
-            y = int(round(iy*yf))
+            x = int(round((ix + widthpad) * xf))
+            y = int(round((iy + heightpad) * yf))
             item.moveTo(x, y)
         # images
         if self.images.redeal:
@@ -999,17 +1016,31 @@ class Stack:
             return 0
         i = self._findCard(event)
         positions = len(self.cards) - i - 1
-        if i < 0 or positions <= 0 or not self.cards[i].face_up:
+        peeked = False
+        if i < 0:
+            return 0
+        if not self.cards[i].face_up:
+            if not self.game.app.opt.peek_facedown:
+                return 0
+            else:
+                self.game.stats.peeks += 1
+                self.cards[i].showFace()
+                peeked = True
+        elif positions <= 0:
             return 0
         # print self.cards[i]
         self.cards[i].item.tkraise()
         self.canvas.update_idletasks()
         self.game.sleep(self.game.app.opt.timeouts['raise_card'])
-        if TOOLKIT == 'tk':
-            self.cards[i].item.lower(self.cards[i+1].item)
-        elif TOOLKIT == 'gtk':
-            for c in self.cards[i+1:]:
-                c.tkraise()
+        if peeked:
+            self.cards[i].showBack()
+        if positions > 0:
+            if TOOLKIT == 'tk':
+                self.cards[i].item.lower(self.cards[i+1].item)
+            elif TOOLKIT == 'gtk':
+                for c in self.cards[i+1:]:
+                    c.tkraise()
+
         self.canvas.update_idletasks()
         return 1
 
@@ -1106,7 +1137,7 @@ class Stack:
         if start_drag:
             # this handler may start a drag operation
             r = handler(event)
-            if r <= 0:
+            if r is not None and r <= 0:
                 sound = r == 0
                 self.startDrag(event, sound=sound)
         else:
@@ -1826,6 +1857,14 @@ class TalonStack(Stack,
         for stack in self.game.allstacks:
             stack.updateText()
 
+    def updateRedealImage(self):
+        deal = self.canDealCards() != 0
+        if self.images.redeal is not None:
+            img = (self.getRedealImages())[deal]
+            if img is not None and img is not self.images.redeal_img:
+                self.images.redeal.config(image=img)
+                self.images.redeal_img = img
+
     def updateText(self, update_rounds=1, update_redeal=1):
         # assertView(self)
         Stack.updateText(self)
@@ -1850,6 +1889,7 @@ class TalonStack(Stack,
 
     def _addRedealImage(self):
         # add or remove the redeal image/text
+
         if not self.is_visible or self.images.bottom is None:
             return
         if self.game.preview > 1:
@@ -1875,13 +1915,18 @@ class TalonStack(Stack,
             img = (self.getRedealImages())[self.max_rounds != 1]
             if img is not None:
                 self.images.redeal_img = img
-                self.images.redeal = MfxCanvasImage(self.canvas,
-                                                    cx, cy, image=img,
-                                                    anchor="center",
-                                                    group=self.group)
                 if TOOLKIT == 'tk':
+                    self.images.redeal = MfxCanvasImage(self.canvas,
+                                                        cx, cy, image=img,
+                                                        anchor="center",
+                                                        group=self.group)
                     self.images.redeal.tkraise(self.top_bottom)
                 elif TOOLKIT == 'kivy':
+                    self.images.redeal = MfxCanvasImage(self.canvas,
+                                                        cx, cy, image=img,
+                                                        anchor="center",
+                                                        group=self.group,
+                                                        hint="redeal_image")
                     self.images.redeal.tkraise(self.top_bottom)
                 elif TOOLKIT == 'gtk':
                     # FIXME
@@ -1954,15 +1999,27 @@ class TalonStack(Stack,
     # def getBaseCard(self):
     #    return self._getBaseCard()
 
-    def resize(self, xf, yf):
+    def resize(self, xf, yf, widthpad=0, heightpad=0):
         self._addRedealImage()
-        Stack.resize(self, xf, yf)
+        Stack.resize(self, xf, yf, widthpad=widthpad, heightpad=heightpad)
+
+
+# Use for games that do not allow manual dealing from the talon.
+class AutoDealTalonStack(TalonStack):
+    def canDealCards(self):
+        return False
 
 
 # A single click deals one card to each of the RowStacks.
 class DealRowTalonStack(TalonStack):
     def dealCards(self, sound=False):
         return self.dealRowAvail(sound=sound)
+
+
+# A single click deals one card to each of the RowStacks.
+class DealFirstRowTalonStack(TalonStack):
+    def dealCards(self, sound=False):
+        return self.dealRowAvail(sound=sound, rows=(self.game.s.rows[0],))
 
 
 # For games where the Talon is only used for the initial dealing.
@@ -2017,6 +2074,17 @@ class DealRowRedealTalonStack(TalonStack, RedealCards_StackMethods):
     def shuffleAndDealCards(self, sound=False, rows=None):
         DealRowRedealTalonStack.dealCards(self, sound=sound,
                                           rows=rows, shuffle=True)
+
+
+class DealFirstRowRedealTalonStack(DealRowRedealTalonStack):
+
+    def canDealCards(self, rows=None):
+        return DealRowRedealTalonStack.canDealCards(
+            self, rows=self.game.s.reserves)
+
+    def dealCards(self, sound=False, rows=None):
+        return DealRowRedealTalonStack.dealCards(
+            self, sound=sound, rows=(self.game.s.rows[0],))
 
 
 class DealReserveRedealTalonStack(DealRowRedealTalonStack):
@@ -2226,7 +2294,7 @@ class OpenStack(Stack):
     def getHelp(self):
         if self.cap.max_accept == 0:
             return _('Reserve. No building.')
-        return ''
+        return 'Reserve.'
 
 
 # ************************************************************************
@@ -2382,6 +2450,31 @@ class SC_FoundationStack(SS_FoundationStack):
             return _('Foundation. Build by same rank.')
 
 
+# A ButOwn_FoundationStack builds up in rank and any suit but the same.
+# It is used in only a few games.
+class BO_FoundationStack(SS_FoundationStack):
+    def __init__(self, x, y, game, suit, **cap):
+        kwdefault(cap, base_suit=suit)
+        SS_FoundationStack.__init__(self, x, y, game, ANY_SUIT, **cap)
+
+    def acceptsCards(self, from_stack, cards):
+        if not SS_FoundationStack.acceptsCards(self, from_stack, cards):
+            return False
+        if self.cards:
+            # check the suit
+            if cards[0].suit == self.cards[-1].suit:
+                return False
+        return True
+
+    def getHelp(self):
+        if self.cap.dir > 0:
+            return _('Foundation. Build up in any suit but the same.')
+        elif self.cap.dir < 0:
+            return _('Foundation. Build down in any suit but the same.')
+        else:
+            return _('Foundation. Build by same rank.')
+
+
 # Spider-type foundations
 class Spider_SS_Foundation(AbstractFoundationStack):
     def __init__(self, x, y, game, suit=ANY_SUIT, **cap):
@@ -2404,6 +2497,14 @@ class Spider_AC_Foundation(Spider_SS_Foundation):
         return isAlternateColorSequence(cards, self.cap.mod, self.cap.dir)
 
 
+class Spider_SC_Foundation(Spider_SS_Foundation):
+    def acceptsCards(self, from_stack, cards):
+        if not AbstractFoundationStack.acceptsCards(self, from_stack, cards):
+            return False
+        # now check the cards
+        return isSameColorSequence(cards, self.cap.mod, self.cap.dir)
+
+
 class Spider_RK_Foundation(Spider_SS_Foundation):
     def acceptsCards(self, from_stack, cards):
         if not AbstractFoundationStack.acceptsCards(self, from_stack, cards):
@@ -2411,6 +2512,13 @@ class Spider_RK_Foundation(Spider_SS_Foundation):
         # now check the cards
         return isRankSequence(cards, self.cap.mod, self.cap.dir)
 
+
+class Spider_BO_Foundation(Spider_SS_Foundation):
+    def acceptsCards(self, from_stack, cards):
+        if not AbstractFoundationStack.acceptsCards(self, from_stack, cards):
+            return False
+        # now check the cards
+        return isAnySuitButOwnSequence(cards, self.cap.mod, self.cap.dir)
 
 # ************************************************************************
 # * Abstract classes for row stacks.
@@ -2628,6 +2736,44 @@ class Spider_SS_RowStack(SS_RowStack):
             return _('Tableau. Build by same rank.')
 
 
+# A Spider_SameColor_RowStack builds down by rank and color,
+# but accepts sequences that match by rank only.
+class Spider_SC_RowStack(SC_RowStack):
+    def _isAcceptableSequence(self, cards):
+        return isRankSequence(cards, self.cap.mod, self.cap.dir)
+
+    def getHelp(self):
+        if self.cap.dir > 0:
+            return _('Tableau. Build up regardless of suit. '
+                     'Sequences of cards in the same color can be moved '
+                     'as a unit.')
+        elif self.cap.dir < 0:
+            return _('Tableau. Build down regardless of suit. '
+                     'Sequences of cards in the same color can be moved '
+                     'as a unit.')
+        else:
+            return _('Tableau. Build by same rank.')
+
+
+# A Spider_ButOwn_RowStack builds down by rank and any suit but own,
+# but accepts sequences that match by rank only.
+class Spider_BO_RowStack(BO_RowStack):
+    def _isAcceptableSequence(self, cards):
+        return isRankSequence(cards, self.cap.mod, self.cap.dir)
+
+    def getHelp(self):
+        if self.cap.dir > 0:
+            return _('Tableau. Build up regardless of suit. '
+                     'Sequences of cards in any suit but the same '
+                     'can be moved as a unit.')
+        elif self.cap.dir < 0:
+            return _('Tableau. Build down regardless of suit. '
+                     'Sequences of cards in any suit but the same '
+                     'can be moved as a unit.')
+        else:
+            return _('Tableau. Build by same rank.')
+
+
 # A Yukon_AlternateColor_RowStack builds down by rank and alternate color,
 # but can move any face-up cards regardless of sequence.
 class Yukon_AC_RowStack(BasicRowStack):
@@ -2683,6 +2829,25 @@ class Yukon_SS_RowStack(Yukon_AC_RowStack):
                      'face-up cards regardless of sequence.')
 
 
+# A Yukon_SameColor_RowStack builds down by rank and color,
+# but can move any face-up cards regardless of sequence.
+class Yukon_SC_RowStack(Yukon_AC_RowStack):
+    def _isYukonSequence(self, c1, c2):
+        return ((c1.rank + self.cap.dir) % self.cap.mod == c2.rank and
+                c1.color == c2.color)
+
+    def getHelp(self):
+        if self.cap.dir > 0:
+            return _('Tableau. Build up by color, can move any face-up cards '
+                     'regardless of sequence.')
+        elif self.cap.dir < 0:
+            return _('Tableau. Build down by color, can move any '
+                     'face-up cards regardless of sequence.')
+        else:
+            return _('Tableau. Build by same rank, can move any '
+                     'face-up cards regardless of sequence.')
+
+
 # A Yukon_Rank_RowStack builds down by rank
 # but can move any face-up cards regardless of sequence.
 class Yukon_RK_RowStack(Yukon_AC_RowStack):
@@ -2696,6 +2861,25 @@ class Yukon_RK_RowStack(Yukon_AC_RowStack):
         elif self.cap.dir < 0:
             return _('Tableau. Build up regardless of suit, can move any '
                      'face-up cards regardless of sequence.')
+        else:
+            return _('Tableau. Build by same rank, can move any '
+                     'face-up cards regardless of sequence.')
+
+
+# A Yukon_ButOwn_RowStack builds down by rank and suit,
+# but can move any face-up cards regardless of sequence.
+class Yukon_BO_RowStack(Yukon_AC_RowStack):
+    def _isYukonSequence(self, c1, c2):
+        return ((c1.rank + self.cap.dir) % self.cap.mod == c2.rank and
+                c1.suit != c2.suit)
+
+    def getHelp(self):
+        if self.cap.dir > 0:
+            return _('Tableau. Build up by any suit but the same, '
+                     'can move any face-up cards regardless of sequence.')
+        elif self.cap.dir < 0:
+            return _('Tableau. Build down by any suit but the same, '
+                     'can move any face-up cards regardless of sequence.')
         else:
             return _('Tableau. Build by same rank, can move any '
                      'face-up cards regardless of sequence.')
@@ -2778,6 +2962,20 @@ class UD_RK_RowStack(SequenceRowStack):
 
     def getHelp(self):
         return _('Tableau. Build up or down regardless of suit.')
+
+
+# up or down by rank ignoring suit
+class UD_BO_RowStack(SequenceRowStack):
+    def __init__(self, x, y, game, **cap):
+        kwdefault(cap, max_move=1, max_accept=1)
+        SequenceRowStack.__init__(self, x, y, game, **cap)
+
+    def _isSequence(self, cards):
+        return (isAnySuitButOwnSequence(cards, self.cap.mod, 1) or
+                isAnySuitButOwnSequence(cards, self.cap.mod, -1))
+
+    def getHelp(self):
+        return _('Tableau. Build up or down in any suit but the same.')
 
 
 # To simplify playing we also consider the number of free rows.

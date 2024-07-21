@@ -35,9 +35,11 @@ from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import \
         AC_RowStack, \
         BO_RowStack, \
+        DealFirstRowTalonStack, \
         DealRowTalonStack, \
         InitialDealTalonStack, \
         KingAC_RowStack, \
+        KingSS_RowStack, \
         OpenStack, \
         OpenTalonStack, \
         RK_FoundationStack, \
@@ -47,6 +49,7 @@ from pysollib.stack import \
         SC_RowStack, \
         SS_FoundationStack, \
         SS_RowStack, \
+        Spider_SS_RowStack, \
         Stack, \
         StackWrapper, \
         SuperMoveAC_RowStack, \
@@ -54,7 +57,7 @@ from pysollib.stack import \
         WasteStack, \
         WasteTalonStack, \
         isSameColorSequence
-from pysollib.util import ACE, ANY_RANK, ANY_SUIT, KING, NO_RANK
+from pysollib.util import ACE, ANY_RANK, ANY_SUIT, KING, NO_RANK, RANKS
 
 # ************************************************************************
 # * Klondike
@@ -68,10 +71,10 @@ class Klondike(Game):
     RowStack_Class = KingAC_RowStack
     Hint_Class = KlondikeType_Hint
 
-    def createGame(self, max_rounds=-1, num_deal=1, **layout):
+    def createGame(self, max_rounds=-1, num_deal=1, rows=7, **layout):
         # create layout
         lay, s = Layout(self), self.s
-        kwdefault(layout, rows=7, waste=1, texts=1, playcards=16)
+        kwdefault(layout, rows=rows, waste=1, texts=1, playcards=16)
         self.Layout_Method.__get__(lay, lay.__class__)(**layout)
         # self.__class__.Layout_Method(lay, **layout)
         self.setSize(lay.size[0], lay.size[1])
@@ -149,6 +152,116 @@ class KlondikeByThrees(Klondike):
 
 
 # ************************************************************************
+# * Half Klondike
+# ************************************************************************
+
+class HalfKlondike(Klondike):
+    def createGame(self):
+        Klondike.createGame(self, rows=4)
+
+
+# ************************************************************************
+# * Trigon
+# ************************************************************************
+
+class Trigon(Klondike):
+    RowStack_Class = KingSS_RowStack
+
+
+# ************************************************************************
+# * Nine Across
+# ************************************************************************
+
+class NineAcross_RowStack(AC_RowStack):
+    def __init__(self, x, y, game, **cap):
+        kwdefault(cap, mod=13)
+        AC_RowStack.__init__(self, x, y, game, **cap)
+
+    def acceptsCards(self, from_stack, cards):
+        if not self.cards:
+            if self.game.base_rank == ANY_RANK:
+                return False
+            elif self.game.base_rank == ACE:
+                if cards[0].rank != KING:
+                    return False
+            elif cards[0].rank != self.game.base_rank - 1:
+                return False
+        return AC_RowStack.acceptsCards(self, from_stack, cards)
+
+    def moveMove(self, ncards, to_stack, frames=-1, shadow=-1):
+        self.game.moveMove(
+            ncards, self, to_stack, frames=frames, shadow=shadow)
+        if to_stack in self.game.s.foundations and \
+                self.game.base_rank == ANY_RANK:
+            old_state = self.game.enterState(self.game.S_FILL)
+            self.game.saveStateMove(2 | 16)  # for undo
+            r = to_stack.cards[0].rank
+            for s in self.game.s.foundations:
+                s.cap.base_rank = r
+            self.game.base_rank = r
+            self.game.saveStateMove(1 | 16)  # for redo
+            self.game.leaveState(old_state)
+
+
+class NineAcross(Klondike):
+    Foundation_Class = StackWrapper(SS_FoundationStack, base_rank=ANY_RANK,
+                                    mod=13)
+    RowStack_Class = NineAcross_RowStack
+
+    base_rank = ANY_RANK
+
+    def createGame(self):
+        lay = Klondike.createGame(self, rows=9)
+
+        tx, ty, ta, tf = lay.getTextAttr(self.s.foundations[0], "s")
+
+        self.texts.info = \
+            MfxCanvasText(self.canvas, tx, ty, anchor=ta,
+                          font=self.app.getFont("canvas_default"))
+
+    def startGame(self):
+        self.base_rank = ANY_RANK
+        for s in self.s.foundations:
+            s.cap.base_rank = ANY_RANK
+        self.updateText()
+        Klondike.startGame(self)
+
+    def updateText(self):
+        if self.preview > 1:
+            return
+        if not self.texts.info:
+            return
+        if self.base_rank == ANY_RANK:
+            t = ""
+        else:
+            t = RANKS[self.base_rank]
+        self.texts.info.config(text=t)
+
+    def _restoreGameHook(self, game):
+        self.base_rank = game.loadinfo.base_rank
+        for s in self.s.foundations:
+            s.cap.base_rank = self.base_rank
+
+    def _loadGameHook(self, p):
+        self.loadinfo.addattr(base_rank=p.load())
+
+    def _saveGameHook(self, p):
+        base_rank = self.base_rank
+        p.dump(base_rank)
+
+    def setState(self, state):
+        # restore saved vars (from undo/redo)
+        self.base_rank = state[0]
+        for s in self.s.foundations:
+            s.cap.base_rank = state[0]
+            break
+
+    def getState(self):
+        # save vars (for undo/redo)
+        return [self.base_rank]
+
+
+# ************************************************************************
 # * Thumb and Pouch
 # * Chinaman
 # ************************************************************************
@@ -199,6 +312,18 @@ class Whitehead(Klondike):
 
     shallHighlightMatch = Game._shallHighlightMatch_SS
     getQuickPlayScore = Game._getSpiderQuickPlayScore
+
+
+# ************************************************************************
+# * Smokey
+# ************************************************************************
+
+class Smokey(Klondike):
+    RowStack_Class = StackWrapper(Whitehead_RowStack, base_rank=KING)
+    Hint_Class = CautiousDefaultHint
+
+    def createGame(self):
+        Klondike.createGame(self, max_rounds=3)
 
 
 # ************************************************************************
@@ -344,6 +469,68 @@ class Usk(Somerset):
             n += 1
 
 # ************************************************************************
+# * Wildcards
+# ************************************************************************
+
+
+class Wildcards_RowStack(SuperMoveAC_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not self.basicAcceptsCards(from_stack, cards):
+            return 0
+        stackcards = self.cards
+        if stackcards:
+            if (stackcards[-1].suit == 4 or cards[0].suit == 4):
+                return 1
+        return AC_RowStack.acceptsCards(self, from_stack, cards)
+
+
+class Wildcards_Foundation(SS_FoundationStack):
+    def acceptsCards(self, from_stack, cards):
+        if self.cap.suit == 4 and cards[0].suit == 4:
+            for s in self.game.s.foundations[:3]:
+                if len(s.cards) != 13:
+                    return 0
+            return 1
+        return SS_FoundationStack.acceptsCards(self, from_stack, cards)
+
+
+class Wildcards(Somerset):
+    RowStack_Class = Wildcards_RowStack
+    Foundation_Class = Wildcards_Foundation
+
+    def startGame(self):
+        for i in range(7):
+            self.s.talon.dealRow(rows=self.s.rows[i:], frames=0)
+        self.startDealSample()
+        self.s.talon.dealRow(rows=self.s.rows[7:])
+        self.s.talon.dealRow(rows=self.s.rows[8:])
+
+
+# ************************************************************************
+# * Joke Klon
+# ************************************************************************
+
+class JokeKlon_RowStack(KingAC_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        stackcards = self.cards
+        if (stackcards and stackcards[-1].suit == 4) or cards[0].suit == 4:
+            return 1
+        if not self.basicAcceptsCards(from_stack, cards):
+            return 0
+        return KingAC_RowStack.acceptsCards(self, from_stack, cards)
+
+
+class JokeKlon(Klondike):
+    RowStack_Class = JokeKlon_RowStack
+    Foundation_Class = Wildcards_Foundation
+
+
+class JokeKlonByThrees(KlondikeByThrees):
+    RowStack_Class = JokeKlon_RowStack
+    Foundation_Class = Wildcards_Foundation
+
+
+# ************************************************************************
 # * Canister
 # * American Canister
 # * British Canister
@@ -487,27 +674,30 @@ class BatsfordAgain(Batsford):
 
 # ************************************************************************
 # * Jumbo
+# * (Removed as it's a duplicate of Gargantua)
 # ************************************************************************
 
-class Jumbo(Klondike):
-    def createGame(self):
-        lay = Klondike.createGame(self, rows=9, max_rounds=2, round_text=True)
-        lay.createRoundText(self.s.talon, 'ne', dx=lay.XS)
-
-    def startGame(self, flip=0):
-        for i in range(9):
-            self.s.talon.dealRow(rows=self.s.rows[:i], flip=flip, frames=0)
-        self._startAndDealRowAndCards()
-
-
-class OpenJumbo(Jumbo):
-    def startGame(self):
-        Jumbo.startGame(self, flip=1)
+# class Jumbo(Klondike):
+#     def createGame(self):
+#         lay = Klondike.createGame(self, rows=9, max_rounds=2,
+#                                   round_text=True)
+#         lay.createRoundText(self.s.talon, 'ne', dx=lay.XS)
+#
+#     def startGame(self, flip=0):
+#         for i in range(9):
+#             self.s.talon.dealRow(rows=self.s.rows[:i], flip=flip, frames=0)
+#         self._startAndDealRowAndCards()
+#
+#
+# class OpenJumbo(Jumbo):
+#     def startGame(self):
+#         Jumbo.startGame(self, flip=1)
 
 
 # ************************************************************************
 # * Stonewall
 # * Flower Garden
+# * Wildflower
 # ************************************************************************
 
 class Stonewall(Klondike):
@@ -547,10 +737,15 @@ class FlowerGarden(Stonewall):
     shallHighlightMatch = Game._shallHighlightMatch_RK
 
 
+class Wildflower(FlowerGarden):
+    RowStack_Class = Spider_SS_RowStack
+
+
 # ************************************************************************
 # * King Albert
 # * Raglan
 # * Brigade
+# * Relaxed Raglan
 # * Queen Victoria
 # ************************************************************************
 
@@ -612,6 +807,10 @@ class Brigade(Raglan):
     shallHighlightMatch = Game._shallHighlightMatch_RK
 
 
+class RelaxedRaglan(Raglan):
+    RowStack_Class = AC_RowStack
+
+
 class QueenVictoria(KingAlbert):
     RowStack_Class = AC_RowStack
 
@@ -619,6 +818,7 @@ class QueenVictoria(KingAlbert):
 # ************************************************************************
 # * Jane
 # * Agnes Bernauer
+# * Agnes Two
 # ************************************************************************
 
 class Jane_Talon(OpenTalonStack):
@@ -652,9 +852,10 @@ class Jane(Klondike):
     def createGame(self, max_rounds=1, rows=7, reserves=7, playcards=16):
         lay, s = Layout(self), self.s
         maxrows = max(rows, 7)
-        w = lay.XM+maxrows*lay.XS+lay.XM+2*lay.XS
-        h = max(lay.YM+2*lay.YS+playcards*lay.YOFFSET+lay.TEXT_HEIGHT,
-                lay.YM+4*lay.YS)
+        w = lay.XM + maxrows * lay.XS + lay.XM + 2 * lay.XS
+        h = max(lay.YM + 2 * lay.YS + playcards * lay.YOFFSET
+                + lay.TEXT_HEIGHT,
+                lay.YM + ((reserves + 1) / 2) * lay.YS)
         self.setSize(w, h)
 
         x, y = lay.XM, lay.YM
@@ -663,10 +864,11 @@ class Jane(Klondike):
         x += lay.XS
         s.waste = WasteStack(x, y, self)
 
-        x += 2*lay.XS
+        x += (rows - 1 - (4 * self.gameinfo.decks)) * lay.XS
         for i in range(4):
-            s.foundations.append(self.Foundation_Class(x, y, self, suit=i))
-            x += lay.XS
+            for j in range(self.gameinfo.decks):
+                s.foundations.append(self.Foundation_Class(x, y, self, suit=i))
+                x += lay.XS
 
         x, y = lay.XM, lay.YM+lay.YS+lay.TEXT_HEIGHT
         for i in range(rows):
@@ -720,6 +922,11 @@ class AgnesBernauer(Jane):
         Jane.startGame(self, flip=1)
 
 
+class AgnesTwo(AgnesBernauer):
+    def createGame(self):
+        Jane.createGame(self, rows=10, reserves=10, playcards=20)
+
+
 # ************************************************************************
 # * Senate
 # ************************************************************************
@@ -727,12 +934,12 @@ class AgnesBernauer(Jane):
 class Senate(Jane):
 
     def createGame(self, rows=4):
-
         playcards = 10
 
         lay, s = Layout(self), self.s
-        self.setSize(lay.XM+(rows+7)*lay.XS,
-                     lay.YM+2*(lay.YS+playcards*lay.YOFFSET))
+        self.setSize(lay.XM + (rows + 7) * lay.XS,
+                     max(lay.YM + 2 * (lay.YS + playcards * lay.YOFFSET),
+                         lay.YS * 5))
 
         x, y = lay.XM, lay.YM
         for i in range(rows):
@@ -853,7 +1060,9 @@ class Lanes(Klondike):
 
 
 # ************************************************************************
-# * Thirty Six
+# * Thirty-Six
+# * Six By Six
+# * Taking Silk
 # ************************************************************************
 
 class ThirtySix(Klondike):
@@ -869,7 +1078,7 @@ class ThirtySix(Klondike):
             if r.cards:
                 c = r.cards[-1]
                 for f in self.s.foundations:
-                    if f.acceptsCards(r, [c]):
+                    if f.acceptsCards(r, [c]) and c.rank == ACE:
                         self.moveMove(1, r, f, frames=4, shadow=0)
                         return 1
         return 0
@@ -886,6 +1095,27 @@ class ThirtySix(Klondike):
     shallHighlightMatch = Game._shallHighlightMatch_RK
 
 
+class SixBySix(ThirtySix):
+
+    Talon_Class = StackWrapper(DealFirstRowTalonStack, max_move=0)
+    RowStack_Class = StackWrapper(Spider_SS_RowStack, base_rank=ANY_RANK)
+
+    def createGame(self):
+        Klondike.createGame(self, rows=6, max_rounds=1, waste=0)
+
+    def startGame(self):
+        self.startDealSample()
+        for i in range(6):
+            self.s.talon.dealRow()
+            while True:
+                if not self._fillOne():
+                    break
+
+
+class TakingSilk(ThirtySix):
+    pass
+
+
 # ************************************************************************
 # * Q.C.
 # ************************************************************************
@@ -898,7 +1128,7 @@ class Q_C_(Klondike):
 
     def createGame(self):
         lay = Klondike.createGame(self, rows=6, max_rounds=2)
-        lay.createRoundText(self.s.talon, 'sss')
+        lay.createRoundText(self.s.talon, 'n')
 
     def startGame(self):
         self._startDealNumRows(3)
@@ -938,6 +1168,7 @@ class Q_C_(Klondike):
 # ************************************************************************
 # * Northwest Territory
 # * Artic Garden
+# * Klondike Territory
 # ************************************************************************
 
 class NorthwestTerritory(KingAlbert):
@@ -954,6 +1185,11 @@ class ArticGarden(NorthwestTerritory):
     def startGame(self):
         Klondike.startGame(self, flip=1, reverse=0)
         self.s.talon.dealRow(rows=self.s.reserves)
+
+
+class KlondikeTerritory(NorthwestTerritory):
+    RESERVES = (6, 6, 6, 6)
+    ROWS = 7
 
 
 # ************************************************************************
@@ -1383,12 +1619,13 @@ class EightSages(Klondike):
 
 # register the game
 registerGame(GameInfo(2, Klondike, "Klondike",
-                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
+                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED,
+                      altnames=("Classic Solitaire", "American Patience")))
 registerGame(GameInfo(61, CasinoKlondike, "Casino Klondike",
                       GI.GT_KLONDIKE | GI.GT_SCORE, 1, 2, GI.SL_BALANCED))
 registerGame(GameInfo(129, VegasKlondike, "Vegas Klondike",
                       GI.GT_KLONDIKE | GI.GT_SCORE, 1, 0, GI.SL_BALANCED))
-registerGame(GameInfo(18, KlondikeByThrees, "Klondike by Threes",
+registerGame(GameInfo(18, KlondikeByThrees, "Klondike (Draw 3)",
                       GI.GT_KLONDIKE, 1, -1, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(58, ThumbAndPouch, "Thumb and Pouch",
                       GI.GT_KLONDIKE, 1, 0, GI.SL_MOSTLY_LUCK))
@@ -1428,7 +1665,7 @@ registerGame(GameInfo(221, Stonewall, "Stonewall",
                       GI.GT_RAGLAN, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(222, FlowerGarden, "Flower Garden",
                       GI.GT_RAGLAN | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
-                      altnames=("The Bouquet", "The Garden",)))
+                      altnames=("The Bouquet", "The Garden", "Le Parterre")))
 registerGame(GameInfo(233, KingAlbert, "King Albert",
                       GI.GT_RAGLAN | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
                       altnames=("Idiot's Delight",)))
@@ -1442,16 +1679,17 @@ registerGame(GameInfo(236, AgnesBernauer, "Agnes Bernauer",
                       GI.GT_RAGLAN, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(263, Phoenix, "Phoenix",
                       GI.GT_RAGLAN | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(283, Jumbo, "Jumbo",
-                      GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
-registerGame(GameInfo(333, OpenJumbo, "Open Jumbo",
-                      GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
+# registerGame(GameInfo(283, Jumbo, "Jumbo",
+#                       GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
+# registerGame(GameInfo(333, OpenJumbo, "Open Jumbo",
+#                       GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
 registerGame(GameInfo(326, Lanes, "Lanes",
                       GI.GT_KLONDIKE, 1, 1, GI.SL_BALANCED))
-registerGame(GameInfo(327, ThirtySix, "Thirty Six",
+registerGame(GameInfo(327, ThirtySix, "Thirty-Six",
                       GI.GT_KLONDIKE, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(350, Q_C_, "Q.C.",
-                      GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
+                      GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED,
+                      altnames=("K.C.",)))
 registerGame(GameInfo(361, NorthwestTerritory, "Northwest Territory",
                       GI.GT_RAGLAN, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(362, Morehead, "Morehead",
@@ -1466,7 +1704,7 @@ registerGame(GameInfo(390, Arizona, "Arizona",
 registerGame(GameInfo(407, AuntMary, "Aunt Mary",
                       GI.GT_KLONDIKE, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(420, DoubleDot, "Double Dot",
-                      GI.GT_KLONDIKE, 1, 0, GI.SL_BALANCED))
+                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(434, SevenDevils, "Seven Devils",
                       GI.GT_RAGLAN, 2, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(452, DoubleEasthaven, "Double Easthaven",
@@ -1484,17 +1722,19 @@ registerGame(GameInfo(474, AliBaba, "Ali Baba",
 registerGame(GameInfo(475, Cassim, "Cassim",
                       GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
 registerGame(GameInfo(479, Saratoga, "Saratoga",
-                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
+                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED,
+                      altnames=("Thoughtful",)))
 registerGame(GameInfo(491, Whitehorse, "Whitehorse",
                       GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
 registerGame(GameInfo(518, Boost, "Boost",
-                      GI.GT_KLONDIKE | GI.GT_ORIGINAL, 1, 2, GI.SL_BALANCED))
+                      GI.GT_KLONDIKE | GI.GT_ORIGINAL, 1, 2, GI.SL_BALANCED,
+                      altnames=("Klondike Mini",)))
 registerGame(GameInfo(522, ArticGarden, "Artic Garden",
-                      GI.GT_RAGLAN, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_RAGLAN | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(532, GoldRush, "Gold Rush",
                       GI.GT_KLONDIKE, 1, 2, GI.SL_BALANCED))
 registerGame(GameInfo(539, Usk, "Usk",
-                      GI.GT_KLONDIKE, 1, 1, GI.SL_BALANCED))
+                      GI.GT_KLONDIKE | GI.GT_OPEN, 1, 1, GI.SL_BALANCED))
 registerGame(GameInfo(541, BatsfordAgain, "Batsford Again",
                       GI.GT_KLONDIKE, 2, 1, GI.SL_BALANCED))
 registerGame(GameInfo(572, GoldMine, "Gold Mine",
@@ -1502,7 +1742,7 @@ registerGame(GameInfo(572, GoldMine, "Gold Mine",
 registerGame(GameInfo(585, LuckyThirteen, "Lucky Thirteen",
                       GI.GT_1DECK_TYPE, 1, 0, GI.SL_MOSTLY_LUCK))
 registerGame(GameInfo(586, LuckyPiles, "Lucky Piles",
-                      GI.GT_FAN_TYPE, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(601, AmericanCanister, "American Canister",
                       GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
                       GI.SL_MOSTLY_SKILL))
@@ -1527,3 +1767,35 @@ registerGame(GameInfo(669, Scarp, "Scarp",
                       GI.GT_GYPSY | GI.GT_ORIGINAL, 3, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(726, EightSages, "Eight Sages",
                       GI.GT_KLONDIKE, 2, 1, GI.SL_MOSTLY_LUCK))
+registerGame(GameInfo(821, Trigon, "Trigon",
+                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
+registerGame(GameInfo(849, RelaxedRaglan, "Relaxed Raglan",
+                      GI.GT_RAGLAN | GI.GT_RELAXED | GI.GT_OPEN, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(855, HalfKlondike, "Half Klondike",
+                      GI.GT_KLONDIKE | GI.GT_STRIPPED, 1, -1, GI.SL_BALANCED,
+                      suits=(1, 2)))
+registerGame(GameInfo(861, Wildflower, "Wildflower",
+                      GI.GT_RAGLAN | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(869, Smokey, "Smokey",
+                      GI.GT_KLONDIKE, 1, 2, GI.SL_BALANCED))
+registerGame(GameInfo(873, AgnesTwo, "Agnes Two",
+                      GI.GT_RAGLAN, 2, 0, GI.SL_BALANCED))
+registerGame(GameInfo(888, SixBySix, "Six by Six",
+                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_BALANCED))
+registerGame(GameInfo(893, TakingSilk, "Taking Silk",
+                      GI.GT_KLONDIKE, 2, 0, GI.SL_BALANCED))
+registerGame(GameInfo(913, NineAcross, "Nine Across",
+                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED))
+registerGame(GameInfo(930, KlondikeTerritory, "Klondike Territory",
+                      GI.GT_RAGLAN, 1, 0, GI.SL_BALANCED))
+registerGame(GameInfo(954, Wildcards, "Wildcards",
+                      GI.GT_BELEAGUERED_CASTLE | GI.GT_OPEN, 1, 0,
+                      GI.SL_MOSTLY_SKILL,
+                      subcategory=GI.GS_JOKER_DECK, trumps=list(range(2))))
+registerGame(GameInfo(956, JokeKlon, "Joke Klon",
+                      GI.GT_KLONDIKE, 1, -1, GI.SL_BALANCED,
+                      subcategory=GI.GS_JOKER_DECK, trumps=list(range(2))))
+registerGame(GameInfo(957, JokeKlonByThrees, "Joke Klon (Draw 3)",
+                      GI.GT_KLONDIKE, 1, -1, GI.SL_MOSTLY_LUCK,
+                      subcategory=GI.GS_JOKER_DECK, trumps=list(range(2))))

@@ -23,11 +23,11 @@
 
 
 # imports
+import math
 
 # PySol imports
 from pysollib.mfxutil import Struct
 from pysollib.pysoltk import MfxCanvasText
-from pysollib.resource import CSI
 
 
 # ************************************************************************
@@ -68,22 +68,11 @@ class Layout:
         self.regions = []
         # set visual constants
         images = self.game.app.images
-        cardset_size = images.cs.si.size
-        if cardset_size in (CSI.SIZE_TINY, CSI.SIZE_SMALL):
-            layout_x_margin = 6
-            layout_y_margin = 6
-            layout_card_x_space = 6
-            layout_card_y_space = 10
-        elif cardset_size in (CSI.SIZE_MEDIUM,):
-            layout_x_margin = 8
-            layout_y_margin = 8
-            layout_card_x_space = 8
-            layout_card_y_space = 12
-        else:  # CSI.SIZE_LARGE, CSI.SIZE_XLARGE
-            layout_x_margin = 10
-            layout_y_margin = 10
-            layout_card_x_space = 10
-            layout_card_y_space = 14
+
+        layout_x_margin = images.CARDW // 9
+        layout_y_margin = layout_x_margin
+        layout_card_x_space = images.CARDW // 9
+        layout_card_y_space = images.CARDH // 8
 
         self.CW = images.CARDW
         self.CH = images.CARDH
@@ -505,7 +494,7 @@ class Layout:
         w += XM
 
         # set size so that at least 19 cards are fully playable
-        h = YS + (playcards-1)*self.YOFFSET
+        h = YS + self.TEXT_HEIGHT + (playcards-1)*self.YOFFSET
         h = max(h, 3*YS)
         if texts:
             h += self.TEXT_HEIGHT
@@ -533,7 +522,7 @@ class Layout:
             x += XS
 
         # bottom
-        x, y = XM, YM + h
+        x, y = XM, YM + h - self.TEXT_HEIGHT
         for suit in range(suits):
             for i in range(decks):
                 self.s.foundations.append(S(x, y, suit=suit))
@@ -549,13 +538,13 @@ class Layout:
             x = w - 2*XS
             self.s.waste = s = S(x, y)
             if texts:
-                # place text above stack
-                self._setText(s, 'n')
+                # place text below stack
+                self._setText(s, 's')
         x = w - XS
         self.s.talon = s = S(x, y)
         if texts:
-            # place text above stack
-            self._setText(s, 'n')
+            # place text below stack
+            self._setText(s, 's')
 
         # set window
         self.size = (w, YM + h + YS)
@@ -618,9 +607,12 @@ class Layout:
                 # center the foundations
                 x = XM + (maxrows - frows) * XS // 2
             for suit in range(suits // foundrows):
+                cursuit = suit
+                if suit < len(self.game.gameinfo.suits):
+                    cursuit = self.game.gameinfo.suits[suit]
                 for i in range(decks):
                     self.s.foundations.append(
-                        S(x, y, suit=suit + (row * (suits // 2))))
+                        S(x, y, suit=cursuit + (row * (suits // 2))))
                     x += XS
             y += YS
 
@@ -668,11 +660,12 @@ class Layout:
         XS, YS = self.XS, self.YS
 
         decks = self.game.gameinfo.decks
+        fpc = max(1, math.floor(decks / 2))
         suits = len(self.game.gameinfo.suits) + bool(self.game.gameinfo.trumps)
 
         # set size so that at least 2//3 of a card is visible with 20 cards
-        h = CH*2//3 + (playcards-1)*self.YOFFSET
-        h = YM + max(h, suits*YS)
+        h = CH * 2 // 3 + (playcards - 1) * self.YOFFSET
+        h = YM + max(h, suits * YS * fpc)
 
         # create rows
         x, y = XM, YM
@@ -682,9 +675,9 @@ class Layout:
         self.setRegion(self.s.rows, (-999, -999, x - CW // 2, 999999))
 
         # create foundations
-        for suit in range(suits):
-            for i in range(decks):
-                self.s.foundations.append(S(x+i*XS, y, suit=suit))
+        for suit in range(suits * fpc):
+            for i in range(decks // fpc):
+                self.s.foundations.append(S(x + i * XS, y, suit=suit // fpc))
             y += YS
 
         # create talon
@@ -695,7 +688,7 @@ class Layout:
             self._setText(s, 'se')
 
         # set window
-        self.size = (XM + (rows+decks)*XS,  h)
+        self.size = (XM + (rows + (decks // fpc)) * XS,  h)
 
     #
     # Easy layout
@@ -780,7 +773,7 @@ class Layout:
 
         # set size so that at least 2//3 of a card is visible with 20 cards
         h = CH * 2 // 3 + (playcards - 1) * self.YOFFSET
-        h = max(h, 2 * YS)
+        h = max(h, 6 * YS)
 
         # bottom center
         x = (XM + (toprows * XS) // 2) - XS
@@ -844,7 +837,7 @@ class Layout:
 
         # set size so that at least 2//3 of a card is visible with 12 cards
         h = CH * 2 // 3 + (playcards - 1) * self.YOFFSET
-        h = max(h, 2 * YS)
+        h = max(h, 2 * decks * YS)
 
         # create foundations
         x, y = XM, YM
@@ -874,14 +867,14 @@ class Layout:
             y += YS
 
         # create talon
-        x, y = XM, h + YM
+        x, y = XM, h
         self.s.talon = s = S(x, y)
         if texts:
             # place text right of stack
             self._setText(s, 'se')
 
         # set window
-        self.size = (XM + toprows * XS, YM + YS + h)
+        self.size = (XM + toprows * XS, (YM * decks) + YS + h)
 
     #
     # Fun layout

@@ -211,16 +211,19 @@ class Mahjongg_RowStack(OpenStack):
         elif TOOLKIT == 'kivy':
             rows = [s for s in self.game.s.rows[:self.id] if s.cards]
             if rows:
-                # self.group.tkraise(rows[-1].group)
+                self.group.tkraise(rows[-1].group)
                 return
             rows = [s for s in self.game.s.rows[self.id+1:] if s.cards]
             if rows:
-                # self.group.lower(rows[0].group)
+                self.group.lower(rows[0].group)
                 return
         elif TOOLKIT == 'gtk':
             # FIXME (this is very slow)
             for s in self.game.s.rows[self.id+1:]:
                 s.group.tkraise()
+
+    def _calcMouseBind(self, binding_format):
+        return self.game.app.opt.calcCustomMouseButtonsBinding(binding_format)
 
     # In Mahjongg games type there are a lot of stacks, so we optimize
     # and don't create bindings that are not used anyway.
@@ -231,9 +234,21 @@ class Mahjongg_RowStack(OpenStack):
         # bind(group, "<3>", self._Stack__controlclickEventHandler)
         # bind(group, "<Control-1>", self._Stack__controlclickEventHandler)
         #
-        bind(group, "<1>", self.__clickEventHandler)
-        bind(group, "<3>", self.__controlclickEventHandler)
-        bind(group, "<Control-1>", self.__controlclickEventHandler)
+        bind(
+            group,
+            self._calcMouseBind("<{mouse_button1}>"),
+            self.__clickEventHandler
+        )
+        bind(
+            group,
+            self._calcMouseBind("<{mouse_button3}>"),
+            self.__controlclickEventHandler
+        )
+        bind(
+            group,
+            self._calcMouseBind("<Control-{mouse_button1}>"),
+            self.__controlclickEventHandler
+        )
         # bind(group, "<Enter>", self._Stack__enterEventHandler)
         # bind(group, "<Leave>", self._Stack__leaveEventHandler)
 
@@ -367,15 +382,20 @@ class AbstractMahjonggGame(Game):
 
         # dx, dy = 2, -2
         # dx, dy = 3, -3
-        cs = self.app.cardset
-        if cs.version >= 6:
+        cs = self.app.images.cs
+        if cs.version == 6 or cs.mahjongg3d:
             dx = l.XOFFSET
             dy = -l.YOFFSET
             d_x = cs.SHADOW_XOFFSET
             d_y = cs.SHADOW_YOFFSET
             if self.preview:
+                size_cap, r = 100, 2
+                if l.CW // r > size_cap or l.CH // r > size_cap:
+                    r = max(l.CW, l.CH) // size_cap
+
                 # Fixme
-                dx, dy, d_x, d_y = dx//2, dy//2, d_x//2, d_y//2
+                dx, dy, d_x, d_y = dx // r, dy // r, d_x // r, d_y // r
+
             self._delta_x, self._delta_y = dx, -dy
         else:
             dx = 3

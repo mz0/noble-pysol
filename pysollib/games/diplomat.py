@@ -59,7 +59,7 @@ class Diplomat(Game):
         l, s = Layout(self), self.s
 
         # set window
-        self.setSize(l.XM+8*l.XS, l.YM+3*l.YS+12*l.YOFFSET+l.TEXT_HEIGHT)
+        self.setSize(l.XM+8*l.XS, l.YM+3*l.YS+12*l.YOFFSET+(2 * l.TEXT_HEIGHT))
 
         # create stacks
         x, y = l.XM, l.YM
@@ -70,14 +70,14 @@ class Diplomat(Game):
         for i in range(8):
             s.rows.append(self.RowStack_Class(x, y, self))
             x = x + l.XS
-        x, y, = l.XM, self.height - l.YS
+        x, y, = l.XM, self.height - l.YS - l.TEXT_HEIGHT
         s.talon = WasteTalonStack(x, y, self, max_rounds=max_rounds)
-        l.createText(s.talon, "n")
+        l.createText(s.talon, "s")
         if max_rounds > 1:
-            l.createRoundText(self.s.talon, 'nnn')
+            l.createRoundText(self.s.talon, 'n')
         x = x + l.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, "n")
+        l.createText(s.waste, "s")
 
         # define stack-groups
         l.defaultStackGroups()
@@ -228,11 +228,11 @@ class Dieppe(Diplomat):
 
 # ************************************************************************
 # * Little Napoleon
+# * McClellan
 # ************************************************************************
 
-class LittleNapoleon(Diplomat):
-    RowStack_Class = Spider_SS_RowStack
-    Hint_Class = Spider_Hint
+class McClellan(Diplomat):
+    RowStack_Class = SS_RowStack
 
     def startGame(self):
         for i in range(3):
@@ -240,6 +240,11 @@ class LittleNapoleon(Diplomat):
         self._startAndDealRowAndCards()
 
     getQuickPlayScore = Game._getSpiderQuickPlayScore
+
+
+class LittleNapoleon(McClellan):
+    RowStack_Class = Spider_SS_RowStack
+    Hint_Class = Spider_Hint
 
 
 # ************************************************************************
@@ -265,7 +270,8 @@ registerGame(GameInfo(149, Diplomat, "Diplomat",
 registerGame(GameInfo(151, LadyPalk, "Lady Palk",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(150, Congress, "Congress",
-                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_MOSTLY_SKILL,
+                      altnames=("President's Cabinet",)))
 registerGame(GameInfo(433, RowsOfFour, "Rows of Four",
                       GI.GT_FORTY_THIEVES, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(485, Dieppe, "Dieppe",
@@ -278,3 +284,5 @@ registerGame(GameInfo(549, Wheatsheaf, "Wheatsheaf",
                       GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(563, TwinQueens, "Twin Queens",
                       GI.GT_FORTY_THIEVES, 2, 1, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(882, McClellan, "McClellan",
+                      GI.GT_FORTY_THIEVES, 2, 0, GI.SL_BALANCED))

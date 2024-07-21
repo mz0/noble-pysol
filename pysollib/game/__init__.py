@@ -54,7 +54,7 @@ from pysollib.move import ATurnStackMove
 from pysollib.move import AUpdateStackMove
 from pysollib.mygettext import _
 from pysollib.mygettext import ungettext
-from pysollib.pysolrandom import LCRandom31, PysolRandom, constructRandom
+from pysollib.pysolrandom import LCRandom31, PysolRandom, construct_random
 from pysollib.pysoltk import CURSOR_WATCH
 from pysollib.pysoltk import Card
 from pysollib.pysoltk import EVENT_HANDLED, EVENT_PROPAGATE
@@ -187,7 +187,9 @@ def _stats__is_perfect(stats):
             # stats.quickplay_moves == 0 and
             stats.highlight_piles == 0 and
             stats.highlight_cards == 0 and
-            stats.shuffle_moves == 0)
+            stats.shuffle_moves == 0 and
+            stats.hints == 0 and
+            stats.peeks == 0)
 
 
 def _highlightCards__calc_item(canvas, delta, cw, ch, s, c1, c2, color):
@@ -250,12 +252,12 @@ def _highlightCards__calc_item(canvas, delta, cw, ch, s, c1, c2, color):
         r = MfxCanvasRectangle(canvas, x1, y1, x2, y2,
                                width=4, fill=None, outline=color)
         if tkraise:
-            r.tkraise(c2.item)
+            canvas.tkraise(r)
     elif TOOLKIT == 'kivy':
         r = MfxCanvasRectangle(canvas, x1, y1, x2, y2,
                                width=4, fill=None, outline=color)
         if tkraise:
-            r.tkraise(c2.item)
+            canvas.tkraise(r)
     elif TOOLKIT == 'gtk':
         r = MfxCanvasRectangle(canvas, x1, y1, x2, y2,
                                width=4, fill=None, outline=color,
@@ -265,6 +267,26 @@ def _highlightCards__calc_item(canvas, delta, cw, ch, s, c1, c2, color):
             for c in s.cards[i+1:]:
                 c.tkraise(1)
     return r
+
+
+class random_dummy:
+    seed = {}
+
+
+# the _alt_unpickler is an unpickler that contains a few hacks
+# to ensure backward compatibility of saves.
+class _alt_unpickler(Unpickler):
+    version = 0
+
+    def set_version(self, version_tuple):
+        if version_tuple < (2, 20, 0):
+            self.version = 1
+
+    def find_class(self, module, name):
+        if self.version == 1 and module == 'pysol_cards.random':
+            return random_dummy
+        else:
+            return super().find_class(module, name)
 
 
 @attr.s
@@ -298,12 +320,14 @@ class StackRegions(NewStruct):
     # init info (at the start)
     init_info = attr.ib(factory=list)
 
-    def calc_info(self, xf, yf):
+    def calc_info(self, xf, yf, widthpad=0, heightpad=0):
         """docstring for calc_info"""
         info = []
         for stacks, rect in self.init_info:
-            newrect = (int(round(rect[0]*xf)), int(round(rect[1]*yf)),
-                       int(round(rect[2]*xf)), int(round(rect[3]*yf)))
+            newrect = (int(round((rect[0] + widthpad) * xf)),
+                       int(round((rect[1] + heightpad) * yf)),
+                       int(round((rect[2] + widthpad) * xf)),
+                       int(round((rect[3] + heightpad) * yf)))
             info.append((stacks, newrect))
         self.info = tuple(info)
 
@@ -378,6 +402,7 @@ class GameHints(NewStruct):
 @attr.s
 class GameStatsStruct(NewStruct):
     hints = attr.ib(default=0)                  # number of hints consumed
+    peeks = attr.ib(default=0)                  # number of peeks consumed
     # number of highlight piles consumed
     highlight_piles = attr.ib(default=0)
     # number of highlight matching cards consumed
@@ -515,6 +540,7 @@ class Game(object):
         self.busy = 0
         self.pause = False
         self.finished = False
+        self.stuck = False
         self.version = VERSION
         self.version_tuple = VERSION_TUPLE
         self.cards = []
@@ -530,6 +556,7 @@ class Game(object):
         self.sg = StackGroups()
         self.regions = StackRegions()
         self.init_size = (0, 0)
+        self.center_offset = (0, 0)
         self.event_handled = False      # if click event handled by Stack (???)
         self.reset()
 
@@ -671,12 +698,19 @@ class Game(object):
             print_err('max_rounds <= 1, but talon.texts.rounds is not None: '
                       '%s' % class_name, 2)
 
+    def _calcMouseBind(self, binding_format):
+        """docstring for _calcMouseBind"""
+        return self.app.opt.calcCustomMouseButtonsBinding(binding_format)
+
     def initBindings(self):
         # note: a Game is only allowed to bind self.canvas and not to self.top
         # bind(self.canvas, "<Double-1>", self.undoHandler)
-        bind(self.canvas, "<1>", self.undoHandler)
-        bind(self.canvas, "<2>", self.dropHandler)
-        bind(self.canvas, "<3>", self.redoHandler)
+        bind(self.canvas,
+             self._calcMouseBind("<{mouse_button1}>"), self.undoHandler)
+        bind(self.canvas,
+             self._calcMouseBind("<{mouse_button2}>"), self.dropHandler)
+        bind(self.canvas,
+             self._calcMouseBind("<{mouse_button3}>"), self.redoHandler)
         bind(self.canvas, '<Unmap>', self._unmapHandler)
         bind(self.canvas, '<Configure>', self._configureHandler, add=True)
 
@@ -770,6 +804,7 @@ class Game(object):
     def newGame(self, random=None, restart=0, autoplay=1, shuffle=True,
                 dealer=None):
         self.finished = False
+        self.stuck = False
         old_busy, self.busy = self.busy, 1
         self.setCursor(cursor=CURSOR_WATCH)
         self.stopWinAnimation()
@@ -808,6 +843,8 @@ class Game(object):
         if dealer:
             dealer()
         else:
+            if not self.preview:
+                self.resizeGame()
             self.startGame()
         self.startMoves()
         for stack in self.allstacks:
@@ -892,7 +929,7 @@ class Game(object):
     def restoreGameFromBookmark(self, bookmark):
         old_busy, self.busy = self.busy, 1
         file = BytesIO(bookmark)
-        p = Unpickler(file)
+        p = _alt_unpickler(file)
         game = self._undumpGame(p, self.app)
         assert game.id == self.id
         self.restoreGame(game, reset=0)
@@ -975,62 +1012,102 @@ class Game(object):
         self.endGame(restart=1)
         self.newGame(restart=1, random=self.random)
 
-    def resizeImages(self):
+    def resizeImages(self, manually=False):
+        self.center_offset = (0, 0)
+        if self.canvas.winfo_ismapped():
+            # apparent size of canvas
+            vw = self.canvas.winfo_width()
+            vh = self.canvas.winfo_height()
+        else:
+            # we have no a real size of canvas
+            # (winfo_width / winfo_reqwidth)
+            # so we use a saved size
+            vw, vh = self.app.opt.game_geometry
+            if not vw:
+                # first run of the game
+                return 1, 1, 1, 1
+        # requested size of canvas (createGame -> setSize)
+        iw, ih = self.init_size
+
         # resizing images and cards
-        if self.app.opt.auto_scale:
-            if self.canvas.winfo_ismapped():
-                # apparent size of canvas
-                vw = self.canvas.winfo_width()
-                vh = self.canvas.winfo_height()
-            else:
-                # we have no a real size of canvas
-                # (winfo_width / winfo_reqwidth)
-                # so we use a saved size
-                vw, vh = self.app.opt.game_geometry
-                if not vw:
-                    # first run of the game
-                    return 1, 1
-            # requested size of canvas (createGame -> setSize)
-            iw, ih = self.init_size
+        if (self.app.opt.auto_scale or
+                (self.app.opt.spread_stacks and not manually)):
             # calculate factor of resizing
             xf = float(vw)/iw
             yf = float(vh)/ih
-            if self.app.opt.preserve_aspect_ratio:
+            if (self.app.opt.preserve_aspect_ratio
+                    and not self.app.opt.spread_stacks):
                 xf = yf = min(xf, yf)
         else:
             xf, yf = self.app.opt.scale_x, self.app.opt.scale_y
-        # images
-        self.app.images.resize(xf, yf)
+        self.center_offset = self.getCenterOffset(vw, vh, iw, ih, xf, yf)
+        if (not self.app.opt.spread_stacks or manually):
+            # images
+            self.app.images.resize(xf, yf, resample=self.app.opt.resampling)
         # cards
         for card in self.cards:
             card.update(card.id, card.deck, card.suit, card.rank, self)
-        return xf, yf
+        return xf, yf, self.app.images._xfactor, self.app.images._yfactor
 
-    def resizeGame(self):
+    def getCenterOffset(self, vw, vh, iw, ih, xf, yf):
+        if (not self.app.opt.center_layout or self.app.opt.spread_stacks or
+                (self.app.opt.auto_scale and not
+                 self.app.opt.preserve_aspect_ratio)):
+            return 0, 0
+        if ((vw > iw and vh > ih) or self.app.opt.auto_scale):
+            return (vw / xf - iw) / 2, (vh / yf - ih) / 2
+        elif (vw >= iw and vh < ih):
+            return (vw / xf - iw) / 2, 0
+        elif (vw < iw and vh >= ih):
+            return 0, (vh / yf - ih) / 2
+        else:
+            return 0, 0
+
+    def resizeGame(self, card_size_manually=False):
         # if self.busy:
         # return
         if not USE_PIL:
             return
         self.deleteStackDesc()
-        xf, yf = self.resizeImages()
+        xf, yf, xf0, yf0 = \
+            self.resizeImages(manually=card_size_manually)
+        cw, ch = self.center_offset[0], self.center_offset[1]
         for stack in self.allstacks:
-            x0, y0 = stack.init_coord
-            x, y = int(round(x0*xf)), int(round(y0*yf))
-            stack.resize(xf, yf)
+
+            if (self.app.opt.spread_stacks):
+                # Do not move Talons
+                # (because one would need to reposition
+                # 'empty cross' and 'redeal' figures)
+                # But in that case,
+                # games with talon not placed top-left corner
+                # will get it misplaced when auto_scale
+                # e.g. Suit Elevens
+                # => player can fix that issue by setting auto_scale false
+                if stack is self.s.talon:
+                    # stack.init_coord=(x, y)
+                    if card_size_manually:
+                        stack.resize(xf, yf0, widthpad=cw, heightpad=ch)
+                    else:
+                        stack.resize(xf0, yf0, widthpad=cw, heightpad=ch)
+                else:
+                    stack.resize(xf, yf0, widthpad=cw, heightpad=ch)
+            else:
+                stack.resize(xf, yf, widthpad=cw, heightpad=ch)
             stack.updatePositions()
-        self.regions.calc_info(xf, yf)
+        self.regions.calc_info(xf, yf, widthpad=cw, heightpad=ch)
         # texts
         for t in ('info', 'help', 'misc', 'score', 'base_rank'):
             init_coord = getattr(self.init_texts, t)
             if init_coord:
                 item = getattr(self.texts, t)
-                x, y = int(round(init_coord[0]*xf)), \
-                    int(round(init_coord[1]*yf))
+                x, y = int(round((init_coord[0] + cw) * xf)), \
+                    int(round((init_coord[1] + ch) * yf))
                 self.canvas.coords(item, x, y)
         for i in range(len(self.texts.list)):
             init_coord = self.init_texts.list[i]
             item = self.texts.list[i]
-            x, y = int(round(init_coord[0]*xf)), int(round(init_coord[1]*yf))
+            x, y = int(round((init_coord[0] + cw) * xf)), \
+                int(round((init_coord[1] + ch) * yf))
             self.canvas.coords(item, x, y)
 
     def createRandom(self, random):
@@ -1058,7 +1135,7 @@ class Game(object):
     def leaveState(self, old_state):
         self.moves.state = old_state
 
-    def getSnapshot(self):
+    def getSnapshotHash(self):
         # generate hash (unique string) of current move
         sn = []
         for stack in self.allstacks:
@@ -1067,8 +1144,11 @@ class Game(object):
                 s.append('%d%03d%d' % (card.suit, card.rank, card.face_up))
             sn.append(''.join(s))
         sn = '-'.join(sn)
+        return sn
+
+    def getSnapshot(self):
         # optimisation
-        sn = hash(sn)
+        sn = hash(self.getSnapshotHash())
         return sn
 
     def createSnGroups(self):
@@ -1283,7 +1363,9 @@ class Game(object):
             return
         if not self.canvas:
             return
-        if not self.app.opt.auto_scale:
+        if (not self.app.opt.auto_scale and
+                not self.app.opt.spread_stacks and
+                not self.app.opt.center_layout):
             return
         if self.preview:
             return
@@ -1292,8 +1374,16 @@ class Game(object):
         self._resizeHandlerID = self.canvas.after(250, self._resizeHandler)
 
     def playSample(self, name, priority=0, loop=0):
-        if name in self.app.opt.sound_samples and \
-               not self.app.opt.sound_samples[name]:
+
+        if name.startswith('deal'):
+            sampleopt = 'deal'
+        elif name not in self.app.opt.sound_samples:
+            sampleopt = 'extra'
+        else:
+            sampleopt = name
+
+        if sampleopt in self.app.opt.sound_samples and \
+           not self.app.opt.sound_samples[sampleopt]:
             return 0
         if self.app.audio:
             return self.app.audio.playSample(
@@ -1314,8 +1404,7 @@ class Game(object):
         a = self.app.opt.animations
         if a and not self.preview:
             self.canvas.update_idletasks()
-        if self.app.audio and self.app.opt.sound \
-                and self.app.opt.sound_samples['deal']:
+        if self.app.audio and self.app.opt.sound:
             if a in (1, 2, 3, 10):
                 self.playSample("deal01", priority=100, loop=loop)
             elif a == 4:
@@ -1361,6 +1450,18 @@ class Game(object):
         # 10 - used internally in game preview
         if self.app.opt.animations == 0 or frames == 0:
             return
+
+        if TOOLKIT == 'kivy':
+            c0 = cards[0]
+            dx, dy = (x - c0.x), (y - c0.y)
+            base = float(self.app.opt.animations)
+            duration = base*base/30.0 + 0.05
+            for card in cards:
+                card.animatedMove(dx, dy, duration)
+            # self.top.waitAnimation(swallow=True, pickup=True)
+            # synchronise: ev. per option ?
+            return
+
         # init timer - need a high resolution for this to work
         clock, delay, skip = None, 1, 1
         if self.app.opt.animations >= 2:
@@ -1381,21 +1482,14 @@ class Game(object):
         elif self.app.opt.animations == 10:
             # this is used internally in game preview to speed up
             # the initial dealing
-            if self.moves.state == self.S_INIT and frames > 4:
-                frames //= 2
+            # if self.moves.state == self.S_INIT and frames > 4:
+            #     frames //= 2
+            return
         if shadow < 0:
             shadow = self.app.opt.shadow
         shadows = ()
-        # start animation
-        if TOOLKIT == 'kivy':
-            c0 = cards[0]
-            dx, dy = (x - c0.x), (y - c0.y)
-            for card in cards:
-                base = float(self.app.opt.animations)
-                duration = base*0.1
-                card.animatedMove(dx, dy, duration)
-            return
 
+        # start animation
         if tkraise:
             for card in cards:
                 card.tkraise()
@@ -1580,12 +1674,12 @@ class Game(object):
         return True
 
     def animatedFlip(self, stack):
-        if not self.app.opt.flip_animation:
+        if self.preview or not self.app.opt.flip_animation:
             return False
         return self.doAnimatedFlipAndMove(stack)
 
     def animatedFlipAndMove(self, from_stack, to_stack, frames=-1):
-        if not self.app.opt.flip_animation:
+        if self.preview or not self.app.opt.flip_animation:
             return False
         return self.doAnimatedFlipAndMove(from_stack, to_stack, frames)
 
@@ -1685,6 +1779,8 @@ class Game(object):
             return
         if TOOLKIT == 'gtk':
             return
+        if TOOLKIT == 'kivy':
+            return
         if not Image:
             return
         self.canvas.hideAllItems()
@@ -1707,6 +1803,8 @@ class Game(object):
         return
 
     def redealAnimation(self):
+        if TOOLKIT == 'kivy':
+            return
         if self.preview:
             return
         if not self.app.opt.animations or not self.app.opt.redeal_animation:
@@ -1833,7 +1931,10 @@ class Game(object):
         # for InvisibleStack, etc
         # x, y = -500, -500 - len(game.allstacks)
         cardw, cardh = self.app.images.CARDW, self.app.images.CARDH
-        x, y = cardw + self.canvas.xmargin, cardh + self.canvas.ymargin
+        xoffset = self.app.images.CARD_XOFFSET
+        yoffset = self.app.images.CARD_YOFFSET
+        x = cardw + xoffset + self.canvas.xmargin
+        y = cardh + yoffset + self.canvas.ymargin
         return -x-10, -y-10
 
     #
@@ -1909,8 +2010,8 @@ class Game(object):
     def changed(self, restart=False):
         if self.gstats.updated < 0:
             return 0                    # already won or lost
-        if self.gstats.loaded > 0:
-            return 0                    # loaded games account for no stats
+        # if self.gstats.loaded > 0:
+        #     return 0                    # loaded games account for no stats
         if not restart:
             if self.gstats.restarted > 0:
                 return 1                # game was restarted - always ask
@@ -1922,10 +2023,11 @@ class Game(object):
 
     def getWinStatus(self):
         won = self.isGameWon() != 0
-        if not won or self.stats.hints > 0 or self.stats.demo_moves > 0:
+        if (not won or (self.stats.hints > 0 and not self.app.opt.free_hint)
+                or self.stats.demo_moves > 0):
             # sorry, you lose
             return won, 0, self.U_LOST
-        if _stats__is_perfect(self.stats):
+        if _stats__is_perfect(self.stats) and self.stats.hints < 1:
             return won, 2, self.U_PERFECT
         return won, 1, self.U_WON
 
@@ -2012,7 +2114,8 @@ class Game(object):
             d = MfxMessageDialog(
                 self.top, title=_("Game won"),
                 text='\n' + congrats + '\n\n' + text + '\n' + top_msg + '\n',
-                strings=(_("&New game"), None, _("&Cancel")),
+                strings=(_("&New game"), None, _("&Back to game"),
+                         _("&Cancel")),
                 image=self.app.gimages.logos[5])
         elif status == 1:
             top_msg = self.updateStats()
@@ -2028,7 +2131,8 @@ class Game(object):
             d = MfxMessageDialog(
                 self.top, title=_("Game won"),
                 text='\n' + congrats + '\n\n' + text + '\n' + top_msg + '\n',
-                strings=(_("&New game"), None, _("&Cancel")),
+                strings=(_("&New game"), None, _("&Back to game"),
+                         _("&Cancel")),
                 image=self.app.gimages.logos[4])
         elif self.gstats.updated < 0:
             self.finished = True
@@ -2036,14 +2140,17 @@ class Game(object):
             d = MfxMessageDialog(
                 self.top, title=_("Game finished"), bitmap="info",
                 text=_("\nGame finished\n"),
-                strings=(_("&New game"), None, _("&Cancel")))
+                strings=(_("&New game"), None, None, _("&Close")))
         else:
             self.finished = True
             self.playSample("gamelost", priority=1000)
+            text = _("Game finished, but not without my help...")
+            hintsused = _("You used %(h)s hint(s) during this game.") % {
+                'h': self.stats.hints}
             d = MfxMessageDialog(
                 self.top, title=_("Game finished"), bitmap="info",
-                text=_("\nGame finished, but not without my help...\n"),
-                strings=(_("&New game"), _("&Restart"), _("&Cancel")))
+                text=_(text + '\n\n' + hintsused),
+                strings=(_("&New game"), _("&Restart"), None, _("&Cancel")))
         self.updateMenus()
         if TOOLKIT == 'kivy':
             return True
@@ -2054,6 +2161,8 @@ class Game(object):
         elif d.status == 0 and d.button == 1:
             # restart game
             self.restartGame()
+        elif d.status == 0 and d.button == 2:
+            self.stopWinAnimation()
         return True
 
     #
@@ -2776,14 +2885,33 @@ class Game(object):
 
     def updateStuck(self):
         # stuck
-        if self.finished:
-            return
-        if self.Stuck_Class is None:
+        if self.finished or self.Stuck_Class is None or self.isGameWon() != 0:
             return
         if self.getStuck():
             text = ''
+            self.stuck = False
         else:
             text = 'x'
+            if (not self.stuck and not self.demo and
+                    self.app.opt.stuck_notification):
+                self.playSample("gamelost", priority=1000)
+                self.updateStatus(stuck='x')
+                d = MfxMessageDialog(
+                    self.top, title=_("You are Stuck"), bitmap="info",
+                    text=_("\nThere are no moves left...\n"),
+                    strings=(_("&New game"), _("&Restart"), None,
+                             _("&Cancel")))
+                if TOOLKIT != 'kivy':
+                    if d.status == 0 and d.button == 0:
+                        # new game
+                        self.endGame()
+                        self.newGame()
+                        return
+                    elif d.status == 0 and d.button == 1:
+                        # restart game
+                        self.restartGame()
+                        return
+            self.stuck = True
             # self.playSample("autopilotlost", priority=1000)
         self.updateStatus(stuck=text)
 
@@ -2935,6 +3063,19 @@ class Game(object):
                         break
                 else:
                     redo = 1
+        # try to detect an undo move for stuck-checking
+        undo = 0
+        if len(moves.history) > 0:
+            mylen, m = len(current), moves.history[moves.index - 1]
+            if mylen == len(m):
+                for i in range(mylen):
+                    a1 = current[i]
+                    a2 = m[i]
+                    if a1.__class__ is not a2.__class__ or \
+                            a1.cmpForUndo(a2) != 0:
+                        break
+                else:
+                    undo = 1
         # add current move to history (which is a list of lists)
         if redo:
             # print "detected redo:", current
@@ -2955,7 +3096,8 @@ class Game(object):
         self.updateStatus(moves=(moves.index, self.stats.total_moves))
         self.updateMenus()
         self.updatePlayTime(do_after=0)
-        self.updateStuck()
+        if not undo:
+            self.updateStuck()
         reset_solver_dialog()
 
         return 1
@@ -3057,7 +3199,7 @@ class Game(object):
             s, moves_index = bm
             self.setCursor(cursor=CURSOR_WATCH)
             file = BytesIO(s)
-            p = Unpickler(file)
+            p = _alt_unpickler(file)
             game = self._undumpGame(p, self.app)
             assert game.id == self.id
             # save state for undoGotoBookmark
@@ -3129,6 +3271,7 @@ class Game(object):
     def saveGame(self, filename, protocol=-1):
         self.finishMove()       # just in case
         self.setCursor(cursor=CURSOR_WATCH)
+        rval = False
         try:
             self._saveGame(filename, protocol)
         except Exception as ex:
@@ -3136,8 +3279,10 @@ class Game(object):
             MfxExceptionDialog(self.top, ex, title=_("Save game error"),
                                text=_("Error while saving game"))
         else:
+            rval = True
             self.filename = filename
             self.setCursor(cursor=self.app.top_cursor)
+        return rval
 
     #
     # low level load/save
@@ -3146,8 +3291,9 @@ class Game(object):
     def _loadGame(self, filename, app):
         game = None
         with open(filename, "rb") as f:
-            game = self._undumpGame(Unpickler(f), app)
+            game = self._undumpGame(_alt_unpickler(f), app)
             game.gstats.loaded += 1
+
         return game
 
     def _undumpGame(self, p, app):
@@ -3181,6 +3327,7 @@ class Game(object):
             _('Cannot load games saved with\n%(app)s version %(ver)s') % {
                 'app': PACKAGE,
                 'ver': version})
+        p.set_version(version_tuple)
         game_version = 1
         bookmark = pload(int)
         validate(0 <= bookmark <= 2, err_txt)
@@ -3204,9 +3351,10 @@ class Game(object):
         game.version_tuple = version_tuple
         #
         initial_seed = random__int2str(pload(int))
-        game.random = constructRandom(initial_seed)
+        game.random = construct_random(initial_seed)
         state = pload()
-        if not (isinstance(game.random, random2.Random) and
+        if (game.random is not None and
+                not isinstance(game.random, random2.Random) and
                 isinstance(state, int)):
             game.random.setstate(state)
         # if not hasattr(game.random, "origin"):
@@ -3284,6 +3432,11 @@ class Game(object):
         d = time.time() - self.stats.update_time + self.stats.elapsed_time
         self.updateStatus(time=format_time(d))
 
+    def displayPauseImage(self):
+        n = self.random.initial_seed % len(self.app.gimages.pause)
+        self.pause_logo = self.app.gimages.pause[int(n)]
+        self.canvas.setTopImage(self.pause_logo)
+
     def doPause(self):
         if self.finished:
             return
@@ -3295,9 +3448,7 @@ class Game(object):
         if self.pause:
             # self.updateTime()
             self.canvas.hideAllItems()
-            n = self.random.initial_seed % len(self.app.gimages.pause)
-            self.pause_logo = self.app.gimages.pause[int(n)]
-            self.canvas.setTopImage(self.pause_logo)
+            self.displayPauseImage()
         else:
             self.stats.update_time = time.time()
             self.updatePlayTime()
@@ -3311,10 +3462,10 @@ class Game(object):
         kw = dict([(args[i], args[i+1]) for i in range(0, len(args), 2)])
         if not kw:
             kw = {'info': '', 'help': ''}
-        if 'info' in kw and self.app.opt.statusbar and self.app.opt.num_cards:
+        if 'info' in kw and self.app.opt.statusbar:
             self.app.statusbar.updateText(info=kw['info'])
-        if 'help' in kw and self.app.opt.helpbar:
-            self.app.helpbar.updateText(info=kw['help'])
+        if 'help' in kw and self.app.opt.statusbar:
+            self.app.statusbar.updateText(help=kw['help'])
 
     #
     # Piles descriptions
@@ -3344,7 +3495,11 @@ class Game(object):
 
     # for find_card_dialog
     def canFindCard(self):
-        return self.gameinfo.category == GI.GC_FRENCH
+        return self.gameinfo.category not in (GI.GC_MATCHING, GI.GC_PUZZLE) \
+            and self.gameinfo.si.game_type != GI.GT_SAMEGAME
+
+    def canShowFullPicture(self):
+        return self.gameinfo.category == GI.GC_PUZZLE
 
     #
     # subclass hooks

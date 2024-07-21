@@ -49,7 +49,7 @@ from pysollib.stack import \
         TalonStack, \
         UD_RK_RowStack, \
         UD_SS_RowStack
-from pysollib.util import ACE, KING, NO_RANK, UNLIMITED_CARDS
+from pysollib.util import ACE, ANY_RANK, KING, NO_RANK, RANKS, UNLIMITED_CARDS
 
 
 class Fan_Hint(CautiousDefaultHint):
@@ -136,6 +136,10 @@ class Fan(Game):
 
 class FanGame(Fan):
     Solver_Class = FreeCellSolverWrapper(preset='fan')
+
+
+class CeilingFan(Fan):
+    RowStack_Class = KingAC_RowStack
 
 
 # ************************************************************************
@@ -275,7 +279,7 @@ class ThreeShufflesAndADraw_RowStack(SS_RowStack):
         game.updateStackMove(r, 3 | 64)       # update model
         game.updateStackMove(r, 1 | 16)       # update view for redo
         # 2) second card from self to foundation/row
-        if 1 or not game.demo:
+        if not game.demo:
             game.playSample("drop", priority=200)
         if frames == 0:
             frames = -1
@@ -331,7 +335,7 @@ class ThreeShufflesAndADraw(LaBelleLucie):
     RowStack_Class = StackWrapper(
         ThreeShufflesAndADraw_RowStack, base_rank=NO_RANK)
 
-    def createGame(self):
+    def createGame(self, texts=True):
         lay = LaBelleLucie.createGame(self)
         s = self.s
         # add a reserve stack
@@ -355,6 +359,35 @@ class ThreeShufflesAndADraw(LaBelleLucie):
 
     def _saveGameHook(self, p):
         p.dump(self.draw_done)
+
+
+# ************************************************************************
+# * Cromwell
+# ************************************************************************
+
+class Cromwell(ThreeShufflesAndADraw):
+    Foundation_Classes = [SS_FoundationStack, SS_FoundationStack]
+    Talon_Class = InitialDealTalonStack
+    RowStack_Class = StackWrapper(
+        ThreeShufflesAndADraw_RowStack, base_rank=NO_RANK, max_move=999999)
+
+    def createGame(self, texts=True):
+        lay = Fan.createGame(self, rows=(6, 6, 6, 6, 2))
+        s = self.s
+        # add a reserve stack
+        x, y = s.rows[3].x, s.rows[-1].y
+        s.reserves.append(ThreeShufflesAndADraw_ReserveStack(x, y, self))
+        # redefine the stack-groups
+        lay.defaultStackGroups()
+        # extra settings
+        self.draw_done = 0
+
+    def startGame(self):
+        self.draw_done = 0
+        self.s.reserves[0].updateText()
+        for i in range(3):
+            self.s.talon.dealRow(rows=self.s.rows[:26], frames=0)
+        self._startAndDealRow()
 
 
 # ************************************************************************
@@ -492,6 +525,7 @@ class HouseOnTheHill(HouseInTheWood):
 
 # ************************************************************************
 # * Clover Leaf
+# * Alexander the Great
 # ************************************************************************
 
 class CloverLeaf_RowStack(UD_SS_RowStack):
@@ -507,20 +541,21 @@ class CloverLeaf_RowStack(UD_SS_RowStack):
 
 
 class CloverLeaf(Game):
-
     Hint_Class = Fan_Hint
 
     #
     # game layout
     #
 
-    def createGame(self):
+    def createGame(self, cols=4):
         # create layout
         l, s = Layout(self), self.s
 
         # set window
         playcards = 7
-        w, h = l.XM+l.XS+4*(l.XS+(playcards-1)*l.XOFFSET), l.YM+4*l.YS
+        w, h = ((2 * l.XM) + l.XS + cols *
+                (l.XS + (playcards - 1) * l.XOFFSET)), \
+            l.YM + 4 * l.YS
         self.setSize(w, h)
 
         # create stacks
@@ -529,12 +564,12 @@ class CloverLeaf(Game):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
             y += l.YS
         for i in range(2):
-            s.foundations.append(SS_FoundationStack(x, y, self, suit=i+2,
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i + 2,
                                                     base_rank=KING, dir=-1))
             y += l.YS
 
-        x = l.XM+l.XS
-        for i in range(4):
+        x = (2 * l.XM) + l.XS
+        for i in range(cols):
             y = l.YM
             for j in range(4):
                 stack = CloverLeaf_RowStack(x, y, self,
@@ -542,9 +577,9 @@ class CloverLeaf(Game):
                 s.rows.append(stack)
                 stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
                 y += l.YS
-            x += l.XS+(playcards-1)*l.XOFFSET
+            x += l.XS + (playcards - 1) * l.XOFFSET
 
-        s.talon = InitialDealTalonStack(w-l.XS, h-l.YS, self)
+        s.talon = InitialDealTalonStack(w - l.XS, h - l.YS, self)
 
         # default
         l.defaultAll()
@@ -566,6 +601,17 @@ class CloverLeaf(Game):
                        c.suit))
 
     shallHighlightMatch = Game._shallHighlightMatch_SS
+
+
+class AlexanderTheGreat(CloverLeaf):
+
+    def createGame(self):
+        CloverLeaf.createGame(self, cols=3)
+
+    def startGame(self):
+        self._startDealNumRows(3)
+        self.s.talon.dealRow()
+        self.s.talon.dealRow(rows=self.s.foundations)
 
 
 # ************************************************************************
@@ -607,10 +653,10 @@ class BoxFan(Fan):
 
 # ************************************************************************
 # * Troika
+# * Quads
 # ************************************************************************
 
 class Troika(Fan):
-
     RowStack_Class = StackWrapper(RK_RowStack, dir=0,
                                   base_rank=NO_RANK, max_cards=3)
 
@@ -664,6 +710,47 @@ class QuadsPlus(Quads):
 
 
 # ************************************************************************
+# * Roaming Proils
+# ************************************************************************
+
+class RoamingProils_RowStack(RK_RowStack):
+
+    def acceptsCards(self, from_stack, cards):
+        if not RK_RowStack.acceptsCards(self, from_stack, cards):
+            return False
+        rank_sequence = 1
+        for card in reversed(self.cards):
+            if card.rank == cards[0].rank and card.face_up:
+                rank_sequence += 1
+            else:
+                break
+
+        if rank_sequence > 3:
+            return False
+        return True
+
+
+class RoamingProils(Fan):
+    RowStack_Class = StackWrapper(RoamingProils_RowStack, dir=0,
+                                  base_rank=NO_RANK)
+    ReserveStack_Class = StackWrapper(ReserveStack, base_rank=KING)
+
+    def createGame(self):
+        Fan.createGame(self, rows=(5, 5, 5, 2), playcards=5, reserves=1)
+
+    def startGame(self, flip=0):
+        for i in range(2):
+            self.s.talon.dealRow(rows=self.s.rows[:17], flip=flip, frames=0)
+        self._startAndDealRow()
+        self.s.talon.dealRow(rows=self.s.reserves)
+
+
+class OpenProils(RoamingProils):
+    def startGame(self):
+        RoamingProils.startGame(self, flip=1)
+
+
+# ************************************************************************
 # * Fascination Fan
 # ************************************************************************
 
@@ -699,6 +786,7 @@ class FascinationFan(Fan):
 
 # ************************************************************************
 # * Crescent
+# * Rainbow Fan
 # ************************************************************************
 
 class Crescent_Talon(RedealTalonStack):
@@ -715,12 +803,12 @@ class Crescent_Talon(RedealTalonStack):
             ncards += len(r.cards)
             # move cards to internal stacks
             while len(r.cards) != 1:
-                self.game.moveMove(1, r, intern1, frames=4)
-            self.game.moveMove(1, r, intern2, frames=4)
+                self.game.moveMove(1, r, intern1, frames=2)
+            self.game.moveMove(1, r, intern2, frames=2)
             # move back
             while intern1.cards:
-                self.game.moveMove(1, intern1, r, frames=4)
-            self.game.moveMove(1, intern2, r, frames=4)
+                self.game.moveMove(1, intern1, r, frames=2)
+            self.game.moveMove(1, intern2, r, frames=2)
         self.game.nextRoundMove(self)
         if sound:
             self.game.stopSamples()
@@ -731,15 +819,24 @@ class Crescent_Talon(RedealTalonStack):
 class Crescent(Game):
     Hint_Class = CautiousDefaultHint
 
+    ROWS = 4
+    COLS = 4
+    INIT_CARDS = 6
+
+    SHOW_TALON_COUNT = False
+
     def createGame(self):
         l, s = Layout(self), self.s
         playcards = 10
-        w0 = l.XS+(playcards-1)*l.XOFFSET
-        w, h = l.XM+max(4*w0, 9*l.XS), l.YM+5*l.YS
+        w0 = l.XS + (playcards - 1) * l.XOFFSET
+        w, h = l.XM + max(self.COLS * w0, 9 * l.XS), \
+            l.YM + (self.ROWS + 1) * l.YS + l.TEXT_HEIGHT
         self.setSize(w, h)
         x, y = l.XM, l.YM
         s.talon = Crescent_Talon(x, y, self, max_rounds=4)
-        l.createRoundText(s.talon, 'ne')
+        if self.SHOW_TALON_COUNT:
+            l.createText(s.talon, 'ne')
+        l.createRoundText(s.talon, 's')
         x, y = w-8*l.XS, l.YM
         for i in range(4):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i))
@@ -748,10 +845,10 @@ class Crescent(Game):
             s.foundations.append(SS_FoundationStack(x, y, self, suit=i,
                                                     base_rank=KING, dir=-1))
             x += l.XS
-        y = l.YM+l.YS
-        for i in range(4):
+        y = l.YM + l.YS + l.TEXT_HEIGHT
+        for i in range(self.ROWS):
             x = l.XM
-            for j in range(4):
+            for j in range(self.COLS):
                 stack = UD_SS_RowStack(x, y, self, base_rank=NO_RANK, mod=13)
                 s.rows.append(stack)
                 stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
@@ -770,9 +867,25 @@ class Crescent(Game):
 
     def startGame(self):
         self.s.talon.dealRow(rows=self.s.foundations, frames=0)
-        self._startDealNumRowsAndDealSingleRow(5)
+        self._startDealNumRowsAndDealSingleRow(self.INIT_CARDS - 1)
 
     shallHighlightMatch = Game._shallHighlightMatch_SSW
+
+
+class RainbowFan(Crescent):
+    ROWS = 4
+    COLS = 5
+    INIT_CARDS = 3
+    SHOW_TALON_COUNT = True
+
+    def fillStack(self, stack):
+        if stack in self.s.rows and len(stack.cards) == 0 \
+                and len(self.s.talon.cards) > 0:
+            old_state = self.enterState(self.S_FILL)
+            for i in range(3):
+                self.s.talon.flipMove(1)
+                self.s.talon.moveMove(1, stack)
+            self.leaveState(old_state)
 
 
 # ************************************************************************
@@ -785,7 +898,7 @@ class School(Fan):
     RowStack_Class = StackWrapper(RK_RowStack, dir=0, base_rank=NO_RANK)
 
     def createGame(self):
-        Fan.createGame(self, rows=(4, 4, 4, 4), playcards=10, texts=True)
+        Fan.createGame(self, rows=(5, 5, 5, 1), playcards=10, texts=True)
 
     def startGame(self):
         self._startDealNumRows(2)
@@ -923,16 +1036,112 @@ class ForestGlade(Game):
     shallHighlightMatch = Game._shallHighlightMatch_SS
 
 
+# ************************************************************************
+# * Bear River
+# ************************************************************************
+
+class BearRiver(Fan):
+
+    def createGame(self):
+        self.base_card = None
+        # create layout
+        l, s = Layout(self), self.s
+
+        # set window
+        # (set size so that at least 3 cards are fully playable)
+        w = max(2 * l.XS, l.XS + 3 * l.XOFFSET)
+        w = min(3 * l.XS, w)
+        w = (w + 1) & ~1
+        self.setSize(l.XM + 6 * w, l.YM + 4 * l.YS + l.TEXT_HEIGHT)
+
+        dx = (self.width - 4 * l.XS) // (4 + 1)
+        x, y = l.XM + dx, l.YM
+        dx += l.XS
+        for i in range(4):
+            s.foundations.append(SS_FoundationStack(x, y, self, suit=i,
+                                                    mod=13))
+            x += dx
+
+        tx, ty, ta, tf = l.getTextAttr(s.foundations[0], "s")
+
+        self.texts.info = \
+            MfxCanvasText(self.canvas, tx, ty, anchor=ta,
+                          font=self.app.getFont("canvas_default"))
+
+        y += l.TEXT_HEIGHT
+        for i in range(3):
+            x, y = l.XM, y + l.YS
+            for j in range(5):
+                stack = UD_SS_RowStack(
+                    x, y, self, max_move=1, max_accept=1, base_rank=NO_RANK,
+                    mod=13, max_cards=3)
+                stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
+                s.rows.append(stack)
+                x += w
+            stack = UD_SS_RowStack(
+                x, y, self, max_move=1, max_accept=1, base_rank=ANY_RANK,
+                mod=13, max_cards=3)
+            stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
+            s.rows.append(stack)
+
+        x, y = self.width - l.XS, self.height - l.YS
+        s.talon = self.Talon_Class(x, y, self)
+
+        # define stack-groups
+        l.defaultStackGroups()
+        return l
+
+    def startGame(self):
+        for i in range(2):
+            self.s.talon.dealRow(rows=self.s.rows[:18], frames=0)
+        self.startDealSample()
+        self.s.talon.dealRow(rows=self.s.rows[:5])
+        self.s.talon.dealRow(rows=self.s.rows[6:11])
+        self.s.talon.dealRow(rows=self.s.rows[12:17])
+
+        self.base_card = self.s.talon.getCard()
+        for s in self.s.foundations:
+            s.cap.base_rank = self.base_card.rank
+        n = self.base_card.suit
+        self.flipMove(self.s.talon)
+        self.moveMove(1, self.s.talon, self.s.foundations[n])
+
+    def updateText(self):
+        if self.preview > 1:
+            return
+        if not self.texts.info:
+            return
+        if not self.base_card:
+            t = ""
+        else:
+            t = RANKS[self.base_card.rank]
+        self.texts.info.config(text=t)
+
+    def _restoreGameHook(self, game):
+        self.base_card = self.cards[game.loadinfo.base_card_id]
+        for s in self.s.foundations:
+            s.cap.base_rank = self.base_card.rank
+
+    def _loadGameHook(self, p):
+        self.loadinfo.addattr(base_card_id=None)    # register extra load var.
+        self.loadinfo.base_card_id = p.load()
+
+    def _saveGameHook(self, p):
+        p.dump(self.base_card.id)
+
+
 # register the game
 registerGame(GameInfo(56, FanGame, "Fan",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(87, ScotchPatience, "Scotch Patience",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(57, Shamrocks, "Shamrocks",
-                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
+                      altnames=("Three Card Fan",)))
 registerGame(GameInfo(901, LaBelleLucie, "La Belle Lucie",      # was: 32, 82
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 2, GI.SL_MOSTLY_SKILL,
-                      altnames=("Fair Lucy", "Midnight Oil")))
+                      altnames=("Fair Lucy", "Midnight Oil", "Lovely Lucy",
+                                "Beautiful Lutecia")))
 registerGame(GameInfo(132, SuperFlowerGarden, "Super Flower Garden",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 2, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(128, ThreeShufflesAndADraw, "Three Shuffles and a Draw",
@@ -944,10 +1153,10 @@ registerGame(GameInfo(227, Intelligence, "Intelligence",
 registerGame(GameInfo(340, IntelligencePlus, "Intelligence +",
                       GI.GT_FAN_TYPE, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(268, HouseInTheWood, "House in the Wood",
-                      GI.GT_FAN_TYPE | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(317, HouseOnTheHill, "House on the Hill",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
-                      rules_filename='houseinthewood.html'))
+                      altnames=("Double Fan",)))
+registerGame(GameInfo(317, HouseOnTheHill, "House on the Hill",
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(320, CloverLeaf, "Clover Leaf",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(347, FreeFan, "Free Fan",
@@ -963,13 +1172,28 @@ registerGame(GameInfo(625, FascinationFan, "Fascination Fan",
                       GI.GT_FAN_TYPE, 1, 6, GI.SL_BALANCED,
                       altnames=('Demon Fan',)))
 registerGame(GameInfo(647, Crescent, "Crescent",
-                      GI.GT_FAN_TYPE, 2, 3, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 2, 3, GI.SL_MOSTLY_SKILL,
+                      altnames=('La Demi-Lune',)))
 registerGame(GameInfo(714, ShamrocksII, "Shamrocks II",
                       GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(719, School, "School",
-                      GI.GT_FAN_TYPE, 1, 2, GI.SL_MOSTLY_SKILL))
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 2, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(739, ForestGlade, "Forest Glade",
                       GI.GT_FAN_TYPE, 2, 2, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(767, QuadsPlus, "Quads +",
                       GI.GT_FAN_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
                       GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(819, BearRiver, "Bear River",
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(834, RainbowFan, "Rainbow Fan",
+                      GI.GT_FAN_TYPE, 2, 3, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(871, CeilingFan, "Ceiling Fan",
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(879, RoamingProils, "Roaming Proils",
+                      GI.GT_FAN_TYPE, 1, 0, GI.SL_BALANCED))
+registerGame(GameInfo(894, Cromwell, "Cromwell",
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(908, OpenProils, "Open Proils",
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_BALANCED))
+registerGame(GameInfo(926, AlexanderTheGreat, "Alexander the Great",
+                      GI.GT_FAN_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))

@@ -21,10 +21,10 @@
 #
 # ---------------------------------------------------------------------------
 
-import formatter
 import os
 import sys
 
+import pysollib.formatter
 import pysollib.htmllib2 as htmllib
 from pysollib.mfxutil import openURL
 from pysollib.mygettext import _
@@ -33,16 +33,17 @@ from pysollib.ui.tktile.tkutil import bind, unbind_destroy
 
 from six.moves import tkinter
 
-REMOTE_PROTOCOLS = ("ftp:", "gopher:", "http:", "mailto:", "news:", "telnet:")
+REMOTE_PROTOCOLS = ("ftp:", "gopher:", "http:", "https:", "mailto:", "news:",
+                    "telnet:")
 
 # ************************************************************************
 # *
 # ************************************************************************
 
 
-class tkHTMLWriter(formatter.NullWriter):
+class tkHTMLWriter(pysollib.formatter.NullWriter):
     def __init__(self, text, viewer, app):
-        formatter.NullWriter.__init__(self)
+        pysollib.formatter.NullWriter.__init__(self)
 
         self.text = text
         self.viewer = viewer
@@ -67,6 +68,7 @@ class tkHTMLWriter(formatter.NullWriter):
             "bold": (font[0], size, "bold"),
             "italic": (font[0], size, "italic"),
             "pre": fixed,
+            "code": fixed,
         }
 
         self.text.config(cursor=self.viewer.defcursor, font=font)
@@ -104,7 +106,11 @@ class tkHTMLWriter(formatter.NullWriter):
             url = self.anchor[0]
             tag = "href_" + url
             self.text.tag_add(tag, self.anchor_mark, "insert")
-            self.text.tag_bind(tag, "<1>", self.createCallback(url))
+            from pysollib.options import calcCustomMouseButtonsBinding
+            self.text.tag_bind(
+                tag,
+                calcCustomMouseButtonsBinding("<{mouse_button1}>"),
+                self.createCallback(url))
             self.text.tag_bind(
                 tag, "<Enter>", lambda e: self.anchor_enter(url))
             self.text.tag_bind(tag, "<Leave>", self.anchor_leave)
@@ -295,7 +301,8 @@ class Base_HTMLViewer:
                 import codecs
                 return codecs.open(url, encoding='utf-8')
             else:
-                return open(url, "rb")
+                with open(url, "rb") as fh:
+                    return fh
         return my_open(url), url
 
     def display(self, url, add=1, relpath=1, xview=0, yview=0):
@@ -374,7 +381,7 @@ to open the following URL:
         self.text.delete("1.0", "end")
         # self.images = {}
         writer = tkHTMLWriter(self.text, self, self.app)
-        fmt = formatter.AbstractFormatter(writer)
+        fmt = pysollib.formatter.AbstractFormatter(writer)
         parser = tkHTMLParser(fmt)
         parser.feed(data)
         parser.close()

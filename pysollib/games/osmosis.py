@@ -37,11 +37,12 @@ from pysollib.stack import \
 from pysollib.util import ANY_RANK, ANY_SUIT, UNLIMITED_REDEALS
 
 # ************************************************************************
-# * Osmosis
+# * Osmium
+# * Osmium II
 # ************************************************************************
 
 
-class Osmosis_Foundation(AbstractFoundationStack):
+class Osmium_Foundation(AbstractFoundationStack):
     def acceptsCards(self, from_stack, cards):
         if not AbstractFoundationStack.acceptsCards(self, from_stack, cards):
             return False
@@ -63,8 +64,8 @@ class Osmosis_Foundation(AbstractFoundationStack):
         return _('Foundation. Build in suit regardless of rank.')
 
 
-class Osmosis(Game):
-    Foundation_Class = Osmosis_Foundation
+class Osmium(Game):
+    Foundation_Class = Osmium_Foundation
 
     #
     # game layout
@@ -122,21 +123,17 @@ class Osmosis(Game):
         self.s.talon.dealCards()          # deal first card to WasteStack
 
 
+class OsmiumII(Osmium):
+    def startGame(self):
+        Osmium.startGame(self, flip=1)
+
+
 # ************************************************************************
+# * Osmosis
 # * Peek
 # ************************************************************************
 
-class Peek(Osmosis):
-    def startGame(self):
-        Osmosis.startGame(self, flip=1)
-
-
-# ************************************************************************
-# * Treasure Trove
-# * Peek II
-# ************************************************************************
-
-class OsmosisII_Foundation(AbstractFoundationStack):
+class Osmosis_Foundation(AbstractFoundationStack):
     def acceptsCards(self, from_stack, cards):
         if not AbstractFoundationStack.acceptsCards(self, from_stack, cards):
             return False
@@ -163,12 +160,12 @@ class OsmosisII_Foundation(AbstractFoundationStack):
         return _('Foundation. Build in suit regardless of rank.')
 
 
-class OsmosisII(Osmosis):
+class Osmosis(Osmium):
     Foundation_Class = FullStackWrapper(
-        OsmosisII_Foundation, base_rank=ANY_RANK, suit=ANY_SUIT, max_move=0)
+        Osmosis_Foundation, base_rank=ANY_RANK, suit=ANY_SUIT, max_move=0)
 
     def createGame(self, max_rounds=-1, num_deal=3):
-        Osmosis.createGame(self, num_deal=3)
+        Osmium.createGame(self, num_deal=3)
 
     def startGame(self, flip=0):
         self.startDealSample()
@@ -182,17 +179,18 @@ class OsmosisII(Osmosis):
         self.s.talon.dealCards()
 
 
-class PeekII(OsmosisII):
+class Peek(Osmosis):
     def startGame(self):
-        OsmosisII.startGame(self, flip=1)
+        Osmosis.startGame(self, flip=1)
 
 
 # ************************************************************************
+# * Open Osmium
 # * Open Peek
 # ************************************************************************
 
-class OpenPeek(Game):
-
+class OpenOsmium(Game):
+    Foundation_Class = Osmium_Foundation
     #
     # game layout
     #
@@ -202,7 +200,7 @@ class OpenPeek(Game):
         l, s = Layout(self), self.s
 
         # set window
-        w, h = max(2*l.XM+2*l.XS+(5+13)*l.XOFFSET, l.XM + 8*l.XS), l.YM+8*l.YS
+        w, h = 10 * l.XM + 10 * l.XS + (5 + 13) * l.XOFFSET, l.YM + 4 * l.YS
         self.setSize(w, h)
 
         # create stacks
@@ -214,20 +212,22 @@ class OpenPeek(Game):
             y += l.YS
         x, y, = 2*l.XM+l.XS+5*l.XOFFSET, l.YM
         for i in range(4):
-            stack = Osmosis_Foundation(
-                x, y, self, i, base_rank=ANY_RANK, max_move=0)
+            stack = self.Foundation_Class(
+                x, y, self, suit=i, base_rank=ANY_RANK, max_move=0)
             stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
             s.foundations.append(stack)
             y += l.YS
-        y = l.YM + 4*l.YS
+        x += l.XS
+        x2 = x + (13 * l.XOFFSET)
         for i in range(4):
-            x = l.XM
+            y = l.YM + (l.YS * i)
+            x = x2
             for j in range(8):
                 s.reserves.append(OpenStack(x, y, self, max_accept=0))
                 x += l.XS
             y += l.YS
 
-        x, y = w-l.XS, l.YM
+        x, y = w - l.XS, l.YM + (3 * l.YS)
         s.talon = InitialDealTalonStack(x, y, self)
 
         # define stack-groups
@@ -242,6 +242,11 @@ class OpenPeek(Game):
         self.s.talon.dealRow(rows=self.s.reserves)
 
 
+class OpenPeek(OpenOsmium):
+    Foundation_Class = FullStackWrapper(
+        Osmosis_Foundation, base_rank=ANY_RANK, suit=ANY_SUIT, max_move=0)
+
+
 # ************************************************************************
 # * Genesis
 # ************************************************************************
@@ -253,7 +258,7 @@ class Genesis(Game):
         l, s = Layout(self), self.s
 
         # set window
-        w, h = l.XM+rows*l.XS, l.YM+2*l.YS+20*l.YOFFSET
+        w, h = l.XM + rows * l.XS, l.YM + (3 * l.YS) + (15 * l.YOFFSET)
         self.setSize(w, h)
 
         # create stacks
@@ -320,8 +325,8 @@ class Bridesmaids(Game):
 
         x, y = l.XM+2*l.XS, l.YM
         for i in range(4):
-            stack = OsmosisII_Foundation(x, y, self, suit=ANY_SUIT,
-                                         base_rank=ANY_RANK, max_move=0)
+            stack = Osmosis_Foundation(x, y, self, suit=ANY_SUIT,
+                                       base_rank=ANY_RANK, max_move=0)
             stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
             s.foundations.append(stack)
             y += l.YS
@@ -339,12 +344,60 @@ class Bridesmaids(Game):
         self.s.talon.dealCards()          # deal first card to WasteStack
 
 
+# ************************************************************************
+# * Dimensions
+# ************************************************************************
+
+class Dimensions_Foundation(AbstractFoundationStack):
+    def acceptsCards(self, from_stack, cards):
+        if not self.cards:
+            return True
+        return cards[0].rank == self.cards[-1].rank or \
+            cards[0].suit == self.cards[-1].suit
+
+
+class Dimensions(Game):
+    def createGame(self):
+        # create layout
+        l, s = Layout(self), self.s
+
+        # set window
+        w, h = l.XM + 3 * l.XS + 24 * l.XOFFSET, l.YM + 3 * l.YS
+        self.setSize(w, h)
+
+        # create stacks
+        x, y = l.XM, l.YM
+        s.talon = WasteTalonStack(x, y, self, max_rounds=1)
+        l.createText(s.talon, 'se')
+        y += l.YS
+        s.waste = WasteStack(x, y, self)
+        l.createText(s.waste, 'se')
+
+        x, y = l.XM+2*l.XS, l.YM
+        for i in range(3):
+            stack = Dimensions_Foundation(x, y, self, suit=ANY_SUIT,
+                                          base_rank=ANY_RANK, max_move=0,
+                                          max_cards=52)
+            stack.CARD_XOFFSET, stack.CARD_YOFFSET = l.XOFFSET, 0
+            s.foundations.append(stack)
+            y += l.YS
+
+        # define stack-groups
+        l.defaultStackGroups()
+
+    def startGame(self, flip=0):
+        self.s.talon.getCard()
+        self.startDealSample()
+        self.flipMove(self.s.talon)
+        self.s.talon.dealCards()          # deal first card to WasteStack
+
+
 # register the game
-registerGame(GameInfo(59, Osmosis, "Osmosis",
+registerGame(GameInfo(59, Osmium, "Osmium",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(60, Peek, "Peek",
+registerGame(GameInfo(60, OsmiumII, "Osmium II",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(298, OpenPeek, "Open Peek",
+registerGame(GameInfo(298, OpenOsmium, "Open Osmium",
                       GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
                       GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(370, Genesis, "Genesis",
@@ -355,8 +408,13 @@ registerGame(GameInfo(371, GenesisPlus, "Genesis +",
                       GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(409, Bridesmaids, "Bridesmaids",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(715, OsmosisII, "Treasure Trove",
-                      GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK))
-registerGame(GameInfo(716, PeekII, "Peek II",
+registerGame(GameInfo(715, Osmosis, "Osmosis",
                       GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK,
-                      rules_filename='treasuretrove.html'))
+                      altnames=("Treasure Trove",)))
+registerGame(GameInfo(716, Peek, "Peek",
+                      GI.GT_1DECK_TYPE, 1, -1, GI.SL_MOSTLY_LUCK))
+registerGame(GameInfo(856, OpenPeek, "Open Peek",
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_ORIGINAL, 1, 0,
+                      GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(864, Dimensions, "Dimensions",
+                      GI.GT_1DECK_TYPE, 1, 0, GI.SL_BALANCED))

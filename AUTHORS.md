@@ -15,13 +15,15 @@ Main Authors
     * Added the Kivy toolkit
 * [Roderik Ploszek](https://github.com/Programator2)
     * Fixes and enhancements
+* [Joe R.](https://github.com/joeraz)
+    * Many new games and continued PySolFC maintenance and development.
 
 Games contributors
 ==================
 
 * Mark Andrews
 * Galen Brooks <galen@nine.com>
-* Andrew Csillag <drew_csillag@geocities.com>
+* Andrew Csillag <drew@thecsillags.com>
 * Michael Foord
 * Matthew Hohlfeld <hohlfeld@cs.ucsd.edu>
 * Nicola Larosa
@@ -34,6 +36,7 @@ Enhancements
 
 * [ghostofiht](https://github.com/ghostofiht) - Contributed a new logo design.
 * [Trueno font](https://fontlibrary.org/en/font/trueno) under the [OFL](https://en.wikipedia.org/wiki/SIL_Open_Font_License) by [Julieta Ulanovsky](http://www.zkysky.com.ar/) - used in the logo.
+* [Remix Icon](https://remixicon.com/) - used for many icons throughout the app.
 
 Translations
 ============

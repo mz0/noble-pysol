@@ -79,12 +79,21 @@ class Gypsy(Game):
         # default
         l.defaultAll()
 
-    def startGame(self):
+    def startGame(self, flip=0):
         for i in range(2):
-            self.s.talon.dealRow(flip=0, frames=0)
+            self.s.talon.dealRow(flip=flip, frames=0)
         self._startAndDealRow()
 
     shallHighlightMatch = Game._shallHighlightMatch_AC
+
+
+# ************************************************************************
+# * Yeast Dough
+# ************************************************************************
+
+class YeastDough(Gypsy):
+    def startGame(self):
+        Gypsy.startGame(self, flip=1)
 
 
 # ************************************************************************
@@ -540,21 +549,28 @@ class Hypotenuse(Gypsy):
     Layout_Method = staticmethod(Layout.klondikeLayout)
     RowStack_Class = KingAC_RowStack
 
-    def createGame(self):
-        Gypsy.createGame(self, rows=10, playcards=24)
+    def createGame(self, rows=10, playcards=24):
+        Gypsy.createGame(self, rows=rows, playcards=playcards)
 
-    def startGame(self, flip=0, reverse=1):
-        for i in range(1, 10):
-            self.s.talon.dealRow(rows=self.s.rows[:i], flip=0, frames=0)
+    def startGame(self, flip=0, rows=10):
+        for i in range(1, rows):
+            self.s.talon.dealRow(rows=self.s.rows[i:], flip=flip, frames=0)
         self._startAndDealRow()
 
 
 class EternalTriangle(Hypotenuse):
 
-    def startGame(self, flip=0, reverse=1):
-        for i in range(1, 10):
-            self.s.talon.dealRow(rows=self.s.rows[i:], frames=0)
-        self._startAndDealRow()
+    def startGame(self):
+        Hypotenuse.startGame(self, flip=1)
+
+
+class SmallTriangle(Hypotenuse):
+
+    def createGame(self):
+        Hypotenuse.createGame(self, rows=7, playcards=20)
+
+    def startGame(self):
+        Hypotenuse.startGame(self, rows=7)
 
 
 class RightTriangle_Talon(OpenStack, DealRowTalonStack):
@@ -720,19 +736,20 @@ class Eclipse(Gypsy):
 
 # ************************************************************************
 # * Brazilian Patience
+# * (Removed as it's a duplicate of Hypotenuse)
 # ************************************************************************
 
-class BrazilianPatience(Gypsy):
-    Layout_Method = staticmethod(Layout.klondikeLayout)
-    RowStack_Class = KingAC_RowStack
+# class BrazilianPatience(Gypsy):
+#     Layout_Method = staticmethod(Layout.klondikeLayout)
+#     RowStack_Class = KingAC_RowStack
 
-    def createGame(self):
-        Gypsy.createGame(self, rows=10, playcards=22)
+#     def createGame(self):
+#         Gypsy.createGame(self, rows=10, playcards=22)
 
-    def startGame(self, flip=0, reverse=1):
-        for i in range(1, 10):
-            self.s.talon.dealRow(rows=self.s.rows[i:], flip=0, frames=0)
-        self._startAndDealRow()
+#     def startGame(self, flip=0, reverse=1):
+#         for i in range(1, 10):
+#             self.s.talon.dealRow(rows=self.s.rows[i:], flip=0, frames=0)
+#         self._startAndDealRow()
 
 
 # ************************************************************************
@@ -843,14 +860,14 @@ class LockedCards(Game):
             s.rows.append(self.RowStack_Class(x, y, self))
             x += l.XS
 
-        x, y = self.width-l.XS, self.height-l.YS
+        x, y = self.width - l.XS, self.height - l.YS - l.TEXT_HEIGHT
         s.talon = WasteTalonStack(x, y, self, max_rounds=3)
-        l.createText(s.talon, 'n')
-        l.createRoundText(s.talon, 'nnn')
+        l.createText(s.talon, 's')
+        l.createRoundText(s.talon, 'n')
 
         x -= l.XS
         s.waste = WasteStack(x, y, self)
-        l.createText(s.waste, 'n')
+        l.createText(s.waste, 's')
 
         # define stack-groups
         l.defaultStackGroups()
@@ -869,6 +886,17 @@ class TopsyTurvyQueens(LockedCards):
 
     def startGame(self):
         LockedCards.startGame(self, rows=4)
+
+    shallHighlightMatch = Game._shallHighlightMatch_SSW
+
+
+class KingsSecrets(LockedCards):
+    Foundation_Class = StackWrapper(LockedCards_Foundation,
+                                    base_rank=KING, mod=13)
+    RowStack_Class = StackWrapper(SS_RowStack, mod=13, base_rank=11)
+
+    def startGame(self):
+        LockedCards.startGame(self, rows=5)
 
     shallHighlightMatch = Game._shallHighlightMatch_SSW
 
@@ -947,6 +975,33 @@ class Thirty(Game):
     getQuickPlayScore = Game._getSpiderQuickPlayScore
 
 
+# ************************************************************************
+# * Swiss Patience
+# ************************************************************************
+
+class SwissPatience_RowStack(AC_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if cards[0].rank == ACE and len(self.cards) > 0:
+            return False
+        return AC_RowStack.acceptsCards(self, from_stack, cards)
+
+
+class SwissPatience(Gypsy):
+    Layout_Method = staticmethod(Layout.klondikeLayout)
+    Foundation_Class = StackWrapper(SS_FoundationStack, base_rank=1, mod=13)
+    RowStack_Class = StackWrapper(SwissPatience_RowStack, base_rank=ACE,
+                                  mod=13)
+
+    def createGame(self):
+        Gypsy.createGame(self, rows=9)
+
+    def startGame(self):
+        self.startDealSample()
+        for i in range(1, 5):
+            self.s.talon.dealRow(rows=self.s.rows[i:-i], flip=0, frames=0)
+        self._startAndDealRow()
+
+
 # register the game
 registerGame(GameInfo(1, Gypsy, "Gypsy",
                       GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
@@ -957,7 +1012,8 @@ registerGame(GameInfo(3, Irmgard, "Irmgard",
 registerGame(GameInfo(119, DieKoenigsbergerin, "Die Koenigsbergerin",
                       GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(174, DieRussische, "Russian Patience",
-                      GI.GT_2DECK_TYPE | GI.GT_OPEN, 2, 0, GI.SL_MOSTLY_SKILL,
+                      GI.GT_KLONDIKE | GI.GT_OPEN | GI.GT_STRIPPED,
+                      2, 0, GI.SL_MOSTLY_SKILL,
                       ranks=(0, 6, 7, 8, 9, 10, 11, 12),
                       altnames=("Die Russische",)))
 registerGame(GameInfo(62, MissMilligan, "Miss Milligan",
@@ -972,7 +1028,8 @@ registerGame(GameInfo(217, MilliganHarp, "Milligan Harp",
 registerGame(GameInfo(218, Carlton, "Carlton",
                       GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(68, LexingtonHarp, "Lexington Harp",
-                      GI.GT_YUKON, 2, 0, GI.SL_BALANCED))
+                      GI.GT_YUKON, 2, 0, GI.SL_BALANCED,
+                      altnames=("Milligan Yukon",)))
 registerGame(GameInfo(154, Brunswick, "Brunswick",
                       GI.GT_YUKON, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(121, Mississippi, "Mississippi",
@@ -996,7 +1053,8 @@ registerGame(GameInfo(487, Millie, "Millie",
 registerGame(GameInfo(498, Steve, "Steve",
                       GI.GT_GYPSY, 2, 0, GI.SL_BALANCED))
 registerGame(GameInfo(566, Hypotenuse, "Hypotenuse",
-                      GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
+                      GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL,
+                      altnames=("Brazilian Patience",)))
 registerGame(GameInfo(567, EternalTriangle, "Eternal Triangle",
                       GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL,
                       altnames=('Lobachevsky',)))
@@ -1008,8 +1066,8 @@ registerGame(GameInfo(581, Flamenco, "Flamenco",
                       GI.GT_GYPSY | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(584, Eclipse, "Eclipse",
                       GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(640, BrazilianPatience, "Brazilian Patience",
-                      GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
+# registerGame(GameInfo(640, BrazilianPatience, "Brazilian Patience",
+#                       GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(666, TrapdoorSpider, "Trapdoor Spider",
                       GI.GT_SPIDER | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(712, Leprechaun, "Leprechaun",
@@ -1017,7 +1075,16 @@ registerGame(GameInfo(712, Leprechaun, "Leprechaun",
 registerGame(GameInfo(718, LockedCards, "Locked Cards",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(721, Thirty, "Thirty",
-                      GI.GT_1DECK_TYPE | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL,
-                      ranks=(0, 6, 7, 8, 9, 10, 11, 12)))
+                      GI.GT_1DECK_TYPE | GI.GT_OPEN | GI.GT_STRIPPED, 1, 0,
+                      GI.SL_MOSTLY_SKILL, ranks=(0, 6, 7, 8, 9, 10, 11, 12)))
 registerGame(GameInfo(725, TopsyTurvyQueens, "Topsy-Turvy Queens",
                       GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED))
+registerGame(GameInfo(792, KingsSecrets, "King's Secrets",
+                      GI.GT_2DECK_TYPE, 2, 2, GI.SL_BALANCED,
+                      altnames=('Royal Secrets',)))
+registerGame(GameInfo(842, SwissPatience, "Swiss Patience",
+                      GI.GT_GYPSY, 1, 0, GI.SL_BALANCED))
+registerGame(GameInfo(890, YeastDough, "Yeast Dough",
+                      GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(912, SmallTriangle, "Small Triangle",
+                      GI.GT_GYPSY, 1, 0, GI.SL_BALANCED))

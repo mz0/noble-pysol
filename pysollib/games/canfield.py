@@ -6,15 +6,18 @@ from pysollib.mygettext import _
 from pysollib.pysoltk import MfxCanvasText
 from pysollib.stack import \
         AC_RowStack, \
+        AbstractFoundationStack, \
         KingAC_RowStack, \
         OpenStack, \
+        RK_FoundationStack, \
         RK_RowStack, \
         ReserveStack, \
         SS_FoundationStack, \
         SS_RowStack, \
         StackWrapper, \
         WasteStack, \
-        WasteTalonStack
+        WasteTalonStack, \
+        isRankSequence
 from pysollib.util import KING, QUEEN, RANKS, UNLIMITED_REDEALS
 
 
@@ -72,13 +75,15 @@ class Canfield(Game):
     INITIAL_RESERVE_CARDS = 13
     INITIAL_RESERVE_FACEUP = 0
     FILL_EMPTY_ROWS = 1
+    SEPARATE_FOUNDATIONS = True
+    ALIGN_FOUNDATIONS = True
 
     #
     # game layout
     #
 
     def createGame(self, rows=4, max_rounds=-1, num_deal=3,
-                   text=True, round_text=False):
+                   text=True, round_text=False, dir=-1):
         # create layout
         lay, s = Layout(self), self.s
         decks = self.gameinfo.decks
@@ -103,27 +108,38 @@ class Canfield(Game):
 
         # create stacks
         x, y = lay.XM, lay.YM
+        if round_text:
+            y += lay.TEXT_HEIGHT
         s.talon = self.Talon_Class(x, y, self,
                                    max_rounds=max_rounds, num_deal=num_deal)
         lay.createText(s.talon, "s")
         if round_text:
-            lay.createRoundText(s.talon, 'sss')
+            lay.createRoundText(s.talon, 'n')
         x += lay.XS
         s.waste = WasteStack(x, y, self)
         lay.createText(s.waste, "s")
         x += lay.XM
         y = lay.YM
-        for i in range(4):
-            for j in range(decks):
-                x += lay.XS
-                s.foundations.append(self.Foundation_Class(x, y, self, i,
-                                                           mod=13, max_move=0))
+        if round_text:
+            y += lay.TEXT_HEIGHT
+        if (self.SEPARATE_FOUNDATIONS):
+            for i in range(4):
+                for j in range(decks):
+                    x += lay.XS
+                    s.foundations.append(self.Foundation_Class(x, y,
+                                                               self, i,
+                                                               mod=13,
+                                                               max_move=0))
+        else:
+            x += (lay.XS * rows)
+            s.foundations.append(self.Foundation_Class(x, y, self, -1,
+                                                       max_move=0))
         if text:
             if rows > 4 * decks:
                 tx, ty, ta, tf = lay.getTextAttr(None, "se")
                 tx, ty = x + tx + lay.XM, y + ty
             else:
-                tx, ty, ta, tf = lay.getTextAttr(None, "ss")
+                tx, ty, ta, tf = lay.getTextAttr(None, "s")
                 tx, ty = x + tx, y + ty
             font = self.app.getFont("canvas_default")
             self.texts.info = MfxCanvasText(self.canvas, tx, ty,
@@ -134,10 +150,12 @@ class Canfield(Game):
         s.reserves.append(self.ReserveStack_Class(x, y, self))
         s.reserves[0].CARD_YOFFSET = yoffset
         x, y = lay.XM + 2 * lay.XS + lay.XM, lay.YM + lay.YS
+        if round_text:
+            y += lay.TEXT_HEIGHT
         if text:
             y += lay.TEXT_HEIGHT
         for i in range(rows):
-            s.rows.append(self.RowStack_Class(x, y, self))
+            s.rows.append(self.RowStack_Class(x, y, self, dir=dir))
             x += lay.XS
 
         # define stack-groups
@@ -166,17 +184,21 @@ class Canfield(Game):
         self.startDealSample()
         self.base_card = None
         self.updateText()
-        # deal base_card to Foundations, update foundations cap.base_rank
-        self.base_card = self.s.talon.getCard()
-        for s in self.s.foundations:
-            s.cap.base_rank = self.base_card.rank
-        n = self.base_card.suit * self.gameinfo.decks
-        if self.s.foundations[n].cards:
-            assert self.gameinfo.decks > 1
-            n = n + 1
-        self.flipMove(self.s.talon)
-        self.moveMove(1, self.s.talon, self.s.foundations[n])
-        self.updateText()
+        if (self.SEPARATE_FOUNDATIONS):
+            # deal base_card to Foundations, update foundations cap.base_rank
+            self.base_card = self.s.talon.getCard()
+            for s in self.s.foundations:
+                s.cap.base_rank = self.base_card.rank
+            if (self.ALIGN_FOUNDATIONS):
+                n = self.base_card.suit * self.gameinfo.decks
+            else:
+                n = 0
+            if self.s.foundations[n].cards:
+                assert self.gameinfo.decks > 1
+                n = n + 1
+            self.flipMove(self.s.talon)
+            self.moveMove(1, self.s.talon, self.s.foundations[n])
+            self.updateText()
         # fill the Reserve
         for i in range(self.INITIAL_RESERVE_CARDS):
             if self.INITIAL_RESERVE_FACEUP:
@@ -336,6 +358,32 @@ class VariegatedCanfield(Canfield):
 
     def updateText(self):
         pass
+
+
+# ************************************************************************
+# * Casino Canfield
+# ************************************************************************
+
+class CasinoCanfield(Canfield):
+    getGameScore = Game.getGameScoreCasino
+    getGameBalance = Game.getGameScoreCasino
+
+    def createGame(self, max_rounds=1, num_deal=1):
+        lay = Canfield.createGame(self, max_rounds=max_rounds,
+                                  num_deal=num_deal)
+        self.texts.score = MfxCanvasText(self.canvas,
+                                         8, self.height - 8, anchor="sw",
+                                         font=self.app.getFont("canvas_large"))
+        return lay
+
+    def updateText(self):
+        if self.preview > 1:
+            return
+        b1, b2 = self.app.stats.gameid_balance, 0
+        if self.shallUpdateBalance():
+            b2 = self.getGameBalance()
+        t = _("Balance $%d") % (b1 + b2)
+        self.texts.score.config(text=t)
 
 
 # ************************************************************************
@@ -605,6 +653,17 @@ class TripleCanfield(Canfield):
 
 
 # ************************************************************************
+# * Quadruple Canfield
+# ************************************************************************
+
+class QuadrupleCanfield(Canfield):
+    INITIAL_RESERVE_CARDS = 39
+
+    def createGame(self):
+        Canfield.createGame(self, rows=8)
+
+
+# ************************************************************************
 # * Acme
 # ************************************************************************
 
@@ -674,7 +733,7 @@ class Duke(Game):
         for i in range(4):
             s.foundations.append(self.Foundation_Class(x, y, self, suit=i))
             x += lay.XS
-        x0, y0, w = lay.XM, lay.YM+lay.YS+2*lay.TEXT_HEIGHT,\
+        x0, y0, w = lay.XM, lay.YM+lay.YS+2*lay.TEXT_HEIGHT, \
             lay.XS+2*lay.XOFFSET
         for i, j in ((0, 0), (0, 1), (1, 0), (1, 1)):
             x, y = x0+i*w, y0+j*lay.YS
@@ -806,6 +865,71 @@ class Skippy(Canfield):
 
 
 # ************************************************************************
+# * Club
+# ************************************************************************
+
+class Club_RowStack(AC_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if self.id > 2 and from_stack.id < 3:
+            return False
+        return AC_RowStack.acceptsCards(self, from_stack, cards)
+
+
+class Club(Game):
+
+    def createGame(self):
+        # create layout
+        lay, s = Layout(self), self.s
+
+        # set window
+        playcards = 8
+        w0 = lay.XS+playcards*lay.XOFFSET
+        w = lay.XM+lay.XS//2+max(10*lay.XS, lay.XS+4*w0)
+        h = lay.YM+4*lay.YS+lay.TEXT_HEIGHT
+        self.setSize(w, h)
+
+        # create stacks
+        y = lay.YM + lay.YS + lay.TEXT_HEIGHT
+        x = lay.XM + lay.XS + lay.XS // 2 + (w0 // 2)
+        for j in range(3):
+            stack = Club_RowStack(x, y, self, max_move=1)
+            s.rows.append(stack)
+            stack.CARD_XOFFSET, stack.CARD_YOFFSET = lay.XOFFSET, 0
+            x += w0
+        y += lay.YS
+        for i in range(2):
+            x = lay.XM + lay.XS + lay.XS // 2
+            for j in range(4):
+                stack = Club_RowStack(x, y, self, max_move=1)
+                s.rows.append(stack)
+                stack.CARD_XOFFSET, stack.CARD_YOFFSET = lay.XOFFSET, 0
+                x += w0
+            y += lay.YS
+
+        x, y = lay.XM, lay.YM
+        s.talon = WasteTalonStack(x, y, self, max_rounds=1)
+        lay.createText(s.talon, 's')
+        x += lay.XS
+        s.waste = WasteStack(x, y, self)
+        lay.createText(s.waste, 's')
+        x = self.width - 8*lay.XS
+        for i in range(8):
+            s.foundations.append(SS_FoundationStack(x, y, self,
+                                                    suit=i % 4, mod=13))
+            x += lay.XS
+
+        # define stack-groups
+        lay.defaultStackGroups()
+
+    def startGame(self):
+        self.startDealSample()
+        self.s.talon.dealRow(rows=self.s.rows, flip=0, frames=0)
+        self.s.talon.dealRow(rows=self.s.rows, flip=1, frames=0)
+        self.s.talon.dealRow()
+        self.s.talon.dealCards()
+
+
+# ************************************************************************
 # * Lafayette
 # ************************************************************************
 
@@ -856,6 +980,84 @@ class Lafayette(Game):
     shallHighlightMatch = Game._shallHighlightMatch_AC
 
 
+# ************************************************************************
+# * Beehive
+# ************************************************************************
+
+class Beehive_RowStack(RK_RowStack):
+    def canDropCards(self, stacks):
+        if len(self.cards) < 4:
+            return (None, 0)
+        cards = self.cards[-4:]
+        for s in stacks:
+            if s is not self and s.acceptsCards(self, cards):
+                return (s, 4)
+        return (None, 0)
+
+
+class Beehive_Foundation(AbstractFoundationStack):
+    def acceptsCards(self, from_stack, cards):
+        if len(cards) < 4:
+            return False
+        return isRankSequence(cards, dir=0)
+
+
+class Beehive(Canfield):
+    Foundation_Class = Beehive_Foundation
+    RowStack_Class = Beehive_RowStack
+
+    SEPARATE_FOUNDATIONS = False
+
+    def createGame(self):
+        Canfield.createGame(self, rows=6, dir=0)
+
+    def _restoreGameHook(self, game):
+        pass
+
+    def _loadGameHook(self, p):
+        pass
+
+    def _saveGameHook(self, p):
+        pass
+
+
+# ************************************************************************
+# * The Plot
+# ************************************************************************
+
+class ThePlot_RowStack(RK_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if len(self.cards) == 0:
+            if (len(self.game.s.foundations[0].cards) < 13 and
+                    cards[0].rank != self.game.s.foundations[0].cap.base_rank):
+                return False
+            if from_stack != self.game.s.waste:
+                return False
+        if from_stack in self.game.s.reserves:
+            return False
+        return RK_RowStack.acceptsCards(self, from_stack, cards)
+
+
+class ThePlot_Foundation(RK_FoundationStack):
+    def acceptsCards(self, from_stack, cards):
+        if (len(self.game.s.foundations[0].cards) < 13 and
+                len(self.cards) == 0):
+            return False
+        return RK_FoundationStack.acceptsCards(self, from_stack, cards)
+
+
+class ThePlot(Canfield):
+    Foundation_Class = ThePlot_Foundation
+    RowStack_Class = StackWrapper(ThePlot_RowStack, mod=13, max_move=1)
+
+    FILL_EMPTY_ROWS = 0
+    ALIGN_FOUNDATIONS = False
+
+    def createGame(self):
+        Canfield.createGame(self, rows=12, max_rounds=1, num_deal=1,
+                            round_text=False)
+
+
 # register the game
 registerGame(GameInfo(105, Canfield, "Canfield",                # was: 262
                       GI.GT_CANFIELD | GI.GT_CONTRIB, 1, -1, GI.SL_BALANCED))
@@ -867,7 +1069,8 @@ registerGame(GameInfo(108, Rainbow, "Rainbow",
                       GI.GT_CANFIELD, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(100, Storehouse, "Storehouse",
                       GI.GT_CANFIELD, 1, 2, GI.SL_BALANCED,
-                      altnames=("Provisions", "Straight Up", "Thirteen Up")))
+                      altnames=("Provisions", "Straight Up", "Thirteen Up",
+                                "The Reserve")))
 registerGame(GameInfo(43, Chameleon, "Chameleon",
                       GI.GT_CANFIELD, 1, 0, GI.SL_BALANCED,
                       altnames="Kansas"))
@@ -878,7 +1081,8 @@ registerGame(GameInfo(103, AmericanToad, "American Toad",
 registerGame(GameInfo(102, VariegatedCanfield, "Variegated Canfield",
                       GI.GT_CANFIELD, 2, 2, GI.SL_BALANCED))
 registerGame(GameInfo(112, EagleWing, "Eagle Wing",
-                      GI.GT_CANFIELD, 1, 2, GI.SL_BALANCED))
+                      GI.GT_CANFIELD, 1, 2, GI.SL_BALANCED,
+                      altnames="Thirteen Down"))
 registerGame(GameInfo(315, Gate, "Gate",
                       GI.GT_CANFIELD, 1, 0, GI.SL_BALANCED))
 registerGame(GameInfo(316, LittleGate, "Little Gate",
@@ -906,3 +1110,14 @@ registerGame(GameInfo(605, Skippy, "Skippy",
                       GI.GT_FAN_TYPE, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(642, Lafayette, "Lafayette",
                       GI.GT_CANFIELD, 1, -1, GI.SL_BALANCED))
+registerGame(GameInfo(789, Beehive, "Beehive",
+                      GI.GT_CANFIELD, 1, -1, GI.SL_BALANCED))
+registerGame(GameInfo(835, CasinoCanfield, "Casino Canfield",
+                      GI.GT_CANFIELD | GI.GT_SCORE, 1, 0, GI.SL_BALANCED,
+                      altnames="Reno"))
+registerGame(GameInfo(896, ThePlot, "The Plot",
+                      GI.GT_CANFIELD, 2, 0, GI.SL_BALANCED))
+registerGame(GameInfo(922, QuadrupleCanfield, "Quadruple Canfield",
+                      GI.GT_CANFIELD, 4, -1, GI.SL_BALANCED))
+registerGame(GameInfo(947, Club, "Club",
+                      GI.GT_FAN_TYPE, 2, 0, GI.SL_BALANCED))

@@ -92,9 +92,10 @@ class SelectCardsetData(SelectDialogTreeData):
                     SelectCardsetNode(
                         None, name, lambda cs, key=key: key in cs.si.styles))
         if nodes:
-            nodes.append(
-                SelectCardsetNode(
-                    None, _("Uncategorized"), lambda cs: not cs.si.styles))
+            if manager.uncategorized_styles:
+                nodes.append(
+                    SelectCardsetNode(
+                        None, _("Uncategorized"), lambda cs: not cs.si.styles))
             select_by_style = SelectCardsetNode(
                 None, _("by Style"), tuple(nodes))
         #
@@ -109,10 +110,11 @@ class SelectCardsetData(SelectDialogTreeData):
                         None, name,
                         lambda cs, key=key: key in cs.si.nationalities))
         if nodes:
-            nodes.append(
-                SelectCardsetNode(
-                    None, _("Uncategorized"),
-                    lambda cs: not cs.si.nationalities))
+            if manager.uncategorized_nationalities:
+                nodes.append(
+                    SelectCardsetNode(
+                        None, _("Uncategorized"),
+                        lambda cs: not cs.si.nationalities))
             select_by_nationality = SelectCardsetNode(
                 None, _("by Nationality"), tuple(nodes))
         #
@@ -126,9 +128,10 @@ class SelectCardsetData(SelectDialogTreeData):
                     SelectCardsetNode(
                         None, name, lambda cs, key=key: key in cs.si.dates))
         if nodes:
-            nodes.append(
-                SelectCardsetNode(
-                    None, _("Uncategorized"), lambda cs: not cs.si.dates))
+            if manager.uncategorized_dates:
+                nodes.append(
+                    SelectCardsetNode(
+                        None, _("Uncategorized"), lambda cs: not cs.si.dates))
             select_by_date = SelectCardsetNode(
                 None, _("by Date"), tuple(nodes))
         #
@@ -150,8 +153,11 @@ class SelectCardsetData(SelectDialogTreeData):
                     None, _("Large cardsets"),
                     lambda cs: cs.si.size == CSI.SIZE_LARGE),
                 SelectCardsetNode(
-                    None, _("XLarge cardsets"),
+                    None, _("Extra Large cardsets"),
                     lambda cs: cs.si.size == CSI.SIZE_XLARGE),
+                SelectCardsetNode(
+                    None, _("Hi-Res cardsets"),
+                    lambda cs: cs.si.size == CSI.SIZE_HIRES),
             ), expanded=1),
             select_by_type,
             select_by_style,
@@ -487,9 +493,10 @@ class CardsetInfoDialog(MfxDialog):
         frame.rowconfigure(1, weight=1)
         #
         text = ''
-        f = os.path.join(cardset.dir, "COPYRIGHT")
+        fn = os.path.join(cardset.dir, "COPYRIGHT")
         try:
-            text = open(f).read()
+            with open(fn, "rt") as fh:
+                text = fh.read()
         except Exception:
             pass
         if text:

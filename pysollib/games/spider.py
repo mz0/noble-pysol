@@ -29,11 +29,11 @@ from pysollib.hint import FreeCellSolverWrapper
 from pysollib.hint import SpiderType_Hint, YukonType_Hint
 from pysollib.layout import Layout
 from pysollib.mfxutil import kwdefault
-from pysollib.mygettext import _
 from pysollib.stack import \
         AC_FoundationStack, \
         AC_RowStack, \
         AbstractFoundationStack, \
+        AutoDealTalonStack, \
         BasicRowStack, \
         DealRowTalonStack, \
         InitialDealTalonStack, \
@@ -42,7 +42,10 @@ from pysollib.stack import \
         RK_RowStack, \
         ReserveStack, \
         SS_FoundationStack, \
+        SS_RowStack, \
         Spider_AC_Foundation, \
+        Spider_AC_RowStack, \
+        Spider_SC_RowStack, \
         Spider_SS_Foundation, \
         Spider_SS_RowStack, \
         StackWrapper, \
@@ -278,6 +281,21 @@ class BabySpiderette(Spiderette):
 class WillOTheWisp(Spiderette):
     def startGame(self):
         for i in range(2):
+            self.s.talon.dealRow(flip=0, frames=0)
+        self._startAndDealRow()
+
+
+# ************************************************************************
+# * Fair Maids
+# ************************************************************************
+
+class FairMaids(Spiderette):
+    RowStack_Class = Spider_AC_RowStack
+    Foundation_Class = Spider_AC_Foundation
+    Hint_Class = CautiousDefaultHint
+
+    def startGame(self):
+        for i in range(3):
             self.s.talon.dealRow(flip=0, frames=0)
         self._startAndDealRow()
 
@@ -869,7 +887,7 @@ class Applegate(Game):
 # * Big Spider
 # * Spider 3x3
 # * Big Divorce
-# * Spider (4 decks)
+# * Spider (4 Decks)
 # * Very Big Divorce
 # * Chinese Spider
 # ************************************************************************
@@ -1123,20 +1141,8 @@ class ScorpionII(Scorpion):
 # * Tarantula
 # ************************************************************************
 
-class Tarantula_RowStack(Spider_RowStack):
-    def _isSequence(self, cards):
-        return isSameColorSequence(cards, self.cap.mod, self.cap.dir)
-
-    def _isAcceptableSequence(self, cards):
-        return isRankSequence(cards, self.cap.mod, self.cap.dir)
-
-    def getHelp(self):
-        return _('Tableau. Build down regardless of suit. Sequences of cards '
-                 'in the same color can be moved as a unit.')
-
-
 class Tarantula(Spider):
-    RowStack_Class = Tarantula_RowStack
+    RowStack_Class = Spider_SC_RowStack
 
     def getQuickPlayScore(self, ncards, from_stack, to_stack):
         if to_stack.cards:
@@ -1221,7 +1227,7 @@ class Bebop(Game):
             s.rows.append(RK_RowStack(x, y, self))
             x += l.XS
         x, y = l.XM, l.YM
-        s.talon = TalonStack(x, y, self)
+        s.talon = AutoDealTalonStack(x, y, self)
         l.createText(s.talon, 'ne')
 
         l.defaultStackGroups()
@@ -1360,6 +1366,165 @@ class TheJollyRoger(Game):
     getQuickPlayScore = Game._getSpiderQuickPlayScore
 
 
+# ************************************************************************
+# * Autumn Leaves
+# ************************************************************************
+
+class AutumnLeaves_RowStack(Spider_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not BasicRowStack.acceptsCards(self, from_stack, cards):
+            return 0
+        if not self.cards:
+            return 1
+        return (self.cards[-1].rank > cards[0].rank
+                and self.cards[-1].suit == cards[0].suit)
+
+
+class AutumnLeaves(Game):
+    Layout_Method = staticmethod(Layout.klondikeLayout)
+    Talon_Class = DealRowTalonStack
+    RowStack_Class = AutumnLeaves_RowStack
+    Hint_Class = Spider_Hint
+
+    def createGame(self, **layout):
+        # create layout
+        l, s = Layout(self), self.s
+        kwdefault(layout, rows=6, waste=0, texts=1, playcards=22)
+        self.Layout_Method(l, **layout)
+        self.setSize(l.size[0], l.size[1])
+        # create stacks
+        s.talon = self.Talon_Class(l.s.talon.x, l.s.talon.y, self)
+        if l.s.waste:
+            s.waste = WasteStack(l.s.waste.x, l.s.waste.y, self)
+        for r in l.s.rows:
+            s.rows.append(self.RowStack_Class(r.x, r.y, self))
+        # default
+        l.defaultAll()
+
+    def startGame(self):
+        for i in range(2):
+            self.s.talon.dealRow(flip=0, frames=0)
+        r = self.s.rows
+        rows = (r[0], r[1], r[4], r[5])
+        self.s.talon.dealRow(rows=rows, flip=0, frames=0)
+        self._startAndDealRow()
+
+    def isGameWon(self):
+        for s in self.s.rows:
+            if s.cards:
+                if len(s.cards) != 13 or not isSameSuitSequence(s.cards):
+                    return False
+        return True
+
+
+# ************************************************************************
+# * Scorpion Towers
+# ************************************************************************
+
+class ScorpionTowers_RowStack(SS_RowStack):
+    def acceptsCards(self, from_stack, cards):
+        if not self.cards:
+            basekings = 0
+            for s in self.game.s.rows:
+                if s.cards and s.cards[0].rank == KING:
+                    basekings += 1
+            if basekings >= 4:
+                return 1
+            else:
+                return cards[0].rank == KING
+        return SS_RowStack.acceptsCards(self, from_stack, cards)
+
+
+class ScorpionTowers(Game):
+    Layout_Method = staticmethod(Layout.freeCellLayout)
+    Talon_Class = InitialDealTalonStack
+    RowStack_Class = ScorpionTowers_RowStack
+    Hint_Class = Spider_Hint
+
+    def createGame(self, **layout):
+        # create layout
+        l, s = Layout(self), self.s
+
+        # set window
+        # (piles up to 20 cards are playable in default window size)
+        h = max(3 * l.YS, 20 * l.YOFFSET)
+        self.setSize(l.XM + 10 * l.XS, l.YM + l.YS + h)
+
+        # create stacks
+        x, y = l.XM, l.YM
+        for i in range(4):
+            s.reserves.append(ReserveStack(x + (i + 3) * l.XS, y, self))
+        x, y = l.XM, l.YM + l.YS
+        for i in range(10):
+            s.rows.append(self.RowStack_Class(x, y, self))
+            x = x + l.XS
+        s.talon = self.Talon_Class(l.XM, self.height - l.YS, self)
+
+        # define stack-groups
+        self.sg.openstacks = s.foundations + s.rows + s.reserves
+        self.sg.talonstacks = [s.talon]
+        self.sg.dropstacks = s.rows + s.reserves
+        self.sg.reservestacks = s.reserves
+
+    def startGame(self):
+        for i in range(4):
+            self.s.talon.dealRow(flip=1, frames=0)
+        self._startAndDealRow()
+        self.s.talon.dealRow(rows=[self.s.reserves[1], self.s.reserves[2]])
+
+    def isGameWon(self):
+        for s in self.s.rows:
+            if s.cards:
+                if len(s.cards) != 13 or not isSameSuitSequence(s.cards):
+                    return False
+        return True
+
+
+# ************************************************************************
+# * Astrocyte
+# ************************************************************************
+
+class Astrocyte(Game):
+
+    def createGame(self):
+
+        # create layout
+        l, s = Layout(self), self.s
+
+        # set window
+        self.setSize(l.XM + 14 * l.XS, l.YM + 2 * l.YS + 20 * l.YOFFSET)
+
+        # create stacks
+        x, y = l.XM + 1.5 * l.XS, l.YM
+        for i in range(4):
+            stack = ReserveStack(x, y, self, max_cards=1)
+            s.reserves.append(stack)
+            stack.CARD_YOFFSET = l.YOFFSET
+            x += l.XS
+
+        x, y = l.XM + 6 * l.XS, l.YM
+        for i in range(8):
+            s.foundations.append(Spider_SS_Foundation(x, y, self))
+            x += l.XS
+
+        x, y = l.XM + 3 * l.XS, l.YM + l.YS
+        for i in range(8):
+            s.rows.append(Spider_RowStack(x, y, self))
+            x += l.XS
+
+        x, y = l.XM, l.YM
+        s.talon = DealRowTalonStack(x, y, self)
+        l.createText(s.talon, "ne")
+
+        # define stack-groups
+        l.defaultStackGroups()
+
+    def startGame(self):
+        for i in range(7):
+            self.s.talon.dealRow(flip=0, frames=0)
+        self._startAndDealRow()
+
+
 # register the game
 registerGame(GameInfo(10, RelaxedSpider, "Relaxed Spider",
                       GI.GT_SPIDER | GI.GT_RELAXED, 2, 0, GI.SL_MOSTLY_SKILL))
@@ -1390,11 +1555,11 @@ registerGame(GameInfo(185, Wasp, "Wasp",
                       GI.GT_SPIDER, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(220, RougeEtNoir, "Rouge et Noir",
                       GI.GT_GYPSY, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(269, Spider1Suit, "Spider (1 suit)",
+registerGame(GameInfo(269, Spider1Suit, "Spider (1 Suit)",
                       GI.GT_SPIDER, 2, 0, GI.SL_MOSTLY_SKILL,
                       suits=(0, 0, 0, 0),
                       rules_filename="spider.html"))
-registerGame(GameInfo(270, Spider2Suits, "Spider (2 suits)",
+registerGame(GameInfo(270, Spider2Suits, "Spider (2 Suits)",
                       GI.GT_SPIDER, 2, 0, GI.SL_MOSTLY_SKILL,
                       suits=(0, 0, 2, 2),
                       rules_filename="spider.html"))
@@ -1430,19 +1595,18 @@ registerGame(GameInfo(441, York, "York",
 registerGame(GameInfo(444, BigYork, "Big York",
                       GI.GT_SPIDER | GI.GT_OPEN | GI.GT_ORIGINAL, 3, 0,
                       GI.SL_SKILL))
-registerGame(GameInfo(445, BigSpider1Suit, "Big Spider (1 suit)",
+registerGame(GameInfo(445, BigSpider1Suit, "Big Spider (1 Suit)",
                       GI.GT_SPIDER, 3, 0, GI.SL_MOSTLY_SKILL,
                       suits=(0, 0, 0, 0),
                       rules_filename="bigspider.html"))
-registerGame(GameInfo(446, BigSpider2Suits, "Big Spider (2 suits)",
+registerGame(GameInfo(446, BigSpider2Suits, "Big Spider (2 Suits)",
                       GI.GT_SPIDER, 3, 0, GI.SL_MOSTLY_SKILL,
                       suits=(0, 0, 2, 2),
                       rules_filename="bigspider.html"))
 registerGame(GameInfo(449, Spider3x3, "Spider 3x3",
-                      GI.GT_SPIDER | GI.GT_ORIGINAL, 3, 0, GI.SL_MOSTLY_SKILL,
-                      suits=(0, 1, 2),
-                      rules_filename="bigspider.html"))
-registerGame(GameInfo(454, Spider4Decks, "Spider (4 decks)",
+                      GI.GT_SPIDER | GI.GT_ORIGINAL | GI.GT_STRIPPED,
+                      3, 0, GI.SL_MOSTLY_SKILL, suits=(0, 1, 2)))
+registerGame(GameInfo(454, Spider4Decks, "Spider (4 Decks)",
                       GI.GT_SPIDER, 4, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(455, GroundsForADivorce4Decks, "Very Big Divorce",
                       GI.GT_SPIDER, 4, 0, GI.SL_MOSTLY_SKILL))
@@ -1450,14 +1614,14 @@ registerGame(GameInfo(458, Spidike, "Spidike",
                       GI.GT_SPIDER, 1, 0, GI.SL_BALANCED))  # GT_GYPSY ?
 registerGame(GameInfo(459, FredsSpider, "Fred's Spider",
                       GI.GT_SPIDER, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(460, FredsSpider3Decks, "Fred's Spider (3 decks)",
+registerGame(GameInfo(460, FredsSpider3Decks, "Fred's Spider (3 Decks)",
                       GI.GT_SPIDER, 3, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(461, OpenSpider, "Open Spider",
                       GI.GT_SPIDER, 2, 0, GI.SL_MOSTLY_SKILL,
                       altnames=('Beetle',)))
 registerGame(GameInfo(501, WakeRobin, "Wake-Robin",
                       GI.GT_SPIDER | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
-registerGame(GameInfo(502, TripleWakeRobin, "Wake-Robin (3 decks)",
+registerGame(GameInfo(502, TripleWakeRobin, "Wake-Robin (3 Decks)",
                       GI.GT_SPIDER | GI.GT_ORIGINAL, 3, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(511, DoubleScorpion, "Double Scorpion",
                       GI.GT_SPIDER, 2, 0, GI.SL_MOSTLY_SKILL))
@@ -1472,7 +1636,7 @@ registerGame(GameInfo(570, LongTail, "Long Tail",
 registerGame(GameInfo(571, ShortTail, "Short Tail",
                       GI.GT_SPIDER | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(670, ChineseSpider, "Chinese Spider",
-                      GI.GT_SPIDER, 4, 0, GI.SL_MOSTLY_SKILL,
+                      GI.GT_SPIDER | GI.GT_STRIPPED, 4, 0, GI.SL_MOSTLY_SKILL,
                       suits=(0, 1, 2),))
 registerGame(GameInfo(671, Incompatibility, "Incompatibility",
                       GI.GT_SPIDER, 2, 0, GI.SL_MOSTLY_SKILL))
@@ -1489,3 +1653,11 @@ registerGame(GameInfo(710, Bebop, "Bebop",
 #                      GI.GT_SPIDER | GI.GT_OPEN, 1, 0, GI.SL_MOSTLY_SKILL))
 registerGame(GameInfo(711, TheJollyRoger, "The Jolly Roger",
                       GI.GT_SPIDER | GI.GT_ORIGINAL, 2, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(788, AutumnLeaves, "Autumn Leaves",
+                      GI.GT_SPIDER, 1, 0, GI.SL_MOSTLY_SKILL))
+registerGame(GameInfo(825, ScorpionTowers, "Scorpion Towers",
+                      GI.GT_SPIDER | GI.GT_OPEN, 1, 0, GI.SL_SKILL))
+registerGame(GameInfo(870, FairMaids, "Fair Maids",
+                      GI.GT_SPIDER, 1, 0, GI.SL_BALANCED))
+registerGame(GameInfo(917, Astrocyte, "Astrocyte",
+                      GI.GT_SPIDER, 2, 0, GI.SL_MOSTLY_SKILL))
