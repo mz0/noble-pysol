@@ -1,13 +1,14 @@
-pysolfc (3.0.0-1) UNRELEASED; urgency=medium
+pysolfc (3.0.0-1) unstable; urgency=medium
 
   * Team Upload
   * New upstream version 3.0.0 (Closes: #1008708)
   * Refresh patch
+  * Simply use pytest for testing
 
   [ Bastian Germann ]
   * Remove retired Uploader (Closes: #1050280)
 
- -- Alexandre Detiste <tchet@debian.org>  Sun, 21 Jul 2024 12:48:46 +0200
+ -- Alexandre Detiste <tchet@debian.org>  Tue, 30 Jul 2024 22:48:22 +0200
 
 pysolfc (2.10.1-1) unstable; urgency=medium
 
