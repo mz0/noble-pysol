@@ -19,7 +19,7 @@ override_dh_install:
 	rm -r debian/pysolfc/usr/share/games/pysolfc/cardset-hanafuda-200-years/
 
 # Run some parts of the test suite. Missing deps for using 'make test':
-# python3-pycotap, python3-flake8-import-order, libtest-trailingspace-perl,
+# python3-pycotap, libtest-trailingspace-perl,
 # libcode-tidyall-plugin-flake8-perl
 override_dh_auto_test:
 	$(MAKE) pretest
