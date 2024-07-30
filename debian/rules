@@ -22,7 +22,7 @@ override_dh_install:
 # python3-pycotap, python3-flake8-import-order, libtest-trailingspace-perl,
 # libcode-tidyall-plugin-flake8-perl
 override_dh_auto_test:
-	TEST_TAGS=SKIP_PY2 $(MAKE) pretest
+	$(MAKE) pretest
 	PYTHONPATH=. prove tests/individually-importing/*.py
 	set -e; for py in $(shell py3versions -s); do \
 		PYTHONPATH=.:tests/lib \
