@@ -30,6 +30,8 @@ Depends: python3-configobj,
          python3-tk,
          ${misc:Depends},
          ${python3:Depends}
+Breaks: pysolfc-cardsets (<< 3.0~)
+Repalces: pysolfc-cardsets (<< 3.0~)
 Recommends: python3-pil.imagetk
 Suggests: freecell-solver-bin,
           pysolfc-cardsets
