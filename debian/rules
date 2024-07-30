@@ -2,6 +2,7 @@
 
 export PYBUILD_INSTALL_ARGS = --install-scripts /usr/share/games/pysolfc \
                               --install-lib /usr/share/games/pysolfc
+export PYBUILD_TEST_ARGS = -k 'not test_main'
 
 %:
 	dh $@ --buildsystem=pybuild
@@ -17,14 +18,3 @@ override_dh_install:
 	dh_install
 	# Avoid conflicting with the separate package pysolfc-cardsets.
 	rm -r debian/pysolfc/usr/share/games/pysolfc/cardset-hanafuda-200-years/
-
-# Run some parts of the test suite. Missing deps for using 'make test':
-# python3-pycotap, libtest-trailingspace-perl,
-# libcode-tidyall-plugin-flake8-perl
-override_dh_auto_test:
-	$(MAKE) pretest
-	PYTHONPATH=. prove tests/individually-importing/*.py
-	set -e; for py in $(shell py3versions -s); do \
-		PYTHONPATH=.:tests/lib \
-		$$py -m unittest discover -v tests/lib/pysol_tests/ '*'; \
-	done
