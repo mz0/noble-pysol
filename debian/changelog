@@ -1,3 +1,10 @@
+pysolfc (3.0.0-2) unstable; urgency=medium
+
+  * Team upload.
+  * Patch-out last user of python3-random2
+
+ -- Alexandre Detiste <tchet@debian.org>  Sat, 14 Sep 2024 18:03:02 +0200
+
 pysolfc (3.0.0-1) unstable; urgency=medium
 
   * Team Upload
