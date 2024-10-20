@@ -4,7 +4,7 @@ Forwarded: not-needed
 
 --- a/pysollib/mfxutil.py
 +++ b/pysollib/mfxutil.py
-@@ -163,7 +163,7 @@
+@@ -160,7 +160,7 @@
      home = os.environ.get("HOME", "").strip()
      if not home or not os.path.isdir(home):
          home = os.curdir
