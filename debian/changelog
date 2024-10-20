@@ -1,3 +1,11 @@
+pysolfc (3.1.0-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream version 3.1.0
+  * Refresh patches
+
+ -- Alexandre Detiste <tchet@debian.org>  Mon, 21 Oct 2024 00:31:06 +0200
+
 pysolfc (3.0.0-2) unstable; urgency=medium
 
   * Team upload.
