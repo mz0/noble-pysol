@@ -1,11 +1,12 @@
 Metadata-Version: 2.1
 Name: PySolFC
-Version: 3.0.0
+Version: 3.1.0
 Summary: a Python solitaire game collection
 Home-page: http://pysolfc.sourceforge.io/
 Author: Skomoroh
 Author-email: skomoroh@gmail.com
 License: GPL
+Classifier: Programming Language :: Python :: 3
 License-File: COPYING
 License-File: AUTHORS.md
 
