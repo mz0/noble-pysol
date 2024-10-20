@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PySol 0.0.1\n"
 "POT-Creation-Date: Sun Mar 31 11:56:38 2024\n"
-"PO-Revision-Date: 2024-03-31 11:59-0400\n"
+"PO-Revision-Date: 2024-10-19 14:31-0400\n"
 "Last-Translator: H. Schaekel <Holger.Schaekel@web.de>\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -40,6 +40,9 @@ msgid "Accordion's Revenge"
 msgstr ""
 
 msgid "Ace Through King"
+msgstr ""
+
+msgid "Ace of Hearts"
 msgstr ""
 
 msgid "Aces High"
@@ -201,6 +204,9 @@ msgstr "Moderne Kunst"
 #, fuzzy
 msgid "Artic Garden"
 msgstr "Garten"
+
+msgid "As You Like It"
+msgstr ""
 
 msgid "Ashrafi"
 msgstr "Ashrafi"
@@ -601,6 +607,9 @@ msgstr ""
 msgid "Captive Queens"
 msgstr "Gefangene Königin"
 
+msgid "Capuchin"
+msgstr ""
+
 msgid "Carcassonne"
 msgstr ""
 
@@ -609,6 +618,9 @@ msgstr "Carlton"
 
 msgid "Carnation"
 msgstr "Carnation"
+
+msgid "Carousel"
+msgstr ""
 
 msgid "Carpet"
 msgstr "Teppich"
@@ -656,6 +668,9 @@ msgid "Cat's Tail"
 msgstr "Schwanz der Katze"
 
 msgid "Catherine the Great"
+msgstr ""
+
+msgid "Cavalcade"
 msgstr ""
 
 msgid "Cavalier"
@@ -1303,6 +1318,9 @@ msgstr "Fahrstuhl"
 msgid "Eleven Away"
 msgstr ""
 
+msgid "Eleven Triangle"
+msgstr ""
+
 msgid "Elevens"
 msgstr "Elevens"
 
@@ -1395,6 +1413,9 @@ msgstr "Faszination Fan"
 
 msgid "Fastness"
 msgstr "Lichtechtheit"
+
+msgid "Father Time"
+msgstr ""
 
 msgid "Fatimeh's Game"
 msgstr "Fatimeh's Spiel"
@@ -1559,6 +1580,9 @@ msgid "Four Corners"
 msgstr ""
 
 msgid "Four Free"
+msgstr ""
+
+msgid "Four Kingdoms"
 msgstr ""
 
 msgid "Four Kings"
@@ -1880,6 +1904,10 @@ msgstr "Frohes neues Jahr"
 msgid "Hare"
 msgstr "Hare"
 
+#: pysollib/wizardutil.py:132 pysollib/games/ultra/mughal.py:260
+msgid "Harp"
+msgstr "Harfe"
+
 msgid "Harvestman"
 msgstr "Harvestman"
 
@@ -2085,6 +2113,9 @@ msgstr ""
 msgid "Ishido Scored"
 msgstr ""
 
+msgid "Isle of Capri"
+msgstr ""
+
 msgid "JPs"
 msgstr ""
 
@@ -2211,6 +2242,9 @@ msgid "King's Plume"
 msgstr ""
 
 msgid "King's Secrets"
+msgstr ""
+
+msgid "King's Way"
 msgstr ""
 
 msgid "KingCell"
@@ -2370,6 +2404,9 @@ msgstr "Lara's Spiel Doppelt"
 
 msgid "Lara's Game Relaxed"
 msgstr "Lara's Spiel entspannt"
+
+msgid "Las Vegas"
+msgstr ""
 
 msgid "Lasker"
 msgstr ""
@@ -3270,6 +3307,9 @@ msgstr "Milligan Harfe"
 msgid "Milligan Yukon"
 msgstr ""
 
+msgid "Miner"
+msgstr ""
+
 msgid "Minerva"
 msgstr "Minerva"
 
@@ -3436,6 +3476,9 @@ msgstr "New York"
 msgid "Nine Across"
 msgstr ""
 
+msgid "Nines"
+msgstr ""
+
 msgid "Ninety-One"
 msgstr ""
 
@@ -3444,6 +3487,9 @@ msgstr "Nomade"
 
 msgid "Nordic"
 msgstr "Nordisch"
+
+msgid "Normandy"
+msgstr ""
 
 msgid "Northwest Territory"
 msgstr "Nordwest Territorium"
@@ -4168,6 +4214,9 @@ msgstr ""
 msgid "Russian Aces"
 msgstr "Russische Asse"
 
+msgid "Russian Cell"
+msgstr ""
+
 msgid "Russian Patience"
 msgstr "Russische Patience"
 
@@ -4276,6 +4325,9 @@ msgstr "Anziehen"
 msgid "Scuffle"
 msgstr "Rauferei"
 
+msgid "Sea Spider"
+msgstr ""
+
 msgid "Sea Towers"
 msgstr "Seetürme"
 
@@ -4296,6 +4348,9 @@ msgstr "Senior Wrangler"
 
 msgid "Serpent"
 msgstr "Natter"
+
+msgid "Sevastopol"
+msgstr ""
 
 msgid "Seven"
 msgstr "Sieben"
@@ -5348,6 +5403,9 @@ msgstr "Datei"
 msgid "X-Shape"
 msgstr "Mahjongg X-Shape"
 
+msgid "Xerxes"
+msgstr ""
+
 msgid "Yeast Dough"
 msgstr ""
 
@@ -5392,6 +5450,9 @@ msgstr ""
 
 msgid "Zigzag Course"
 msgstr "Zickzackkurs"
+
+msgid "Zingara"
+msgstr ""
 
 msgid "Zodiac"
 msgstr "Zodiac"
@@ -7054,10 +7115,6 @@ msgstr "Vier"
 msgid "Number of decks:"
 msgstr "Nummer der Decks:"
 
-#: pysollib/wizardutil.py:132 pysollib/games/ultra/mughal.py:260
-msgid "Harp"
-msgstr "Harfe"
-
 #: pysollib/wizardutil.py:135
 msgid "Layout:"
 msgstr "Layout:"
@@ -7411,6 +7468,12 @@ msgstr ""
 msgid "You used %(h)s hint(s) during this game."
 msgstr ""
 
+msgid "You used %(h)s hint(s) and the demo during this game."
+msgstr ""
+
+msgid "You used the demo during this game."
+msgstr ""
+
 msgid "You are Stuck"
 msgstr ""
 
@@ -7613,6 +7676,18 @@ msgstr ""
 "7: A 8 2 9 3 T 4 J 5 Q 6 K\n"
 "8: 3 J 6 A 9 4 Q 7 2 T 5 K"
 
+msgid "Dungeon"
+msgstr ""
+
+msgid "Tower"
+msgstr ""
+
+msgid "Guest"
+msgstr ""
+
+msgid "Subjects"
+msgstr ""
+
 #: pysollib/games/curdsandwhey.py:76
 msgid "Tableau. Build down by suit or of the same rank."
 msgstr "Tableau. Erstellt nach unten nach Farbe oder denselben Rang."
@@ -7632,6 +7707,9 @@ msgstr "Basiskarte - Ass oder König."
 #: pysollib/games/golf.py:118 pysollib/games/royalcotillion.py:383
 msgid "Waste. Build up or down regardless of suit."
 msgstr "Zwischentalon. Hoch oder Runter unabhängig der Farbe zu erstelle."
+
+msgid "Waste. Build up or down by alternate color."
+msgstr ""
 
 #: pysollib/games/klondike.py:125
 #, python-format
@@ -7761,6 +7839,9 @@ msgstr "Werkzeuge/Hilfen"
 #: pysollib/tk/toolbar.py:188
 msgid "Statistics"
 msgstr "Statistiken"
+
+msgid "Demo Statistics"
+msgstr ""
 
 #: pysollib/kivy/menubar.py:197
 msgid "Assist"
@@ -8836,10 +8917,10 @@ msgstr ""
 msgid "Inventor:"
 msgstr ""
 
-msgid "PySol Version:"
+msgid "PySol version:"
 msgstr ""
 
-msgid "Statistics:"
+msgid "Play history:"
 msgstr ""
 
 #: pysollib/pysolgtk/selectgame.py:122 pysollib/tile/selectgame.py:400
@@ -9405,6 +9486,9 @@ msgstr "Nationalität:"
 msgid "Year:"
 msgstr "Jahr:"
 
+msgid "Compatible with current game"
+msgstr ""
+
 #: pysollib/tile/selectcardset.py:488
 msgid "Settings"
 msgstr "Enstellungen"
@@ -9433,6 +9517,15 @@ msgid "Tiles"
 msgstr ""
 
 msgid "Images"
+msgstr ""
+
+msgid "SD"
+msgstr ""
+
+msgid "HD"
+msgstr ""
+
+msgid "4K"
 msgstr ""
 
 #: pysollib/tile/solverdialog.py:54 pysollib/tk/solverdialog.py:62
@@ -10654,6 +10747,9 @@ msgid "Othe&r graphics"
 msgstr ""
 
 #: pysollib/ui/tktile/menubar.py:637
+msgid "&Button icons"
+msgstr ""
+
 msgid "&Demo logo"
 msgstr "&Demo logo"
 
