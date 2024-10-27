@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: PySolFC
+Version: 3.1.0
+Summary: a Python solitaire game collection
+Home-page: http://pysolfc.sourceforge.io/
+Author: Skomoroh
+Author-email: skomoroh@gmail.com
+License: GPL
+Classifier: Programming Language :: Python :: 3
+License-File: COPYING
+License-File: AUTHORS.md
+
+PySolFC is a collection of more than 1200 solitaire card games.
+Its features include modern look and feel (uses Tile widget set), multiple
+cardsets and tableau backgrounds, sound, unlimited undo, player statistics,
+a hint system, demo games, a solitaire wizard, support for user written
+plug-ins, an integrated HTML help browser, and lots of documentation.

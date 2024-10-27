@@ -1,0 +1,41 @@
+Description: Change some data and doc locations
+Author: Bernhard Reiter <ockham@raz.or.at>
+Forwarded: not-needed
+
+--- a/pysollib/mfxutil.py
++++ b/pysollib/mfxutil.py
+@@ -160,7 +160,7 @@
+     home = os.environ.get("HOME", "").strip()
+     if not home or not os.path.isdir(home):
+         home = os.curdir
+-    return os.path.join(home, ".PySolFC")
++    return os.path.join(home, ".pysolfc")
+ 
+ 
+ # high resolution clock() and sleep()
+--- a/setup.py
++++ b/setup.py
+@@ -19,7 +19,7 @@
+ 
+ 
+ if os.name == 'posix':
+-    data_dir = 'share/PySolFC'
++    data_dir = 'share/games/pysolfc'
+     locale_dir = 'share/locale'
+ else:
+     data_dir = 'data'
+--- a/pysollib/settings.py
++++ b/pysollib/settings.py
+@@ -61,11 +61,7 @@
+ # you can add your extra directories here
+ if os.name == 'posix':
+     DATA_DIRS = [
+-        '/app/share/PySolFC',
+-        '/usr/share/PySolFC',
+-        '/usr/local/share/PySolFC',
+-        '/usr/share/games/PySolFC',
+-        '/usr/local/share/games/PySolFC',
++        '/usr/share/games/pysolfc',
+         ]
+ if os.name == 'nt':
+     pass

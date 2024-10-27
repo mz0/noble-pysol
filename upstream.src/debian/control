@@ -1,0 +1,51 @@
+Source: pysolfc
+Section: games
+Priority: optional
+Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
+Uploaders: Juhani Numminen <juhaninumminen0@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-python3,
+               python-is-python3,
+               python3-all,
+               python3-attr,
+               python3-configobj,
+               python3-flake8-import-order <!nocheck>,
+               python3-pygame,
+               python3-pytest <!nocheck>,
+               python3-pysol-cards,
+               python3-setuptools,
+               python3-six,
+               python3-tk
+Rules-Requires-Root: no
+Standards-Version: 4.5.1
+Homepage: https://pysolfc.sourceforge.io/
+Vcs-Browser: https://salsa.debian.org/games-team/pysolfc
+Vcs-Git: https://salsa.debian.org/games-team/pysolfc.git
+
+Package: pysolfc
+Architecture: all
+Depends: python3-configobj,
+         python3-pygame,
+         python3-pysol-cards,
+         python3-six,
+         python3-tk,
+         ${misc:Depends},
+         ${python3:Depends}
+Breaks: pysolfc-cardsets (<< 3.0~)
+Repalces: pysolfc-cardsets (<< 3.0~)
+Recommends: python3-pil.imagetk
+Suggests: freecell-solver-bin,
+          pysolfc-cardsets
+Description: collection of more than 1000 solitaire card games
+ There are games that use the 52 card International Pattern deck,
+ games for the 78 card Tarock deck, eight and ten suit Ganjifa games,
+ Hanafuda games, Matrix games, Mahjongg games, and games for an original
+ hexadecimal-based deck.
+ .
+ Its features include modern look and feel (uses Ttk widget set),
+ multiple cardsets and tableau backgrounds, sound, unlimited undo,
+ player statistics, a hint system, demo games, a solitaire wizard,
+ support for user written plug-ins, an integrated HTML help browser,
+ and lots of documentation.
+ .
+ PySolFC is a fork of PySol Solitaire.

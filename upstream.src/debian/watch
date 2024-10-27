@@ -1,0 +1,8 @@
+version=4
+https://sf.net/pysolfc/ \
+    PySolFC-@ANY_VERSION@@ARCHIVE_EXT@
+
+# 'ignore' means that the version number of this tarball is ignored
+opts="component=cardsets" \
+https://sf.net/pysolfc/ \
+    PySolFC-Cardsets--Minimal-@ANY_VERSION@@ARCHIVE_EXT@ ignore

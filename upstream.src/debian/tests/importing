@@ -1,0 +1,3 @@
+#!/bin/sh -ex
+python3 scripts/gen_individual_importing_tests.py
+PYTHONPATH=/usr/share/games/pysolfc prove tests/individually-importing/*.py

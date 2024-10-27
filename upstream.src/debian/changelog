@@ -1,0 +1,227 @@
+pysolfc (3.1.0-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream version 3.1.0
+  * Refresh patches
+
+ -- Alexandre Detiste <tchet@debian.org>  Mon, 21 Oct 2024 00:31:06 +0200
+
+pysolfc (3.0.0-2) unstable; urgency=medium
+
+  * Team upload.
+  * Patch-out last user of python3-random2
+
+ -- Alexandre Detiste <tchet@debian.org>  Sat, 14 Sep 2024 18:03:02 +0200
+
+pysolfc (3.0.0-1) unstable; urgency=medium
+
+  * Team Upload
+  * New upstream version 3.0.0 (Closes: #1008708)
+  * Refresh patch
+  * Simply use pytest for testing
+
+  [ Bastian Germann ]
+  * Remove retired Uploader (Closes: #1050280)
+
+ -- Alexandre Detiste <tchet@debian.org>  Tue, 30 Jul 2024 22:48:22 +0200
+
+pysolfc (2.10.1-1) unstable; urgency=medium
+
+  * New upstream version 2.10.1.
+    - Hanafuda card stacks have been fixed (Closes: #859047).
+  * debian/patches: Refresh patches for new upstream release, remove merged ones
+  * debian/control:
+    - Add build-depends python3-setuptools and python3-attr.
+    - Add build-depends and depends python3-pysol-cards.
+    - Bump policy to 4.5.1.
+  * Switch to debhelper-compat 13. "nocheck" test can be dropped in d/rules.
+  * debian/rules:
+    - Run unit tests.
+    - override_dh_auto_build: Utilize upstream Makefile more.
+  * Path usr/share/games/pysolfc/html must not be symlink to usr/share/doc/...
+    The game will not function if the files are removed (Policy §12.3).
+    Remove /usr/share/doc/pysolfc/html because dpkg makes it hard to keep both
+    paths while changing symlink to dir.
+  * Remove debian/doc-base. No HTML docs in /usr/share/doc anymore
+    (lintian: doc-base-file-references-wrong-path).
+  * debian/docs: Update list of useful documentation.
+  * debian/clean: Update comments, add po/de.po.
+
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Fri, 27 Nov 2020 18:00:42 +0200
+
+pysolfc (2.6.4-3) unstable; urgency=medium
+
+  * debian/patches/python3.8: Don't use the removed time.clock() anymore.
+    Thanks to Matthias Klose. (Closes: #950208).
+  * debian/control:
+    - Add myself to Uploaders.
+    - Bump Standards-Version to 4.5.0.
+
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Sun, 16 Feb 2020 19:40:20 +0200
+
+pysolfc (2.6.4-2) unstable; urgency=medium
+
+  * Source-only upload.
+
+ -- Hugo Lefeuvre <hle@debian.org>  Fri, 26 Jul 2019 14:30:10 -0300
+
+pysolfc (2.6.4-1) unstable; urgency=medium
+
+  * Team upload.
+
+  [ Hugo Lefeuvre ]
+  * Migrate to Python 3 (Closes: #912508).
+  * debian/control:
+    - Update Vcs-Git and Vcs-Browser fields (Salsa migration).
+    - Multiple build-dependency changes due to the migration to Python 3 and
+      documentation generation which requires several binary dependencies to
+      be build dependencies as well.
+  * debian/copyright:
+    - Update copyright years.
+    - Refresh files list and copyrights to match new upstream release.
+  * debian/patches:
+    - Refresh patches for new upstream release, remove merged patches.
+  * Update docs list.
+  * debian/rules:
+    - Build translations from po.
+    - Build html documentation from source.
+    - Migrate to pybuild.
+  * Bump watch file version to 4.
+
+  [ Juhani Numminen ]
+  * New upstream release (Closes: #919923).
+    - Compatible with the current version of Python Imaging Library
+      (Closes: #931851).
+    - No longer crashes when there is no sound card (Closes: #781663).
+  * debian/watch: Download a separate orig tarball for the minimal cardsets.
+  * debian/gbp.conf:
+    - Add component=cardsets to tell gbp about the new additional tarball.
+    - Remove compression=bzip2, the defaults are good enough.
+  * debian/clean: Clean up after localization build process, html generation,
+    and test suite.
+  * debian/control:
+    - Update home page URL.
+    - Bump Standards-Version to 4.4.0.
+    - Bump compat level by depending on debhelper-compat (= 12).
+    - Add python3-random2 dependency.
+    - Declare Rules-Requires-Root: no.
+  * debian/docs: AUTHORS is no longer in the tarball.
+  * debian/patches:
+    - desktop: Add Comment, Keywords, StartupWMClass for better DE integration.
+    - manpage: Drop the patch, changes are incorporated upstream.
+  * debian/rules:
+    - It is no longer necessary to rename the manpage either.
+    - Build docs/all_games.html from source.
+    - Run a part of the test suite. All tests can't be run as some dependencies
+      are not in Debian.
+  * debian/tests/: Run the same subset of tests also for the installed package.
+  * Remove debian/menu because it's redundant with .desktop (Policy §9.6).
+  * debian/copyright:
+    - Update home page URL.
+    - Add myself to the debian/ paragraph.
+
+ -- Juhani Numminen <juhaninumminen0@gmail.com>  Thu, 18 Jul 2019 21:16:29 +0300
+
+pysolfc (2.0-4) unstable; urgency=low
+
+  [ Hugo Lefeuvre ]
+  * debian/control:
+    - Add Hugo Lefeuvre as uploader (Closes: #767603).
+    - Bump Standards-Version to 3.9.7.
+    - Update Vcs-Git and Vcs-Browser fields to use an encrypted
+      transport protocol.
+    - Add a dependency on dh-python.
+  * debian/copyright:
+    - Add a copyright entry for Hugo Lefeuvre.
+  * debian/patches/desktop:
+    - Add a Keyword entry to make it freedesktop compliant.
+
+  [ Bernhard Reiter ]
+  * debian/control:
+    - s/freecell-solver/freecell-solver-bin/.
+    - Ran wrap-and-sort -sa.
+  * debian/menu: Add longtitle and icon fields (Closes: #726857).
+
+  [ Markus Koschany ]
+  * Remove Bernhard Reiter from Uploaders at his own request.
+
+ -- Hugo Lefeuvre <hle@debian.org>  Sun, 3 Apr 2016 15:07:56 +0200
+
+pysolfc (2.0-3) unstable; urgency=low
+
+  * debian/copyright:
+    - Change Format from DEP-5 to copyright-format/1.0 link.
+    - Point to GFDL-1.3 instead of just GFDL.
+  * debian/control:
+    - Remove Replaces: and Conflicts: lines as those packages aren't in
+      Debian anymore.
+    - Remove X-Python-Version line.
+    - Switch to canonical Vcs-* fields.
+    - Bump Standards-Version to 3.9.4.
+    - Bump debhelper Build-Depends to >= 9.
+  * debian/compat: Bump to 9.
+  * debian/control, debian/rules:
+    - Drop transitional pysol package now that wheezy is out.
+  * debian/rules:
+    - Fix order of arguments for the dh command.
+    - Delete COPYRIGHT files in the override_dh_auto_install (instead of the
+      override_dh_auto_install) section.
+  * debian/pysolfc.install: Remove.
+  * debian/patches/pillow, debian/patches/series: Fix PIL imports for pillow
+    compatibility -- see 5117D0B7.801@debian.org (LP: 1160571).
+
+ -- Bernhard Reiter <ockham@raz.or.at>  Wed, 17 Apr 2013 08:10:25 +0200
+
+pysolfc (2.0-2) unstable; urgency=low
+
+  * Remove python-gnome2 dependency.
+
+ -- Bernhard Reiter <ockham@raz.or.at>  Sun, 01 Jan 2012 21:58:23 +0100
+
+pysolfc (2.0-1) unstable; urgency=low
+
+  * First Debian release (Closes: #519752).
+  * debian/changelog:
+    - Moved Debian bug number from initial changelog entry to this one.
+    - Forgot to add a colon after "LP" in the inital changelog entry.
+  * debian/control:
+    - Replace "Build-Depends-Indep: python (>= 2.6.6-3~)" with
+      "Build-Depends: python-all (>= 2.6.6-3~)"
+    - Recommends: s/python-imaging/python-imaging-tk/ (LP: #716403).
+    - Add pysol transitional binary package.
+    - Move python-pygame from Recommends to Depends.
+    - Add Vcs-Git and Vcs-Browser
+    - Amend Replaces and Conflicts fields.
+    - Bump Standards-Version to 3.9.2 (no changes needed).
+    - Make Debian Games Team the Maintainer, and myself an Uploader.
+  * debian/copyright:
+    - Add more copyright holders.
+    - Annotate cardsets entries with comments of their origins.
+    - Minor updates for current DEP-5 revision.
+  * debian/gbp.conf: Create.
+  * debian/rules:
+    - Add override_dh_gencontrol section with some epoch magic
+      to ensure proper upgrade path from pysol.
+    - Exclude COPYRIGHT files in individual cardset directories
+      from installation.
+  * Migrate from python-support to dh_python2.
+    debian/control:
+    - Remove python-support from Build-Depends.
+    - Build-Depend on python (>= 2.6.6-3~) instead of (>= 2.4)
+    - s/XS-Python-Version/X-Python-Version/
+    debian/rules:
+    - Add '--with python2' after 'dh'
+  * debian/patches/*: Remove # in front of comments.
+  * debian/patches/montana, debian/patches/series: Update patch, add to series.
+  * debian/patches/remove_checks_for_copyright_files, debian/patches/series:
+    Remove checks for individual cardsets' COPYRIGHT files
+    which we remove in order to comply with Debian policy.
+  * debian/pysolfc.install: Add.
+
+ -- Bernhard Reiter <ockham@raz.or.at>  Sat, 26 Nov 2011 19:32:47 +0100
+
+pysolfc (2.0-0ubuntu1) lucid; urgency=low
+
+  * Initial release (LP: #179298)
+
+ -- Bernhard Reiter <ockham@raz.or.at>  Fri, 4 Feb 2010 16:16:38 +0100

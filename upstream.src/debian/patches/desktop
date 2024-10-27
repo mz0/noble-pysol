@@ -1,0 +1,16 @@
+Description: Point to pysolfc instead of pysol.py
+Author: Bernhard Reiter <ockham@raz.or.at>
+Author: Juhani Numminen <juhaninumminen0@gmail.com>
+Forwarded: not-needed
+
+--- a/data/pysol.desktop
++++ b/data/pysol.desktop
+@@ -1,7 +1,7 @@
+ [Desktop Entry]
+ Name=PySol Fan Club Edition
+ Comment=More than 1000 solitaire card games
+-Exec=pysol.py
++Exec=pysolfc
+ StartupWMClass=Pysol
+ Terminal=false
+ Type=Application
