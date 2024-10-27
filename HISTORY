@@ -1,0 +1,32 @@
+## 2024-10-27 Project bootstrap
+```
+$ git init --initial-branch=main
+$ cat > TODO << EoT
+git subtree --prefix=upstream.src add dg-pysol master
+EoT
+
+$ git add TODO && git commit -m'start my 2nd apt packaging adventure'
+
+$ git remote add dg-pysol https://salsa.debian.org/games-team/pysolfc.git
+$ git subtree --prefix=upstream.src add dg-pysol master
+```
+
+Result:
+```
+git fetch dg-pysol master
+...
+Receiving objects: 100% (16729/16729), 98.28 MiB | 11.56 MiB/s, done.
+
+From https://salsa.debian.org/games-team/pysolfc
+ * branch        master -> FETCH_HEAD
+ * [new branch]  master -> dg-pysol/master
+Added dir 'upstream.src'
+
+$ git branch
+* main
+
+$ git log --oneline -3
+f915e104 (HEAD -> main) Add 'upstream.src/' from commit 'e1a8f06b0f4c9d2a18d100674287a9317ae1bc6a'
+f4dde013 start my 2nd apt packaging adventure
+e1a8f06b (dg-pysol/master) release
+```
